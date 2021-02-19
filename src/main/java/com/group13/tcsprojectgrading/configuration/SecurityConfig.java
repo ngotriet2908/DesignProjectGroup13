@@ -25,7 +25,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/", "/home", "/login","/login/oauth2/code/canvas", "/index", "/api/basic/userinfo").permitAll()
+                .antMatchers("/", "/home", "/login","/login/oauth2/code/canvas", "/index", "/api/basic/userinfo", "/api/test/canvas/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .oauth2Login()
