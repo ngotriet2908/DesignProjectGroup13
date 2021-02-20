@@ -1,5 +1,8 @@
 package com.group13.tcsprojectgrading.configuration.Oauth2;
 
+import com.group13.tcsprojectgrading.model.user.Account;
+import com.group13.tcsprojectgrading.service.user.AccountService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -25,6 +28,9 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                 userMap.get("global_id"),
                 userMap.get("name"));
 
+        //TODO save to database
+//        Account account = new Account(userMap.get("id"), userMap.get("name"));
+//        accountService.addNewAccount(account);
 
         System.out.println(oAuth2User);
         return oAuth2User;

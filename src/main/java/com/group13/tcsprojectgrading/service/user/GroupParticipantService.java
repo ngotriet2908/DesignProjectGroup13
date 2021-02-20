@@ -1,10 +1,10 @@
-package com.group13.tcsprojectgrading.service;
+package com.group13.tcsprojectgrading.service.user;
 
 import com.group13.tcsprojectgrading.model.project.CourseGroup;
 import com.group13.tcsprojectgrading.model.user.GroupParticipant;
 import com.group13.tcsprojectgrading.model.user.Student;
-import com.group13.tcsprojectgrading.repository.project.CourseGroupRepository;
 import com.group13.tcsprojectgrading.repository.user.GroupParticipantRepository;
+import com.group13.tcsprojectgrading.service.project.CourseGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

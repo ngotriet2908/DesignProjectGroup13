@@ -1,9 +1,18 @@
 package com.group13.tcsprojectgrading.configuration.Oauth2;
 
+import com.group13.tcsprojectgrading.model.user.Account;
+import com.group13.tcsprojectgrading.model.user.Participant;
+import com.group13.tcsprojectgrading.service.canvasFetching.CanvasCourseService;
+import com.group13.tcsprojectgrading.service.canvasFetching.CanvasUserService;
+import com.group13.tcsprojectgrading.service.user.AccountService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -24,6 +33,15 @@ public class CustomOAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSucc
     protected Log logger = LogFactory.getLog(this.getClass());
 
     private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
+
+    @Autowired
+    private CanvasUserService canvasUserService;
+
+    @Autowired
+    private CanvasCourseService canvasCourseService;
+
+    @Autowired
+    private AccountService accountService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
@@ -61,6 +79,15 @@ public class CustomOAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSucc
                             + targetUrl);
             return;
         }
+
+        //Syncing with Canvas
+
+        //Sync account
+        canvasUserService.addNewAccount(oauth2User.getAccessToken().getTokenValue());
+        //Sync courses
+        Participant participant = canvasUserService.addNewParticipant(oauth2User.getAccessToken().getTokenValue(), oauth2User.getUserId());
+
+        canvasCourseService.syncParticipants(oauth2User.getAccessToken().getTokenValue(), participant.getId().getCourseId());
 
         redirectStrategy.sendRedirect(request, response, targetUrl);
     }

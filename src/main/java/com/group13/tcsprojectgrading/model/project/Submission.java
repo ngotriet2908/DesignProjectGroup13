@@ -1,6 +1,6 @@
 package com.group13.tcsprojectgrading.model.project;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.*;
 import com.group13.tcsprojectgrading.model.course.Course;
 import com.group13.tcsprojectgrading.model.user.Account;
 import com.group13.tcsprojectgrading.model.user.Grader;
@@ -15,11 +15,14 @@ public class Submission {
     @EmbeddedId
     private SubmissionKey id;
 
+    @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id", scope = Project.class)
+    @JsonIdentityReference(alwaysAsId=true)
     @ManyToOne
     @MapsId("projectId")
     @JoinColumn(name = "project_id")
     private Project project;
 
+    @JsonIgnoreProperties({"course", "groupParticipants" })
     @ManyToOne
     @MapsId("courseGroupId")
     @JoinColumn(name = "course_group_id")
@@ -27,14 +30,14 @@ public class Submission {
 
     private Timestamp submission_date;
 
+    @JsonIgnoreProperties({"submissions","account","course","teachingassistant_attr"})
     @ManyToOne
     @JoinColumns({
-            @JoinColumn(name = "account_id", insertable = false, updatable = false),
-            @JoinColumn(name = "course_id", insertable = false, updatable = false)
+            @JoinColumn(name = "account_id"),
+            @JoinColumn(name = "course_id")
     })
     private Grader grader;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "submission")
     private Set<Grading> gradings;
 

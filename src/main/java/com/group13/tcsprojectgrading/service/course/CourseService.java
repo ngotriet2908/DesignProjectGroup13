@@ -1,4 +1,4 @@
-package com.group13.tcsprojectgrading.service;
+package com.group13.tcsprojectgrading.service.course;
 
 import com.group13.tcsprojectgrading.model.course.Course;
 import com.group13.tcsprojectgrading.model.user.Account;
@@ -22,11 +22,20 @@ public class CourseService {
         return courseRepository.findAll();
     }
 
-    public void addNewCourse(Course course) {
-        courseRepository.save(course);
+    public Course addNewCourse(Course course) {
+        if (courseRepository.existsById(course.getId())) {
+            System.out.println("Course " + course.getName() + " is existed, updating info");
+        } else {
+            System.out.println("Course " + course.getName() + " is not in the system, creating new course");
+        }
+        return courseRepository.save(course);
     }
 
     public boolean existsById(String id) {
         return courseRepository.existsById(id);
+    }
+
+    public Course findCourseById(String id) {
+        return courseRepository.findById(id).orElse(null);
     }
 }

@@ -1,10 +1,10 @@
-package com.group13.tcsprojectgrading.service;
+package com.group13.tcsprojectgrading.service.user;
 
 import com.group13.tcsprojectgrading.model.course.Course;
 import com.group13.tcsprojectgrading.model.user.Account;
-import com.group13.tcsprojectgrading.model.user.Student;
 import com.group13.tcsprojectgrading.model.user.Teacher;
 import com.group13.tcsprojectgrading.repository.user.TeacherRepository;
+import com.group13.tcsprojectgrading.service.course.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,12 +30,19 @@ public class TeacherService {
     }
 
     public Teacher addNewTeacher(Course course, Account account) {
-        if (courseService.existsById(course.getId()) &&
-                accountService.existsById(account.getId())) {
+        //TODO should I add account and course creation here ? come back when needed
+
+        if (courseService.existsById(course.getId()) && accountService.existsById(account.getId())) {
             Teacher teacher = new Teacher(account, course);
-            teacherRepository.save(teacher);
-            return teacher;
+            if (teacherRepository.existsById(teacher.getId())) {
+                System.out.println(account.getName() + " as Teacher is already existed");
+                return teacherRepository.findById(teacher.getId()).orElse(null);
+            } else {
+                System.out.println(account.getName() + " as Teacher is not existed, creating new teacher");
+                return teacherRepository.save(teacher);
+            }
         }
         return null;
     }
+
 }

@@ -2,6 +2,7 @@ package com.group13.tcsprojectgrading.configuration;
 
 import com.group13.tcsprojectgrading.configuration.Oauth2.CustomOAuth2LoginSuccessHandler;
 import com.group13.tcsprojectgrading.configuration.Oauth2.CustomOAuth2UserService;
+import com.group13.tcsprojectgrading.service.user.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +22,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
+    @Autowired
+    private AccountService accountService;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {

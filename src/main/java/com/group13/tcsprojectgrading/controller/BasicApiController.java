@@ -52,7 +52,7 @@ public class BasicApiController {
                         authentication.getName());
 
         String body = WebclientUtils.getWebClientString(authorizedClient, webClient, resource_uri);
-        System.out.println(body);
+//        System.out.println(body);
 
         CustomOauth2User oauth2User = (CustomOauth2User) authentication.getPrincipal();
 

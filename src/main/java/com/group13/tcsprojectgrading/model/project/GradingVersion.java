@@ -1,5 +1,9 @@
 package com.group13.tcsprojectgrading.model.project;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.group13.tcsprojectgrading.model.project.rubric.Rubric;
 
 import javax.persistence.*;
@@ -25,24 +29,25 @@ public class GradingVersion {
 
     private String created_by; //TODO: make this into relation with Grader ?
 
-    private String previous_rubric_version_id;
+    private Long previous_grading_version_id;
 
+    @JsonIgnoreProperties({"gradingVersions"})
     @ManyToOne
-    @MapsId("gradingId")
     @JoinColumns({
-            @JoinColumn(name = "submission_id", insertable = false, updatable = false),
-            @JoinColumn(name = "criterion_id", insertable = false, updatable = false)
+            @JoinColumn(name = "project_id"),
+            @JoinColumn(name = "course_group_id"),
+            @JoinColumn(name = "criterion_version_id")
     })
     private Grading grading;
 
     private Double grade;
     private String comment;
 
-    public GradingVersion(String name, Timestamp created_date, String created_by, String previous_rubric_version_id, Grading grading, Double grade, String comment) {
+    public GradingVersion(String name, Timestamp created_date, String created_by, Long previous_grading_version_id, Grading grading, Double grade, String comment) {
         this.name = name;
         this.created_date = created_date;
         this.created_by = created_by;
-        this.previous_rubric_version_id = previous_rubric_version_id;
+        this.previous_grading_version_id = previous_grading_version_id;
         this.grading = grading;
         this.grade = grade;
         this.comment = comment;
@@ -83,12 +88,12 @@ public class GradingVersion {
         this.created_by = created_by;
     }
 
-    public String getPrevious_rubric_version_id() {
-        return previous_rubric_version_id;
+    public Long getPrevious_grading_version_id() {
+        return previous_grading_version_id;
     }
 
-    public void setPrevious_rubric_version_id(String previous_rubric_version_id) {
-        this.previous_rubric_version_id = previous_rubric_version_id;
+    public void setPrevious_grading_version_id(Long previous_grading_version_id) {
+        this.previous_grading_version_id = previous_grading_version_id;
     }
 
     public Grading getGrading() {
@@ -122,7 +127,7 @@ public class GradingVersion {
                 ", name='" + name + '\'' +
                 ", created_date=" + created_date +
                 ", created_by='" + created_by + '\'' +
-                ", previous_rubric_version_id='" + previous_rubric_version_id + '\'' +
+                ", previous_rubric_version_id='" + previous_grading_version_id + '\'' +
                 ", grading=" + grading +
                 ", grade=" + grade +
                 ", comment='" + comment + '\'' +

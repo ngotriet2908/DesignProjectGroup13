@@ -13,7 +13,6 @@ import java.util.Set;
 public class Student extends Participant{
     private String student_attr;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "student")
     private Set<GroupParticipant> groupParticipants = new HashSet<>();
 

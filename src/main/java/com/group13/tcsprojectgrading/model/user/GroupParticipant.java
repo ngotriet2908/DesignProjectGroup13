@@ -1,7 +1,13 @@
 package com.group13.tcsprojectgrading.model.user;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.group13.tcsprojectgrading.model.project.CourseGroup;
+import com.group13.tcsprojectgrading.model.project.Grading;
 import com.group13.tcsprojectgrading.model.project.SubmissionKey;
+import org.checkerframework.checker.units.qual.C;
 
 import javax.persistence.*;
 
@@ -11,6 +17,7 @@ public class GroupParticipant {
     @EmbeddedId
     private GroupParticipantKey id;
 
+    @JsonIgnoreProperties({"course", "groupParticipants" })
     @ManyToOne
     @MapsId("studentId")
     @JoinColumns({
@@ -19,6 +26,8 @@ public class GroupParticipant {
     })
     private Student student;
 
+    @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id", scope = CourseGroup.class)
+    @JsonIdentityReference(alwaysAsId=true)
     @ManyToOne
     @MapsId("courseGroupId")
     @JoinColumn(name = "course_group_id")

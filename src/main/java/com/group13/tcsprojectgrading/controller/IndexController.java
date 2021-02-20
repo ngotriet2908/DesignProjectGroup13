@@ -45,7 +45,7 @@ public class IndexController {
     public String getUser(@RegisteredOAuth2AuthorizedClient("canvas") OAuth2AuthorizedClient authorizedClient) {
 
         String body = WebclientUtils.getWebClientString(authorizedClient, webClient, resource_uri);
-        System.out.println(body);
+//        System.out.println(body);
 
         return "user";
     }

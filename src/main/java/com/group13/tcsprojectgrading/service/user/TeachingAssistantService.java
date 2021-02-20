@@ -1,11 +1,10 @@
-package com.group13.tcsprojectgrading.service;
+package com.group13.tcsprojectgrading.service.user;
 
 import com.group13.tcsprojectgrading.model.course.Course;
 import com.group13.tcsprojectgrading.model.user.Account;
-import com.group13.tcsprojectgrading.model.user.Student;
 import com.group13.tcsprojectgrading.model.user.TeachingAssistant;
-import com.group13.tcsprojectgrading.repository.user.StudentRepository;
 import com.group13.tcsprojectgrading.repository.user.TeachingAssistantRepository;
+import com.group13.tcsprojectgrading.service.course.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,8 +33,13 @@ public class TeachingAssistantService {
         if (courseService.existsById(course.getId()) &&
                 accountService.existsById(account.getId())) {
             TeachingAssistant teachingAssistant = new TeachingAssistant(account, course);
-            teachingAssistantRepository.save(teachingAssistant);
-            return teachingAssistant;
+            if (teachingAssistantRepository.existsById(teachingAssistant.getId())) {
+                System.out.println(account.getName() + " as TA is already existed");
+                return teachingAssistantRepository.findById(teachingAssistant.getId()).orElse(null);
+            } else {
+                System.out.println(account.getName() + " as TA  is not existed, creating new TA");
+                return teachingAssistantRepository.save(teachingAssistant);
+            }
         }
         return null;
     }

@@ -1,4 +1,4 @@
-package com.group13.tcsprojectgrading.service;
+package com.group13.tcsprojectgrading.service.project;
 
 import com.group13.tcsprojectgrading.model.project.CourseGroup;
 import com.group13.tcsprojectgrading.model.user.Account;

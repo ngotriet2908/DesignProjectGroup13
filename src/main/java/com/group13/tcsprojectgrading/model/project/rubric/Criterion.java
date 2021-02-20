@@ -33,14 +33,11 @@ public class Criterion {
     @OneToMany(mappedBy = "criterion")
     private Set<CriterionVersion> criterionVersions;
 
-    @OneToMany(mappedBy = "criterion")
-    private Set<Grading> gradings;
 
-    public Criterion(Block block, Long current_criterion_version_id, Set<CriterionVersion> criterionVersions, Set<Grading> gradings) {
+    public Criterion(Block block, Long current_criterion_version_id, Set<CriterionVersion> criterionVersions) {
         this.block = block;
         this.current_criterion_version_id = current_criterion_version_id;
         this.criterionVersions = criterionVersions;
-        this.gradings = gradings;
     }
 
     public Criterion() {
@@ -82,14 +79,6 @@ public class Criterion {
         this.criterionVersions = criterionVersions;
     }
 
-    public Set<Grading> getGradings() {
-        return gradings;
-    }
-
-    public void setGradings(Set<Grading> gradings) {
-        this.gradings = gradings;
-    }
-
     @Override
     public String toString() {
         return "Criterion{" +
@@ -97,7 +86,6 @@ public class Criterion {
                 ", block=" + block +
                 ", current_criterion_version_id='" + current_criterion_version_id + '\'' +
                 ", criterionVersions=" + criterionVersions +
-                ", gradings=" + gradings +
                 '}';
     }
 }

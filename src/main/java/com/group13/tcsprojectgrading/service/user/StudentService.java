@@ -1,16 +1,13 @@
-package com.group13.tcsprojectgrading.service;
+package com.group13.tcsprojectgrading.service.user;
 
 import com.group13.tcsprojectgrading.model.course.Course;
 import com.group13.tcsprojectgrading.model.user.Account;
-import com.group13.tcsprojectgrading.model.user.Participant;
 import com.group13.tcsprojectgrading.model.user.Student;
-import com.group13.tcsprojectgrading.repository.user.AccountRepository;
 import com.group13.tcsprojectgrading.repository.user.StudentRepository;
+import com.group13.tcsprojectgrading.service.course.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
@@ -37,8 +34,13 @@ public class StudentService {
         if (courseService.existsById(course.getId()) &&
             accountService.existsById(account.getId())) {
             Student student = new Student(account, course);
-            studentRepository.save(student);
-            return student;
+            if (studentRepository.existsById(student.getId())) {
+                System.out.println(account.getName() + " as Student is already existed");
+                return studentRepository.findById(student.getId()).orElse(null);
+            } else {
+                System.out.println(account.getName() + " as Student is not existed, creating new student");
+                return studentRepository.save(student);
+            }
         }
         return null;
     }

@@ -11,7 +11,6 @@ import java.util.Set;
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class Grader extends Participant{
 
-    @JsonIgnore
     @OneToMany(mappedBy = "grader")
     private Set<Submission> submissions;
 

@@ -1,4 +1,4 @@
-package com.group13.tcsprojectgrading.service;
+package com.group13.tcsprojectgrading.service.project.rubric;
 
 import com.group13.tcsprojectgrading.model.project.rubric.Block;
 import com.group13.tcsprojectgrading.model.project.rubric.BlockVersion;

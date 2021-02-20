@@ -18,6 +18,8 @@ public class Course {
     @Id
     private String id;
     private String name;
+    private String course_code;
+
 
     @OneToMany(mappedBy = "account")
     private Set<Participant> participants  = new HashSet<>();
@@ -34,9 +36,18 @@ public class Course {
     public Course() {
     }
 
-    public Course(String id, String name) {
+    public Course(String id, String name, String course_code) {
         this.id = id;
         this.name = name;
+        this.course_code = course_code;
+    }
+
+    public String getCourse_code() {
+        return course_code;
+    }
+
+    public void setCourse_code(String course_code) {
+        this.course_code = course_code;
     }
 
     public String getId() {
