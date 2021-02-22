@@ -2,6 +2,7 @@ package com.group13.tcsprojectgrading.model.course;
 
 import com.fasterxml.jackson.annotation.*;
 import com.group13.tcsprojectgrading.model.project.CourseGroup;
+import com.group13.tcsprojectgrading.model.project.CourseGroupCategory;
 import com.group13.tcsprojectgrading.model.project.Project;
 import com.group13.tcsprojectgrading.model.user.Participant;
 
@@ -31,7 +32,7 @@ public class Course {
 
     @JsonIgnore
     @OneToMany(mappedBy = "course")
-    private Set<CourseGroup> courseGroups  = new HashSet<>();
+    private Set<CourseGroupCategory> courseGroups  = new HashSet<>();
 
     public Course() {
     }
@@ -82,11 +83,11 @@ public class Course {
         this.projects = projects;
     }
 
-    public Set<CourseGroup> getCourseGroups() {
+    public Set<CourseGroupCategory> getCourseGroups() {
         return courseGroups;
     }
 
-    public void setCourseGroups(Set<CourseGroup> courseGroups) {
+    public void setCourseGroups(Set<CourseGroupCategory> courseGroups) {
         this.courseGroups = courseGroups;
     }
 

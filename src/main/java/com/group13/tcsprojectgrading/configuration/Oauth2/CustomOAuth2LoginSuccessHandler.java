@@ -22,6 +22,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -82,12 +83,26 @@ public class CustomOAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSucc
 
         //Syncing with Canvas
 
+        long begin = System.currentTimeMillis();
+
         //Sync account
         canvasUserService.addNewAccount(oauth2User.getAccessToken().getTokenValue());
         //Sync courses
-        Participant participant = canvasUserService.addNewParticipant(oauth2User.getAccessToken().getTokenValue(), oauth2User.getUserId());
+        canvasUserService.selfSyncCourseAndUser(oauth2User.getAccessToken().getTokenValue(), oauth2User.getUserId());
 
-        canvasCourseService.syncParticipants(oauth2User.getAccessToken().getTokenValue(), participant.getId().getCourseId());
+        String couseId = "120";
+
+        canvasCourseService.syncParticipants(oauth2User.getAccessToken().getTokenValue(), couseId);
+
+        canvasCourseService.syncCourseProjects(oauth2User.getAccessToken().getTokenValue(), couseId);
+
+        canvasCourseService.syncCourseGroupCategory(oauth2User.getAccessToken().getTokenValue(), couseId);
+
+        canvasCourseService.syncCourseGroups(oauth2User.getAccessToken().getTokenValue(), couseId);
+
+        canvasCourseService.syncCourseGroupParticipant(oauth2User.getAccessToken().getTokenValue(), couseId);
+
+        System.out.println("time: " + (System.currentTimeMillis()-begin));
 
         redirectStrategy.sendRedirect(request, response, targetUrl);
     }

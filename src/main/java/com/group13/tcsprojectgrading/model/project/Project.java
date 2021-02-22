@@ -16,22 +16,18 @@ import java.util.Set;
         @UniqueConstraint(name = "project_name_course_unique",columnNames = {"name", "course_id"})
 })
 public class Project {
-
     @Id
-    @SequenceGenerator(
-            name = "project_sequence",
-            sequenceName = "project_sequence",
-            allocationSize = 1
-    )
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "project_sequence"
-    )
     private Long id;
 
     private String name;
 
     private Timestamp deadline;
+
+    private Double pointPossible;
+
+    private Long assignmentGroupId;
+
+    private Long groupCategoryCanvasId;
 
     @Column(name = "publish_date")
     private Timestamp publishDate;
@@ -50,10 +46,10 @@ public class Project {
     @JoinColumn(name = "course_id")
     private Course course;
 
-    public Project(String name, Timestamp deadline, Timestamp publishDate, Course course) {
+    public Project(Long id, String name, Double pointPossible, Course course) {
+        this.id = id;
         this.name = name;
-        this.deadline = deadline;
-        this.publishDate = publishDate;
+        this.pointPossible = pointPossible;
         this.course = course;
     }
 
@@ -116,12 +112,39 @@ public class Project {
         this.submissions = submissions;
     }
 
+    public Double getPointPossible() {
+        return pointPossible;
+    }
+
+    public void setPointPossible(Double pointPossible) {
+        this.pointPossible = pointPossible;
+    }
+
+    public Long getAssignmentGroupId() {
+        return assignmentGroupId;
+    }
+
+    public void setAssignmentGroupId(Long assignmentGroupId) {
+        this.assignmentGroupId = assignmentGroupId;
+    }
+
+    public Long getGroupCategoryCanvasId() {
+        return groupCategoryCanvasId;
+    }
+
+    public void setGroupCategoryCanvasId(Long groupCategoryCanvasId) {
+        this.groupCategoryCanvasId = groupCategoryCanvasId;
+    }
+
     @Override
     public String toString() {
         return "Project{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", deadline=" + deadline +
+                ", pointPossible=" + pointPossible +
+                ", assignmentGroupId=" + assignmentGroupId +
+                ", groupCategoryCanvasId=" + groupCategoryCanvasId +
                 ", publishDate=" + publishDate +
                 ", course=" + course +
                 '}';

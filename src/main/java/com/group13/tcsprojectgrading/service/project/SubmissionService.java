@@ -26,7 +26,7 @@ public class SubmissionService {
     }
 
     public void addNewSubmission(Project project, CourseGroup courseGroup) {
-        if (!project.getCourse().equals(courseGroup.getCourse())) {
+        if (!project.getCourse().equals(courseGroup.getCourseGroupCategory().getCourse())) {
             throw new IllegalArgumentException("project course and group course are not the same" + project + ";" + courseGroup);
         }
         repository.save(new Submission(project, courseGroup));
@@ -38,7 +38,7 @@ public class SubmissionService {
     }
 
     public Submission addNewSubmissionWithSubmissionDate(Project project, CourseGroup courseGroup, Timestamp submissionDate) {
-        if (!project.getCourse().equals(courseGroup.getCourse())) {
+        if (!project.getCourse().equals(courseGroup.getCourseGroupCategory().getCourse())) {
             throw new IllegalArgumentException("project course and group course are not the same" + project + ";" + courseGroup);
         }
         return repository.save(new Submission(project, courseGroup, submissionDate));

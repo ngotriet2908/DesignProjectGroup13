@@ -22,8 +22,8 @@ public class CourseGroupService {
         return repository.findAll();
     }
 
-    public void addCourseGroup(CourseGroup courseGroup) {
-        repository.save(courseGroup);
+    public CourseGroup addCourseGroup(CourseGroup courseGroup) {
+        return repository.save(courseGroup);
     }
 
     public boolean existsById(Long id) {

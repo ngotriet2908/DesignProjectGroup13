@@ -23,6 +23,11 @@ public class ProjectService {
     }
 
     public void addNewProject(Project project) {
+        if (projectRepository.existsById(project.getId())) {
+            System.out.println("Project " + project.getName() + " is already existed");
+        } else {
+            System.out.println("Project " + project.getName() + " is not existed, creating new project");
+        }
         projectRepository.save(project);
     }
 

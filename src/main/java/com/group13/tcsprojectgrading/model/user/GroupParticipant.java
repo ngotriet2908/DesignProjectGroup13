@@ -33,9 +33,18 @@ public class GroupParticipant {
     @JoinColumn(name = "course_group_id")
     private CourseGroup courseGroup;
 
+    private Long canvas_id;
+
     public GroupParticipant(Student student, CourseGroup courseGroup) {
         this.student = student;
         this.courseGroup = courseGroup;
+        this.id = new GroupParticipantKey(student.getId(), courseGroup.getId());
+    }
+
+    public GroupParticipant(Student student, CourseGroup courseGroup, Long canvas_id) {
+        this.student = student;
+        this.courseGroup = courseGroup;
+        this.canvas_id = canvas_id;
         this.id = new GroupParticipantKey(student.getId(), courseGroup.getId());
     }
 
@@ -66,12 +75,21 @@ public class GroupParticipant {
         this.courseGroup = courseGroup;
     }
 
+    public Long getCanvas_id() {
+        return canvas_id;
+    }
+
+    public void setCanvas_id(Long canvas_id) {
+        this.canvas_id = canvas_id;
+    }
+
     @Override
     public String toString() {
         return "GroupParticipant{" +
                 "id=" + id +
                 ", student=" + student +
                 ", courseGroup=" + courseGroup +
+                ", canvas_id=" + canvas_id +
                 '}';
     }
 }
