@@ -48,4 +48,8 @@ public class StudentService {
     public Student findStudentByAccountAndCourse(Account account, Course course) {
         return studentRepository.findByAccountAndCourse(account, course);
     }
+
+    public List<Student> findStudentByCourse(Course course) {
+        return studentRepository.findStudentByCourse(course);
+    }
 }

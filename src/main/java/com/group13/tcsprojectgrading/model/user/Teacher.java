@@ -11,26 +11,26 @@ import java.util.Set;
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class Teacher extends Grader{
-    private String teacher_attr;
+    private String teacherAttr;
 
     public Teacher(Account account, Course course) {
         super(account, course, "TEACHER");
     }
 
     public Teacher(String teacher_attr) {
-        this.teacher_attr = teacher_attr;
+        this.teacherAttr = teacher_attr;
     }
 
 
     public Teacher() {
     }
 
-    public String getTeacher_attr() {
-        return teacher_attr;
+    public String getTeacherAttr() {
+        return teacherAttr;
     }
 
-    public void setTeacher_attr(String teacher_attr) {
-        this.teacher_attr = teacher_attr;
+    public void setTeacherAttr(String teacherAttr) {
+        this.teacherAttr = teacherAttr;
     }
 
     @Override
@@ -39,7 +39,8 @@ public class Teacher extends Grader{
                 "id=" + id +
                 ", account=" + account +
                 ", course=" + course +
-                ", teacher_attr='" + teacher_attr + '\'' +
+                ", role='" + role + '\'' +
+                ", teacherAttr='" + teacherAttr + '\'' +
                 '}';
     }
 }

@@ -27,7 +27,7 @@ public class GradingService {
     }
 
     public void setCurrentGradingVersion(Grading grading, GradingVersion gradingVersion) {
-        grading.setCurrent_grading_version(gradingVersion.getId());
+        grading.setCurrentGradingVersion(gradingVersion.getId());
         repository.save(grading);
     }
 }

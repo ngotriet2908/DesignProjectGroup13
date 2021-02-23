@@ -11,7 +11,7 @@ import java.util.Set;
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class Student extends Participant{
-    private String student_attr;
+    private String studentAttr;
 
     @OneToMany(mappedBy = "student")
     private Set<GroupParticipant> groupParticipants = new HashSet<>();
@@ -22,18 +22,18 @@ public class Student extends Participant{
     }
 
     public Student(String student_attr) {
-        this.student_attr = student_attr;
+        this.studentAttr = student_attr;
     }
 
     public Student() {
     }
 
-    public String getStudent_attr() {
-        return student_attr;
+    public String getStudentAttr() {
+        return studentAttr;
     }
 
-    public void setStudent_attr(String student_attr) {
-        this.student_attr = student_attr;
+    public void setStudentAttr(String studentAttr) {
+        this.studentAttr = studentAttr;
     }
 
     public Set<GroupParticipant> getGroupParticipants() {
@@ -50,7 +50,7 @@ public class Student extends Participant{
                 "id=" + id +
                 ", account=" + account +
                 ", course=" + course +
-                ", student_attr='" + student_attr + '\'' +
+                ", student_attr='" + studentAttr + '\'' +
                 '}';
     }
 }

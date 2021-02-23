@@ -16,10 +16,10 @@ public class Grading {
 
     @JsonIgnoreProperties({"gradings"})
     @ManyToOne
-    @MapsId("submissionId")
+//    @MapsId("submissionId")
     @JoinColumns({
-            @JoinColumn(name = "project_id", insertable = false, updatable = false),
-            @JoinColumn(name = "course_group_id", insertable = false, updatable = false)
+            @JoinColumn(name = "course_group_id", insertable = false, updatable = false),
+            @JoinColumn(name = "project_id", insertable = false, updatable = false)
     })
     private Submission submission;
 
@@ -33,12 +33,12 @@ public class Grading {
     @OneToMany(mappedBy = "grading")
     private Set<GradingVersion> gradingVersions;
 
-    private Long current_grading_version;
+    private Long currentGradingVersion;
 
     public Grading(Submission submission, CriterionVersion criterionVersion, Long current_grading_version) {
         this.submission = submission;
         this.criterionVersion = criterionVersion;
-        this.current_grading_version = current_grading_version;
+        this.currentGradingVersion = current_grading_version;
         this.id = new GradingKey(submission.getId().getProjectId(), submission.getId().getCourseGroupId(), criterionVersion.getId());
     }
 
@@ -83,14 +83,13 @@ public class Grading {
         this.gradingVersions = gradingVersions;
     }
 
-    public Long getCurrent_grading_version() {
-        return current_grading_version;
+    public Long getCurrentGradingVersion() {
+        return currentGradingVersion;
     }
 
-    public void setCurrent_grading_version(Long current_grading_version) {
-        this.current_grading_version = current_grading_version;
+    public void setCurrentGradingVersion(Long currentGradingVersion) {
+        this.currentGradingVersion = currentGradingVersion;
     }
-
 
     @Override
     public String toString() {
@@ -98,7 +97,7 @@ public class Grading {
                 "id=" + id +
                 ", submission=" + submission +
                 ", criterionVersion=" + criterionVersion +
-                ", current_grading_version=" + current_grading_version +
+                ", current_grading_version=" + currentGradingVersion +
                 '}';
     }
 }

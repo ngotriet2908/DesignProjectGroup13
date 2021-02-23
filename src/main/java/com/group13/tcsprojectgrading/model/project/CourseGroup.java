@@ -28,41 +28,40 @@ public class CourseGroup {
     )
     private Long id;
 
-    private String canvas_id;
+    @Column(name = "canvas_id")
+    private String canvasId;
 
     private String name;
 
-    private Long max_membership;
+    private Long maxMembership;
 
-    private Long members_count;
+    private Long membersCount;
 
     @OneToMany(mappedBy = "courseGroup")
     private Set<GroupParticipant> groupParticipants;
 
-    @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id", scope = CourseGroupCategory.class)
-    @JsonIdentityReference(alwaysAsId=true)
     @ManyToOne
     @JoinColumn(name = "course_group_category_id")
     private CourseGroupCategory courseGroupCategory;
 
     public CourseGroup(String canvas_id, String name, Long max_membership, Long members_count, CourseGroupCategory courseGroupCategory) {
-        this.canvas_id = canvas_id;
+        this.canvasId = canvas_id;
         this.name = name;
-        this.max_membership = max_membership;
+        this.maxMembership = max_membership;
         this.courseGroupCategory = courseGroupCategory;
-        this.members_count = members_count;
+        this.membersCount = members_count;
+    }
+
+    public CourseGroup(String name, Long max_membership, Long members_count, CourseGroupCategory courseGroupCategory) {
+        this.name = name;
+        this.maxMembership = max_membership;
+        this.courseGroupCategory = courseGroupCategory;
+        this.membersCount = members_count;
     }
 
     public CourseGroup() {
     }
 
-    public Long getMax_membership() {
-        return max_membership;
-    }
-
-    public void setMax_membership(Long max_membership) {
-        this.max_membership = max_membership;
-    }
 
     public String getName() {
         return name;
@@ -88,12 +87,12 @@ public class CourseGroup {
         this.groupParticipants = groupParticipants;
     }
 
-    public String getCanvas_id() {
-        return canvas_id;
+    public String getCanvasId() {
+        return canvasId;
     }
 
-    public void setCanvas_id(String canvas_id) {
-        this.canvas_id = canvas_id;
+    public void setCanvasId(String canvasId) {
+        this.canvasId = canvasId;
     }
 
     public CourseGroupCategory getCourseGroupCategory() {
@@ -104,22 +103,30 @@ public class CourseGroup {
         this.courseGroupCategory = courseGroupCategory;
     }
 
-    public Long getMembers_count() {
-        return members_count;
+    public Long getMaxMembership() {
+        return maxMembership;
     }
 
-    public void setMembers_count(Long members_count) {
-        this.members_count = members_count;
+    public void setMaxMembership(Long maxMembership) {
+        this.maxMembership = maxMembership;
+    }
+
+    public Long getMembersCount() {
+        return membersCount;
+    }
+
+    public void setMembersCount(Long membersCount) {
+        this.membersCount = membersCount;
     }
 
     @Override
     public String toString() {
         return "CourseGroup{" +
                 "id=" + id +
-                ", canvas_id='" + canvas_id + '\'' +
+                ", canvas_id='" + canvasId + '\'' +
                 ", name='" + name + '\'' +
-                ", max_membership=" + max_membership +
-                ", members_count=" + members_count +
+                ", max_membership=" + maxMembership +
+                ", members_count=" + membersCount +
                 ", groupParticipants=" + groupParticipants +
                 ", courseGroupCategory=" + courseGroupCategory +
                 '}';

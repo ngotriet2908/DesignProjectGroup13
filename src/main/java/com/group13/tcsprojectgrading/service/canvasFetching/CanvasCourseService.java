@@ -4,15 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.group13.tcsprojectgrading.model.course.Course;
-import com.group13.tcsprojectgrading.model.project.CourseGroup;
-import com.group13.tcsprojectgrading.model.project.CourseGroupCategory;
-import com.group13.tcsprojectgrading.model.project.Project;
+import com.group13.tcsprojectgrading.model.project.*;
 import com.group13.tcsprojectgrading.model.user.Account;
 import com.group13.tcsprojectgrading.model.user.Student;
 import com.group13.tcsprojectgrading.service.course.CourseService;
-import com.group13.tcsprojectgrading.service.project.CourseGroupCategoryService;
-import com.group13.tcsprojectgrading.service.project.CourseGroupService;
-import com.group13.tcsprojectgrading.service.project.ProjectService;
+import com.group13.tcsprojectgrading.service.project.*;
 import com.group13.tcsprojectgrading.service.user.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -56,8 +52,12 @@ public class CanvasCourseService {
 
     private ProjectService projectService;
 
+    private SubmissionService submissionService;
+
+    private AttachmentService attachmentService;
+
     @Autowired
-    public CanvasCourseService(WebClient webClient, AccountService accountService, CourseService courseService, TeacherService teacherService, TeachingAssistantService teachingAssistantService, StudentService studentService, CourseGroupCategoryService courseGroupCategoryService, CourseGroupService courseGroupService, GroupParticipantService groupParticipantService, ProjectService projectService) {
+    public CanvasCourseService(WebClient webClient, AccountService accountService, CourseService courseService, TeacherService teacherService, TeachingAssistantService teachingAssistantService, StudentService studentService, CourseGroupCategoryService courseGroupCategoryService, CourseGroupService courseGroupService, GroupParticipantService groupParticipantService, ProjectService projectService, SubmissionService submissionService, AttachmentService attachmentService) {
         this.webClient = webClient;
         this.accountService = accountService;
         this.courseService = courseService;
@@ -68,6 +68,8 @@ public class CanvasCourseService {
         this.courseGroupService = courseGroupService;
         this.groupParticipantService = groupParticipantService;
         this.projectService = projectService;
+        this.submissionService = submissionService;
+        this.attachmentService = attachmentService;
     }
 
     public void syncCourseProjects(String token, String course_id) throws JsonProcessingException {
@@ -96,7 +98,7 @@ public class CanvasCourseService {
                 );
                 if (node.get("group_category_id") != null && !node.get("group_category_id").asText().equals("null"))
                     project.setGroupCategoryCanvasId(node.get("group_category_id").asLong());
-                if (node.get("due_at") != null && !node.get("group_category_id").asText().equals("null")) {
+                if (node.get("due_at") != null && !node.get("due_at").asText().equals("null")) {
                     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
                     dateFormat.setTimeZone(TimeZone.getTimeZone(ZoneId.of("UTC")));
                     try {
@@ -170,7 +172,33 @@ public class CanvasCourseService {
         }
     }
 
+    public void syncSingleCourseGroup(String course_id) {
+        //create single group category
+        Course course = courseService.findCourseById(course_id);
+
+        courseGroupCategoryService.addNewCourseGroupCategory(new CourseGroupCategory(
+                (SINGLE_GROUP_MARK + course_id),
+                SINGLE_GROUP_NAME_PREFIX + course.getName(),
+                course));
+
+        //sync single group
+        List<Student> students = studentService.findStudentByCourse(course);
+        for (Student student: students) {
+            CourseGroup courseGroup = courseGroupService.addCourseGroup(new CourseGroup(
+//                    student.getAccount().getId(),
+                    SINGLE_GROUP_NAME_PREFIX + student.getAccount().getName() + "(" + student.getAccount().getId() + ")",
+                    1L,
+                    1L,
+                    courseGroupCategoryService.findById(SINGLE_GROUP_MARK + course.getId())));
+
+            groupParticipantService.addSingleGroupParticipant(student, courseGroup);
+        }
+
+    }
+
     public void syncCourseGroupCategory(String token, String course_id) throws JsonProcessingException {
+        //fetch and create group categories from canvas
+        Course course = courseService.findCourseById(course_id);
         URI uriComponents = UriComponentsBuilder.newInstance()
                 .scheme(SCHEME)
                 .host(HOST)
@@ -186,8 +214,6 @@ public class CanvasCourseService {
             for (Iterator<JsonNode> it = jsonNode.elements(); it.hasNext(); ) {
                 JsonNode node = it.next();
 
-                Course course = courseService.findCourseById(node.get("course_id").asText());
-
                 courseGroupCategoryService.addNewCourseGroupCategory(new CourseGroupCategory(
                         node.get("id").asText(),
                         node.get("name").asText(),
@@ -198,6 +224,8 @@ public class CanvasCourseService {
     }
 
     public void syncCourseGroups(String token, String course_id) throws JsonProcessingException {
+
+        //fetch and sync groups from canvas
         URI uriComponents = UriComponentsBuilder.newInstance()
                 .scheme(SCHEME)
                 .host(HOST)
@@ -232,16 +260,14 @@ public class CanvasCourseService {
         Course course = courseService.findCourseById(course_id);
 
         for(CourseGroup courseGroup: courseGroups) {
-            if (courseGroup.getMembers_count() == 0) continue;
-            if (courseGroup.getCanvas_id() == null) {
-                //TODO create single group
-            }
+            if (courseGroup.getCourseGroupCategory().getId().contains(SINGLE_GROUP_MARK)) continue;
+            if (courseGroup.getMembersCount() == 0) continue;
 
             URI uriComponents = UriComponentsBuilder.newInstance()
                     .scheme(SCHEME)
                     .host(HOST)
                     .path(COURSE_GROUP_MEMBERSHIP_PATH)
-                    .build(courseGroup.getCanvas_id());
+                    .build(courseGroup.getCanvasId());
 
             List<String> jsonNodeStringList = sendWebClientWithPagination(token, uriComponents);
 
@@ -261,6 +287,77 @@ public class CanvasCourseService {
                 }
             }
         }
+    }
+
+    public void syncSubmission(String token, Long assignment_id) throws JsonProcessingException {
+        Project project = projectService.findProjectWithId(assignment_id);
+        Course course = project.getCourse();
+
+        URI uriComponents = UriComponentsBuilder.newInstance()
+                .scheme(SCHEME)
+                .host(HOST)
+                .path(SUBMISSIONS_PATH)
+                .queryParam("include[]", "group","submission_history","submission_comments")
+                .queryParam("grouped", true)
+                .build(course.getId(), assignment_id);
+
+        List<String> jsonNodeStringList = sendWebClientWithPagination(token, uriComponents);
+
+        for (String jsonNodeString: jsonNodeStringList) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(jsonNodeString);
+
+            for (Iterator<JsonNode> it = jsonNode.elements(); it.hasNext(); ) {
+                JsonNode node = it.next();
+                if (!node.get("workflow_state").asText().equals("submitted")) continue;
+
+                JsonNode groupNode = node.get("group");
+                CourseGroup courseGroup;
+
+                if (!groupNode.get("id").asText().equals("null")) {
+                    courseGroup = courseGroupService.findCanvasGroup(groupNode.get("id").asText());
+                } else {
+                    Student student = studentService.findStudentByAccountAndCourse(
+                            accountService.findAccountById(node.get("user_id").asText()),
+                            course);
+                    if (student == null) continue;
+                    courseGroup = courseGroupService.findSingleCourseGroup(student);
+                }
+
+                Submission submission = new Submission(
+                        project,
+                        courseGroup);
+
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+                dateFormat.setTimeZone(TimeZone.getTimeZone(ZoneId.of("UTC")));
+                try {
+                    Date parsedDate = dateFormat.parse(node.get("submitted_at").asText());
+                    Timestamp timestamp = new Timestamp(parsedDate.getTime());
+                    submission.setSubmission_date(timestamp);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                submissionService.addNewSubmission(submission);
+
+                JsonNode attachmentsNode = node.get("attachments");
+                for (Iterator<JsonNode> iter = attachmentsNode.elements(); iter.hasNext(); ) {
+                    JsonNode attachmentNode = iter.next();
+                    Attachment attachment = new Attachment(
+                            attachmentNode.get("id").asLong(),
+                            attachmentNode.get("uuid").asText(),
+                            attachmentNode.get("display_name").asText(),
+                            attachmentNode.get("filename").asText(),
+                            attachmentNode.get("content-type").asText(),
+                            attachmentNode.get("url").asText(),
+                            attachmentNode.get("size").asLong(),
+                            submission
+                            );
+                    attachmentService.addNewAttachment(attachment);
+                }
+
+            }
+        }
+
     }
 
     private JsonNode sendWebClient(String token, String url) throws JsonProcessingException {

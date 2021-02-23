@@ -11,7 +11,7 @@ import java.util.Set;
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class TeachingAssistant extends Grader{
-    private String teachingassistant_attr;
+    private String teachingAssistantAttr;
 
 
     public TeachingAssistant(Account account, Course course) {
@@ -19,18 +19,18 @@ public class TeachingAssistant extends Grader{
     }
 
     public TeachingAssistant(String teachingassistant_attr) {
-        this.teachingassistant_attr = teachingassistant_attr;
+        this.teachingAssistantAttr = teachingassistant_attr;
     }
 
     public TeachingAssistant() {
     }
 
-    public String getTeachingassistant_attr() {
-        return teachingassistant_attr;
+    public String getTeachingAssistantAttr() {
+        return teachingAssistantAttr;
     }
 
-    public void setTeachingassistant_attr(String teachingassistant_attr) {
-        this.teachingassistant_attr = teachingassistant_attr;
+    public void setTeachingAssistantAttr(String teachingAssistantAttr) {
+        this.teachingAssistantAttr = teachingAssistantAttr;
     }
 
     @Override
@@ -39,7 +39,7 @@ public class TeachingAssistant extends Grader{
                 "id=" + id +
                 ", account=" + account +
                 ", course=" + course +
-                ", teachingassistant_attr='" + teachingassistant_attr + '\'' +
+                ", teachingassistant_attr='" + teachingAssistantAttr + '\'' +
                 '}';
     }
 }

@@ -34,9 +34,9 @@ public class GradingVersion {
     @JsonIgnoreProperties({"gradingVersions"})
     @ManyToOne
     @JoinColumns({
-            @JoinColumn(name = "project_id"),
             @JoinColumn(name = "course_group_id"),
-            @JoinColumn(name = "criterion_version_id")
+            @JoinColumn(name = "criterion_version_id"),
+            @JoinColumn(name = "project_id")
     })
     private Grading grading;
 

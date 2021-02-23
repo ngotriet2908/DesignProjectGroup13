@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.*;
 import com.group13.tcsprojectgrading.model.course.Course;
 import com.group13.tcsprojectgrading.model.user.Account;
 import com.group13.tcsprojectgrading.model.user.Grader;
+import com.group13.tcsprojectgrading.model.user.GroupParticipant;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -40,6 +41,9 @@ public class Submission {
 
     @OneToMany(mappedBy = "submission")
     private Set<Grading> gradings;
+
+    @OneToMany(mappedBy = "submission")
+    private Set<Attachment> attachments;
 
     public Submission(SubmissionKey id, Project project, CourseGroup courseGroup, Timestamp submission_date, Grader grader, Set<Grading> gradings) {
         this.id = id;
@@ -112,6 +116,14 @@ public class Submission {
 
     public void setGradings(Set<Grading> gradings) {
         this.gradings = gradings;
+    }
+
+    public Set<Attachment> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(Set<Attachment> attachments) {
+        this.attachments = attachments;
     }
 
     @Override

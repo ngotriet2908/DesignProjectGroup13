@@ -5,6 +5,8 @@ public class DefaultCanvasUrls {
     public static final String HOST = "utwente-dev.instructure.com";
     public static final String SCHEME = "https";
 
+    public static final String SINGLE_GROUP_MARK = "-";
+    public static final String SINGLE_GROUP_NAME_PREFIX = "Single Group of ";
 
     public static final String BASE_URL = SCHEME + "://" + HOST;
 
@@ -23,6 +25,8 @@ public class DefaultCanvasUrls {
     public static final String COURSE_ASSIGNMENT_PATH = "/api/v1/courses/{course_id}/assignments";
 
     public static final String COURSE_ASSIGNMENT_GROUPS_PATH = "/api/v1/courses/{course_id}/assignment_groups";
+
+    public static final String SUBMISSIONS_PATH = "/api/v1/courses/{course_id}/assignments/{assignment_id}/submissions";
 
 
     public static final String TEACHER_ROLE = "TeacherEnrollment";

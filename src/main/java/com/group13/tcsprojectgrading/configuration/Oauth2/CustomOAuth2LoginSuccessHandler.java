@@ -1,9 +1,11 @@
 package com.group13.tcsprojectgrading.configuration.Oauth2;
 
+import com.group13.tcsprojectgrading.model.project.Project;
 import com.group13.tcsprojectgrading.model.user.Account;
 import com.group13.tcsprojectgrading.model.user.Participant;
 import com.group13.tcsprojectgrading.service.canvasFetching.CanvasCourseService;
 import com.group13.tcsprojectgrading.service.canvasFetching.CanvasUserService;
+import com.group13.tcsprojectgrading.service.project.ProjectService;
 import com.group13.tcsprojectgrading.service.user.AccountService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,6 +27,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import static com.group13.tcsprojectgrading.model.user.ApplicationUserRole.*;
 
@@ -43,6 +46,9 @@ public class CustomOAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSucc
 
     @Autowired
     private AccountService accountService;
+
+    @Autowired
+    private ProjectService projectService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
@@ -91,16 +97,27 @@ public class CustomOAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSucc
         canvasUserService.selfSyncCourseAndUser(oauth2User.getAccessToken().getTokenValue(), oauth2User.getUserId());
 
         String couseId = "120";
+        Long assignmentId = 160L;
 
+        //Sync course members and projects
         canvasCourseService.syncParticipants(oauth2User.getAccessToken().getTokenValue(), couseId);
 
         canvasCourseService.syncCourseProjects(oauth2User.getAccessToken().getTokenValue(), couseId);
+
+        //Sync group
+        canvasCourseService.syncSingleCourseGroup(couseId);
 
         canvasCourseService.syncCourseGroupCategory(oauth2User.getAccessToken().getTokenValue(), couseId);
 
         canvasCourseService.syncCourseGroups(oauth2User.getAccessToken().getTokenValue(), couseId);
 
         canvasCourseService.syncCourseGroupParticipant(oauth2User.getAccessToken().getTokenValue(), couseId);
+
+        //Sync submission
+        List<Project> projects = projectService.getProjects();
+        for (Project project: projects) {
+            canvasCourseService.syncSubmission(oauth2User.getAccessToken().getTokenValue(), project.getId());
+        }
 
         System.out.println("time: " + (System.currentTimeMillis()-begin));
 

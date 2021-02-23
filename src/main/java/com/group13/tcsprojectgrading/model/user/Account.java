@@ -12,10 +12,10 @@ public class Account {
     @Id
     private String id;
     private String name;
-    private String login_id;
-    private String short_name;
-    private String sortable_name;
-    private String primary_email;
+    private String loginId;
+    private String shortName;
+    private String sortableName;
+    private String primaryEmail;
 
     @OneToMany(mappedBy = "course")
     private Set<Participant> participants = new HashSet<>();
@@ -29,10 +29,10 @@ public class Account {
     public Account(String id, String name, String login_id, String short_name, String sortable_name, String primary_email) {
         this.id = id;
         this.name = name;
-        this.login_id = login_id;
-        this.short_name = short_name;
-        this.sortable_name = sortable_name;
-        this.primary_email = primary_email;
+        this.loginId = login_id;
+        this.shortName = short_name;
+        this.sortableName = sortable_name;
+        this.primaryEmail = primary_email;
     }
 
     public Account(String id, String name) {
@@ -71,36 +71,36 @@ public class Account {
         this.participants.add(participant);
     }
 
-    public String getLogin_id() {
-        return login_id;
+    public String getLoginId() {
+        return loginId;
     }
 
-    public void setLogin_id(String login_id) {
-        this.login_id = login_id;
+    public void setLoginId(String loginId) {
+        this.loginId = loginId;
     }
 
-    public String getShort_name() {
-        return short_name;
+    public String getShortName() {
+        return shortName;
     }
 
-    public void setShort_name(String short_name) {
-        this.short_name = short_name;
+    public void setShortName(String shortName) {
+        this.shortName = shortName;
     }
 
-    public String getSortable_name() {
-        return sortable_name;
+    public String getSortableName() {
+        return sortableName;
     }
 
-    public void setSortable_name(String sortable_name) {
-        this.sortable_name = sortable_name;
+    public void setSortableName(String sortableName) {
+        this.sortableName = sortableName;
     }
 
-    public String getPrimary_email() {
-        return primary_email;
+    public String getPrimaryEmail() {
+        return primaryEmail;
     }
 
-    public void setPrimary_email(String primary_email) {
-        this.primary_email = primary_email;
+    public void setPrimaryEmail(String primaryEmail) {
+        this.primaryEmail = primaryEmail;
     }
 
     @Override
@@ -108,10 +108,10 @@ public class Account {
         return "Account{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
-                ", login_id='" + login_id + '\'' +
-                ", short_name='" + short_name + '\'' +
-                ", sortable_name='" + sortable_name + '\'' +
-                ", primary_email='" + primary_email + '\'' +
+                ", loginId='" + loginId + '\'' +
+                ", shortName='" + shortName + '\'' +
+                ", sortableName='" + sortableName + '\'' +
+                ", primaryEmail='" + primaryEmail + '\'' +
                 '}';
     }
 }

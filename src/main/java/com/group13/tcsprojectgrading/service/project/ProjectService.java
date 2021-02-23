@@ -31,4 +31,8 @@ public class ProjectService {
         projectRepository.save(project);
     }
 
+    public Project findProjectWithId(Long id) {
+        return projectRepository.findById(id).orElse(null);
+    }
+
 }

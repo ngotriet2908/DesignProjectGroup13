@@ -35,4 +35,11 @@ public class GroupParticipantService {
         }
         repository.save(new GroupParticipant(student, courseGroup, canvas_id));
     }
+
+    public void addSingleGroupParticipant(Student student, CourseGroup courseGroup) {
+        if (!student.getCourse().equals(courseGroup.getCourseGroupCategory().getCourse())) {
+            throw new IllegalArgumentException("Course from student and group are not the same " + student + ";" + courseGroup);
+        }
+        repository.save(new GroupParticipant(student, courseGroup));
+    }
 }

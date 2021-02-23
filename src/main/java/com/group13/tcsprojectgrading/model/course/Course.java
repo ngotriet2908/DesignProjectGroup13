@@ -19,7 +19,7 @@ public class Course {
     @Id
     private String id;
     private String name;
-    private String course_code;
+    private String courseCode;
 
 
     @OneToMany(mappedBy = "account")
@@ -40,15 +40,15 @@ public class Course {
     public Course(String id, String name, String course_code) {
         this.id = id;
         this.name = name;
-        this.course_code = course_code;
+        this.courseCode = course_code;
     }
 
-    public String getCourse_code() {
-        return course_code;
+    public String getCourseCode() {
+        return courseCode;
     }
 
-    public void setCourse_code(String course_code) {
-        this.course_code = course_code;
+    public void setCourseCode(String courseCode) {
+        this.courseCode = courseCode;
     }
 
     public String getId() {

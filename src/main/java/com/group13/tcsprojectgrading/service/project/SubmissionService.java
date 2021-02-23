@@ -37,6 +37,10 @@ public class SubmissionService {
         repository.save(submission);
     }
 
+    public void addNewSubmission(Submission submission) {
+        repository.save(submission);
+    }
+
     public Submission addNewSubmissionWithSubmissionDate(Project project, CourseGroup courseGroup, Timestamp submissionDate) {
         if (!project.getCourse().equals(courseGroup.getCourseGroupCategory().getCourse())) {
             throw new IllegalArgumentException("project course and group course are not the same" + project + ";" + courseGroup);
