@@ -28,7 +28,6 @@ public class CourseGroup {
     )
     private Long id;
 
-    @Column(name = "canvas_id")
     private String canvasId;
 
     private String name;
