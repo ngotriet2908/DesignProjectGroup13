@@ -1,20 +1,7 @@
 package com.group13.tcsprojectgrading;
 
-import com.group13.tcsprojectgrading.model.course.Course;
-import com.group13.tcsprojectgrading.model.project.*;
-import com.group13.tcsprojectgrading.model.project.rubric.*;
-import com.group13.tcsprojectgrading.model.user.*;
-import com.group13.tcsprojectgrading.service.course.CourseService;
-import com.group13.tcsprojectgrading.service.project.*;
-import com.group13.tcsprojectgrading.service.project.rubric.*;
-import com.group13.tcsprojectgrading.service.user.*;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-
-import java.sql.Timestamp;
-import java.util.List;
 
 @SpringBootApplication
 public class TcsProjectGradingApplication {
