@@ -8,4 +8,5 @@ import java.util.Optional;
 public interface CourseGroupRepository extends JpaRepository<CourseGroup, Long> {
     public Optional<CourseGroup> findCourseGroupByNameContainingAndCourseGroupCategory_Id(String studentId, String categoryId);
     public Optional<CourseGroup> findCourseGroupByCanvasId(String canvasId);
+    public Optional<CourseGroup> findCourseGroupByName(String name);
 }

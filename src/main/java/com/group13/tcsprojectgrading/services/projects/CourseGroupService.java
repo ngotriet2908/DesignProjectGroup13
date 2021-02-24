@@ -24,7 +24,26 @@ public class CourseGroupService {
     }
 
     public CourseGroup addCourseGroup(CourseGroup courseGroup) {
-        return repository.save(courseGroup);
+        if (courseGroup.getCanvasId() == null) {
+            CourseGroup courseGroup1 = repository.findCourseGroupByName(courseGroup.getName()).orElse(null);
+            if (courseGroup1 == null) {
+                System.out.println("group " + courseGroup.getName() + " is not exist, creating new group");
+                return repository.save(courseGroup);
+            } else {
+                System.out.println("group " + courseGroup.getName() + " is exist, updating info group");
+                return courseGroup1;
+            }
+        } else {
+            CourseGroup courseGroup1 = repository.findCourseGroupByCanvasId(courseGroup.getCanvasId()).orElse(null);
+            if (courseGroup1 == null) {
+                System.out.println("group " + courseGroup.getName() + " is not exist, creating new group");
+                return repository.save(courseGroup);
+            } else {
+                courseGroup.setId(courseGroup1.getId());
+                System.out.println("group " + courseGroup.getName() + " is exist, updating info group");
+                return repository.save(courseGroup);
+            }
+        }
     }
 
     public CourseGroup findSingleCourseGroup(Student student) {
