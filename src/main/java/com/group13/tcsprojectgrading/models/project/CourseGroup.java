@@ -24,7 +24,6 @@ public class CourseGroup {
     @Column(unique=true)
     private String canvasId;
 
-    @Column(unique=true)
     private String name;
 
     private Long maxMembership;

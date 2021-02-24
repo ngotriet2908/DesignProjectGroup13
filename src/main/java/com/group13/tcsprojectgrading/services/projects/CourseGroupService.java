@@ -25,7 +25,7 @@ public class CourseGroupService {
 
     public CourseGroup addCourseGroup(CourseGroup courseGroup) {
         if (courseGroup.getCanvasId() == null) {
-            CourseGroup courseGroup1 = repository.findCourseGroupByName(courseGroup.getName()).orElse(null);
+            CourseGroup courseGroup1 = repository.findCourseGroupByNameAndCourseGroupCategory_Id(courseGroup.getName(), courseGroup.getCourseGroupCategory().getId()).orElse(null);
             if (courseGroup1 == null) {
                 System.out.println("group " + courseGroup.getName() + " is not exist, creating new group");
                 return repository.save(courseGroup);
