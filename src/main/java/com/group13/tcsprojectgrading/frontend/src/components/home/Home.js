@@ -3,7 +3,8 @@ import CourseCard from './CourseCard'
 
 import styles from './home.module.css'
 import {request} from "../../services/request";
-import {BASE, USER_COURSES, USER_INFO} from "../../services/endpoints";
+import {BASE, USER_COURSES, USER_INFO, USER_RECENT} from "../../services/endpoints";
+import ProjectCard from "../course/ProjectCard";
 // import ProjectCard from '../projects/ProjectCard'
 
 class Home extends Component {
@@ -12,7 +13,7 @@ class Home extends Component {
     this.state = {
       courses: [],
       user: {},
-      // recentProjects: recentProjects,
+      recentProjects: [],
       loaded: false,
     }
   }
@@ -47,12 +48,28 @@ class Home extends Component {
       .catch(error => {
         console.error(error.message)
       });
+
+    request(BASE + USER_RECENT)
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        console.log(data);
+        this.setState({
+          recentProjects: data
+        })
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
   }
 
   render () {
     return (
       <div className={styles.container}>
-        <h1>Welcome, {this.state.user.name}!</h1>
+        <div className={styles.headers}>
+          <h1>Welcome, {this.state.user.name}!</h1>
+        </div>
         <div className={styles.coursesContainer}>
           <h2>Your courses</h2>
           <ul className={styles.ul}>
@@ -66,20 +83,20 @@ class Home extends Component {
           </ul>
         </div>
 
-        {/*<div className={styles.recentContainer}>*/}
-        {/*    <h2>Recent projects</h2>*/}
-        {/*    <div>*/}
-        {/*        <ul className={styles.ul}>*/}
-        {/*            {this.state.recentProjects.map(project => {*/}
-        {/*                return (*/}
-        {/*                    <li className={styles.li} key={project.id}>*/}
-        {/*                        <ProjectCard data={project}/>*/}
-        {/*                    </li>*/}
-        {/*                )*/}
-        {/*            })}*/}
-        {/*        </ul>*/}
-        {/*    </div>*/}
-        {/*</div>*/}
+        <div className={styles.recentContainer}>
+            <h2>Recent projects</h2>
+            <div>
+                <ul className={styles.ul}>
+                    {this.state.recentProjects.map(project => {
+                        return (
+                            <li className={styles.li} key={project.id}>
+                                <ProjectCard data={project}/>
+                            </li>
+                        )
+                    })}
+                </ul>
+            </div>
+        </div>
       </div>
     )
   }

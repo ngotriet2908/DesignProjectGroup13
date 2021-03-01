@@ -6,6 +6,8 @@ import Card from 'react-bootstrap/Card'
 import Button from 'react-bootstrap/Button'
 
 import styles from './home.module.css'
+import {URL_PREFIX} from "../../services/config";
+import {COURSE_INFO} from "../../services/endpoints";
 
 class CourseCard extends Component {
   constructor (props) {
@@ -26,7 +28,13 @@ class CourseCard extends Component {
             {/*{this.state.course.year}*/}
             2021
           </Card.Text>
-          <Button variant="primary"><Link className={styles.plainLink} to="/app/projects">Open course</Link></Button>
+          <Button variant="primary">
+            <Link className={styles.plainLink} to={{
+              // pathname: URL_PREFIX + "/" + COURSE_INFO + "/" + this.state.course.id
+              pathname: `${URL_PREFIX}/${COURSE_INFO}/${this.state.course.id}`
+              }}>Open course
+            </Link>
+          </Button>
         </Card.Body>
       </Card>
     )

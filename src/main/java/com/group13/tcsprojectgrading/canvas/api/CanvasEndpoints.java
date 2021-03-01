@@ -10,6 +10,8 @@ public class CanvasEndpoints {
 
     public static final String SELF_COURSE_URL = "/api/v1/courses";
 
+    public static final String COURSE_URL = "/api/v1/courses/{courseId}";
+
     public static final String COURSE_USERS_PATH = "/api/v1/courses/{courseId}/users";
 
     public static final String COURSE_GROUPS_PATH = "/api/v1/courses/{courseId}/groups";
@@ -19,6 +21,7 @@ public class CanvasEndpoints {
     public static final String COURSE_GROUP_MEMBERSHIP_PATH = "/api/v1/groups/{group_id}/memberships";
 
     public static final String COURSE_ASSIGNMENT_PATH = "/api/v1/courses/{courseId}/assignments";
+    public static final String COURSE_SINGLE_ASSIGNMENT_PATH = "/api/v1/courses/{courseId}/assignments/{projectId}";
 
     public static final String COURSE_ASSIGNMENT_GROUPS_PATH = "/api/v1/courses/{courseId}/assignment_groups";
 

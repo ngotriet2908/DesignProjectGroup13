@@ -10,6 +10,8 @@ import { connect } from "react-redux";
 import {setAuthState} from "../redux/actions";
 import {URL_PREFIX} from "../services/config";
 import {request} from "../services/request";
+import Course from "./course/Course";
+import Project from "./project/Project";
 
 class Main extends React.Component {
   constructor(props) {
@@ -61,6 +63,10 @@ class Main extends React.Component {
           <Route exact path={URL_PREFIX + "/login/"}>
             <SignIn/>
           </Route>
+
+          <Route path={URL_PREFIX + "/course/:course_id"} exact component={Course}/>
+          <Route path={URL_PREFIX + "/course/:course_id/project/:project_id"} component={Project}/>
+
           <Route exact path={URL_PREFIX + "/"}>
             <Home/>
           </Route>
