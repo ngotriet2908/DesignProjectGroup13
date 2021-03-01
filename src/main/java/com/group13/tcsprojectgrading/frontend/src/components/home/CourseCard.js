@@ -32,7 +32,7 @@ class CourseCard extends Component {
             <Link className={styles.plainLink} to={{
               // pathname: URL_PREFIX + "/" + COURSE_INFO + "/" + this.state.course.id
               pathname: `${URL_PREFIX}/${COURSE_INFO}/${this.state.course.id}`
-              }}>Open course
+            }}>Open course
             </Link>
           </Button>
         </Card.Body>

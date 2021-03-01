@@ -7,7 +7,6 @@ import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 import Loader from "react-loader-spinner";
 
 import { connect } from "react-redux";
-import {setAuthState} from "../redux/actions";
 import {URL_PREFIX} from "../services/config";
 import {request} from "../services/request";
 import Rubric from "./rubric/Rubric";
@@ -88,12 +87,12 @@ class Main extends React.Component {
           <Route exact path={URL_PREFIX + "/"}>
             <Home/>
           </Route>
-          <Route exact path={URL_PREFIX + "/projects/34/rubric/"}>
-            <Rubric/>
-          </Route>
-          <Route exact path={URL_PREFIX + "/projects/34"}>
-            <Project/>
-          </Route>
+          {/*<Route exact path={URL_PREFIX + "/projects/34/rubric/"}>*/}
+          {/*  <Rubric/>*/}
+          {/*</Route>*/}
+          {/*<Route exact path={URL_PREFIX + "/projects/34"}>*/}
+          {/*  <Project/>*/}
+          {/*</Route>*/}
           <Route>
             <Redirect to={URL_PREFIX + "/notfound/"}/>
             <NotFound/>
@@ -104,11 +103,4 @@ class Main extends React.Component {
   }
 }
 
-// const mapStateToProps = state => {
-//   return {
-//     signedIn: state.user.signedIn
-//   };
-// };
-
-// export default connect(mapStateToProps, { setAuthState })(Main);
 export default Main;

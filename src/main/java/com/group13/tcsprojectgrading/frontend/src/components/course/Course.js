@@ -3,7 +3,6 @@ import {request} from "../../services/request";
 import {BASE, COURSE_INFO, USER_COURSES} from "../../services/endpoints";
 import styles from "./course.module.css";
 import ProjectCard from "./ProjectCard";
-import {Button} from "react-bootstrap";
 
 
 class Course extends Component {

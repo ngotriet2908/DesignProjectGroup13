@@ -1,10 +1,5 @@
 package com.group13.tcsprojectgrading.canvas.oauth;
 
-import com.group13.tcsprojectgrading.models.project.Project;
-import com.group13.tcsprojectgrading.services.courses.CoursesSyncService;
-import com.group13.tcsprojectgrading.services.projects.ProjectService;
-import com.group13.tcsprojectgrading.services.users.AccountService;
-import com.group13.tcsprojectgrading.services.users.UsersSyncService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,18 +22,6 @@ public class CanvasOAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSucc
     protected Log logger = LogFactory.getLog(this.getClass());
 
     private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
-
-    @Autowired
-    private CoursesSyncService coursesSyncService;
-
-    @Autowired
-    private UsersSyncService userSyncService;
-
-    @Autowired
-    private AccountService accountService;
-
-    @Autowired
-    private ProjectService projectService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
@@ -81,34 +64,34 @@ public class CanvasOAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSucc
 
         System.out.println(oauth2User.getAttributes());
 
-        //Sync account
-        userSyncService.syncUser();
-
-        //Sync courses
-        coursesSyncService.selfSyncCourseAndUser(String.valueOf(oauth2User.getAttributes().get("id")));
-
-        String courseId = "120";
-        Long assignmentId = 160L;
-
-        //Sync course members and projects
-        coursesSyncService.syncParticipants(courseId);
-
-        coursesSyncService.syncCourseProjects(courseId);
-
-        //Sync group
-        coursesSyncService.syncSingleCourseGroup(courseId);
-
-        coursesSyncService.syncCourseGroupCategory(courseId);
-
-        coursesSyncService.syncCourseGroups(courseId);
-
-        coursesSyncService.syncCourseGroupParticipants(courseId);
-
-        //Sync submission
-        List<Project> projects = projectService.getProjects();
-        for (Project project: projects) {
-            coursesSyncService.syncSubmission(project.getId());
-        }
+//        //Sync account
+//        userSyncService.syncUser();
+//
+//        //Sync courses
+//        coursesSyncService.selfSyncCourseAndUser(String.valueOf(oauth2User.getAttributes().get("id")));
+//
+//        String courseId = "120";
+//        Long assignmentId = 160L;
+//
+//        //Sync course members and projects
+//        coursesSyncService.syncParticipants(courseId);
+//
+//        coursesSyncService.syncCourseProjects(courseId);
+//
+//        //Sync group
+//        coursesSyncService.syncSingleCourseGroup(courseId);
+//
+//        coursesSyncService.syncCourseGroupCategory(courseId);
+//
+//        coursesSyncService.syncCourseGroups(courseId);
+//
+//        coursesSyncService.syncCourseGroupParticipants(courseId);
+//
+//        //Sync submission
+//        List<Project> projects = projectService.getProjects();
+//        for (Project project: projects) {
+//            coursesSyncService.syncSubmission(project.getId());
+//        }
 
         System.out.println("time: " + (System.currentTimeMillis()-begin));
 

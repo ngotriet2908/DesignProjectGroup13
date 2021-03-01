@@ -2,9 +2,8 @@ package com.group13.tcsprojectgrading.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.group13.tcsprojectgrading.models.project.ProjectNew;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
-import com.group13.tcsprojectgrading.repositories.rubric.RubricMongoRepository;
+import com.group13.tcsprojectgrading.repositories.rubric.RubricRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,10 +14,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/courses/{c_id}/projects/")
 public class ProjectsController {
-    private final RubricMongoRepository repository;
+    private final RubricRepository repository;
 
     @Autowired
-    public ProjectsController(RubricMongoRepository repository) {
+    public ProjectsController(RubricRepository repository) {
         this.repository = repository;
     }
 

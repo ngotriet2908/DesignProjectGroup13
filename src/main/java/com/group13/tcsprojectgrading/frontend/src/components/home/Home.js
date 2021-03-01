@@ -89,18 +89,18 @@ class Home extends Component {
         </div>
 
         <div className={styles.recentContainer}>
-            <h2>Recent projects</h2>
-            <div>
-                <ul className={styles.ul}>
-                    {this.state.recentProjects.map(project => {
-                        return (
-                            <li className={styles.li} key={project.id}>
-                                <ProjectCard data={project}/>
-                            </li>
-                        )
-                    })}
-                </ul>
-            </div>
+          <h2>Recent projects</h2>
+          <div>
+            <ul className={styles.ul}>
+              {this.state.recentProjects.map(project => {
+                return (
+                  <li className={styles.li} key={project.id}>
+                    <ProjectCard data={project}/>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
         </div>
       </div>
     )

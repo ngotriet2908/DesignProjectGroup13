@@ -1,13 +1,9 @@
 package com.group13.tcsprojectgrading;
 
-import com.group13.tcsprojectgrading.models.rubric.Rubric;
-import com.group13.tcsprojectgrading.repositories.rubric.RubricMongoRepository;
+import com.group13.tcsprojectgrading.repositories.rubric.RubricRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import java.util.ArrayList;
 
 @SpringBootApplication
 //public class TcsProjectGradingApplication implements CommandLineRunner {
@@ -18,7 +14,7 @@ public class TcsProjectGradingApplication {
     }
 
     @Autowired
-    private RubricMongoRepository repository;
+    private RubricRepository repository;
 
 //    @Override
 //    public void run(String... args) {
