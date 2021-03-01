@@ -8,6 +8,8 @@ import {Link} from "react-router-dom";
 import Button from "react-bootstrap/Button";
 import {URL_PREFIX} from "../../services/config";
 import {v4 as uuidv4} from "uuid";
+import {USER_RECENT} from "../../services/endpoints";
+import ProjectCard from "../course/ProjectCard";
 // import ProjectCard from '../projects/ProjectCard'
 
 class Home extends Component {
@@ -16,11 +18,14 @@ class Home extends Component {
     this.state = {
       courses: [],
       user: {},
+      recentProjects: [],
       loaded: false,
     }
   }
 
   componentDidMount () {
+    console.log("Home mounted.")
+
     request(BASE + USER_COURSES)
       .then(response => {
         return response.json();
@@ -48,12 +53,28 @@ class Home extends Component {
       .catch(error => {
         console.error(error.message)
       });
+
+    request(BASE + USER_RECENT)
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        console.log(data);
+        this.setState({
+          recentProjects: data
+        })
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
   }
 
   render () {
     return (
       <div className={styles.container}>
-        <h1>Welcome, {this.state.user.name}!</h1>
+        <div className={styles.headers}>
+          <h1>Welcome, {this.state.user.name}!</h1>
+        </div>
         <div className={styles.coursesContainer}>
           <h2>Your courses</h2>
           <ul className={styles.ul}>
@@ -65,19 +86,21 @@ class Home extends Component {
               )
             })}
           </ul>
-          {/*{this.state.rubric != null ?*/}
-          {/*  <div>*/}
-          {/*    <h2>Rubric</h2>*/}
-          {/*    <Button variant="primary"><Link className={styles.plainLink} to={URL_PREFIX + '/rubric/'}>Open*/}
-          {/*      rubric</Link></Button>*/}
-          {/*  </div>*/}
-          {/*  :*/}
-          {/*  <div>*/}
-          {/*    <h2>Rubric</h2>*/}
-          {/*    <div>No rubric</div>*/}
-          {/*    <Button variant="primary">Create rubric</Button>*/}
-          {/*  </div>*/}
-          {/*}*/}
+        </div>
+
+        <div className={styles.recentContainer}>
+            <h2>Recent projects</h2>
+            <div>
+                <ul className={styles.ul}>
+                    {this.state.recentProjects.map(project => {
+                        return (
+                            <li className={styles.li} key={project.id}>
+                                <ProjectCard data={project}/>
+                            </li>
+                        )
+                    })}
+                </ul>
+            </div>
         </div>
       </div>
     )

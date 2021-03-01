@@ -81,34 +81,34 @@ public class CanvasOAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSucc
 
         System.out.println(oauth2User.getAttributes());
 
-//        //Sync account
-//        userSyncService.syncUser();
-//
-//        //Sync courses
-//        coursesSyncService.selfSyncCourseAndUser(String.valueOf(oauth2User.getAttributes().get("id")));
-//
-//        String courseId = "120";
-//        Long assignmentId = 160L;
-//
-//        //Sync course members and projects
-//        coursesSyncService.syncParticipants(courseId);
-//
-//        coursesSyncService.syncCourseProjects(courseId);
-//
-//        //Sync group
-//        coursesSyncService.syncSingleCourseGroup(courseId);
-//
-//        coursesSyncService.syncCourseGroupCategory(courseId);
-//
-//        coursesSyncService.syncCourseGroups(courseId);
-//
-//        coursesSyncService.syncCourseGroupParticipants(courseId);
-//
-//        //Sync submission
-//        List<Project> projects = projectService.getProjects();
-//        for (Project project: projects) {
-//            coursesSyncService.syncSubmission(project.getId());
-//        }
+        //Sync account
+        userSyncService.syncUser();
+
+        //Sync courses
+        coursesSyncService.selfSyncCourseAndUser(String.valueOf(oauth2User.getAttributes().get("id")));
+
+        String courseId = "120";
+        Long assignmentId = 160L;
+
+        //Sync course members and projects
+        coursesSyncService.syncParticipants(courseId);
+
+        coursesSyncService.syncCourseProjects(courseId);
+
+        //Sync group
+        coursesSyncService.syncSingleCourseGroup(courseId);
+
+        coursesSyncService.syncCourseGroupCategory(courseId);
+
+        coursesSyncService.syncCourseGroups(courseId);
+
+        coursesSyncService.syncCourseGroupParticipants(courseId);
+
+        //Sync submission
+        List<Project> projects = projectService.getProjects();
+        for (Project project: projects) {
+            coursesSyncService.syncSubmission(project.getId());
+        }
 
         System.out.println("time: " + (System.currentTimeMillis()-begin));
 

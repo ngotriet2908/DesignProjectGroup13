@@ -6,6 +6,8 @@ import NotFound from "./error/NotFound";
 import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 import Loader from "react-loader-spinner";
 
+import { connect } from "react-redux";
+import {setAuthState} from "../redux/actions";
 import {URL_PREFIX} from "../services/config";
 import {request} from "../services/request";
 import Rubric from "./rubric/Rubric";
@@ -16,6 +18,7 @@ import {push} from "connected-react-router";
 
 import styles from './main.module.css'
 
+import Course from "./course/Course";
 
 class Main extends React.Component {
   constructor(props) {
@@ -78,6 +81,10 @@ class Main extends React.Component {
           <Route exact path={URL_PREFIX + "/login/"}>
             <SignIn/>
           </Route>
+
+          <Route path={URL_PREFIX + "/course/:course_id"} exact component={Course}/>
+          <Route path={URL_PREFIX + "/course/:course_id/project/:project_id"} component={Project}/>
+
           <Route exact path={URL_PREFIX + "/"}>
             <Home/>
           </Route>

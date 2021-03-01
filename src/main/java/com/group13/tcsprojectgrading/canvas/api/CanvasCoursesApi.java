@@ -38,6 +38,22 @@ public class CanvasCoursesApi {
         }
     }
 
+    public String getUserCourse(String courseId) {
+        OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
+
+        if (authorizedClient == null) {
+            return null;
+        } else {
+            URI uri = UriComponentsBuilder.newInstance()
+                    .scheme(CanvasEndpoints.SCHEME)
+                    .host(CanvasEndpoints.HOST)
+                    .path(CanvasEndpoints.COURSE_URL)
+                    .build(courseId);
+
+            return this.canvasApi.sendRequest(uri, HttpMethod.GET, authorizedClient);
+        }
+    }
+
     public List<String> getCourseProjects(String courseId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
@@ -134,6 +150,22 @@ public class CanvasCoursesApi {
                     .build(courseId, assignmentId);
 
             return this.canvasApi.sendRequestWithPagination(uri, HttpMethod.GET, authorizedClient);
+        }
+    }
+
+    public String getCourseProject(String courseId, String projectId) {
+        OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
+
+        if (authorizedClient == null) {
+            return null;
+        } else {
+            URI uri = UriComponentsBuilder.newInstance()
+                    .scheme(CanvasEndpoints.SCHEME)
+                    .host(CanvasEndpoints.HOST)
+                    .path(CanvasEndpoints.COURSE_SINGLE_ASSIGNMENT_PATH)
+                    .build(courseId, projectId);
+
+            return this.canvasApi.sendRequest(uri, HttpMethod.GET, authorizedClient);
         }
     }
 }

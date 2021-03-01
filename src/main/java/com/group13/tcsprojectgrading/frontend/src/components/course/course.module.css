@@ -7,7 +7,12 @@
     padding-bottom: 2rem;
 }
 
-.coursesContainer {
+.projectsContainer {
+    width: 100%;
+    display: block;
+}
+
+.overviewContainer {
     width: 100%;
     display: block;
 }
@@ -29,15 +34,16 @@
 }
 
 .card {
-    width: 25rem;
+    width: 18rem;
 }
+
+.cardImg {
+    object-position: top center;
+    object-fit: cover;
+}
+
 
 .plainLink, .plainLink:hover {
     text-decoration: none;
     color: white;
-}
-
-.recentContainer {
-    width: 100%;
-    display: block;
 }
