@@ -3,7 +3,11 @@ import CourseCard from './CourseCard'
 
 import styles from './home.module.css'
 import {request} from "../../services/request";
-import {BASE, USER_COURSES, USER_INFO} from "../../services/endpoints";
+import {BASE, RUBRIC_CURRENT, USER_COURSES, USER_INFO} from "../../services/endpoints";
+import {Link} from "react-router-dom";
+import Button from "react-bootstrap/Button";
+import {URL_PREFIX} from "../../services/config";
+import {v4 as uuidv4} from "uuid";
 // import ProjectCard from '../projects/ProjectCard'
 
 class Home extends Component {
@@ -12,14 +16,11 @@ class Home extends Component {
     this.state = {
       courses: [],
       user: {},
-      // recentProjects: recentProjects,
       loaded: false,
     }
   }
 
   componentDidMount () {
-    console.log("Home mounted.")
-
     request(BASE + USER_COURSES)
       .then(response => {
         return response.json();
@@ -64,22 +65,20 @@ class Home extends Component {
               )
             })}
           </ul>
+          {/*{this.state.rubric != null ?*/}
+          {/*  <div>*/}
+          {/*    <h2>Rubric</h2>*/}
+          {/*    <Button variant="primary"><Link className={styles.plainLink} to={URL_PREFIX + '/rubric/'}>Open*/}
+          {/*      rubric</Link></Button>*/}
+          {/*  </div>*/}
+          {/*  :*/}
+          {/*  <div>*/}
+          {/*    <h2>Rubric</h2>*/}
+          {/*    <div>No rubric</div>*/}
+          {/*    <Button variant="primary">Create rubric</Button>*/}
+          {/*  </div>*/}
+          {/*}*/}
         </div>
-
-        {/*<div className={styles.recentContainer}>*/}
-        {/*    <h2>Recent projects</h2>*/}
-        {/*    <div>*/}
-        {/*        <ul className={styles.ul}>*/}
-        {/*            {this.state.recentProjects.map(project => {*/}
-        {/*                return (*/}
-        {/*                    <li className={styles.li} key={project.id}>*/}
-        {/*                        <ProjectCard data={project}/>*/}
-        {/*                    </li>*/}
-        {/*                )*/}
-        {/*            })}*/}
-        {/*        </ul>*/}
-        {/*    </div>*/}
-        {/*</div>*/}
       </div>
     )
   }

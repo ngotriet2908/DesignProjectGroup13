@@ -23,7 +23,6 @@ class CoursesController {
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
-    @ResponseBody
     protected ResponseEntity<String> courses() {
         List<String> response = this.canvasApi.getCanvasCoursesApi().getUserCourseList();
 

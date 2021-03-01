@@ -1,0 +1,168 @@
+.container {
+    padding: 2rem;
+    width: 100%;
+}
+
+/* rubric controls */
+#rubricTitleContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#rubricTitleContainer button:first-child {
+    margin-right: 0.5rem;
+}
+
+#blocksContainer {
+    margin: 1rem 0;
+}
+
+/* blocks */
+.blockCard {
+    /*height: 73px;*/
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+.blockCard h3 {
+    margin: 0;
+}
+
+.blockCard button:first-child {
+    margin: 0 0.5rem;
+}
+
+.blockCardTitle {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    height: 40px;
+}
+
+.blockCard input {
+    flex-grow: 1;
+    /*margin-right: 0.5rem;*/
+    display: block;
+    padding: 6px 12px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 28px;
+}
+
+.blockContentContainer {
+    /*margin-left: 1rem;*/
+    margin: 1rem 0 1rem 2rem;
+}
+
+.arrowsIcon {
+    color: gray;
+    margin-right: 0.5rem;
+}
+
+#addBlockButtonContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.noCriteriaPlaceholder {
+    border-style: dashed;
+}
+
+/* criteria */
+.criterionCard {
+    margin: 1rem 0 0 0;
+}
+
+.criterionCard p {
+    margin: 0;
+}
+
+.criterionCardTitle {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    height: 40px;
+}
+
+.criterionCardTitle input {
+    flex-grow: 1;
+    margin-right: 0.5rem;
+    display: block;
+    padding: 6px 12px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* editor and editor's toolbar */
+.editor {
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+
+    cursor: text;
+    padding: 6px 12px;
+}
+
+.editor :global(.public-DraftEditor-content) {
+    min-height: 3rem;
+}
+
+.toolbar {
+    margin-top: 0.5rem;
+    visibility: hidden;
+    /*transition: visibility 1s ease-in-out;*/
+}
+
+.editorFocused .toolbar {
+    visibility: visible;
+}
+
+.toolbar .visible {
+    margin-top: 0.5rem;
+    visibility: visible;
+}
+
+.toolbar div {
+    display: flex;
+    flex-direction: row;
+}
+
+.toolbarButton {
+    background-color: white;
+    border: 1px solid #6c757d;
+    border-radius: 4px;
+    margin-right: 0.1rem;
+}
+
+.toolbarButton:hover {
+    background-color: #6c757d;
+}
+
+.toolbarButton:hover > svg {
+    fill: white;
+}
+
+.toolbarButton svg {
+    fill: #6c757d;
+}
+
+.toolbarButtonWrapper {
+
+}
+
+.toolbarButtonActive {
+    background-color: #6c757d;
+}
+
+.toolbarButtonActive svg {
+    fill: white;
+}
