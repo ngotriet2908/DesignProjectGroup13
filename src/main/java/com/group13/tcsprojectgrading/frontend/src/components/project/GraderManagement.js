@@ -297,7 +297,7 @@ class GraderManagement extends Component {
         </Alert>}
 
 
-        <Card border="secondary" className={styles.GradersCardContainer}>
+        <Card border="secondary" className={styles.gradersCardContainer}>
           <div className={styles.manageTaToolbar}>
             <h3 className={styles.subtitle} >Manage Graders</h3>
             <FormControl className={styles.manageTaSearch}
@@ -308,7 +308,7 @@ class GraderManagement extends Component {
 
           <div className={styles.gradersContainer}>
             {/*<h3>Assigned to Graders</h3>*/}
-            <div className={styles.gradersListContainer}>
+            <Card className={styles.gradersListContainer}>
               <ul className={styles.grader_ul}>
                 {this.state.graders
                   .filter((grader) => {
@@ -327,7 +327,7 @@ class GraderManagement extends Component {
                   )
                 })}
               </ul>
-            </div>
+            </Card>
           </div>
         </Card>
 
