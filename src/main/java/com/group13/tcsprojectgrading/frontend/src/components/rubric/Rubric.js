@@ -158,7 +158,7 @@ class Rubric extends Component {
                   </DragDropContext>
                   :
                   <div>
-                    <Card className={[styles.criterionCard, styles.noCriteriaPlaceholder]}>
+                    <Card className={`${styles.criterionCard} ${styles.noCriteriaPlaceholder}`}>
                       <Card.Body>
                         No blocks
                       </Card.Body>
@@ -194,7 +194,7 @@ class Rubric extends Component {
                   </DragDropContext>
                   :
                   <div>
-                    <Card className={[styles.criterionCard, styles.noCriteriaPlaceholder]}>
+                    <Card className={`${styles.criterionCard} ${styles.noCriteriaPlaceholder}`}>
                       <Card.Body>
                         No blocks
                       </Card.Body>

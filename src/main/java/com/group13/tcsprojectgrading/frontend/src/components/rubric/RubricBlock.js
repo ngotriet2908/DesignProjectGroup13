@@ -77,7 +77,7 @@ class RubricBlock extends Component {
               :
             // no criteria in the block
               <div>
-                <Card className={[styles.criterionCard, styles.noCriteriaPlaceholder]}>
+                <Card className={`${styles.criterionCard} ${styles.noCriteriaPlaceholder}`}>
                   <Card.Body>
                   No criteria
                   </Card.Body>
@@ -125,7 +125,7 @@ class RubricBlock extends Component {
                     }))
                     :
                     <div>
-                      <Card className={[styles.criterionCard, styles.noCriteriaPlaceholder]}>
+                      <Card className={`${styles.criterionCard} ${styles.noCriteriaPlaceholder}`}>
                         <Card.Body>
                           No criteria
                         </Card.Body>
