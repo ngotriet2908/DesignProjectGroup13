@@ -22,4 +22,6 @@
 - react
 - react router
 - react bootstrap
+- redux
 - css modules
+- react icons
