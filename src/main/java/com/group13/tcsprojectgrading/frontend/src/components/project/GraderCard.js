@@ -100,7 +100,9 @@ class GraderCard extends Component {
               .map(group => {
               // console.log(group)
               return (
-                <ListGroupItem key={group.id} className={styles.listGroupItemCustom}>
+                <ListGroupItem key={group.id}
+                               className={styles.listGroupItemCustom}
+                               action onClick={() => this.props.onClickFunc(group, this.props.grader, false)}>
                   {<TaskCard
                     // groupProp={group}
                     data={group}/>}
