@@ -34,25 +34,7 @@ class RubricBlock extends Component {
     }))
   }
 
-  // onClickSaveTitle = () => {
-  //   this.setState(prevState => ({
-  //     showEditor: false,
-  //   }))
-  //
-  //   this.props.alterBlockTitle(this.state.tempTitle, this.props.data.id);
-  // }
-  //
-  // onClickCancelTitle = () => {
-  //   this.setState(prevState => ({
-  //     showEditor: false,
-  //     tempTitle: this.props.data.title,
-  //   }))
-  // }
-
   onChangeTitle = (event) => {
-    // this.setState({
-    //   tempTitle: event.target.value,
-    // })
     this.props.alterBlockTitle(event.target.value, this.props.data.id);
   }
 
@@ -95,7 +77,7 @@ class RubricBlock extends Component {
               :
             // no criteria in the block
               <div>
-                <Card className={[styles.criterionCard, styles.noCriteriaPlaceholder]}>
+                <Card className={`${styles.criterionCard} ${styles.noCriteriaPlaceholder}`}>
                   <Card.Body>
                   No criteria
                   </Card.Body>
@@ -143,7 +125,7 @@ class RubricBlock extends Component {
                     }))
                     :
                     <div>
-                      <Card className={[styles.criterionCard, styles.noCriteriaPlaceholder]}>
+                      <Card className={`${styles.criterionCard} ${styles.noCriteriaPlaceholder}`}>
                         <Card.Body>
                           No criteria
                         </Card.Body>

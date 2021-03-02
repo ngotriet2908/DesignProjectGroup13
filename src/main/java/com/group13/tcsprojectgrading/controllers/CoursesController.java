@@ -7,7 +7,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.Activity;
+import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.services.ActivityService;
+import com.group13.tcsprojectgrading.services.rubric.RubricService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,11 +29,13 @@ class CoursesController {
     private final CanvasApi canvasApi;
 
     private final ActivityService activityService;
+    private final RubricService rubricService;
 
     @Autowired
-    public CoursesController(CanvasApi canvasApi, ActivityService activityService) {
+    public CoursesController(CanvasApi canvasApi, ActivityService activityService, RubricService rubricService) {
         this.canvasApi = canvasApi;
         this.activityService = activityService;
+        this.rubricService = rubricService;
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
@@ -46,7 +50,7 @@ class CoursesController {
         }
     }
 
-    @RequestMapping(value = "/course/{course_id}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/{course_id}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     protected ResponseEntity<JsonNode> getCourse(@PathVariable String course_id) throws JsonProcessingException {
         List<String> responseString = this.canvasApi.getCanvasCoursesApi().getCourseProjects(course_id);
@@ -73,7 +77,7 @@ class CoursesController {
         }
     }
 
-    @RequestMapping(value = "/course/{courseId}/project/{projectId}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/{courseId}/projects/{projectId}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     protected ResponseEntity<JsonNode> getProject(@PathVariable String courseId, @PathVariable String projectId, Principal principal) throws JsonProcessingException, ParseException {
         String projectResponse = this.canvasApi.getCanvasCoursesApi().getCourseProject(courseId, projectId);
@@ -83,9 +87,21 @@ class CoursesController {
         JsonNode projectJson = objectMapper.readTree(projectResponse);
         JsonNode courseJson = objectMapper.readTree(courseResponse);
 
-        JsonNode resultJson = objectMapper.createObjectNode();
-        ((ObjectNode)resultJson).set("course", courseJson);
-        ((ObjectNode)resultJson).set("project", projectJson);
+        // including rubric to the response
+        List<Rubric> rubric = rubricService.getAllRubrics();
+        JsonNode rubricJson;
+        if (rubric.size() == 0) {
+            rubricJson = objectMapper.readTree("{\"rubric\": null}");
+        } else {
+            String rubricString = objectMapper.writeValueAsString(rubric.get(0));
+            String response = "{\"rubric\":" + rubricString + "}";
+            rubricJson = objectMapper.readTree(response);
+        }
+
+        ObjectNode resultJson = objectMapper.createObjectNode();
+        resultJson.set("course", courseJson);
+        resultJson.set("project", projectJson);
+        resultJson.set("rubric", rubricJson);
 
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 
@@ -110,5 +126,34 @@ class CoursesController {
         } else {
             return new ResponseEntity<>(resultJson, HttpStatus.OK);
         }
+    }
+
+    @GetMapping("/{courseId}/projects/{projectId}/rubric")
+    public ResponseEntity<String> getProject() throws JsonProcessingException {
+        List<Rubric> rubric = rubricService.getAllRubrics();
+
+        if (rubric.size() == 0) {
+            return new ResponseEntity<>("{\"rubric\": null}", HttpStatus.OK);
+        } else {
+            ObjectMapper objectMapper = new ObjectMapper();
+            String rubricString = objectMapper.writeValueAsString(rubric.get(0));
+            String response = "{\"rubric\":" + rubricString + "}";
+            System.out.println(response);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+    }
+
+    @PostMapping("/{courseId}/projects/{projectId}/rubric")
+    public Rubric newRubric(@RequestBody Rubric newRubric) {
+        System.out.println("Creating a rubric...");
+        return rubricService.addNewRubric(newRubric);
+    }
+
+    @DeleteMapping("/{courseId}/projects/{projectId}/rubric")
+    public void deleteRubric() {
+        System.out.println("Deleting the rubric...");
+        // TODO currently deletes all rubrics
+//        rubricService.removeRubric();
+//        return rubricService.addNewRubric(newRubric);
     }
 }

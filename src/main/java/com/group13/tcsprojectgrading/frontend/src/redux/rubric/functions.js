@@ -78,6 +78,8 @@ export const reorderCriterion = (blocks, blockId, sourceIndex, destinationIndex)
 }
 
 export const moveCriterion = (blocks, sourceBlockId, destinationBlockId, sourceIndex, destinationIndex) => {
+  // TODO: the approach below works fine for non-complex objects, but will fail for anything with functions, classes etc.
+  // TODO: for that use cloneDeep() from lodash
   let newBlockList = JSON.parse(JSON.stringify(blocks));
 
   // find source block

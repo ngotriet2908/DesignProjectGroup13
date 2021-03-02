@@ -80,19 +80,12 @@ class Main extends React.Component {
           <Route exact path={URL_PREFIX + "/login/"}>
             <SignIn/>
           </Route>
-
-          <Route path={URL_PREFIX + "/course/:course_id"} exact component={Course}/>
-          <Route path={URL_PREFIX + "/course/:course_id/project/:project_id"} component={Project}/>
-
+          <Route exact path={URL_PREFIX + "/courses/:courseId/projects/:projectId/rubric"} component={Rubric}/>
+          <Route path={URL_PREFIX + "/courses/:courseId/projects/:projectId"} component={Project}/>
+          <Route path={URL_PREFIX + "/courses/:courseId"} exact component={Course}/>
           <Route exact path={URL_PREFIX + "/"}>
             <Home/>
           </Route>
-          {/*<Route exact path={URL_PREFIX + "/projects/34/rubric/"}>*/}
-          {/*  <Rubric/>*/}
-          {/*</Route>*/}
-          {/*<Route exact path={URL_PREFIX + "/projects/34"}>*/}
-          {/*  <Project/>*/}
-          {/*</Route>*/}
           <Route>
             <Redirect to={URL_PREFIX + "/notfound/"}/>
             <NotFound/>

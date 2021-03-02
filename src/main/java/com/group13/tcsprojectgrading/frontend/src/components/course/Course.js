@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import {request} from "../../services/request";
-import {BASE, COURSE_INFO, USER_COURSES} from "../../services/endpoints";
+import {BASE} from "../../services/endpoints";
 import styles from "./course.module.css";
 import ProjectCard from "./ProjectCard";
 
@@ -19,7 +19,7 @@ class Course extends Component {
     console.log("Course mounted.")
     // console.log(this.props)
 
-    request(`${BASE}${USER_COURSES}/${COURSE_INFO}/${this.props.match.params.course_id}`)
+    request(BASE + "courses/" + this.props.match.params.courseId)
       .then(response => {
         return response.json();
       })
@@ -42,6 +42,8 @@ class Course extends Component {
         </div>
         <div className={styles.overviewContainer}>
           <h2>Course overview</h2>
+          <div>Blablabla here...
+            Some people like Sponge Bob while some adore anime. @Yevhen (NB: me.interests.contains(anime) == false)</div>
         </div>
 
         <div className={styles.projectsContainer}>
@@ -50,7 +52,7 @@ class Course extends Component {
             {this.state.projects.map(project => {
               console.log(project)
               return (
-                <li className={styles.li} key={project.uuid}>
+                <li className={styles.li} key={project.id}>
                   <ProjectCard data={project}/>
                 </li>
               )

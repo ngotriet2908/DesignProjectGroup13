@@ -35,14 +35,14 @@ class Rubric extends Component {
   }
 
   componentDidMount() {
-    request(BASE + RUBRIC_CURRENT)
+    request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/rubric")
       .then(response => {
         return response.json();
       })
       .then(data => {
         console.log(data);
 
-        this.props.saveRubric(data);
+        this.props.saveRubric(data.rubric);
 
         this.setState({
           loaded: true
@@ -105,7 +105,7 @@ class Rubric extends Component {
 
   onClickSaveRubric = () => {
     // send request
-    request(BASE + RUBRIC_CURRENT, "POST", this.props.rubric)
+    request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/rubric", "POST", this.props.rubric)
       .then(data => {
         console.log(data);
       })
@@ -158,7 +158,7 @@ class Rubric extends Component {
                   </DragDropContext>
                   :
                   <div>
-                    <Card className={[styles.criterionCard, styles.noCriteriaPlaceholder]}>
+                    <Card className={`${styles.criterionCard} ${styles.noCriteriaPlaceholder}`}>
                       <Card.Body>
                         No blocks
                       </Card.Body>
@@ -194,7 +194,7 @@ class Rubric extends Component {
                   </DragDropContext>
                   :
                   <div>
-                    <Card className={[styles.criterionCard, styles.noCriteriaPlaceholder]}>
+                    <Card className={`${styles.criterionCard} ${styles.noCriteriaPlaceholder}`}>
                       <Card.Body>
                         No blocks
                       </Card.Body>

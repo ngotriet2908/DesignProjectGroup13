@@ -7,16 +7,28 @@ import com.group13.tcsprojectgrading.repositories.rubric.RubricRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
-public class RubricMongoService {
+public class RubricService {
     private final RubricRepository repository;
 
     @Autowired
-    public RubricMongoService(RubricRepository repository) {
+    public RubricService(RubricRepository repository) {
         this.repository = repository;
     }
 
     public Rubric addNewRubric(Rubric rubric) {
         return repository.save(rubric);
+    }
+
+    public List<Rubric> getAllRubrics() {
+        return repository.findAll();
+    }
+
+    public void removeRubric() {
+        // TODO removes all rubrics right now
+        repository.deleteAll();
+//        return repository.findAll();
     }
 }
