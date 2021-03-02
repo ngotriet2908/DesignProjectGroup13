@@ -122,13 +122,13 @@ class GraderManagement extends Component {
   render () {
     return (
       <div className={styles.graderManagement}>
-        <Card border="secondary" className={styles.GradersCardContainer}>
+        <Card border="secondary" className={styles.gradersCardContainer}>
           <div className={styles.manageTaToolbar}>
             <h3 className={styles.subtitle} >Manage Graders</h3>
             <FormControl className={styles.manageTaSearch}
-                         type="text"
-                         placeholder="Search for grader or group name"
-                         onChange={this.handleGraderSearchChange}/>
+              type="text"
+              placeholder="Search for grader or group name"
+              onChange={this.handleGraderSearchChange}/>
           </div>
 
           <div className={styles.gradersContainer}>
@@ -142,51 +142,51 @@ class GraderManagement extends Component {
                       || grader.groups.reduce(((result, group) => result || group.name.toLowerCase().includes(filterStringTmp)),false))
                   })
                   .map(grader => {
-                  return (
-                    <li className={styles.grader_li} key={grader.id}>
-                      <GraderCard grader={grader} onReturnClicked={() => this.handleReturnTasks(grader)}/>
-                    </li>
-                  )
-                })}
+                    return (
+                      <li className={styles.grader_li} key={grader.id}>
+                        <GraderCard grader={grader} onReturnClicked={() => this.handleReturnTasks(grader)}/>
+                      </li>
+                    )
+                  })}
               </ul>
             </div>
           </div>
         </Card>
 
 
-          <Card border="secondary" className={styles.notAssignedContainer}>
-            <div className={styles.notAssignedToolbar}>
-              <h4 className={styles.notAssignedText}>Not assigned </h4>
-              {/*<Button className={styles.notAssignedButton}*/}
-              {/*        variant="primary"*/}
-              {/*        onClick={() => null}>*/}
-              {/*  hide groups*/}
-              {/*</Button> {" "}*/}
-              <Button className={styles.notAssignedButton}
-                      variant="primary"
-                      onClick={this.handleHideSearch}>
+        <Card border="secondary" className={styles.notAssignedContainer}>
+          <div className={styles.notAssignedToolbar}>
+            <h4 className={styles.notAssignedText}>Not assigned </h4>
+            {/*<Button className={styles.notAssignedButton}*/}
+            {/*        variant="primary"*/}
+            {/*        onClick={() => null}>*/}
+            {/*  hide groups*/}
+            {/*</Button> {" "}*/}
+            <Button className={styles.notAssignedButton}
+              variant="primary"
+              onClick={this.handleHideSearch}>
                 search
-              </Button>
-              {(this.state.hideSearch) ? null :
-                <FormControl className={styles.notAssignedToolBarSearch}
-                             type="text"
-                             placeholder="Normal text"
-                             onChange={this.handleSearchChange}/>
-              }
-              <Button className={styles.notAssignedButton}
-                      variant="primary"
-                      onClick={null}>
+            </Button>
+            {(this.state.hideSearch) ? null :
+              <FormControl className={styles.notAssignedToolBarSearch}
+                type="text"
+                placeholder="Normal text"
+                onChange={this.handleSearchChange}/>
+            }
+            <Button className={styles.notAssignedButton}
+              variant="primary"
+              onClick={null}>
                 bulk assign
-              </Button>
-              <h5 className={styles.notAssignedCount}> Submissions: {this.state.notAssigned.length}</h5>
-            </div>
+            </Button>
+            <h5 className={styles.notAssignedCount}> Submissions: {this.state.notAssigned.length}</h5>
+          </div>
 
-            <ListGroup className={styles.notAssignedGroupList}>
-              {this.state.notAssigned
-                .filter((group) => {
-                  return group.name.toLowerCase().includes(this.state.groupsFilterString.toLowerCase())
-                })
-                .map(group => {
+          <ListGroup className={styles.notAssignedGroupList}>
+            {this.state.notAssigned
+              .filter((group) => {
+                return group.name.toLowerCase().includes(this.state.groupsFilterString.toLowerCase())
+              })
+              .map(group => {
                 return (
                   <ListGroupItem
                     key={group.id}
@@ -196,8 +196,8 @@ class GraderManagement extends Component {
                   </ListGroupItem>
                 )
               })}
-            </ListGroup>
-          </Card>
+          </ListGroup>
+        </Card>
       </div>
     )
   }

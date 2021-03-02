@@ -1,11 +1,15 @@
 import React, {Component} from "react";
 import styles from "../project/project.module.css";
 import {request} from "../../services/request";
-import {BASE, COURSE_INFO, PROJECT, USER_COURSES} from "../../services/endpoints";
+import {BASE } from "../../services/endpoints";
 import Button from 'react-bootstrap/Button'
 import {URL_PREFIX} from "../../services/config";
-import { Route, Switch, Redirect } from 'react-router-dom'
+import {Link, Route, Switch} from 'react-router-dom'
 import GraderManagement from "./GraderManagement";
+
+import {v4 as uuidv4} from "uuid";
+import {removeRubric, saveRubric} from "../../redux/rubric/actions";
+import {connect} from "react-redux";
 
 class Project extends Component {
 
@@ -14,7 +18,8 @@ class Project extends Component {
 
     this.state = {
       project: {},
-      course: {}
+      course: {},
+      rubric: null,
     }
   }
 
@@ -22,7 +27,8 @@ class Project extends Component {
     console.log("Project mounted.")
     // console.log(this.props)
 
-    request(`${BASE}${USER_COURSES}/${COURSE_INFO}/${this.props.match.params.course_id}/${PROJECT}/${this.props.match.params.project_id}`)
+    // request(`${BASE}${USER_COURSES}/${COURSE_INFO}/${this.props.match.params.course_id}/${PROJECT}/${this.props.match.params.project_id}`)
+    request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId)
       .then(response => {
         return response.json();
       })
@@ -30,9 +36,44 @@ class Project extends Component {
         console.log(data);
         this.setState({
           project: data.project,
-          course: data.course
-
+          course: data.course,
+          // rubric: data.rubric,
         })
+
+        this.props.saveRubric(data.rubric);
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
+  }
+
+  /*
+  Creates a new rubric object and saves it to the store
+  */
+  onClickCreateRubric = () => {
+    let rubric = {
+      id: uuidv4(),
+      blocks: []
+    }
+
+    request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/rubric", "POST", rubric)
+      .then(data => {
+        console.log(data);
+        this.props.saveRubric(rubric);
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
+  }
+
+  onClickRemoveRubric = () => {
+    // this.props.removeRubric();
+
+    // TODO: send DELETE
+    request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/rubric", "DELETE")
+      .then(data => {
+        console.log(data);
+        this.props.removeRubric();
       })
       .catch(error => {
         console.error(error.message);
@@ -42,18 +83,18 @@ class Project extends Component {
   render () {
     return (
       <div className={styles.projectContainer}>
-          <div className={styles.headers}>
-            <h3>{this.state.course.name} > {this.state.project.name}</h3>
-          </div>
+        <div className={styles.headers}>
+          <h3>{this.state.course.name} > {this.state.project.name}</h3>
+        </div>
         <div className={styles.overviewContainer}>
-        <Switch>
-          <Route exact path={`${URL_PREFIX}/course/${this.props.match.params.course_id}/project/${this.props.match.params.project_id}`}>
+          <Switch>
+            <Route exact path={URL_PREFIX + "/courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId}>
               <div className={styles.overviewContainer}>
                 <h2>Administration</h2>
                 <Button
                   variant="primary"
                   onClick={() =>
-                    this.props.history.push(`${URL_PREFIX}/course/${this.props.match.params.course_id}/project/${this.props.match.params.project_id}/groups`)
+                    this.props.history.push(this.props.match.url + "/groups")
                   }>
                   Groups
                 </Button> {" "}
@@ -61,27 +102,54 @@ class Project extends Component {
                 <Button
                   variant="primary"
                   onClick={() =>
-                    this.props.history.push(`${URL_PREFIX}/course/${this.props.match.params.course_id}/project/${this.props.match.params.project_id}/graders`)
+                    this.props.history.push(this.props.match.url  + "/graders")
                   }>
                   Manage graders
                 </Button>
               </div>
-          </Route>
+
+              <div>
+                {this.props.rubric != null ?
+                  <div>
+                    <h2>Rubric</h2>
+                    <Button variant="primary"><Link className={styles.plainLink} to={this.props.match.url + "/rubric"}>Open
+                      rubric</Link></Button>
+                    <Button variant="danger" onClick={this.onClickRemoveRubric}>Remove rubric (turned off)</Button>
+                  </div>
+                  :
+                  <div>
+                    <div>No rubric</div>
+                    <Button variant="primary" onClick={this.onClickCreateRubric}>Create rubric</Button>
+                  </div>
+                }
+              </div>
+            </Route>
 
 
-          {/*Sub-routes*/}
-          <Route exact path={`${URL_PREFIX}/course/${this.props.match.params.course_id}/project/${this.props.match.params.project_id}/groups`}>
-                  <h2>Project groups</h2>
-          </Route>
+            {/*Sub-routes*/}
+            <Route exact path={URL_PREFIX + "/courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/groups"}>
+              <h2>Project groups</h2>
+            </Route>
 
-          <Route exact path={`${URL_PREFIX}/course/${this.props.match.params.course_id}/project/${this.props.match.params.project_id}/graders`}
-                 component={GraderManagement}
-          />
-        </Switch>
+            <Route exact path={URL_PREFIX + "/courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/graders"}
+              component={GraderManagement}
+            />
+          </Switch>
         </div>
       </div>
     )
   }
 }
 
-export default Project;
+const mapStateToProps = state => {
+  return {
+    rubric: state.rubric.rubric
+  };
+};
+
+const actionCreators = {
+  saveRubric,
+  removeRubric
+}
+
+export default connect(mapStateToProps, actionCreators)(Project)

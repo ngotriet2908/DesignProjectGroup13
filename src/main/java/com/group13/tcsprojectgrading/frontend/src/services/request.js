@@ -26,6 +26,11 @@ export function request(url, method = "GET", data = {}) {
       },
       body: JSON.stringify(data)
     }
+  } else if (method === "DELETE") {
+    init = {
+      method: method,
+      headers: {}
+    }
   }
 
   if (method === 'POST' || method === 'PUT' || method === 'DELETE') {

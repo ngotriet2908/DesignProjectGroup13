@@ -124,12 +124,6 @@ class RubricCriterion extends Component {
     this.props.removeCriterion(this.props.blockId, this.props.data.id);
   }
 
-  // onTextEditorFocused = () => {
-  //   this.setState({
-  //     hasFocus: true,
-  //   })
-  // }
-
   render () {
     const { Toolbar } = this.pluginComponents;
 

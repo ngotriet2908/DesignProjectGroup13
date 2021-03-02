@@ -1,15 +1,9 @@
-
-.headers {
-    height: 7vh;
-}
-
 .projectContainer {
     padding: 2rem;
     width: 100%;
-    height: 100vh;
 }
 
-.GradersCardContainer {
+.gradersCardContainer {
     padding: 0.5rem 0.5rem;
     margin-bottom: 1.2rem;
 }
@@ -133,7 +127,7 @@
 
 .gradersListContainer {
     width: 100%;
-    max-height: 45vh;
+    /*max-height: 45vh;*/
     margin-bottom: 10px;
     overflow-y:hidden;
 }
@@ -209,7 +203,7 @@
 
 .overviewContainer {
     width: 100%;
-    height: 87vh;
+    /*height: 87vh;*/
     display: block;
 }
 
