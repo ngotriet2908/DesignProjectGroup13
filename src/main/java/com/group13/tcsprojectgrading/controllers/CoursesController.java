@@ -11,10 +11,16 @@ import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.services.ActivityService;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.Principal;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -155,5 +161,20 @@ class CoursesController {
         // TODO currently deletes all rubrics
 //        rubricService.removeRubric();
 //        return rubricService.addNewRubric(newRubric);
+    }
+
+    // TODO temporary unsafe method
+    @GetMapping("/{courseId}/projects/{projectId}/submissions/sample")
+    public ResponseEntity<byte[]> getSamplePdf() throws IOException {
+        Path pdfPath = Paths.get("src","main", "resources","static", "testPdf.pdf");
+        byte[] contents = Files.readAllBytes(pdfPath);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        String filename = "output.pdf";
+        headers.setContentDispositionFormData(filename, filename);
+        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+        ResponseEntity<byte[]> response = new ResponseEntity<>(contents, headers, HttpStatus.OK);
+        return response;
     }
 }

@@ -1,8 +1,7 @@
 /* navbar */
 #navBar {
-    /*background-color: blue;*/
     border-bottom: 1px solid #dfdfdf;
-    padding: 0.8rem;
+    padding: 0.8rem 2rem;
 
     display: flex;
     flex-direction: row;
@@ -10,7 +9,6 @@
 }
 
 #logo {
-    margin-left: 1rem;
     cursor: pointer;
 }
 
@@ -37,7 +35,7 @@
     height: 5rem;
     background-color: #1f2328;
 
-    padding: 1rem;
+    padding: 2rem;
 
     display: flex;
     flex-direction: row;

@@ -111,6 +111,12 @@ class Project extends Component {
                       Manage graders
                   </Link>
                 </Button>
+
+                <Button variant="primary">
+                  <Link className={styles.plainLink} to={this.props.match.url + "/grading"}>
+                    Grading Interface
+                  </Link>
+                </Button>
               </div>
             </Card.Body>
           </Card>

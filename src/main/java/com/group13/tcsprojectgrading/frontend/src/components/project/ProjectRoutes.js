@@ -4,6 +4,7 @@ import Project from "./Project";
 import Rubric from "../rubric/Rubric";
 import GraderManagement from "../assign/GraderManagement";
 import Groups from "../groups/Groups";
+import Grading from "../grading/Grading";
 
 
 class ProjectRoutes extends Component {
@@ -17,6 +18,7 @@ class ProjectRoutes extends Component {
         <Route path={this.props.match.path + "/groups"} component={Groups}/>
         <Route path={this.props.match.path + "/rubric"} component={Rubric}/>
         <Route path={this.props.match.path + "/graders"} component={GraderManagement}/>
+        <Route path={this.props.match.path + "/grading"} component={Grading}/>
         <Route path={this.props.match.path + ""} component={Project}/>
       </Switch>
     )

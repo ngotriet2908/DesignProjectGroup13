@@ -18,7 +18,6 @@ class NavigationBar extends React.Component {
   }
 
   onClickSignOut = () => {
-    // store.dispatch(push(URL_PREFIX + "/log"))
     request( "/logout", "POST", {})
       .then(data => {
         console.log(data);
