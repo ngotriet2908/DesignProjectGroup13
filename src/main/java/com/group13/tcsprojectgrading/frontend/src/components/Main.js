@@ -1,23 +1,18 @@
 import React from 'react';
-import { Route, Switch, Redirect } from 'react-router-dom'
-import Home from "./home/Home";
-import SignIn from "./auth/SignIn";
-import NotFound from "./error/NotFound";
 import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 import Loader from "react-loader-spinner";
 
-import { connect } from "react-redux";
 import {URL_PREFIX} from "../services/config";
 import {request} from "../services/request";
-import Rubric from "./rubric/Rubric";
-import Project from "./project/Project";
-import {Navbar} from "react-bootstrap";
-import store from "../redux/store";
-import {push} from "connected-react-router";
+import {Redirect, Route, Switch} from "react-router-dom";
+import SignIn from "./auth/SignIn";
+import Home from "./home/Home";
+import NotFound from "./error/NotFound";
+import CourseRoutes from "./course/CourseRoutes";
+import NavigationBar from "./navigation/NavigationBar";
+import Footer from "./navigation/Footer";
+import styles from "./main.module.css";
 
-import styles from './main.module.css'
-
-import Course from "./course/Course";
 
 class Main extends React.Component {
   constructor(props) {
@@ -48,10 +43,6 @@ class Main extends React.Component {
       })
   }
 
-  onClickLogo = () => {
-    store.dispatch(push(URL_PREFIX + "/"))
-  }
-
   render() {
     if (!this.state.loaded) {
       return (
@@ -68,30 +59,29 @@ class Main extends React.Component {
     }
 
     return (
-      <div>
-        {/*<Navbar bg="light" variant="light">*/}
-        {/*  <Navbar.Brand id={styles.logo} onClick={this.onClickLogo}>ProjectGrading</Navbar.Brand>*/}
-        {/*  /!*<Nav className="mr-auto">*!/*/}
-        {/*  /!*  <Nav.Link href="#home">Home</Nav.Link>*!/*/}
-        {/*  /!*</Nav>*!/*/}
-        {/*</Navbar>*/}
-
-        <Switch>
-          <Route exact path={URL_PREFIX + "/login/"}>
-            <SignIn/>
-          </Route>
-          <Route exact path={URL_PREFIX + "/courses/:courseId/projects/:projectId/rubric"} component={Rubric}/>
-          <Route path={URL_PREFIX + "/courses/:courseId/projects/:projectId"} component={Project}/>
-          <Route path={URL_PREFIX + "/courses/:courseId"} exact component={Course}/>
-          <Route exact path={URL_PREFIX + "/"}>
-            <Home/>
-          </Route>
-          <Route>
-            <Redirect to={URL_PREFIX + "/notfound/"}/>
-            <NotFound/>
-          </Route>
-        </Switch>
-      </div>
+      <Switch>
+        <Route exact path={URL_PREFIX + "/login/"}>
+          <SignIn/>
+        </Route>
+        <Route>
+          <div className={styles.container}>
+            <NavigationBar/>
+            <div className={styles.content}>
+              <Switch>
+                <Route path={URL_PREFIX + "/courses/:courseId"} component={CourseRoutes}/>
+                <Route exact path={URL_PREFIX + "/"}>
+                  <Home/>
+                </Route>
+                <Route>
+                  <Redirect to={URL_PREFIX + "/notfound/"}/>
+                  <NotFound/>
+                </Route>
+              </Switch>
+            </div>
+            <Footer/>
+          </div>
+        </Route>
+      </Switch>
     );
   }
 }

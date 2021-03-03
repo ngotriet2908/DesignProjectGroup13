@@ -1,7 +1,8 @@
-import { SET_AUTH_STATE } from "../actionTypes";
+import {REMOVE_USER, SAVE_USER, SET_AUTH_STATE} from "../actionTypes";
 
 const initialState = {
   signedIn: false,
+  user: null
 };
 
 export default function(state = initialState, action) {
@@ -11,6 +12,18 @@ export default function(state = initialState, action) {
     return {
       ...state,
       signedIn: signedIn,
+    };
+  }
+  case SAVE_USER: {
+    return {
+      ...state,
+      user: action.payload,
+    };
+  }
+  case REMOVE_USER: {
+    return {
+      ...state,
+      user: null,
     };
   }
   default:

@@ -10,6 +10,10 @@ import GraderManagement from "./GraderManagement";
 import {v4 as uuidv4} from "uuid";
 import {removeRubric, saveRubric} from "../../redux/rubric/actions";
 import {connect} from "react-redux";
+import {Breadcrumb} from "react-bootstrap";
+import store from "../../redux/store";
+import {push} from "connected-react-router";
+import Card from "react-bootstrap/Card";
 
 class Project extends Component {
 
@@ -24,10 +28,6 @@ class Project extends Component {
   }
 
   componentDidMount() {
-    console.log("Project mounted.")
-    // console.log(this.props)
-
-    // request(`${BASE}${USER_COURSES}/${COURSE_INFO}/${this.props.match.params.course_id}/${PROJECT}/${this.props.match.params.project_id}`)
     request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId)
       .then(response => {
         return response.json();
@@ -37,7 +37,6 @@ class Project extends Component {
         this.setState({
           project: data.project,
           course: data.course,
-          // rubric: data.rubric,
         })
 
         this.props.saveRubric(data.rubric);
@@ -67,9 +66,6 @@ class Project extends Component {
   }
 
   onClickRemoveRubric = () => {
-    // this.props.removeRubric();
-
-    // TODO: send DELETE
     request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/rubric", "DELETE")
       .then(data => {
         console.log(data);
@@ -83,58 +79,70 @@ class Project extends Component {
   render () {
     return (
       <div className={styles.projectContainer}>
-        <div className={styles.headers}>
-          <h3>{this.state.course.name} > {this.state.project.name}</h3>
-        </div>
-        <div className={styles.overviewContainer}>
-          <Switch>
-            <Route exact path={URL_PREFIX + "/courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId}>
-              <div className={styles.overviewContainer}>
-                <h2>Administration</h2>
-                <Button
-                  variant="primary"
-                  onClick={() =>
-                    this.props.history.push(this.props.match.url + "/groups")
-                  }>
-                  Groups
-                </Button> {" "}
+        <Breadcrumb>
+          <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumb.Item>
+          <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id ))}>
+            {this.state.course.name}
+          </Breadcrumb.Item>
+          <Breadcrumb.Item active>
+            {this.state.project.name}
+          </Breadcrumb.Item>
+        </Breadcrumb>
 
-                <Button
-                  variant="primary"
-                  onClick={() =>
-                    this.props.history.push(this.props.match.url  + "/graders")
-                  }>
-                  Manage graders
-                </Button>
-              </div>
+        <div className={styles.titleContainer}>
+          <h2>{this.state.project.name}</h2>
+        </div>
+
+        <div className={styles.sectionContainer}>
+          <Card>
+            <Card.Body>
+              <Card.Title>
+                <h3 className={styles.sectionTitle}>Administration</h3>
+              </Card.Title>
 
               <div>
-                {this.props.rubric != null ?
-                  <div>
-                    <h2>Rubric</h2>
-                    <Button variant="primary"><Link className={styles.plainLink} to={this.props.match.url + "/rubric"}>Open
-                      rubric</Link></Button>
-                    <Button variant="danger" onClick={this.onClickRemoveRubric}>Remove rubric (turned off)</Button>
-                  </div>
-                  :
-                  <div>
-                    <div>No rubric</div>
-                    <Button variant="primary" onClick={this.onClickCreateRubric}>Create rubric</Button>
-                  </div>
-                }
+                <Button variant="primary">
+                  <Link className={styles.plainLink} to={this.props.match.url + "/groups"}>
+                      Groups
+                  </Link>
+                </Button>
+
+                <Button variant="primary">
+                  <Link className={styles.plainLink} to={this.props.match.url + "/graders"}>
+                      Manage graders
+                  </Link>
+                </Button>
+
+                <Button variant="primary">
+                  <Link className={styles.plainLink} to={this.props.match.url + "/grading"}>
+                    Grading Interface
+                  </Link>
+                </Button>
               </div>
-            </Route>
+            </Card.Body>
+          </Card>
+        </div>
 
-
-            {/*Sub-routes*/}
-            <Route exact path={URL_PREFIX + "/courses/:course_id/projects/:project_id/groups"}>
-              <h2>Project groups</h2>
-            </Route>
-
-            <Route exact path={URL_PREFIX + "/courses/:course_id/projects/:project_id/graders"}
-              component={GraderManagement}
-            />
-          </Switch>
+        <div className={styles.sectionContainer}>
+          <Card>
+            <Card.Body>
+              <Card.Title>
+                <h3 className={styles.sectionTitle}>Rubric</h3>
+              </Card.Title>
+              {this.props.rubric != null ?
+                <div>
+                  <Button variant="primary"><Link className={styles.plainLink} to={this.props.match.url + "/rubric"}>Open
+                      rubric</Link></Button>
+                  <Button variant="danger" onClick={this.onClickRemoveRubric}>Remove rubric (disabled)</Button>
+                </div>
+                :
+                <div>
+                  <div>No rubric</div>
+                  <Button variant="primary" onClick={this.onClickCreateRubric}>Create rubric</Button>
+                </div>
+              }
+            </Card.Body>
+          </Card>
         </div>
       </div>
     )

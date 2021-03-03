@@ -23,6 +23,10 @@ import cloneDeep from 'lodash/cloneDeep';
 
 import {FaPencilAlt, FaPlus, FaSave} from "react-icons/fa";
 import Card from "react-bootstrap/Card";
+import {Breadcrumb} from "react-bootstrap";
+import store from "../../redux/store";
+import {push} from "connected-react-router";
+import {URL_PREFIX} from "../../services/config";
 
 
 class Rubric extends Component {
@@ -135,78 +139,80 @@ class Rubric extends Component {
           </div>)
           :
         // standard mode
-          (!this.props.isEditing ?
-            <div>
-              <div id={styles.rubricTitleContainer}>
-                <h1>Rubric</h1>
-                <Button variant="primary" onClick={this.onClickEditRubric}>Edit Rubric</Button>
-              </div>
-              <div id={styles.blocksContainer}>
-                {this.props.rubric.blocks.length > 0 ?
-                  <DragDropContext onDragEnd={this.onDragEnd}>
-                    {this.props.rubric.blocks.map((block, index) => {
-                      return (
-                        <RubricBlock
-                          index={index}
-                          data={block}
-                          key={block.id}
-                          droppableId={`${block.id}`}
-                          onRemoveCriterion={this.removeCriterion}
-                        />
-                      )
-                    })}
-                  </DragDropContext>
-                  :
-                  <div>
-                    <Card className={`${styles.criterionCard} ${styles.noCriteriaPlaceholder}`}>
-                      <Card.Body>
-                        No blocks
-                      </Card.Body>
-                    </Card>
-                  </div>
-                }
-              </div>
-            </div>
-            :
-          // edit mode
-            <div>
-              <div id={styles.rubricTitleContainer}>
-                <h1>Rubric</h1>
-                <div>
-                  <Button variant="success" onClick={this.onClickSaveRubric}>Save</Button>
-                  <Button variant="danger" onClick={this.onClickCancelSaveRubric}>Cancel</Button>
+          <div>
+            {!this.props.isEditing ?
+              <div>
+                <div id={styles.rubricTitleContainer}>
+                  <h1>Rubric</h1>
+                  <Button variant="primary" onClick={this.onClickEditRubric}>Edit Rubric</Button>
+                </div>
+                <div id={styles.blocksContainer}>
+                  {this.props.rubric.blocks.length > 0 ?
+                    <DragDropContext onDragEnd={this.onDragEnd}>
+                      {this.props.rubric.blocks.map((block, index) => {
+                        return (
+                          <RubricBlock
+                            index={index}
+                            data={block}
+                            key={block.id}
+                            droppableId={`${block.id}`}
+                            onRemoveCriterion={this.removeCriterion}
+                          />
+                        )
+                      })}
+                    </DragDropContext>
+                    :
+                    <div>
+                      <Card className={`${styles.criterionCard} ${styles.noCriteriaPlaceholder}`}>
+                        <Card.Body>
+                          No blocks
+                        </Card.Body>
+                      </Card>
+                    </div>
+                  }
                 </div>
               </div>
-              <div id={styles.blocksContainer}>
-                {this.props.rubric.blocks.length > 0 ?
-                  <DragDropContext onDragEnd={this.onDragEnd}>
-                    {this.props.rubric.blocks.map((block, index) => {
-                      return (
-                        <RubricBlock
-                          index={index}
-                          data={block}
-                          key={block.id}
-                          droppableId={`${block.id}`}
-                          onRemoveCriterion={this.removeCriterion}
-                        />
-                      )
-                    })}
-                  </DragDropContext>
-                  :
+              :
+              // edit mode
+              <div>
+                <div id={styles.rubricTitleContainer}>
+                  <h1>Rubric</h1>
                   <div>
-                    <Card className={`${styles.criterionCard} ${styles.noCriteriaPlaceholder}`}>
-                      <Card.Body>
-                        No blocks
-                      </Card.Body>
-                    </Card>
+                    <Button variant="success" onClick={this.onClickSaveRubric}>Save</Button>
+                    <Button variant="danger" onClick={this.onClickCancelSaveRubric}>Cancel</Button>
                   </div>
-                }
+                </div>
+                <div id={styles.blocksContainer}>
+                  {this.props.rubric.blocks.length > 0 ?
+                    <DragDropContext onDragEnd={this.onDragEnd}>
+                      {this.props.rubric.blocks.map((block, index) => {
+                        return (
+                          <RubricBlock
+                            index={index}
+                            data={block}
+                            key={block.id}
+                            droppableId={`${block.id}`}
+                            onRemoveCriterion={this.removeCriterion}
+                          />
+                        )
+                      })}
+                    </DragDropContext>
+                    :
+                    <div>
+                      <Card className={`${styles.criterionCard} ${styles.noCriteriaPlaceholder}`}>
+                        <Card.Body>
+                          No blocks
+                        </Card.Body>
+                      </Card>
+                    </div>
+                  }
+                </div>
+                <div id={styles.addBlockButtonContainer}>
+                  <Button variant="primary" onClick={this.onClickAddBlock}>Add block</Button>
+                </div>
               </div>
-              <div id={styles.addBlockButtonContainer}>
-                <Button variant="primary" onClick={this.onClickAddBlock}>Add block</Button>
-              </div>
-            </div>
-          )
+            }
+          </div>
         }
       </div>
     )

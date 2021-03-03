@@ -11,6 +11,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
+import javax.servlet.http.HttpServletResponse;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
@@ -31,13 +33,22 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf(c -> c
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                 )
-                .oauth2Login()
+                .logout(logout -> logout
+                        .permitAll()
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                                    response.setStatus(HttpServletResponse.SC_OK);
+                        }
+                        )
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                )
+                .oauth2Login();
 
+
+//                .successHandler(this.canvasOAuth2LoginSuccessHandler);
+//                .logoutSuccessUrl("/")
 //            .userInfoEndpoint()
 //                .userService(this.oauth2UserService())
 //                .and()
-                .successHandler(this.canvasOAuth2LoginSuccessHandler);
-
-
     }
 }

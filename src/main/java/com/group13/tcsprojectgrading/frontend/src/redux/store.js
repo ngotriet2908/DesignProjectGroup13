@@ -1,17 +1,22 @@
 import {applyMiddleware, compose, createStore} from 'redux'
-import rootReducer from "./rootReducer";
+import createRootReducer from "./rootReducer";
 import {createBrowserHistory} from 'history'
 import {routerMiddleware} from 'connected-react-router'
+import { persistStore, persistReducer } from 'redux-persist'
+import storage from 'redux-persist/lib/storage'
 
-// export default createStore(
-//   rootReducer,
-//   window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
-// );
+const persistConfig = {
+  key: 'root',
+  storage,
+  blacklist: ['history']
+}
 
-export const history = createBrowserHistory()
+export const history = createBrowserHistory();
+const rootReducer = createRootReducer(history);
+const persistedReducer = persistReducer(persistConfig, rootReducer)
 
-const store = createStore(
-  rootReducer(history), // including router state
+export const store = createStore(
+  persistedReducer, // including router state
   compose(
     applyMiddleware(
       routerMiddleware(history), // allows dispatching of history actions
@@ -19,5 +24,7 @@ const store = createStore(
     window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
   ),
 );
+
+export let persistor = persistStore(store)
 
 export default store;
