@@ -28,7 +28,7 @@ class SignIn extends Component {
           <Card.Body>
             <Card.Title>Grading System</Card.Title>
             <Button variant="primary" href="/oauth2/authorization/canvas">
-                Sign in via UT
+                Sign in with UT Canvas
             </Button>
           </Card.Body>
         </Card>

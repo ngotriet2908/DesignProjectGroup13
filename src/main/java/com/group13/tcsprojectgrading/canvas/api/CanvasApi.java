@@ -2,6 +2,7 @@ package com.group13.tcsprojectgrading.canvas.api;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -60,9 +61,23 @@ public class CanvasApi {
     public String sendRequest(URI uri, HttpMethod httpMethod, OAuth2AuthorizedClient authorizedClient) {
         WebClient.UriSpec<WebClient.RequestBodySpec> uriSpec = webClient.method(httpMethod);
         WebClient.RequestBodySpec bodySpec = uriSpec.uri(uri);
-        bodySpec.attributes(ServletOAuth2AuthorizedClientExchangeFilterFunction.oauth2AuthorizedClient(authorizedClient));
-        return bodySpec.retrieve().bodyToMono(String.class).block();
+        bodySpec
+                .attributes(ServletOAuth2AuthorizedClientExchangeFilterFunction.oauth2AuthorizedClient(authorizedClient));
+//        return bodySpec
+//                .retrieve()
+//                .bodyToMono(String.class)
+//                .block();
+        // TODO: catch errors here and in other request functions (!important)
+        return bodySpec
+                .retrieve()
+//                .onStatus(status -> status == HttpStatus.OK,
+//                        clientResponse -> Mono.empty()
+////                                Mono.error(new SomeCustomAuthorizationException("Some failure exception"))
+//                )
+                .bodyToMono(String.class)
+                .block();
     }
+
 
     public Mono<ResponseEntity<String>> sendRequestAsync(URI uri, HttpMethod httpMethod, OAuth2AuthorizedClient authorizedClient) {
         WebClient.UriSpec<WebClient.RequestBodySpec> uriSpec = webClient.method(httpMethod);

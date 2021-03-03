@@ -43,7 +43,7 @@ class ProjectCard extends Component {
           <Button variant="primary">
             <Link className={styles.plainLink} to={{
               pathname: "/app/courses/" + this.state.project.course_id + "/projects/" + this.state.project.id
-            }}>Open project
+            }}>Open
             </Link>
           </Button>
         </Card.Body>

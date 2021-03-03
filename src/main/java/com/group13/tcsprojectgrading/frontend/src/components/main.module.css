@@ -1,8 +1,9 @@
 .container {
-    padding: 2rem;
-    width: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
 }
 
-#logo {
-    cursor: pointer;
+.content {
+    flex: 1;
 }

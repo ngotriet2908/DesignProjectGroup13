@@ -1,7 +1,7 @@
 import React, {Component} from "react";
 import Button from 'react-bootstrap/Button'
 import {URL_PREFIX} from "../../services/config";
-import styles from "./project.module.css";
+import styles from "../project/project.module.css";
 
 class TaskCard extends Component {
   constructor (props) {

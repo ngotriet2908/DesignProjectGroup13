@@ -24,15 +24,15 @@ class CourseCard extends Component {
         <Card.Img height="150" variant="cover" src="https://picsum.photos/seed/picsum/536/354" />
         <Card.Body>
           <Card.Title>{this.state.course.name}</Card.Title>
-          <Card.Text>
-            {/*{this.state.course.year}*/}
-            2021
-          </Card.Text>
+          {/*<Card.Text>*/}
+          {/*  /!*{this.state.course.year}*!/*/}
+          {/*  2021*/}
+          {/*</Card.Text>*/}
           <Button variant="primary">
             <Link className={styles.plainLink} to={{
               // pathname: URL_PREFIX + "/" + COURSE_INFO + "/" + this.state.course.id
               pathname: `${URL_PREFIX}/${COURSES}/${this.state.course.id}`
-            }}>Open course
+            }}>Open
             </Link>
           </Button>
         </Card.Body>

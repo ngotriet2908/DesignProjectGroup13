@@ -5,11 +5,13 @@ import {BASE } from "../../services/endpoints";
 import Button from 'react-bootstrap/Button'
 import {URL_PREFIX} from "../../services/config";
 import {Link, Route, Switch} from 'react-router-dom'
-import GraderManagement from "./GraderManagement";
 
 import {v4 as uuidv4} from "uuid";
 import {removeRubric, saveRubric} from "../../redux/rubric/actions";
 import {connect} from "react-redux";
+import {Breadcrumb} from "react-bootstrap";
+import store from "../../redux/store";
+import {push} from "connected-react-router";
 
 class Project extends Component {
 
@@ -24,10 +26,6 @@ class Project extends Component {
   }
 
   componentDidMount() {
-    console.log("Project mounted.")
-    // console.log(this.props)
-
-    // request(`${BASE}${USER_COURSES}/${COURSE_INFO}/${this.props.match.params.course_id}/${PROJECT}/${this.props.match.params.project_id}`)
     request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId)
       .then(response => {
         return response.json();
@@ -37,7 +35,6 @@ class Project extends Component {
         this.setState({
           project: data.project,
           course: data.course,
-          // rubric: data.rubric,
         })
 
         this.props.saveRubric(data.rubric);
@@ -67,9 +64,6 @@ class Project extends Component {
   }
 
   onClickRemoveRubric = () => {
-    // this.props.removeRubric();
-
-    // TODO: send DELETE
     request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/rubric", "DELETE")
       .then(data => {
         console.log(data);
@@ -83,58 +77,58 @@ class Project extends Component {
   render () {
     return (
       <div className={styles.projectContainer}>
-        <div className={styles.headers}>
-          <h3>{this.state.course.name} > {this.state.project.name}</h3>
+        <Breadcrumb>
+          <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumb.Item>
+          <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id ))}>
+            {this.state.course.name}
+          </Breadcrumb.Item>
+          <Breadcrumb.Item active>
+            {this.state.project.name}
+          </Breadcrumb.Item>
+        </Breadcrumb>
+
+        <div className={styles.titleContainer}>
+          <h2>{this.state.project.name}</h2>
         </div>
         <div className={styles.overviewContainer}>
-          <Switch>
-            <Route exact path={URL_PREFIX + "/courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId}>
-              <div className={styles.overviewContainer}>
-                <h2>Administration</h2>
-                <Button
-                  variant="primary"
-                  onClick={() =>
-                    this.props.history.push(this.props.match.url + "/groups")
-                  }>
-                  Groups
-                </Button> {" "}
+          <div className={styles.overviewContainer}>
+            <h3 className={styles.sectionTitle}>Administration</h3>
+            <Button
+              variant="primary"
+              onClick={() =>
+                this.props.history.push(this.props.match.url + "/groups")
+              }
+            >
+              Groups
+              {/*<Link to={this.props.match.url + "/groups"}>*/}
+              {/*    Groups*/}
+              {/*</Link>*/}
+            </Button>
 
-                <Button
-                  variant="primary"
-                  onClick={() =>
-                    this.props.history.push(this.props.match.url  + "/graders")
-                  }>
+            <Button
+              variant="primary"
+              onClick={() =>
+                this.props.history.push(this.props.match.url  + "/graders")
+              }>
                   Manage graders
-                </Button>
-              </div>
+            </Button>
+          </div>
 
+          <div>
+            {this.props.rubric != null ?
               <div>
-                {this.props.rubric != null ?
-                  <div>
-                    <h2>Rubric</h2>
-                    <Button variant="primary"><Link className={styles.plainLink} to={this.props.match.url + "/rubric"}>Open
+                <h3 className={styles.sectionTitle}>Rubric</h3>
+                <Button variant="primary"><Link className={styles.plainLink} to={this.props.match.url + "/rubric"}>Open
                       rubric</Link></Button>
-                    <Button variant="danger" onClick={this.onClickRemoveRubric}>Remove rubric (turned off)</Button>
-                  </div>
-                  :
-                  <div>
-                    <div>No rubric</div>
-                    <Button variant="primary" onClick={this.onClickCreateRubric}>Create rubric</Button>
-                  </div>
-                }
+                <Button variant="danger" onClick={this.onClickRemoveRubric}>Remove rubric (turned off)</Button>
               </div>
-            </Route>
-
-
-            {/*Sub-routes*/}
-            <Route exact path={URL_PREFIX + "/courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/groups"}>
-              <h2>Project groups</h2>
-            </Route>
-
-            <Route exact path={URL_PREFIX + "/courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/graders"}
-              component={GraderManagement}
-            />
-          </Switch>
+              :
+              <div>
+                <div>No rubric</div>
+                <Button variant="primary" onClick={this.onClickCreateRubric}>Create rubric</Button>
+              </div>
+            }
+          </div>
         </div>
       </div>
     )

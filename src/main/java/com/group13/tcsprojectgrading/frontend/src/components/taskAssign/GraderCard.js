@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import styles from "./project.module.css";
+import styles from "../project/project.module.css";
 import {ListGroup, ListGroupItem} from "react-bootstrap";
 import TaskCard from "./TaskCard";
 import {Button, Card, FormControl} from 'react-bootstrap'
@@ -64,28 +64,28 @@ class GraderCard extends Component {
         <div className={styles.graderToolBar}>
           <h4 className={styles.graderToolBarText}> {this.props.grader.name} </h4>
           <Button className={styles.graderToolBarButton}
-                  variant="primary"
-                  size="sm"
-                  onClick={this.handleHideGroup}>
+            variant="primary"
+            size="sm"
+            onClick={this.handleHideGroup}>
             {(this.state.hideGroup)? "show groups" : "hide groups"}
           </Button> {" "}
           <Button className={styles.graderToolBarButton}
-                  variant="primary"
-                  size="sm"
-                  onClick={this.handleHideSearch}>
+            variant="primary"
+            size="sm"
+            onClick={this.handleHideSearch}>
             search
           </Button>
           {(this.state.hideSearch) ? null :
             <FormControl className={styles.graderToolBarSearch}
-                         size="sm"
-                         type="text"
-                         placeholder="Normal text"
-                         onChange={this.handleSearchChange}/>
+              size="sm"
+              type="text"
+              placeholder="Normal text"
+              onChange={this.handleSearchChange}/>
           }
           <Button className={styles.graderToolBarButton}
-                  variant="primary"
-                  size="sm"
-                  onClick={this.props.onReturnClicked}>
+            variant="primary"
+            size="sm"
+            onClick={this.props.onReturnClicked}>
             return tasks
           </Button>
           <h6 className={styles.notTasksCount}> Tasks: {this.props.grader.groups.length}</h6>
@@ -95,21 +95,21 @@ class GraderCard extends Component {
             {/*{this.state.groupsFiltered.map(group => {*/}
             {this.props.grader.groups
               .filter((group) => {
-                  return group.name.toLowerCase().includes(this.state.filterString.toLowerCase())
+                return group.name.toLowerCase().includes(this.state.filterString.toLowerCase())
               })
               .map(group => {
               // console.log(group)
-              return (
-                <ListGroupItem key={group.id}
-                               className={styles.listGroupItemCustom}
-                               action onClick={() => this.props.onClickFunc(group, this.props.grader, false)}>
-                  {<TaskCard
+                return (
+                  <ListGroupItem key={group.id}
+                    className={styles.listGroupItemCustom}
+                    action onClick={() => this.props.onClickFunc(group, this.props.grader, false)}>
+                    {<TaskCard
                     // groupProp={group}
-                    data={group}/>}
-                  {/*{group.name}*/}
-                </ListGroupItem>
-              )
-            })}
+                      data={group}/>}
+                    {/*{group.name}*/}
+                  </ListGroupItem>
+                )
+              })}
           </ListGroup>
         }
 
