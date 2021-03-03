@@ -5,7 +5,6 @@ import {BASE } from "../../services/endpoints";
 import Button from 'react-bootstrap/Button'
 import {URL_PREFIX} from "../../services/config";
 import {Link, Route, Switch} from 'react-router-dom'
-import GraderManagement from "./GraderManagement";
 
 import {v4 as uuidv4} from "uuid";
 import {removeRubric, saveRubric} from "../../redux/rubric/actions";

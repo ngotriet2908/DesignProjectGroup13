@@ -3,7 +3,7 @@ import React, {Component} from "react";
 import GraderCard from "./GraderCard";
 import {ListGroup, ListGroupItem} from "react-bootstrap";
 import TaskCard from "./TaskCard";
-import {notAssignedGroupsData} from './GradersData'
+import {notAssignedGroupsData, gradersData} from './GradersData'
 import {Button, Card, FormControl, Modal, Alert} from 'react-bootstrap'
 import {request} from "../../services/request";
 import {BASE, COURSES, PROJECT, USER_COURSES} from "../../services/endpoints";
@@ -45,13 +45,13 @@ class GraderManagement extends Component {
     this.projectManagementHandler()
 
     // this.setState({
-    //   // graders : gradersData,
+    //   graders : gradersData,
     //   notAssigned: notAssignedGroupsData,
     // })
   }
 
   projectManagementHandler = () => {
-    request(`${BASE}${USER_COURSES}/${this.props.match.params.course_id}/${PROJECT}/${this.props.match.params.project_id}/management`)
+    request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management`)
       .then(response => {
         return response.json();
       })
@@ -68,7 +68,7 @@ class GraderManagement extends Component {
   }
 
   addGradersHandler = () => {
-    request(`${BASE}${USER_COURSES}/${this.props.match.params.course_id}/${PROJECT}/${this.props.match.params.project_id}/addGraders`, "POST")
+    request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/addGraders`, "POST")
       .then(response => {
         this.projectManagementHandler();
       })

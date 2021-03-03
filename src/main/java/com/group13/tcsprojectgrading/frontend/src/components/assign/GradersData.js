@@ -96,72 +96,72 @@ export const notAssignedGroupsData = [
   }
 ]
 
-// export const gradersData = [
-//   {
-//     name: "Triet",
-//     id: "124",
-//     groups: [
-//       {
-//         id: "245",
-//         name: "group aa1",
-//         progress: 100,
-//         members: []
-//       },
-//       {
-//         id: "246",
-//         name: "group bb1",
-//         progress: 0,
-//         members: []
-//       },
-//       {
-//         id: "247",
-//         name: "group bb2",
-//         progress: 20,
-//         members: []
-//       },
-//       {
-//         id: "248",
-//         name: "group bb3",
-//         progress: 0,
-//         members: []
-//       }
-//     ]
-//   },
-//   {
-//     name: "Yevhen",
-//     id: "127",
-//     groups: [
-//       {
-//         id: "127",
-//         name: "group j1",
-//         progress: 0,
-//         members: []
-//       },
-//       {
-//         id: "128",
-//         name: "group j2",
-//         progress: 0,
-//         members: []
-//       },
-//       {
-//         id: "129",
-//         name: "group k3",
-//         progress: 0,
-//         members: []
-//       }
-//     ]
-//   },
-//   {
-//     name: "Rin",
-//     id: "129",
-//     groups: [
-//       {
-//         id: "789",
-//         name: "group t2",
-//         progress: 0,
-//         members: []
-//       }
-//     ]
-//   }
-//
-// ]
+export const gradersData = [
+  {
+    name: "Triet",
+    id: "124",
+    groups: [
+      {
+        id: "245",
+        name: "group aa1",
+        progress: 100,
+        members: []
+      },
+      {
+        id: "246",
+        name: "group bb1",
+        progress: 0,
+        members: []
+      },
+      {
+        id: "247",
+        name: "group bb2",
+        progress: 20,
+        members: []
+      },
+      {
+        id: "248",
+        name: "group bb3",
+        progress: 0,
+        members: []
+      }
+    ]
+  },
+  {
+    name: "Yevhen",
+    id: "127",
+    groups: [
+      {
+        id: "127",
+        name: "group j1",
+        progress: 0,
+        members: []
+      },
+      {
+        id: "128",
+        name: "group j2",
+        progress: 0,
+        members: []
+      },
+      {
+        id: "129",
+        name: "group k3",
+        progress: 0,
+        members: []
+      }
+    ]
+  },
+  {
+    name: "Rin",
+    id: "129",
+    groups: [
+      {
+        id: "789",
+        name: "group t2",
+        progress: 0,
+        members: []
+      }
+    ]
+  }
+
+]
