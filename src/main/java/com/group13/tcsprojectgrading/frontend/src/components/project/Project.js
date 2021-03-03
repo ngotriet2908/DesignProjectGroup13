@@ -12,6 +12,7 @@ import {connect} from "react-redux";
 import {Breadcrumb} from "react-bootstrap";
 import store from "../../redux/store";
 import {push} from "connected-react-router";
+import Card from "react-bootstrap/Card";
 
 class Project extends Component {
 
@@ -90,45 +91,51 @@ class Project extends Component {
         <div className={styles.titleContainer}>
           <h2>{this.state.project.name}</h2>
         </div>
-        <div className={styles.overviewContainer}>
-          <div className={styles.overviewContainer}>
-            <h3 className={styles.sectionTitle}>Administration</h3>
-            <Button
-              variant="primary"
-              onClick={() =>
-                this.props.history.push(this.props.match.url + "/groups")
-              }
-            >
-              Groups
-              {/*<Link to={this.props.match.url + "/groups"}>*/}
-              {/*    Groups*/}
-              {/*</Link>*/}
-            </Button>
 
-            <Button
-              variant="primary"
-              onClick={() =>
-                this.props.history.push(this.props.match.url  + "/graders")
-              }>
-                  Manage graders
-            </Button>
-          </div>
+        <div className={styles.sectionContainer}>
+          <Card>
+            <Card.Body>
+              <Card.Title>
+                <h3 className={styles.sectionTitle}>Administration</h3>
+              </Card.Title>
 
-          <div>
-            {this.props.rubric != null ?
               <div>
+                <Button variant="primary">
+                  <Link className={styles.plainLink} to={this.props.match.url + "/groups"}>
+                      Groups
+                  </Link>
+                </Button>
+
+                <Button variant="primary">
+                  <Link className={styles.plainLink} to={this.props.match.url + "/graders"}>
+                      Manage graders
+                  </Link>
+                </Button>
+              </div>
+            </Card.Body>
+          </Card>
+        </div>
+
+        <div className={styles.sectionContainer}>
+          <Card>
+            <Card.Body>
+              <Card.Title>
                 <h3 className={styles.sectionTitle}>Rubric</h3>
-                <Button variant="primary"><Link className={styles.plainLink} to={this.props.match.url + "/rubric"}>Open
+              </Card.Title>
+              {this.props.rubric != null ?
+                <div>
+                  <Button variant="primary"><Link className={styles.plainLink} to={this.props.match.url + "/rubric"}>Open
                       rubric</Link></Button>
-                <Button variant="danger" onClick={this.onClickRemoveRubric}>Remove rubric (turned off)</Button>
-              </div>
-              :
-              <div>
-                <div>No rubric</div>
-                <Button variant="primary" onClick={this.onClickCreateRubric}>Create rubric</Button>
-              </div>
-            }
-          </div>
+                  <Button variant="danger" onClick={this.onClickRemoveRubric}>Remove rubric (disabled)</Button>
+                </div>
+                :
+                <div>
+                  <div>No rubric</div>
+                  <Button variant="primary" onClick={this.onClickCreateRubric}>Create rubric</Button>
+                </div>
+              }
+            </Card.Body>
+          </Card>
         </div>
       </div>
     )

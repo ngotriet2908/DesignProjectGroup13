@@ -15,3 +15,11 @@
     text-decoration: none;
     color: white;
 }
+
+.sectionContainer {
+    margin-bottom: 1rem;
+}
+
+.sectionContainer button {
+    margin-right: 0.5rem;
+}

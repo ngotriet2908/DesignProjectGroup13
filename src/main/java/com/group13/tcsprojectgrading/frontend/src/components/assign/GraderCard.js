@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import styles from "../project/project.module.css";
+import styles from "./assign.module.css";
 import {ListGroup, ListGroupItem} from "react-bootstrap";
 import TaskCard from "./TaskCard";
 import {Button, Card, FormControl} from 'react-bootstrap'

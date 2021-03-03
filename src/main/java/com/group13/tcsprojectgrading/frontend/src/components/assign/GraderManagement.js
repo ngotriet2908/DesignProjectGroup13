@@ -1,15 +1,10 @@
-import styles from "../project/project.module.css";
+import styles from "./assign.module.css";
 import React, {Component} from "react";
-import ProjectCard from "../course/ProjectCard";
 import GraderCard from "./GraderCard";
-// import GraderCard from "./GraderCard";
-import {DragDropContext, Droppable, Draggable}  from "react-beautiful-dnd";
 import {ListGroup, ListGroupItem} from "react-bootstrap";
 import TaskCard from "./TaskCard";
 import {notAssignedGroupsData, gradersData} from './GradersData'
 import {Button, Card, FormControl, Modal, Alert} from 'react-bootstrap'
-import {request} from "../../services/request";
-import {BASE, COURSE_INFO, PROJECT, USER_COURSES} from "../../services/endpoints";
 import AssigningModal from "./AssigningModal";
 
 class GraderManagement extends Component {
