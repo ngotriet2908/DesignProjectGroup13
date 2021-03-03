@@ -87,6 +87,24 @@ public class CanvasCoursesApi {
         }
     }
 
+    public List<String> getCourseGraders(String courseId) {
+        OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
+
+        if (authorizedClient == null) {
+            return null;
+        } else {
+            URI uri = UriComponentsBuilder.newInstance()
+                    .scheme(CanvasEndpoints.SCHEME)
+                    .host(CanvasEndpoints.HOST)
+                    .path(CanvasEndpoints.COURSE_USERS_PATH)
+                    .queryParam("include[]", "enrollments")
+                    .queryParam("enrollment_type[]", "teacher","ta")
+                    .build(courseId);
+
+            return this.canvasApi.sendRequestWithPagination(uri, HttpMethod.GET, authorizedClient);
+        }
+    }
+
     public List<String> getCourseGroupCategories(String courseId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 

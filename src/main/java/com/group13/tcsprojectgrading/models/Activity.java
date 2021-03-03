@@ -1,5 +1,7 @@
 package com.group13.tcsprojectgrading.models;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -8,6 +10,7 @@ import java.sql.Timestamp;
 
 @Entity
 @IdClass(ActivityId.class)
+@JsonSerialize(using = ActivitySerializer.class)
 public class Activity {
 
     @Id

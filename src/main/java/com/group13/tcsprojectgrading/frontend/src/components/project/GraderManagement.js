@@ -6,11 +6,12 @@ import GraderCard from "./GraderCard";
 import {DragDropContext, Droppable, Draggable}  from "react-beautiful-dnd";
 import {ListGroup, ListGroupItem} from "react-bootstrap";
 import TaskCard from "./TaskCard";
-import {notAssignedGroupsData, gradersData} from './GradersData'
+import {notAssignedGroupsData} from './GradersData'
 import {Button, Card, FormControl, Modal, Alert} from 'react-bootstrap'
 import {request} from "../../services/request";
-import {BASE, COURSE_INFO, PROJECT, USER_COURSES} from "../../services/endpoints";
+import {BASE, COURSES, PROJECT, USER_COURSES} from "../../services/endpoints";
 import AssigningModal from "./AssigningModal";
+import { withRouter } from 'react-router-dom'
 
 class GraderManagement extends Component {
 
@@ -42,29 +43,41 @@ class GraderManagement extends Component {
 
   componentDidMount () {
     console.log("Grader Management mounted.")
-    // console.log(this.state.graders)
+    console.log(this.props)
 
-    // request(`${BASE}${USER_COURSES}/${COURSE_INFO}/${this.props.match.params.course_id}/${PROJECT}/${this.props.match.params.project_id}/graderManagement`)
-    //   .then(response => {
-    //     return response.json();
-    //   })
-    //   .then(data => {
-    //     console.log(data);
-    //     this.setState({
-    //       graders: data.graders,
-    //       notAssigned: data.notAssigned
-    //     })
-    //   })
-    //   .catch(error => {
-    //     console.error(error.message);
-    //   });
+    this.projectManagementHandler()
 
-    this.setState({
-      graders : gradersData,
-      gradersFiltered : gradersData,
-      notAssigned: notAssignedGroupsData,
-      groupsFiltered: notAssignedGroupsData,
-    })
+    // this.setState({
+    //   // graders : gradersData,
+    //   notAssigned: notAssignedGroupsData,
+    // })
+  }
+
+  projectManagementHandler = () => {
+    request(`${BASE}${USER_COURSES}/${this.props.match.params.course_id}/${PROJECT}/${this.props.match.params.project_id}/management`)
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        console.log(data);
+        this.setState({
+          graders: data.graders,
+          // notAssigned: data.notAssigned
+        })
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
+  }
+
+  addGradersHandler = () => {
+    request(`${BASE}${USER_COURSES}/${this.props.match.params.course_id}/${PROJECT}/${this.props.match.params.project_id}/addGraders`, "POST")
+      .then(response => {
+        this.projectManagementHandler();
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
   }
 
   showAlertOnScreen = (body) => {
@@ -304,11 +317,22 @@ class GraderManagement extends Component {
                          type="text"
                          placeholder="Search for grader or group name"
                          onChange={this.handleGraderSearchChange}/>
+
+            <Button className={styles.manageTaToolbarButton}
+                    variant="primary"
+                    onClick={this.addGradersHandler}>
+              add graders
+            </Button>
+            <Button className={styles.manageTaToolbarButton}
+                    variant="primary"
+                    onClick={null}>
+              sort
+            </Button>
           </div>
 
           <div className={styles.gradersContainer}>
             {/*<h3>Assigned to Graders</h3>*/}
-            <Card className={styles.gradersListContainer}>
+            <Card border="secondary" className={styles.gradersListContainer}>
               <ul className={styles.grader_ul}>
                 {this.state.graders
                   .filter((grader) => {
@@ -410,4 +434,4 @@ class GraderManagement extends Component {
   }
 }
 
-export default GraderManagement;
+export default withRouter(GraderManagement);

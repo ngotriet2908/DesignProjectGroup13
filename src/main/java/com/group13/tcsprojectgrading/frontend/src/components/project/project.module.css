@@ -27,6 +27,13 @@
     width: 30%;
 }
 
+.manageTaToolbarButton {
+    display: inline;
+    margin-left: 0.5rem;
+    margin-top: 0.2rem;
+    margin-bottom: 1rem;
+}
+
 .graderManagement {
     height: inherit;
 }
@@ -130,6 +137,7 @@
 .gradersListContainer {
     width: 100%;
     max-height: 45vh;
+    padding: 0.5rem 0.5rem;
     margin-bottom: 10px;
     overflow-y:hidden;
 }
@@ -151,7 +159,7 @@
 .grader_li {
     display: flex;
     list-style-type: none;
-    padding-right: 1rem;
+    /*padding-right: 1rem;*/
     padding-bottom: 1rem;
 }
 

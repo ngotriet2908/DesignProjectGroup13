@@ -127,11 +127,11 @@ class Project extends Component {
 
 
             {/*Sub-routes*/}
-            <Route exact path={URL_PREFIX + "/courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/groups"}>
+            <Route exact path={URL_PREFIX + "/courses/:course_id/projects/:project_id/groups"}>
               <h2>Project groups</h2>
             </Route>
 
-            <Route exact path={URL_PREFIX + "/courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/graders"}
+            <Route exact path={URL_PREFIX + "/courses/:course_id/projects/:project_id/graders"}
               component={GraderManagement}
             />
           </Switch>
