@@ -3,7 +3,7 @@ import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
 import styles from "./course.module.css";
 import ProjectCard from "./ProjectCard";
-import {Breadcrumb} from "react-bootstrap";
+import {Breadcrumb, Button} from "react-bootstrap";
 import store from "../../redux/store";
 import {push} from "connected-react-router";
 import {URL_PREFIX} from "../../services/config";
@@ -61,7 +61,14 @@ class Course extends Component {
         </div>
 
         <div className={styles.projectsContainer}>
-          <h3>Course projects</h3>
+          {/*<div className={styles.projectsToolBar}>*/}
+            <h3>Course projects</h3>
+            {/*<Button className={styles.projectsToolBarButton}*/}
+            {/*        variant="primary"*/}
+            {/*        onClick={this.modalEditProjectsHandleShow}>*/}
+            {/*  edit projects*/}
+            {/*</Button>*/}
+          {/*</div>*/}
           <ul className={styles.ul}>
             {this.state.projects.map(project => {
               console.log(project)
@@ -73,6 +80,21 @@ class Course extends Component {
             })}
           </ul>
         </div>
+
+
+        {/*<EditProjectsModal*/}
+        {/*  show={this.state.modalEditGradersShow}*/}
+        {/*  activeProjects={this.state.modalEditGradersActiveGraders}*/}
+        {/*  availableProjects={this.state.modalEditGradersAvailableGraders}*/}
+        {/*  onClickDeactive={this.modalEditGradersHandleDeactive}*/}
+        {/*  onClickActive={this.modalEditGradersHandleActive}*/}
+        {/*  onClose={this.modalEditGradersHandleClose}*/}
+        {/*  onAccept={this.modalEditGradersHandleAccept}*/}
+
+        {/*  showAlert={this.state.modalEditShowAlert}*/}
+        {/*  alertBody={this.state.modalEditAlertBody}*/}
+        {/*  closeAlertHandle={this.modalEditGradersHandleCloseAlert}*/}
+        {/*/>*/}
 
       </div>
     )

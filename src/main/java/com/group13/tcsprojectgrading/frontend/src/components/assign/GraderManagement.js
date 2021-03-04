@@ -157,27 +157,6 @@ class GraderManagement extends Component {
     })
   }
 
-  // handleReturnTask = (grader, task) => {
-  //   let graderOriginalTasks = [...grader.groups]
-  //
-  //   let graderLeftTasks = graderOriginalTasks.filter((group) => {
-  //     return group.id !== task.id
-  //   })
-  //   let notAssignedTasks = [...this.state.notAssigned]
-  //   notAssignedTasks.push(task)
-  //
-  //   let gradersList = [...this.state.graders]
-  //   gradersList.forEach((grader1) => {
-  //     if (grader1.id === grader.id) {
-  //       grader1.groups = graderLeftTasks
-  //     }
-  //   })
-  //   this.setState({
-  //     notAssigned: notAssignedTasks,
-  //     graders : gradersList,
-  //   })
-  // }
-
   handleReturnTask = (grader, task) => {
     request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management/assign/${task.id}/${task.isGroup}/notAssigned`)
       .then(response => {
@@ -194,55 +173,6 @@ class GraderManagement extends Component {
         console.error(error.message);
       });
     }
-
-  // handleAssignTask = (fromGrader, isFromNotAssigned,toGrader, task) => {
-  //   if (isFromNotAssigned) {
-  //     this.showAlertOnScreen(`Assigned ${task.name} to ${toGrader.name} from Not Assigned`)
-  //
-  //     let notAssignedTasks = [...this.state.notAssigned]
-  //     console.log(notAssignedTasks)
-  //     let notAssignedLeftTasks = notAssignedTasks.filter((group) => {
-  //       return group.id !== task.id
-  //     })
-  //
-  //     let gradersList = [...this.state.graders]
-  //     console.log(gradersList)
-  //
-  //     gradersList.forEach((grader1) => {
-  //       if (grader1.id === toGrader.id) {
-  //         grader1.groups.push(task)
-  //       }
-  //     })
-  //
-  //     console.log(gradersList)
-  //     this.setState({
-  //       notAssigned: notAssignedLeftTasks,
-  //       graders : gradersList,
-  //     })
-  //   } else {
-  //     this.showAlertOnScreen(`Assigned ${task.name} to ${toGrader.name} from ${fromGrader.name}`)
-  //     let gradersList = [...this.state.graders]
-  //     let fromGraderTasks = [...fromGrader.groups]
-  //     let toGraderTasks = [...toGrader.groups]
-  //
-  //     let fromGraderLeftTasks = fromGraderTasks.filter((group) => {
-  //       return group.id !== task.id
-  //     })
-  //     toGraderTasks.push(task)
-  //
-  //     gradersList.forEach((grader) => {
-  //       if (grader.id === fromGrader.id) {
-  //         grader.groups = fromGraderLeftTasks
-  //       } else if (grader.id === toGrader.id) {
-  //         grader.groups = toGraderTasks
-  //       }
-  //     })
-  //
-  //     this.setState({
-  //       graders : gradersList,
-  //     })
-  //   }
-  // }
 
   handleAssignTask = (fromGrader, isFromNotAssigned,toGrader, task) => {
       request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management/assign/${task.id}/${task.isGroup}/${toGrader.id}`)
@@ -316,37 +246,6 @@ class GraderManagement extends Component {
     }
     return false;
   }
-
-  // handleReturnTasks = (grader) => {
-  //   let graderOriginalTasks = [...grader.groups]
-  //   console.log(graderOriginalTasks)
-  //   let graderReturnTasks = graderOriginalTasks.filter((group) => {
-  //     return group.progress < 100;
-  //   })
-  //   console.log(graderReturnTasks)
-  //   let graderLeftTasks = graderOriginalTasks.filter((group) => {
-  //     return !this.containsObject(group, graderReturnTasks)
-  //   })
-  //   console.log(graderLeftTasks)
-  //   let notAssignedTasks = [...this.state.notAssigned]
-  //   graderReturnTasks.forEach(tasks => {
-  //     notAssignedTasks.push(tasks)
-  //   })
-  //   console.log(notAssignedTasks)
-  //
-  //   let gradersList = [...this.state.graders]
-  //   console.log(gradersList)
-  //   gradersList.forEach((grader1) => {
-  //     if (grader1.id === grader.id) {
-  //       grader1.groups = graderLeftTasks
-  //     }
-  //   })
-  //   console.log(gradersList)
-  //   this.setState({
-  //     notAssigned: notAssignedTasks,
-  //     graders : gradersList,
-  //   })
-  // }
 
   handleReturnTasks = (grader) => {
     request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management/return/${grader.id}`)
@@ -555,11 +454,6 @@ class GraderManagement extends Component {
         <Card border="secondary" className={styles.notAssignedContainer}>
           <div className={styles.notAssignedToolbar}>
             <h4 className={styles.notAssignedText}>Not assigned </h4>
-            {/*<Button className={styles.notAssignedButton}*/}
-            {/*        variant="primary"*/}
-            {/*        onClick={() => null}>*/}
-            {/*  hide groups*/}
-            {/*</Button> {" "}*/}
             <Button className={styles.notAssignedButton}
               variant="primary"
               onClick={this.handleHideSearch}>

@@ -4,16 +4,30 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class ActivityId implements Serializable {
-    private String projectId;
-    private String courseId;
+    private ProjectId project;
     private String userId;
 
     public ActivityId() {
     }
 
-    public ActivityId(String projectId, String courseId, String userId) {
-        this.projectId = projectId;
-        this.courseId = courseId;
+    public ActivityId(ProjectId project, String userId) {
+        this.project = project;
+        this.userId = userId;
+    }
+
+    public ProjectId getProject() {
+        return project;
+    }
+
+    public void setProject(ProjectId project) {
+        this.project = project;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 
@@ -22,11 +36,19 @@ public class ActivityId implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ActivityId that = (ActivityId) o;
-        return Objects.equals(projectId, that.projectId) && Objects.equals(courseId, that.courseId) && Objects.equals(userId, that.userId);
+        return Objects.equals(project, that.project) && Objects.equals(userId, that.userId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(projectId, courseId, userId);
+        return Objects.hash(project, userId);
+    }
+
+    @Override
+    public String toString() {
+        return "ActivityId{" +
+                "projectId=" + project +
+                ", userId='" + userId + '\'' +
+                '}';
     }
 }

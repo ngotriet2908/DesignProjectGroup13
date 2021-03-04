@@ -2,6 +2,7 @@ package com.group13.tcsprojectgrading.services;
 
 import com.group13.tcsprojectgrading.models.Grader;
 import com.group13.tcsprojectgrading.models.GraderId;
+import com.group13.tcsprojectgrading.models.Project;
 import com.group13.tcsprojectgrading.repositories.GraderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,15 +22,15 @@ public class GraderService {
         return repository.save(grader);
     }
 
-    public List<Grader> getGraderFromId(String courseId, String projectId) {
-        return repository.findGraderByCourseIdAndProjectId(courseId, projectId);
+    public List<Grader> getGraderFromProject(Project project) {
+        return repository.findGraderByProject(project);
     }
 
     public void deleteGrader(Grader grader) {
         repository.delete(grader);
     }
 
-    public Grader getGraderFromGraderId(String userId, String courseId, String projectId) {
-        return repository.findById(new GraderId(userId, courseId, projectId)).orElse(null);
+    public Grader getGraderFromGraderId(String userId, Project project) {
+        return repository.findById(new GraderId(userId, project.getProjectCompositeKey())).orElse(null);
     }
 }

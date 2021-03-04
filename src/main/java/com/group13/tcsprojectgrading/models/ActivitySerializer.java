@@ -13,8 +13,8 @@ public class ActivitySerializer extends JsonSerializer<Activity> {
     @Override
     public void serialize(Activity value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         gen.writeStartObject();
-        gen.writeStringField("id", value.getProjectId());
-        gen.writeStringField("course_id", value.getCourseId());
+        gen.writeStringField("id", value.getProject().getProjectId());
+        gen.writeStringField("course_id", value.getProject().getCourseId());
         gen.writeStringField("user_id", value.getUserId());
         gen.writeStringField("last_opened", value.getTimestamp().toString());
         gen.writeStringField("name", value.getProjectName());

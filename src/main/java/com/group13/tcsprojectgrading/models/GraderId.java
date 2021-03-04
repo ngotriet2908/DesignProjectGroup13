@@ -5,37 +5,37 @@ import java.util.Objects;
 
 public class GraderId implements Serializable {
     private String userId;
-    private String courseId;
-    private String projectId;
+    private ProjectId project;
 
-    public GraderId(String userId, String courseId, String projectId) {
+    public GraderId(String userId, ProjectId project) {
         this.userId = userId;
-        this.courseId = courseId;
-        this.projectId = projectId;
+        this.project = project;
     }
 
     public GraderId() {
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        GraderId graderId = (GraderId) o;
-        return Objects.equals(userId, graderId.userId) && Objects.equals(courseId, graderId.courseId) && Objects.equals(projectId, graderId.projectId);
+    public String getUserId() {
+        return userId;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(userId, courseId, projectId);
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public ProjectId getProject() {
+        return project;
+    }
+
+    public void setProject(ProjectId project) {
+        this.project = project;
     }
 
     @Override
     public String toString() {
         return "GraderId{" +
                 "userId='" + userId + '\'' +
-                ", courseId='" + courseId + '\'' +
-                ", projectId='" + projectId + '\'' +
+                ", project=" + project +
                 '}';
     }
 }

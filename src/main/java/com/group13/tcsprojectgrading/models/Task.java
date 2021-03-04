@@ -12,10 +12,8 @@ public class Task {
     private Boolean isGroup;
 
     @Id
-    private String courseId;
-
-    @Id
-    private String projectId;
+    @ManyToOne
+    private Project project;
 
     @ManyToOne
     private Grader grader;
@@ -24,11 +22,10 @@ public class Task {
 
     private String name;
 
-    public Task(String id, Boolean isGroup, String courseId, String projectId, String submissionId, String name) {
+    public Task(String id, Boolean isGroup, Project project, String submissionId, String name) {
         this.id = id;
         this.isGroup = isGroup;
-        this.courseId = courseId;
-        this.projectId = projectId;
+        this.project = project;
         this.submissionId = submissionId;
         this.name = name;
     }
@@ -71,20 +68,12 @@ public class Task {
         this.submissionId = submissionId;
     }
 
-    public String getCourseId() {
-        return courseId;
+    public Project getProject() {
+        return project;
     }
 
-    public void setCourseId(String courseId) {
-        this.courseId = courseId;
-    }
-
-    public String getProjectId() {
-        return projectId;
-    }
-
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
+    public void setProject(Project project) {
+        this.project = project;
     }
 
     public String getName() {
@@ -100,8 +89,7 @@ public class Task {
         return "Task{" +
                 "id='" + id + '\'' +
                 ", isGroup=" + isGroup +
-                ", courseId='" + courseId + '\'' +
-                ", projectId='" + projectId + '\'' +
+                ", project=" + project +
                 ", grader=" + grader +
                 ", submissionId='" + submissionId + '\'' +
                 ", name='" + name + '\'' +

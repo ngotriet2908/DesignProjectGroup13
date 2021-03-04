@@ -6,12 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
-import com.group13.tcsprojectgrading.models.Activity;
-import com.group13.tcsprojectgrading.models.Grader;
-import com.group13.tcsprojectgrading.models.Task;
+import com.group13.tcsprojectgrading.models.*;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.services.ActivityService;
 import com.group13.tcsprojectgrading.services.GraderService;
+import com.group13.tcsprojectgrading.services.ProjectService;
 import com.group13.tcsprojectgrading.services.TaskService;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -40,14 +40,16 @@ class CoursesController {
     private final RubricService rubricService;
     private final GraderService graderService;
     private final TaskService taskService;
+    private final ProjectService projectService;
 
     @Autowired
-    public CoursesController(CanvasApi canvasApi, ActivityService activityService, RubricService rubricService, GraderService graderService, TaskService taskService) {
+    public CoursesController(CanvasApi canvasApi, ActivityService activityService, RubricService rubricService, GraderService graderService, TaskService taskService, ProjectService projectService) {
         this.canvasApi = canvasApi;
         this.activityService = activityService;
         this.rubricService = rubricService;
         this.graderService = graderService;
         this.taskService = taskService;
+        this.projectService = projectService;
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
@@ -75,6 +77,7 @@ class CoursesController {
             JsonNode jsonNode = objectMapper.readTree(nodeListString);
             for (Iterator<JsonNode> it = jsonNode.elements(); it.hasNext(); ) {
                 JsonNode node = it.next();
+                projectService.addNewProject(new Project(course_id, node.get("id").asText()));
                 arrayNode.add(node);
             }
         }
@@ -122,9 +125,15 @@ class CoursesController {
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
         Timestamp createdAt = new Timestamp(format.parse(projectJson.get("created_at").asText()).getTime());
 
+        Project project = projectService.getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "entity not found"
+            );
+        }
+
         Activity activity = new Activity(
-                projectId,
-                courseId,
+                project,
                 principal.getName(),
                 timestamp,
                 projectJson.get("name").asText(),
@@ -174,7 +183,14 @@ class CoursesController {
                              @PathVariable String projectId,
                              @RequestBody ArrayNode activeGraders,
                              Principal principal) throws JsonProcessingException, ParseException {
-        List<Grader> gradersDatabase = graderService.getGraderFromId(courseId, projectId);
+        Project project = projectService.getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "entity not found"
+            );
+        }
+
+        List<Grader> gradersDatabase = graderService.getGraderFromProject(project);
         List<String> editedActiveGraders = new ArrayList<>();
         List<String> gradersResponse = this.canvasApi.getCanvasCoursesApi().getCourseGraders(courseId);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -183,8 +199,7 @@ class CoursesController {
         for (Iterator<JsonNode> it = gradersArrayFromCanvas.elements(); it.hasNext(); ) {
             JsonNode node = it.next();
             availableGrader.put(node.get("id").asText(), new Grader(
-                    projectId,
-                    courseId,
+                    project,
                     node.get("id").asText(),
                     node.get("name").asText(),
                     Grader.getRoleFromString(node.get("enrollments").get(0).get("type").asText()))
@@ -207,7 +222,7 @@ class CoursesController {
 
         //remake notAssigned & graders
 
-        List<Grader> graders = graderService.getGraderFromId(courseId, projectId);
+        List<Grader> graders = graderService.getGraderFromProject(project);
         JsonNode resultNode = objectMapper.createObjectNode();
         ArrayNode notAssignedArray = objectMapper.createArrayNode();
         ArrayNode gradersArray = objectMapper.createArrayNode();
@@ -224,7 +239,7 @@ class CoursesController {
             gradersArray.add(formatNode);
         }
 
-        List<Task> tasks = taskService.getTasksFromId(courseId, projectId);
+        List<Task> tasks = taskService.getTasksFromId(project);
         System.out.println(tasks);
         for (Task task1: tasks) {
 
@@ -271,7 +286,14 @@ class CoursesController {
     protected JsonNode getManagementInfo(@PathVariable String courseId, @PathVariable String projectId, Principal principal) throws JsonProcessingException, ParseException {
         String projectResponse = this.canvasApi.getCanvasCoursesApi().getCourseProject(courseId, projectId);
 
-        List<Grader> graders = graderService.getGraderFromId(courseId, projectId);
+        Project project = projectService.getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "entity not found"
+            );
+        }
+
+        List<Grader> graders = graderService.getGraderFromProject(project);
         List<String> submissionsString = this.canvasApi.getCanvasCoursesApi().getSubmissionsInfo(courseId, Long.parseLong(projectId));
         List<String> studentsString = this.canvasApi.getCanvasCoursesApi().getCourseStudents(courseId);
 
@@ -323,13 +345,12 @@ class CoursesController {
             Task task = new Task(
                     id,
                     isGroup,
-                    courseId,
-                    projectId,
+                    project,
                     jsonNode.get("id").asText(),
                     name
             );
             validSubmissionId.add(task.getSubmissionId());
-            Task existedTask = taskService.findTaskById(jsonNode.get("id").asText(), courseId, projectId);
+            Task existedTask = taskService.findTaskById(jsonNode.get("id").asText(), project);
             if (existedTask != null) {
                 if (existedTask.isGroup() != isGroup || !existedTask.getId().equals(id)) {
                     taskService.deleteTask(existedTask);
@@ -350,7 +371,7 @@ class CoursesController {
             gradersArray.add(formatNode);
         }
 
-        List<Task> tasks = taskService.getTasksFromId(courseId, projectId);
+        List<Task> tasks = taskService.getTasksFromId(project);
         for (Task task: tasks) {
             if (!validSubmissionId.contains(task.getSubmissionId())) {
                 taskService.deleteTask(task);
@@ -385,9 +406,14 @@ class CoursesController {
 //                                  @PathVariable String fromUserId,
                                   @PathVariable String toUserId,
                                   Principal principal) throws JsonProcessingException, ParseException {
-
-        Task task = taskService.findTaskByTaskId(assignmentId, isGroup, courseId, projectId);
-        Grader grader = graderService.getGraderFromGraderId(toUserId, courseId, projectId);
+        Project project = projectService.getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "entity not found"
+            );
+        }
+        Task task = taskService.findTaskByTaskId(assignmentId, isGroup, project);
+        Grader grader = graderService.getGraderFromGraderId(toUserId, project);
         if (task == null) return null;
         if (!toUserId.equals("notAssigned")) {
             if (grader == null) return null;
@@ -399,8 +425,7 @@ class CoursesController {
         taskService.addNewTask(task);
 
         //remake notAssigned & graders
-
-        List<Grader> graders = graderService.getGraderFromId(courseId, projectId);
+        List<Grader> graders = graderService.getGraderFromProject(project);
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode resultNode = objectMapper.createObjectNode();
         ArrayNode notAssignedArray = objectMapper.createArrayNode();
@@ -418,7 +443,7 @@ class CoursesController {
             gradersArray.add(formatNode);
         }
 
-        List<Task> tasks = taskService.getTasksFromId(courseId, projectId);
+        List<Task> tasks = taskService.getTasksFromId(project);
         System.out.println(tasks);
         for (Task task1: tasks) {
 
@@ -447,8 +472,13 @@ class CoursesController {
                                   @PathVariable String projectId,
                                   @PathVariable String userId,
                                   Principal principal) throws JsonProcessingException, ParseException {
-
-        List<Task> tasks1 = taskService.getTasksFromId(courseId, projectId);
+        Project project = projectService.getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "entity not found"
+            );
+        }
+        List<Task> tasks1 = taskService.getTasksFromId(project);
         for(Task task: tasks1) {
             if (task.getGrader() == null) continue;
             if (task.getGrader().getUserId().equals(userId)) {
@@ -459,7 +489,7 @@ class CoursesController {
 
         //remake notAssigned & graders
 
-        List<Grader> graders = graderService.getGraderFromId(courseId, projectId);
+        List<Grader> graders = graderService.getGraderFromProject(project);
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode resultNode = objectMapper.createObjectNode();
         ArrayNode notAssignedArray = objectMapper.createArrayNode();
@@ -477,7 +507,7 @@ class CoursesController {
             gradersArray.add(formatNode);
         }
 
-        List<Task> tasks = taskService.getTasksFromId(courseId, projectId);
+        List<Task> tasks = taskService.getTasksFromId(project);
         System.out.println(tasks);
         for (Task task1: tasks) {
 

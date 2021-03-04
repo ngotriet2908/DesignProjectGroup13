@@ -2,10 +2,7 @@ package com.group13.tcsprojectgrading.models;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
+import javax.persistence.*;
 import java.sql.Timestamp;
 
 @Entity
@@ -14,10 +11,8 @@ import java.sql.Timestamp;
 public class Activity {
 
     @Id
-    private String projectId;
-
-    @Id
-    private String courseId;
+    @ManyToOne
+    private Project project;
 
     @Id
     private String userId;
@@ -28,18 +23,16 @@ public class Activity {
 
     private Timestamp projectCreatedAt;
 
-    public Activity(String projectId, String courseId, String userId, Timestamp timestamp, String projectName, Timestamp projectCreatedAt) {
-        this.projectId = projectId;
-        this.courseId = courseId;
+    public Activity(Project project, String userId, Timestamp timestamp, String projectName, Timestamp projectCreatedAt) {
+        this.project = project;
         this.userId = userId;
         this.timestamp = timestamp;
         this.projectName = projectName;
         this.projectCreatedAt = projectCreatedAt;
     }
 
-    public Activity(String projectId, String courseId, String userId, Timestamp timestamp) {
-        this.projectId = projectId;
-        this.courseId = courseId;
+    public Activity(Project project, String userId, Timestamp timestamp) {
+        this.project = project;
         this.userId = userId;
         this.timestamp = timestamp;
     }
@@ -47,12 +40,12 @@ public class Activity {
     public Activity() {
     }
 
-    public String getProjectId() {
-        return projectId;
+    public Project getProject() {
+        return project;
     }
 
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
+    public void setProject(Project project) {
+        this.project = project;
     }
 
     public String getUserId() {
@@ -87,19 +80,10 @@ public class Activity {
         this.projectCreatedAt = projectCreatedAt;
     }
 
-    public String getCourseId() {
-        return courseId;
-    }
-
-    public void setCourseId(String courseId) {
-        this.courseId = courseId;
-    }
-
     @Override
     public String toString() {
         return "Activity{" +
-                "projectId='" + projectId + '\'' +
-                ", courseId='" + courseId + '\'' +
+                "project=" + project +
                 ", userId='" + userId + '\'' +
                 ", timestamp=" + timestamp +
                 ", projectName='" + projectName + '\'' +

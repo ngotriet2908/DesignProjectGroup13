@@ -6,17 +6,23 @@ import java.util.Objects;
 public class TaskId implements Serializable {
     private String id;
     private Boolean isGroup;
-    private String courseId;
-    private String projectId;
+    private ProjectId project;
 
-    public TaskId(String id, Boolean isGroup, String courseId, String projectId) {
+    public TaskId(String id, Boolean isGroup, ProjectId project) {
         this.id = id;
         this.isGroup = isGroup;
-        this.courseId = courseId;
-        this.projectId = projectId;
+        this.project = project;
     }
 
     public TaskId() {
+    }
+
+    public ProjectId getProject() {
+        return project;
+    }
+
+    public void setProject(ProjectId project) {
+        this.project = project;
     }
 
     public String getId() {
@@ -35,20 +41,13 @@ public class TaskId implements Serializable {
         isGroup = group;
     }
 
-    public String getCourseId() {
-        return courseId;
-    }
-
-    public void setCourseId(String courseId) {
-        this.courseId = courseId;
-    }
-
-    public String getProjectId() {
-        return projectId;
-    }
-
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
+    @Override
+    public String toString() {
+        return "TaskId{" +
+                "id='" + id + '\'' +
+                ", isGroup=" + isGroup +
+                ", project=" + project +
+                '}';
     }
 
     @Override
@@ -56,21 +55,11 @@ public class TaskId implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TaskId taskId = (TaskId) o;
-        return Objects.equals(id, taskId.id) && Objects.equals(isGroup, taskId.isGroup) && Objects.equals(courseId, taskId.courseId) && Objects.equals(projectId, taskId.projectId);
+        return Objects.equals(id, taskId.id) && Objects.equals(isGroup, taskId.isGroup) && Objects.equals(project, taskId.project);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, isGroup, courseId, projectId);
-    }
-
-    @Override
-    public String toString() {
-        return "TaskId{" +
-                "id='" + id + '\'' +
-                ", isGroup=" + isGroup +
-                ", courseId='" + courseId + '\'' +
-                ", projectId='" + projectId + '\'' +
-                '}';
+        return Objects.hash(id, isGroup, project);
     }
 }

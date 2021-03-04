@@ -8,10 +8,8 @@ import java.util.List;
 @IdClass(GraderId.class)
 public class Grader {
     @Id
-    private String projectId;
-
-    @Id
-    private String courseId;
+    @ManyToOne
+    private Project project;
 
     @Id
     private String userId;
@@ -24,9 +22,8 @@ public class Grader {
     @OneToMany(mappedBy = "grader")
     private List<Task> tasks;
 
-    public Grader(String projectId, String courseId, String userId, String name, Role role) {
-        this.projectId = projectId;
-        this.courseId = courseId;
+    public Grader(Project project, String userId, String name, Role role) {
+        this.project = project;
         this.userId = userId;
         this.name = name;
         this.role = role;
@@ -35,20 +32,20 @@ public class Grader {
     public Grader() {
     }
 
-    public String getProjectId() {
-        return projectId;
+    public Project getProject() {
+        return project;
     }
 
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
+    public void setProject(Project project) {
+        this.project = project;
     }
 
-    public String getCourseId() {
-        return courseId;
+    public List<Task> getTasks() {
+        return tasks;
     }
 
-    public void setCourseId(String courseId) {
-        this.courseId = courseId;
+    public void setTasks(List<Task> tasks) {
+        this.tasks = tasks;
     }
 
     public String getUserId() {
@@ -87,8 +84,7 @@ public class Grader {
     @Override
     public String toString() {
         return "Grader{" +
-                "projectId='" + projectId + '\'' +
-                ", courseId='" + courseId + '\'' +
+                "project=" + project +
                 ", userId='" + userId + '\'' +
                 ", name='" + name + '\'' +
                 ", role=" + role +
