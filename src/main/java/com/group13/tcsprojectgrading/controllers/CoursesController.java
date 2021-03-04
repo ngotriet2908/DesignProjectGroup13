@@ -95,6 +95,13 @@ class CoursesController {
     @RequestMapping(value = "/{courseId}/projects/{projectId}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     protected ResponseEntity<JsonNode> getProject(@PathVariable String courseId, @PathVariable String projectId, Principal principal) throws JsonProcessingException, ParseException {
+        Project project = projectService.getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "entity not found"
+            );
+        }
+
         String projectResponse = this.canvasApi.getCanvasCoursesApi().getCourseProject(courseId, projectId);
         String courseResponse = this.canvasApi.getCanvasCoursesApi().getUserCourse(courseId);
 
@@ -124,13 +131,6 @@ class CoursesController {
                 "yyyy-MM-dd'T'HH:mm:ss'Z'");
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
         Timestamp createdAt = new Timestamp(format.parse(projectJson.get("created_at").asText()).getTime());
-
-        Project project = projectService.getProjectById(courseId, projectId);
-        if (project == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "entity not found"
-            );
-        }
 
         Activity activity = new Activity(
                 project,
