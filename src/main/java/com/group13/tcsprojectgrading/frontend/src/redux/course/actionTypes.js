@@ -1,0 +1,1 @@
+export const SAVE_COURSE = "SAVE_COURSE";

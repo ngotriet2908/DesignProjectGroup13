@@ -3,7 +3,7 @@
     width: 100%;
 }
 
-.headers {
+.titleContainer {
     padding-bottom: 2rem;
 }
 
@@ -29,7 +29,7 @@
 }
 
 .card {
-    width: 25rem;
+    width: 18rem;
 }
 
 .plainLink, .plainLink:hover {

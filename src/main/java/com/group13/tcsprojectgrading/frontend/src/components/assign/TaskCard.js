@@ -1,7 +1,5 @@
 import React, {Component} from "react";
-import Button from 'react-bootstrap/Button'
-import {URL_PREFIX} from "../../services/config";
-import styles from "./project.module.css";
+import styles from "./assign.module.css";
 
 class TaskCard extends Component {
   constructor (props) {
@@ -24,9 +22,9 @@ class TaskCard extends Component {
           {/*{this.props.data.members.map((member) => {*/}
           {/*  return member.name*/}
           {/*}).join(", ")}*/}
-          {this.props.data.progress}% graded, member#: {this.props.data.members.length}, member: {this.props.data.members.map((member) => {return member.name}).join(", ")}
+          {/*{this.props.data.progress}% graded, member#: {this.props.data.members.length}, member: {this.props.data.members.map((member) => {return member.name}).join(", ")}*/}
+          {this.props.data.submission_id}
         </h6>
-
 
       </div>
     )

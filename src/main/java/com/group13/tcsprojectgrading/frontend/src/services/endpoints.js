@@ -13,5 +13,5 @@ export const COURSES = "courses";
 // export const PROJECT = "courses/23/projects/33"
 // export const USER_RECENT = "users/recent"
 // export const COURSE_INFO = "courses"
-// export const PROJECT = "projects"
+export const PROJECT = "projects"
 

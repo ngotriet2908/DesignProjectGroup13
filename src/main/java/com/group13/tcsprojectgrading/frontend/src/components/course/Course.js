@@ -3,6 +3,10 @@ import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
 import styles from "./course.module.css";
 import ProjectCard from "./ProjectCard";
+import {Breadcrumb} from "react-bootstrap";
+import store from "../../redux/store";
+import {push} from "connected-react-router";
+import {URL_PREFIX} from "../../services/config";
 import testStats from "../stat/testStats.json";
 import Statistic from "../stat/Statistic";
 
@@ -39,17 +43,27 @@ class Course extends Component {
   render () {
     return (
       <div className={styles.container}>
-        <div className={styles.headers}>
-          <h1>{this.state.course.name}</h1>
+        <Breadcrumb>
+          <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumb.Item>
+          <Breadcrumb.Item active>
+            {this.state.course.name}
+          </Breadcrumb.Item>
+        </Breadcrumb>
+
+        <div className={styles.titleContainer}>
+          <h2>{this.state.course.name}</h2>
         </div>
+
         <div className={styles.overviewContainer}>
-          <h2>Course overview</h2>
-          <div>Blablabla here...
-            Some people like Sponge Bob while some adore anime. @Yevhen (NB: me.interests.contains(anime) == false)</div>
+          <h3 className={styles.sectionTitle}>Overview/Stats</h3>
+          <div>
+            <p>Blablabla here...</p>
+            <p>Some people like Sponge Bob while some are in love with anime. @Y (NB: me.interests.contains(anime) == false)</p>
+          </div>
         </div>
 
         <div className={styles.projectsContainer}>
-          <h2>Course projects</h2>
+          <h3>Course projects</h3>
           <ul className={styles.ul}>
             {this.state.projects.map(project => {
               console.log(project)
@@ -80,10 +94,7 @@ class Course extends Component {
 
       </div>
     )
-
   }
 }
-
-
 
 export default Course;

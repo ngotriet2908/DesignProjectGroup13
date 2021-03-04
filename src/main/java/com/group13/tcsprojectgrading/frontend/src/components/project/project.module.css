@@ -1,201 +1,14 @@
 .projectContainer {
     padding: 2rem;
     width: 100%;
-    height: 100vh;
 }
 
-.gradersCardContainer {
-    padding: 0.5rem 0.5rem;
+.titleContainer {
     margin-bottom: 1.2rem;
-    /*height: 57vh;*/
 }
 
-.manageTaToolbar {
-    display: inline-flex;
-}
-
-.subtitle {
-    padding: 0.5rem 0.5rem;
-    margin-bottom: 1rem;
-    display: inline;
-    margin-right: 1rem;
-}
-
-.manageTaSearch {
-    display: inline;
-    margin-top: 0.5rem;
-    width: 30%;
-}
-
-.graderManagement {
-    height: inherit;
-}
-
-.notAssignedContainer {
-    padding: 0.5rem 0.5rem;
-    margin-bottom: 2rem;
-}
-
-.notAssignedGroupList {
-    max-height: 20vh;
-    margin-bottom: 10px;
-    margin-top: 10px;
-    overflow-y:hidden;
-}
-
-.notAssignedGroupList:hover {
-    overflow-y: scroll;
-}
-
-
-.graderGroupList {
-    /*max-height: 100px;*/
-    margin-bottom: 10px;
-    margin-top: 10px;
-    /*overflow-y:hidden;*/
-}
-
-.graderGroupList:hover {
-    /*overflow-y: scroll;*/
-}
-
-.notAssignedToolbar {
-    display: inline-flex;
-    width: 100%;
-}
-
-.notAssignedToolBarSearch {
-    display: inline-flex;
-    margin-right: 0.5rem;
-    /*margin-left: 0.5rem;*/
-    width: 20%;
-}
-
-.notAssignedButton {
-    display: inline-flex;
-    margin-right: 0.5rem;
-}
-
-.notAssignedText {
-    display: inline-flex;
-    padding-left: 0.5rem;
-    padding-top: 0.5rem;
-    margin-right: 1rem;
-}
-
-.notAssignedCount {
-    position: absolute;
-    padding-top: 0.5rem;
-    right: 10px;
-}
-
-.graderToolBar {
-    display: inline-flex;
-    width: 100%;
-}
-
-.graderToolBarButton {
-    display: inline-flex;
-    margin-right: 0.5rem;
-}
-.graderToolBarSearch {
-    display: inline-flex;
-    margin-right: 0.5rem;
-    /*margin-left: 0.5rem;*/
-    width: 20%;
-}
-
-.graderToolBarText {
-    display: inline-flex;
-    padding-left: 1rem;
-    margin-right: 1rem;
-}
-
-.notTasksCount {
-    position: absolute;
-    padding-top: 0.5rem;
-    right: 10px;
-}
-
-.gradersContainer {
-    width: 100%;
-    height: 60%;
-}
-
-.graderCard {
-    width: 100%;
-    padding: 0.5rem 0.5rem
-}
-
-.gradersListContainer {
-    width: 100%;
-    max-height: 45vh;
-    margin-bottom: 10px;
-    overflow-y:hidden;
-}
-
-.gradersListContainer:hover {
-    overflow-y:scroll;
-}
-
-.listGroupItemCustom {
-    padding: .35rem 1rem;
-}
-
-.grader_ul {
-    width: 100%;
-    display: block;
-    padding-inline-start: 0;
-}
-
-.grader_li {
-    display: flex;
-    list-style-type: none;
-    padding-right: 1rem;
-    padding-bottom: 1rem;
-}
-
-.taskCard {
-    display: flex;
-}
-
-.taskCardGroupName {
-    display: inline;
-    float: left;
-    font-family: Arial, sans-serif;
-    font-weight: bold;
-    margin-right: 1rem;
-}
-
-.taskCardDetails {
-    display: inline;
-    float: left;
-}
-
-.taskCardButton {
-    display: inline;
-    position: absolute;
-    right: 10px;
-}
-
-.ul {
-    /*margin: 0;*/
-    /*margin-block-start: 0;*/
-    /*margin-block-end: 0;*/
-    padding-inline-start: 0;
-    /*width: 100%;*/
-    display: flex;
-}
-
-.li {
-    display: inline;
-    list-style-type: none;
-    padding-right: 1rem;
-    float: left;
-}
-
-.card {
-    width: 25rem;
+.sectionTitle {
+    margin-bottom: 0.8rem;
 }
 
 .plainLink, .plainLink:hover {
@@ -203,12 +16,10 @@
     color: white;
 }
 
-.overviewContainer {
-    width: 100%;
-    /*height: 87vh;*/
-    display: block;
+.sectionContainer {
+    margin-bottom: 1rem;
 }
 
-/*::-webkit-scrollbar {*/
-/*    display: none;*/
-/*}*/
+.sectionContainer button {
+    margin-right: 0.5rem;
+}

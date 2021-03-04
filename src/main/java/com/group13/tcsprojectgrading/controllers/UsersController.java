@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,21 +47,23 @@ class UsersController {
         }
     }
 
-    @RequestMapping(value = "/recent", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    protected List<JsonNode> recentProject(Principal principal) throws JsonProcessingException {
+    @GetMapping(value = "/recent")
+    protected List<Activity> recentProject(Principal principal) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
 
-        List<JsonNode> nodes = new ArrayList<>();
-        for(Activity activity: activityService.getActivities(principal.getName())) {
-            ObjectNode node = objectMapper.createObjectNode();
+        List<Activity> activities = activityService.getActivities(principal.getName());
+//        List<JsonNode> nodes = new ArrayList<>();
+//        for(Activity activity: activities) {
+//            ObjectNode node = objectMapper.createObjectNode();
+//
+//            node.put("id", activity.getProjectId());
+//            node.put("course_id", activity.getCourseId());
+//            node.put("name", activity.getProjectName());
+//            node.put("created_at", activity.getProjectCreatedAt().toString());
+//            nodes.add(node);
+//        }
 
-            node.put("id", activity.getProjectId());
-            node.put("course_id", activity.getCourseId());
-            node.put("name", activity.getProjectName());
-            node.put("created_at", activity.getProjectCreatedAt().toString());
-            nodes.add(node);
-        }
-
-        return nodes.subList(0, Math.min(3, nodes.size()));
+//        return nodes.subList(0, Math.min(3, nodes.size()));
+        return activities.subList(0, Math.min(3, activities.size()));
     }
 }

@@ -3,29 +3,24 @@ import CourseCard from './CourseCard'
 
 import styles from './home.module.css'
 import {request} from "../../services/request";
-import {BASE, RUBRIC_CURRENT, USER_COURSES, USER_INFO} from "../../services/endpoints";
-import {Link} from "react-router-dom";
-import Button from "react-bootstrap/Button";
-import {URL_PREFIX} from "../../services/config";
-import {v4 as uuidv4} from "uuid";
+import {BASE, USER_COURSES, USER_INFO} from "../../services/endpoints";
 import {USER_RECENT} from "../../services/endpoints";
 import ProjectCard from "../course/ProjectCard";
-// import ProjectCard from '../projects/ProjectCard'
+import {connect} from "react-redux";
+import {saveUser} from "../../redux/user/actions";
+import Breadcrumb from "react-bootstrap/Breadcrumb";
 
 class Home extends Component {
   constructor (props) {
     super(props)
     this.state = {
       courses: [],
-      user: {},
       recentProjects: [],
       loaded: false,
     }
   }
 
   componentDidMount () {
-    console.log("Home mounted.")
-
     request(BASE + USER_COURSES)
       .then(response => {
         return response.json();
@@ -46,9 +41,7 @@ class Home extends Component {
       })
       .then(data => {
         console.log(data);
-        this.setState({
-          user: data
-        })
+        this.props.saveUser(data);
       })
       .catch(error => {
         console.error(error.message)
@@ -71,35 +64,44 @@ class Home extends Component {
 
   render () {
     return (
-      <div className={styles.container}>
-        <div className={styles.headers}>
-          <h1>Welcome, {this.state.user.name}!</h1>
-        </div>
-        <div className={styles.coursesContainer}>
-          <h2>Your courses</h2>
-          <ul className={styles.ul}>
-            {this.state.courses.map(course => {
-              return (
-                <li className={styles.li} key={course.uuid}>
-                  <CourseCard data={course}/>
-                </li>
-              )
-            })}
-          </ul>
-        </div>
+      <div>
+        <div className={styles.container}>
+          <Breadcrumb>
+            <Breadcrumb.Item active>Home</Breadcrumb.Item>
+          </Breadcrumb>
 
-        <div className={styles.recentContainer}>
-          <h2>Recent projects</h2>
-          <div>
+          <div className={styles.coursesContainer}>
+            <h2>My Courses</h2>
             <ul className={styles.ul}>
-              {this.state.recentProjects.map(project => {
+              {this.state.courses.map(course => {
                 return (
-                  <li className={styles.li} key={project.id}>
-                    <ProjectCard data={project}/>
+                  <li className={styles.li} key={course.uuid}>
+                    <CourseCard data={course}/>
                   </li>
                 )
               })}
             </ul>
+          </div>
+
+          <div className={styles.recentContainer}>
+            <h2>Recent Activity</h2>
+            <div>
+              {this.state.recentProjects.length > 0 ?
+                (<ul className={styles.ul}>
+                  {this.state.recentProjects.map(project => {
+                    return (
+                      <li className={styles.li} key={project.id}>
+                        <ProjectCard data={project}/>
+                      </li>
+                    )
+                  })}
+                </ul>)
+                :
+                (<div>
+                  No recent activity
+                </div>)
+              }
+            </div>
           </div>
         </div>
       </div>
@@ -107,4 +109,8 @@ class Home extends Component {
   }
 }
 
-export default Home
+const actionCreators = {
+  saveUser,
+}
+
+export default connect(null, actionCreators)(Home)
