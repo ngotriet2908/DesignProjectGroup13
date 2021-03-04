@@ -4,11 +4,12 @@ import GraderCard from "./GraderCard";
 import {ListGroup, ListGroupItem} from "react-bootstrap";
 import TaskCard from "./TaskCard";
 import {notAssignedGroupsData, gradersData} from './GradersData'
-import {Button, Card, FormControl, Modal, Alert} from 'react-bootstrap'
+import {Button, Card, FormControl, Modal, Alert, Spinner} from 'react-bootstrap'
 import {request} from "../../services/request";
 import {BASE, COURSES, PROJECT, USER_COURSES} from "../../services/endpoints";
 import AssigningModal from "./AssigningModal";
 import { withRouter } from 'react-router-dom'
+import EditGradersModal from "./EditGradersModal";
 
 class GraderManagement extends Component {
 
@@ -20,6 +21,7 @@ class GraderManagement extends Component {
       groupsFilterString: "",
       gradersFilterString: "",
       hideSearch: true,
+      isLoading: true,
 
       //return tasks modal
       modalGraderShow: false,
@@ -32,6 +34,13 @@ class GraderManagement extends Component {
       modalAssignIsFromNotAssigned: false,
       modalAssignGraderChoice: null,
 
+      //assign tasks modal
+      modalEditGradersShow: false,
+      modalEditGradersActiveGraders: [],
+      modalEditGradersAvailableGraders: [],
+      modalEditShowAlert: false,
+      modalEditAlertBody: "",
+
       //Alert
       alertShow: false,
       alertBody: "",
@@ -41,13 +50,26 @@ class GraderManagement extends Component {
   componentDidMount () {
     console.log("Grader Management mounted.")
     console.log(this.props)
-
+    this.setState({
+      isLoading: true
+    })
     this.projectManagementHandler()
 
     // this.setState({
     //   graders : gradersData,
     //   notAssigned: notAssignedGroupsData,
     // })
+  }
+
+  hasTasks = (graderId) => {
+    let i;
+    for(i = 0; i < this.state.graders.length; i++) {
+      if (this.state.graders[i].id === graderId
+        && this.state.graders[i].groups !== null && this.state.graders[i].groups.length > 0) {
+        return true;
+      }
+    }
+    return false;
   }
 
   projectManagementHandler = () => {
@@ -59,7 +81,8 @@ class GraderManagement extends Component {
         console.log(data);
         this.setState({
           graders: data.graders,
-          // notAssigned: data.notAssigned
+          notAssigned: data.notAssigned,
+          isLoading: false
         })
       })
       .catch(error => {
@@ -134,74 +157,113 @@ class GraderManagement extends Component {
     })
   }
 
+  // handleReturnTask = (grader, task) => {
+  //   let graderOriginalTasks = [...grader.groups]
+  //
+  //   let graderLeftTasks = graderOriginalTasks.filter((group) => {
+  //     return group.id !== task.id
+  //   })
+  //   let notAssignedTasks = [...this.state.notAssigned]
+  //   notAssignedTasks.push(task)
+  //
+  //   let gradersList = [...this.state.graders]
+  //   gradersList.forEach((grader1) => {
+  //     if (grader1.id === grader.id) {
+  //       grader1.groups = graderLeftTasks
+  //     }
+  //   })
+  //   this.setState({
+  //     notAssigned: notAssignedTasks,
+  //     graders : gradersList,
+  //   })
+  // }
+
   handleReturnTask = (grader, task) => {
-    let graderOriginalTasks = [...grader.groups]
+    request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management/assign/${task.id}/${task.isGroup}/notAssigned`)
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        this.showAlertOnScreen(`Return ${task.name} to not assigned from ${grader.name}`)
+        this.setState({
+          graders: data.graders,
+          notAssigned: data.notAssigned
+        })
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
+    }
 
-    let graderLeftTasks = graderOriginalTasks.filter((group) => {
-      return group.id !== task.id
-    })
-    let notAssignedTasks = [...this.state.notAssigned]
-    notAssignedTasks.push(task)
-
-    let gradersList = [...this.state.graders]
-    gradersList.forEach((grader1) => {
-      if (grader1.id === grader.id) {
-        grader1.groups = graderLeftTasks
-      }
-    })
-    this.setState({
-      notAssigned: notAssignedTasks,
-      graders : gradersList,
-    })
-  }
+  // handleAssignTask = (fromGrader, isFromNotAssigned,toGrader, task) => {
+  //   if (isFromNotAssigned) {
+  //     this.showAlertOnScreen(`Assigned ${task.name} to ${toGrader.name} from Not Assigned`)
+  //
+  //     let notAssignedTasks = [...this.state.notAssigned]
+  //     console.log(notAssignedTasks)
+  //     let notAssignedLeftTasks = notAssignedTasks.filter((group) => {
+  //       return group.id !== task.id
+  //     })
+  //
+  //     let gradersList = [...this.state.graders]
+  //     console.log(gradersList)
+  //
+  //     gradersList.forEach((grader1) => {
+  //       if (grader1.id === toGrader.id) {
+  //         grader1.groups.push(task)
+  //       }
+  //     })
+  //
+  //     console.log(gradersList)
+  //     this.setState({
+  //       notAssigned: notAssignedLeftTasks,
+  //       graders : gradersList,
+  //     })
+  //   } else {
+  //     this.showAlertOnScreen(`Assigned ${task.name} to ${toGrader.name} from ${fromGrader.name}`)
+  //     let gradersList = [...this.state.graders]
+  //     let fromGraderTasks = [...fromGrader.groups]
+  //     let toGraderTasks = [...toGrader.groups]
+  //
+  //     let fromGraderLeftTasks = fromGraderTasks.filter((group) => {
+  //       return group.id !== task.id
+  //     })
+  //     toGraderTasks.push(task)
+  //
+  //     gradersList.forEach((grader) => {
+  //       if (grader.id === fromGrader.id) {
+  //         grader.groups = fromGraderLeftTasks
+  //       } else if (grader.id === toGrader.id) {
+  //         grader.groups = toGraderTasks
+  //       }
+  //     })
+  //
+  //     this.setState({
+  //       graders : gradersList,
+  //     })
+  //   }
+  // }
 
   handleAssignTask = (fromGrader, isFromNotAssigned,toGrader, task) => {
-    if (isFromNotAssigned) {
-      this.showAlertOnScreen(`Assigned ${task.name} to ${toGrader.name} from Not Assigned`)
-
-      let notAssignedTasks = [...this.state.notAssigned]
-      console.log(notAssignedTasks)
-      let notAssignedLeftTasks = notAssignedTasks.filter((group) => {
-        return group.id !== task.id
-      })
-
-      let gradersList = [...this.state.graders]
-      console.log(gradersList)
-
-      gradersList.forEach((grader1) => {
-        if (grader1.id === toGrader.id) {
-          grader1.groups.push(task)
-        }
-      })
-
-      console.log(gradersList)
-      this.setState({
-        notAssigned: notAssignedLeftTasks,
-        graders : gradersList,
-      })
-    } else {
-      this.showAlertOnScreen(`Assigned ${task.name} to ${toGrader.name} from ${fromGrader.name}`)
-      let gradersList = [...this.state.graders]
-      let fromGraderTasks = [...fromGrader.groups]
-      let toGraderTasks = [...toGrader.groups]
-
-      let fromGraderLeftTasks = fromGraderTasks.filter((group) => {
-        return group.id !== task.id
-      })
-      toGraderTasks.push(task)
-
-      gradersList.forEach((grader) => {
-        if (grader.id === fromGrader.id) {
-          grader.groups = fromGraderLeftTasks
-        } else if (grader.id === toGrader.id) {
-          grader.groups = toGraderTasks
-        }
-      })
-
-      this.setState({
-        graders : gradersList,
-      })
-    }
+      request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management/assign/${task.id}/${task.isGroup}/${toGrader.id}`)
+        .then(response => {
+          return response.json();
+        })
+        .then(data => {
+          console.log(data);
+          if (isFromNotAssigned) {
+            this.showAlertOnScreen(`Assigned ${task.name} to ${toGrader.name} from Not Assigned`)
+          } else {
+            this.showAlertOnScreen(`Assigned ${task.name} to ${toGrader.name} from ${fromGrader.name}`)
+          }
+          this.setState({
+            graders: data.graders,
+            notAssigned: data.notAssigned
+          })
+        })
+        .catch(error => {
+          console.error(error.message);
+        });
   }
 
   //Grader modal handlers
@@ -255,35 +317,53 @@ class GraderManagement extends Component {
     return false;
   }
 
-  handleReturnTasks = (grader) => {
-    let graderOriginalTasks = [...grader.groups]
-    console.log(graderOriginalTasks)
-    let graderReturnTasks = graderOriginalTasks.filter((group) => {
-      return group.progress < 100;
-    })
-    console.log(graderReturnTasks)
-    let graderLeftTasks = graderOriginalTasks.filter((group) => {
-      return !this.containsObject(group, graderReturnTasks)
-    })
-    console.log(graderLeftTasks)
-    let notAssignedTasks = [...this.state.notAssigned]
-    graderReturnTasks.forEach(tasks => {
-      notAssignedTasks.push(tasks)
-    })
-    console.log(notAssignedTasks)
+  // handleReturnTasks = (grader) => {
+  //   let graderOriginalTasks = [...grader.groups]
+  //   console.log(graderOriginalTasks)
+  //   let graderReturnTasks = graderOriginalTasks.filter((group) => {
+  //     return group.progress < 100;
+  //   })
+  //   console.log(graderReturnTasks)
+  //   let graderLeftTasks = graderOriginalTasks.filter((group) => {
+  //     return !this.containsObject(group, graderReturnTasks)
+  //   })
+  //   console.log(graderLeftTasks)
+  //   let notAssignedTasks = [...this.state.notAssigned]
+  //   graderReturnTasks.forEach(tasks => {
+  //     notAssignedTasks.push(tasks)
+  //   })
+  //   console.log(notAssignedTasks)
+  //
+  //   let gradersList = [...this.state.graders]
+  //   console.log(gradersList)
+  //   gradersList.forEach((grader1) => {
+  //     if (grader1.id === grader.id) {
+  //       grader1.groups = graderLeftTasks
+  //     }
+  //   })
+  //   console.log(gradersList)
+  //   this.setState({
+  //     notAssigned: notAssignedTasks,
+  //     graders : gradersList,
+  //   })
+  // }
 
-    let gradersList = [...this.state.graders]
-    console.log(gradersList)
-    gradersList.forEach((grader1) => {
-      if (grader1.id === grader.id) {
-        grader1.groups = graderLeftTasks
-      }
-    })
-    console.log(gradersList)
-    this.setState({
-      notAssigned: notAssignedTasks,
-      graders : gradersList,
-    })
+  handleReturnTasks = (grader) => {
+    request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management/return/${grader.id}`)
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        console.log(data);
+        this.showAlertOnScreen(`return all tasks from ${grader.name}`)
+        this.setState({
+          graders: data.graders,
+          notAssigned: data.notAssigned
+        })
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
   }
 
   handleGraderSearchChange = (event) => {
@@ -296,8 +376,127 @@ class GraderManagement extends Component {
     })
   }
 
+  modalEditGradersHandleClose = (event) => {
+    this.setState({
+      modalEditGradersShow: false,
+      modalEditGradersActiveGraders: [],
+      modalEditGradersAvailableGraders: [],
+      modalEditShowAlert: false,
+      modalEditAlertBody: "",
+    })
+  }
+
+  modalEditGradersHandleAccept = (event) => {
+    request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/addGraders`,
+      "POST",
+      this.state.modalEditGradersActiveGraders
+    )
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        console.log(data)
+
+        this.setState({
+          modalEditGradersShow: false,
+          modalEditShowAlert: false,
+          modalEditAlertBody: "",
+          graders: data.graders,
+          notAssigned: data.notAssigned
+        })
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
+  }
+
+  modalEditGradersHandleShow = () => {
+    request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/addGraders/getAllGraders`)
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        let activeGraders = [...data]
+        activeGraders = activeGraders.filter((grader) => {
+          return this.containsObject(grader, this.state.graders)
+        })
+
+        let availableGraders = [...data]
+        availableGraders = availableGraders.filter((grader) => {
+          return !this.containsObject(grader, this.state.graders)
+        })
+        // console.log(availableGraders)
+
+        this.setState({
+          modalEditGradersShow: true,
+          modalEditGradersActiveGraders: activeGraders,
+          modalEditGradersAvailableGraders: availableGraders,
+          modalEditShowAlert: false,
+          modalEditAlertBody: "",
+        })
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
+  }
+
+  modalEditGradersHandleDeactive = (grader) => {
+    if (this.hasTasks(grader.id)) {
+      this.modalEditGradersHandleShowAlert(`Grader ${grader.name} is holding tasks, can't remove grader`)
+      return
+    }
+
+    let availableGraders = [...this.state.modalEditGradersAvailableGraders]
+    availableGraders.push(grader)
+    let activeGraders = [...this.state.modalEditGradersActiveGraders]
+    activeGraders = activeGraders.filter((grader1) => {
+      return grader1.id !== grader.id
+    })
+    console.log(activeGraders)
+    console.log(availableGraders)
+
+    this.setState({
+      modalEditGradersActiveGraders: activeGraders,
+      modalEditGradersAvailableGraders: availableGraders,
+    })
+  }
+
+  modalEditGradersHandleActive = (grader) => {
+    let activeGraders = [...this.state.modalEditGradersActiveGraders]
+    activeGraders.push(grader)
+    let availableGraders = [...this.state.modalEditGradersAvailableGraders]
+    availableGraders = availableGraders.filter((grader1) => {
+      return grader1.id !== grader.id
+    })
+    console.log(activeGraders)
+    console.log(availableGraders)
+    this.setState({
+      modalEditGradersActiveGraders: activeGraders,
+      modalEditGradersAvailableGraders: availableGraders,
+    })
+  }
+
+  modalEditGradersHandleShowAlert = (body) => {
+    this.setState({
+      modalEditShowAlert: true,
+      modalEditAlertBody: body,
+    })
+  }
+
+  modalEditGradersHandleCloseAlert = () => {
+    this.setState({
+      modalEditShowAlert: false,
+      modalEditAlertBody: "",
+    })
+  }
+
   render () {
     return (
+      (this.state.isLoading)?
+        <Spinner className={styles.spinner} animation="border" role="status">
+          <span className="sr-only">Loading...</span>
+        </Spinner>
+        :
       <div className={styles.graderManagement}>
         {(!this.state.alertShow)? null :
           <Alert variant="success" onClose={() => {this.setState({alertShow:false})}} dismissible>
@@ -317,8 +516,8 @@ class GraderManagement extends Component {
 
             <Button className={styles.manageTaToolbarButton}
                     variant="primary"
-                    onClick={this.addGradersHandler}>
-              add graders
+                    onClick={this.modalEditGradersHandleShow}>
+              edit graders
             </Button>
             <Button className={styles.manageTaToolbarButton}
                     variant="primary"
@@ -424,6 +623,21 @@ class GraderManagement extends Component {
           taskGroup={this.state.modalAssignTask}
           isFromNotAssigned={this.state.modalAssignIsFromNotAssigned}
           onReturnTask={this.modalAssignHandleReturnTask}
+        />
+
+        <EditGradersModal
+          show={this.state.modalEditGradersShow}
+          activeGraders={this.state.modalEditGradersActiveGraders}
+          availableGraders={this.state.modalEditGradersAvailableGraders}
+          onClickDeactive={this.modalEditGradersHandleDeactive}
+          onClickActive={this.modalEditGradersHandleActive}
+          onClose={this.modalEditGradersHandleClose}
+          onAccept={this.modalEditGradersHandleAccept}
+          hasTask={this.hasTasks}
+
+          showAlert={this.state.modalEditShowAlert}
+          alertBody={this.state.modalEditAlertBody}
+          closeAlertHandle={this.modalEditGradersHandleCloseAlert}
         />
 
       </div>

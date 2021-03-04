@@ -87,6 +87,22 @@ public class CanvasCoursesApi {
         }
     }
 
+    public String getCourseUser(String courseId, String userId) {
+        OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
+
+        if (authorizedClient == null) {
+            return null;
+        } else {
+            URI uri = UriComponentsBuilder.newInstance()
+                    .scheme(CanvasEndpoints.SCHEME)
+                    .host(CanvasEndpoints.HOST)
+                    .path(CanvasEndpoints.COURSE_SINGLE_USER)
+                    .build(courseId, userId);
+
+            return this.canvasApi.sendRequest(uri, HttpMethod.GET, authorizedClient);
+        }
+    }
+
     public List<String> getCourseGraders(String courseId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
@@ -99,6 +115,24 @@ public class CanvasCoursesApi {
                     .path(CanvasEndpoints.COURSE_USERS_PATH)
                     .queryParam("include[]", "enrollments")
                     .queryParam("enrollment_type[]", "teacher","ta")
+                    .build(courseId);
+
+            return this.canvasApi.sendRequestWithPagination(uri, HttpMethod.GET, authorizedClient);
+        }
+    }
+
+    public List<String> getCourseStudents(String courseId) {
+        OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
+
+        if (authorizedClient == null) {
+            return null;
+        } else {
+            URI uri = UriComponentsBuilder.newInstance()
+                    .scheme(CanvasEndpoints.SCHEME)
+                    .host(CanvasEndpoints.HOST)
+                    .path(CanvasEndpoints.COURSE_USERS_PATH)
+                    .queryParam("include[]", "enrollments")
+                    .queryParam("enrollment_type[]", "student")
                     .build(courseId);
 
             return this.canvasApi.sendRequestWithPagination(uri, HttpMethod.GET, authorizedClient);
@@ -121,6 +155,23 @@ public class CanvasCoursesApi {
         }
     }
 
+    public List<String> getCourseGroupCategoryGroup(String groupCatId) {
+        OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
+
+        if (authorizedClient == null) {
+            return null;
+        } else {
+            URI uri = UriComponentsBuilder.newInstance()
+                    .scheme(CanvasEndpoints.SCHEME)
+                    .host(CanvasEndpoints.HOST)
+                    .path(CanvasEndpoints.COURSE_GROUP_CATEGORY_GROUP_PATH)
+                    .queryParam("include[]", "users")
+                    .build(groupCatId);
+
+            return this.canvasApi.sendRequestWithPagination(uri, HttpMethod.GET, authorizedClient);
+        }
+    }
+
     public List<String> getCourseGroups(String courseId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
@@ -131,6 +182,7 @@ public class CanvasCoursesApi {
                     .scheme(CanvasEndpoints.SCHEME)
                     .host(CanvasEndpoints.HOST)
                     .path(CanvasEndpoints.COURSE_GROUPS_PATH)
+                    .queryParam("include[]", "users")
                     .build(courseId);
 
             return this.canvasApi.sendRequestWithPagination(uri, HttpMethod.GET, authorizedClient);
@@ -164,6 +216,24 @@ public class CanvasCoursesApi {
                     .host(CanvasEndpoints.HOST)
                     .path(CanvasEndpoints.SUBMISSIONS_PATH)
                     .queryParam("include[]", "group","submission_history","submission_comments")
+                    .queryParam("grouped", true)
+                    .build(courseId, assignmentId);
+
+            return this.canvasApi.sendRequestWithPagination(uri, HttpMethod.GET, authorizedClient);
+        }
+    }
+
+    public List<String> getSubmissionsInfo(String courseId, Long assignmentId) {
+        OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
+
+        if (authorizedClient == null) {
+            return null;
+        } else {
+            URI uri = UriComponentsBuilder.newInstance()
+                    .scheme(CanvasEndpoints.SCHEME)
+                    .host(CanvasEndpoints.HOST)
+                    .path(CanvasEndpoints.SUBMISSIONS_PATH)
+                    .queryParam("include[]", "group")
                     .queryParam("grouped", true)
                     .build(courseId, assignmentId);
 

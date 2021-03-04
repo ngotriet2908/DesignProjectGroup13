@@ -22,12 +22,15 @@ public class Task {
 
     private String submissionId;
 
-    public Task(String id, Boolean isGroup, String courseId, String projectId, String submissionId) {
+    private String name;
+
+    public Task(String id, Boolean isGroup, String courseId, String projectId, String submissionId, String name) {
         this.id = id;
         this.isGroup = isGroup;
         this.courseId = courseId;
         this.projectId = projectId;
         this.submissionId = submissionId;
+        this.name = name;
     }
 
     public Task() {
@@ -42,6 +45,9 @@ public class Task {
     }
 
     public Boolean getGroup() {
+        return isGroup;
+    }
+    public Boolean isGroup() {
         return isGroup;
     }
 
@@ -81,6 +87,14 @@ public class Task {
         this.projectId = projectId;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     @Override
     public String toString() {
         return "Task{" +
@@ -90,6 +104,7 @@ public class Task {
                 ", projectId='" + projectId + '\'' +
                 ", grader=" + grader +
                 ", submissionId='" + submissionId + '\'' +
+                ", name='" + name + '\'' +
                 '}';
     }
 }

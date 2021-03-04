@@ -16,6 +16,9 @@ public class TaskId implements Serializable {
         this.projectId = projectId;
     }
 
+    public TaskId() {
+    }
+
     public String getId() {
         return id;
     }

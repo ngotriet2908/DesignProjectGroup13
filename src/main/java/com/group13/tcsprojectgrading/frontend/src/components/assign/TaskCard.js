@@ -22,7 +22,8 @@ class TaskCard extends Component {
           {/*{this.props.data.members.map((member) => {*/}
           {/*  return member.name*/}
           {/*}).join(", ")}*/}
-          {this.props.data.progress}% graded, member#: {this.props.data.members.length}, member: {this.props.data.members.map((member) => {return member.name}).join(", ")}
+          {/*{this.props.data.progress}% graded, member#: {this.props.data.members.length}, member: {this.props.data.members.map((member) => {return member.name}).join(", ")}*/}
+          {this.props.data.submission_id}
         </h6>
 
       </div>
