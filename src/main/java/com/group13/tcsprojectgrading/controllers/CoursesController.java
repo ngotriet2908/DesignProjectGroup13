@@ -109,7 +109,7 @@ class CoursesController {
                 Project project = projectService.getProjectById(course_id, node.get("id").asText());
                 Boolean isVolatile = project != null;
 
-                //TODO add check rubrics exist
+                //TODO check whether needed to check the later 2 conditions
                 if (project != null) {
                     isVolatile = (activityService.getActivitiesByProject(project).size() > 0) ||
                             (graderService.getGraderFromProject(project).size() > 0) ||
@@ -167,25 +167,6 @@ class CoursesController {
         for(String activeProjectId: editedActiveProject) {
             projectService.addNewProject(availableProjects.get(activeProjectId));
         }
-//
-//        ArrayNode arrayNode = objectMapper.createArrayNode();
-//        for(Project project: projectService.getProjectByCourseId(course_id)) {
-//            String nodeString = this.canvasApi.getCanvasCoursesApi().getCourseProject(project.getCourseId(), project.getProjectId());
-//            JsonNode node = objectMapper.readTree(nodeString);
-//
-//            //TODO add check rubrics exist
-//            Boolean isVolatile = (activityService.getActivitiesByProject(project).size() > 0) ||
-//                    (graderService.getGraderFromProject(project).size() > 0) ||
-//                    (taskService.getTasksFromId(project).size() > 0);
-//
-//            JsonNode projectNode = objectMapper.createObjectNode();
-//            ((ObjectNode) projectNode).put("id", node.get("id").asText());
-//            ((ObjectNode) projectNode).put("name", node.get("name").asText());
-//            ((ObjectNode) projectNode).put("isVolatile", isVolatile);
-//
-//            arrayNode.add(projectNode);
-//        }?
-//        rturn arrayNode;
     }
 
 
