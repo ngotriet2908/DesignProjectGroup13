@@ -1,26 +1,20 @@
 [
   {
-    "name": "Amount of TAs",
-    "type": "text",
+    "title": "Amount of TAs",
+    "type": "number",
     "data": 34,
     "unit": "TAs"
   },
   {
-    "name": "Amount of students",
-    "type": "text",
-    "data": 250,
-    "unit": "Students"
-  },
-  {
-    "name": "Submissions graded",
+    "title": "Submissions graded",
     "type": "piechart",
     "data": [
       {
-        "name": "graded",
+        "label": "graded",
         "count": 200
       },
       {
-        "name": "ungraded",
+        "label": "ungraded",
         "count": 100
       }
     ]

@@ -78,9 +78,9 @@ class CoursesController {
                 arrayNode.add(node);
             }
         }
-        JsonNode resultNode = objectMapper.createObjectNode();
-        ((ObjectNode)resultNode).set("course", jsonCourseNode);
-        ((ObjectNode)resultNode).set("projects", arrayNode);
+        ObjectNode resultNode = objectMapper.createObjectNode();
+        resultNode.set("course", jsonCourseNode);
+        resultNode.set("projects", arrayNode);
 
         if (arrayNode == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

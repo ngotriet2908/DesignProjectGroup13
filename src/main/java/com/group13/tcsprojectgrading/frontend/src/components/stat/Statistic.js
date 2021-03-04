@@ -8,7 +8,7 @@ class Statistic extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: props.name,
+      title: props.title,
       type: props.type,
       data: props.data,
       unit: props.unit,
@@ -17,11 +17,11 @@ class Statistic extends Component {
 
   render() {
     switch (this.state.type) {
-    case 'text':
+    case 'number':
       return (
         <Card>
           <Card.Body>
-            <Card.Title className={styles.statTitle}>{this.state.name}</Card.Title>
+            <Card.Title className={styles.statTitle}>{this.state.title}</Card.Title>
             <Card.Text className={styles.statTextValue}>{this.state.data}</Card.Text>
             <Card.Text className={styles.statTextUnit}>{this.state.unit}</Card.Text>
           </Card.Body>
@@ -31,7 +31,7 @@ class Statistic extends Component {
       return (
         <Card>
           <Card.Body>
-            <Card.Title className={styles.statTitle}>{this.state.name}</Card.Title>
+            <Card.Title className={styles.statTitle}>{this.state.title}</Card.Title>
             <Pie data={generatePieData(this.state.data)}/>
           </Card.Body>
         </Card>
@@ -48,7 +48,7 @@ function generatePieData(data) {
       datasets: [{
         data: data.map(entry => entry.count)
       }],
-      labels: data.map(entry => entry.name),
+      labels: data.map(entry => entry.label),
       options: {
         plugins: {
           colorschemes: {

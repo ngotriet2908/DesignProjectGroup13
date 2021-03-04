@@ -17,28 +17,29 @@ class Course extends Component {
     this.state = {
       projects: [],
       course: {},
+      stats: [],
       loaded: false,
     }
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     console.log("Course mounted.")
     // console.log(this.props)
 
-    request(BASE + "courses/" + this.props.match.params.courseId)
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        console.log(data);
-        this.setState({
-          projects: data.projects,
-          course: data.course
-        })
-      })
-      .catch(error => {
-        console.error(error.message);
+    try {
+      let response = await request(BASE + "courses/" + this.props.match.params.courseId);
+      let data = await response.json();
+      console.log(data);
+      this.setState({
+        projects: data.projects,
+        course: data.course
       });
+      response = await request(`${BASE}stats/courses/${this.props.match.params.courseId}/count`);
+      data = await response.json();
+      this.setState({ stats: data })
+    } catch (error) {
+      console.log(error);
+    }
   }
   render () {
     return (
@@ -79,10 +80,21 @@ class Course extends Component {
         <div className={styles.statsContainer}>
           <h2>Course statistics</h2>
           <ul className={styles.ul}>
-            {testStats.map(stat => {
+            {/*{testStats.map(stat => {*/}
+            {/*  return (*/}
+            {/*    <li className={styles.li} key={stat.title}>*/}
+            {/*      <Statistic name={stat.title}*/}
+            {/*                 type={stat.type}*/}
+            {/*                 data={stat.data}*/}
+            {/*                 unit={stat.unit}/>*/}
+            {/*    </li>*/}
+            {/*  );*/}
+            {/*})}*/}
+
+            {this.state.stats.map(stat => {
               return (
-                <li className={styles.li} key={stat.name}>
-                  <Statistic name={stat.name}
+                <li className={styles.li} key={stat.title}>
+                  <Statistic name={stat.title}
                              type={stat.type}
                              data={stat.data}
                              unit={stat.unit}/>
