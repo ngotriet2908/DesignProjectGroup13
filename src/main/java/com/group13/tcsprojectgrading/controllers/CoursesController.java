@@ -67,20 +67,22 @@ class CoursesController {
     @RequestMapping(value = "/{course_id}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     protected ResponseEntity<JsonNode> getCourse(@PathVariable String course_id) throws JsonProcessingException {
-        List<String> responseString = this.canvasApi.getCanvasCoursesApi().getCourseProjects(course_id);
         String courseString = this.canvasApi.getCanvasCoursesApi().getUserCourse(course_id);
+        List<Project> projects = projectService.getProjectByCourseId(course_id);
 
         ObjectMapper objectMapper = new ObjectMapper();
         ArrayNode arrayNode = objectMapper.createArrayNode();
         JsonNode jsonCourseNode = objectMapper.readTree(courseString);
-        for(String nodeListString: responseString) {
-            JsonNode jsonNode = objectMapper.readTree(nodeListString);
-            for (Iterator<JsonNode> it = jsonNode.elements(); it.hasNext(); ) {
-                JsonNode node = it.next();
-                projectService.addNewProject(new Project(course_id, node.get("id").asText()));
-                arrayNode.add(node);
-            }
+
+        for(Project project: projects) {
+            JsonNode projectNode = objectMapper.createObjectNode();
+            String nodeString = this.canvasApi.getCanvasCoursesApi().getCourseProject(project.getCourseId(), project.getProjectId());
+            JsonNode node = objectMapper.readTree(nodeString);
+            ((ObjectNode) projectNode).put("id", node.get("id").asText());
+            ((ObjectNode) projectNode).put("name", node.get("name").asText());
+            arrayNode.add(node);
         }
+
         JsonNode resultNode = objectMapper.createObjectNode();
         ((ObjectNode)resultNode).set("course", jsonCourseNode);
         ((ObjectNode)resultNode).set("projects", arrayNode);
@@ -91,6 +93,101 @@ class CoursesController {
             return new ResponseEntity<>(resultNode, HttpStatus.OK);
         }
     }
+
+    @RequestMapping(value = "/{course_id}/addProject/getAllProjects", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    protected ResponseEntity<ArrayNode> getCourseCanvas(@PathVariable String course_id) throws JsonProcessingException {
+        List<String> responseString = this.canvasApi.getCanvasCoursesApi().getCourseProjects(course_id);
+        String courseString = this.canvasApi.getCanvasCoursesApi().getUserCourse(course_id);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        ArrayNode arrayNode = objectMapper.createArrayNode();
+        for(String nodeListString: responseString) {
+            JsonNode jsonNode = objectMapper.readTree(nodeListString);
+            for (Iterator<JsonNode> it = jsonNode.elements(); it.hasNext(); ) {
+                JsonNode node = it.next();
+                Project project = projectService.getProjectById(course_id, node.get("id").asText());
+                Boolean isVolatile = project != null;
+
+                //TODO add check rubrics exist
+                if (project != null) {
+                    isVolatile = (activityService.getActivitiesByProject(project).size() > 0) ||
+                            (graderService.getGraderFromProject(project).size() > 0) ||
+                            (taskService.getTasksFromId(project).size() > 0);
+                }
+
+                JsonNode projectNode = objectMapper.createObjectNode();
+                ((ObjectNode) projectNode).put("id", node.get("id").asText());
+                ((ObjectNode) projectNode).put("name", node.get("name").asText());
+                ((ObjectNode) projectNode).put("isVolatile", isVolatile);
+
+                arrayNode.add(projectNode);
+            }
+        }
+
+        if (arrayNode == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        } else {
+            return new ResponseEntity<>(arrayNode, HttpStatus.OK);
+        }
+    }
+
+    @PostMapping(value = "/{course_id}/addProject")
+    @ResponseBody
+    protected void editProjects(@PathVariable String course_id,
+                                     @RequestBody ArrayNode activeProjects) throws JsonProcessingException {
+        List<Project> projectsDatabase = projectService.getProjectByCourseId(course_id);
+
+        List<String> responseString = this.canvasApi.getCanvasCoursesApi().getCourseProjects(course_id);
+        ObjectMapper objectMapper = new ObjectMapper();
+        ArrayNode ProjectsArrayFromCanvas = groupPages(objectMapper, responseString);
+        Map<String, Project> availableProjects = new HashMap<>();
+
+
+        for (Iterator<JsonNode> it = ProjectsArrayFromCanvas.elements(); it.hasNext(); ) {
+            JsonNode node = it.next();
+            availableProjects.put(node.get("id").asText(), new Project(
+                    course_id,
+                    node.get("id").asText()
+            ));
+        }
+
+        List<String> editedActiveProject = new ArrayList<>();
+        for (Iterator<JsonNode> it = activeProjects.elements(); it.hasNext(); ) {
+            JsonNode project = it.next();
+            editedActiveProject.add(project.get("id").asText());
+        }
+
+        for (Project project: projectsDatabase) {
+            if (!editedActiveProject.contains(project.getProjectId())) {
+                projectService.deleteProject(project);
+            }
+        }
+
+        for(String activeProjectId: editedActiveProject) {
+            projectService.addNewProject(availableProjects.get(activeProjectId));
+        }
+//
+//        ArrayNode arrayNode = objectMapper.createArrayNode();
+//        for(Project project: projectService.getProjectByCourseId(course_id)) {
+//            String nodeString = this.canvasApi.getCanvasCoursesApi().getCourseProject(project.getCourseId(), project.getProjectId());
+//            JsonNode node = objectMapper.readTree(nodeString);
+//
+//            //TODO add check rubrics exist
+//            Boolean isVolatile = (activityService.getActivitiesByProject(project).size() > 0) ||
+//                    (graderService.getGraderFromProject(project).size() > 0) ||
+//                    (taskService.getTasksFromId(project).size() > 0);
+//
+//            JsonNode projectNode = objectMapper.createObjectNode();
+//            ((ObjectNode) projectNode).put("id", node.get("id").asText());
+//            ((ObjectNode) projectNode).put("name", node.get("name").asText());
+//            ((ObjectNode) projectNode).put("isVolatile", isVolatile);
+//
+//            arrayNode.add(projectNode);
+//        }?
+//        rturn arrayNode;
+    }
+
 
     @RequestMapping(value = "/{courseId}/projects/{projectId}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody

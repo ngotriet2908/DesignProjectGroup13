@@ -12,6 +12,39 @@
     display: block;
 }
 
+.projectsToolBar {
+    display: inline;
+    /*margin-bottom: 3rem;*/
+}
+
+.projectsToolBarText {
+    display: inline;
+    margin-right: 1rem;
+}
+
+.projectsToolBarButton {
+    display: inline;
+}
+
+.editProjectsModalCard {
+    margin-bottom: 2rem;
+}
+
+.listGroupItemCustom {
+    padding: .35rem 1rem;
+}
+
+.projectsList {
+    max-height: 20vh;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    overflow-y:hidden;
+}
+
+.projectsList:hover {
+    overflow-y: scroll;
+}
+
 .overviewContainer {
     width: 100%;
     display: block;
@@ -22,6 +55,7 @@
 }
 
 .ul {
+    margin-top: 1rem;
     padding-inline-start: 0;
     display: flex;
 }
