@@ -3,6 +3,8 @@ import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
 import styles from "./course.module.css";
 import ProjectCard from "./ProjectCard";
+import testStats from "../stat/testStats.json";
+import Statistic from "../stat/Statistic";
 
 
 class Course extends Component {
@@ -60,6 +62,22 @@ class Course extends Component {
           </ul>
         </div>
 
+        <div className={styles.statsContainer}>
+          <h2>Course statistics</h2>
+          <ul className={styles.ul}>
+            {testStats.map(stat => {
+              return (
+                <li className={styles.li} key={stat.name}>
+                  <Statistic name={stat.name}
+                             type={stat.type}
+                             data={stat.data}
+                             unit={stat.unit}/>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+
       </div>
     )
 
@@ -68,4 +86,4 @@ class Course extends Component {
 
 
 
-export default Course
+export default Course;

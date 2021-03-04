@@ -1,0 +1,9 @@
+.statTextValue {
+    text-align: center;
+    font-size: 4rem;
+    font-weight: bold;
+}
+
+.statTextUnit{
+    text-align: center;
+}

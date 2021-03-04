@@ -1,0 +1,28 @@
+[
+  {
+    "name": "Amount of TAs",
+    "type": "text",
+    "data": 34,
+    "unit": "TAs"
+  },
+  {
+    "name": "Amount of students",
+    "type": "text",
+    "data": 250,
+    "unit": "Students"
+  },
+  {
+    "name": "Submissions graded",
+    "type": "piechart",
+    "data": [
+      {
+        "name": "graded",
+        "count": 200
+      },
+      {
+        "name": "ungraded",
+        "count": 100
+      }
+    ]
+  }
+]

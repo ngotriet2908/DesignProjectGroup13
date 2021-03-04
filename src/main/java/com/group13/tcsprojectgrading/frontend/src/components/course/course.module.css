@@ -17,6 +17,11 @@
     display: block;
 }
 
+.statsContainer {
+    width: 100%;
+    display: block;
+}
+
 .ul {
     /*margin: 0;*/
     /*margin-block-start: 0;*/
