@@ -91,7 +91,7 @@ class GraderManagement extends Component {
   }
 
   addGradersHandler = () => {
-    request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/addGraders`, "POST")
+    request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management/addGraders`, "POST")
       .then(response => {
         this.projectManagementHandler();
       })
@@ -286,7 +286,7 @@ class GraderManagement extends Component {
   }
 
   modalEditGradersHandleAccept = (event) => {
-    request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/addGraders`,
+    request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management/addGraders`,
       "POST",
       this.state.modalEditGradersActiveGraders
     )
@@ -310,7 +310,7 @@ class GraderManagement extends Component {
   }
 
   modalEditGradersHandleShow = () => {
-    request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/addGraders/getAllGraders`)
+    request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management/addGraders/getAllGraders`)
       .then(response => {
         return response.json();
       })
