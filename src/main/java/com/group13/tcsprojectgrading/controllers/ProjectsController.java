@@ -109,6 +109,98 @@ public class ProjectsController {
         }
     }
 
+    @GetMapping(value = "/{projectId}/groups")
+    @ResponseBody
+    protected JsonNode getProjectGroup(@PathVariable String courseId, @PathVariable String projectId, Principal principal) throws JsonProcessingException, ParseException {
+        String projectResponse = this.canvasApi.getCanvasCoursesApi().getCourseProject(courseId, projectId);
+
+        Project project = projectService.getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "entity not found"
+            );
+        }
+
+
+        List<String> submissionsString = this.canvasApi.getCanvasCoursesApi().getSubmissionsInfo(courseId, Long.parseLong(projectId));
+        List<String> studentsString = this.canvasApi.getCanvasCoursesApi().getCourseStudents(courseId);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode resultNode = objectMapper.createObjectNode();
+        ((ObjectNode) resultNode).set("project", objectMapper.readTree(projectResponse));
+
+        JsonNode projectJson = objectMapper.readTree(projectResponse);
+        String projectCatId = projectJson.get("group_category_id").asText();
+        Map<String, String> groupIdToNameMap = new HashMap<>();
+        Map<String, String> userIdToGroupIdMap = new HashMap<>();
+        Map<String, List<String>> groupIdToMembership = new HashMap<>();
+
+        if (!projectCatId.equals("null")) {
+            ArrayNode groupsString = groupPages(objectMapper, canvasApi.getCanvasCoursesApi().getCourseGroupCategoryGroup(projectCatId));
+
+            for (Iterator<JsonNode> it = groupsString.elements(); it.hasNext(); ) {
+                JsonNode group = it.next();
+                if (group.get("members_count").asInt(0) <= 0) continue;
+
+                List<String> members = new ArrayList<>();
+                ArrayNode memberships = groupPages(objectMapper, this.canvasApi.getCanvasCoursesApi().getGroupMemberships(group.get("id").asText()));
+                groupIdToNameMap.put(group.get("id").asText(), group.get("name").asText());
+
+                for (Iterator<JsonNode> iter = memberships.elements(); iter.hasNext(); ) {
+                    JsonNode membership = iter.next();
+                    userIdToGroupIdMap.put(membership.get("user_id").asText(), membership.get("group_id").asText());
+                    members.add(membership.get("user_id").asText());
+                }
+                groupIdToMembership.put(group.get("id").asText(), members);
+            }
+        }
+
+        ArrayNode studentArray = groupPages(objectMapper, studentsString);
+        Map<String, JsonNode> studentMap = new HashMap<>();
+        for (Iterator<JsonNode> it = studentArray.elements(); it.hasNext(); ) {
+            JsonNode jsonNode = it.next();
+            studentMap.put(jsonNode.get("id").asText(), jsonNode);
+        }
+
+        ArrayNode submissionArray = groupPages(objectMapper, submissionsString);
+        ArrayNode groupsArray = objectMapper.createArrayNode();
+        for (Iterator<JsonNode> it = submissionArray.elements(); it.hasNext(); ) {
+            JsonNode jsonNode = it.next();
+
+            if (!studentMap.containsKey(jsonNode.get("user_id").asText())) continue;
+
+            boolean isGroup = userIdToGroupIdMap.containsKey(jsonNode.get("user_id").asText());
+            String id = (isGroup)? userIdToGroupIdMap.get(jsonNode.get("user_id").asText()): jsonNode.get("user_id").asText();
+            String name = (isGroup)? groupIdToNameMap.get(userIdToGroupIdMap.get(jsonNode.get("user_id").asText())): studentMap.get(id).get("name").asText();
+
+            JsonNode entityNode = objectMapper.createObjectNode();
+            ((ObjectNode) entityNode).put("id", id);
+            if (!isGroup) ((ObjectNode) entityNode).put("sid", studentMap.get(jsonNode.get("user_id").asText()).get("login_id").asText());
+            ((ObjectNode) entityNode).put("name", name);
+            ((ObjectNode) entityNode).put("isGroup", isGroup);
+            ((ObjectNode) entityNode).put("status", jsonNode.get("workflow_state").asText());
+            if (isGroup) {
+                ArrayNode membersNode = objectMapper.createArrayNode();
+                if (!groupIdToMembership.containsKey(id)) continue;
+                for(String userId: groupIdToMembership.get(id)) {
+                    JsonNode memberNode = objectMapper.createObjectNode();
+                    if (!studentMap.containsKey(userId)) continue;
+                    ((ObjectNode) memberNode).put("name", studentMap.get(userId).get("name").asText());
+                    ((ObjectNode) memberNode).put("sid", studentMap.get(userId).get("login_id").asText());
+                    ((ObjectNode) memberNode).put("sortable_name", studentMap.get(userId).get("sortable_name").asText());
+                    ((ObjectNode) memberNode).put("email", studentMap.get(userId).get("email").asText());
+                    membersNode.add(memberNode);
+                }
+                ((ObjectNode) entityNode).put("members", membersNode);
+            }
+            groupsArray.add(entityNode);
+        }
+
+        ((ObjectNode) resultNode).set("groups", groupsArray);
+
+        return resultNode;
+    }
+
     @GetMapping("/{projectId}/rubric")
     public ResponseEntity<String> getProject() throws JsonProcessingException {
         List<Rubric> rubric = rubricService.getAllRubrics();
