@@ -1,13 +1,12 @@
 import React, {Component} from "react";
 import {request} from "../../services/request";
-import {BASE, PROJECT, USER_COURSES} from "../../services/endpoints";
+import {BASE} from "../../services/endpoints";
 import styles from "./course.module.css";
 import ProjectCard from "./ProjectCard";
-import {Breadcrumb, Button} from "react-bootstrap";
+import {Breadcrumb} from "react-bootstrap";
 import store from "../../redux/store";
 import {push} from "connected-react-router";
 import {URL_PREFIX} from "../../services/config";
-import EditProjectsModal from "./EditProjectsModal";
 
 
 class Course extends Component {
@@ -16,6 +15,7 @@ class Course extends Component {
     this.state = {
       projects: [],
       course: {},
+      stats: [],
       loaded: false,
 
 
@@ -231,9 +231,36 @@ class Course extends Component {
           closeAlertHandle={this.modalEditProjectsHandleCloseAlert}
         />
 
+        <div className={styles.statsContainer}>
+          <h2>Course statistics</h2>
+          <ul className={styles.ul}>
+            {/*{testStats.map(stat => {*/}
+            {/*  return (*/}
+            {/*    <li className={styles.li} key={stat.title}>*/}
+            {/*      <Statistic name={stat.title}*/}
+            {/*                 type={stat.type}*/}
+            {/*                 data={stat.data}*/}
+            {/*                 unit={stat.unit}/>*/}
+            {/*    </li>*/}
+            {/*  );*/}
+            {/*})}*/}
+
+            {this.state.stats.map(stat => {
+              return (
+                <li className={styles.li} key={stat.title}>
+                  <Statistic name={stat.title}
+                             type={stat.type}
+                             data={stat.data}
+                             unit={stat.unit}/>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+
       </div>
     )
   }
 }
 
-export default Course
+export default Course;

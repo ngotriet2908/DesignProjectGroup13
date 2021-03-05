@@ -50,6 +50,11 @@
     display: block;
 }
 
+.statsContainer {
+    width: 100%;
+    display: block;
+}
+
 .sectionTitle {
     margin-bottom: 0.8rem;
 }
