@@ -18,8 +18,8 @@ class ProjectCard extends Component {
     }
   }
 
-  // src = animeSources
-  src = normalSources
+  src = animeSources
+  // src = normalSources
 
   randomSrc() {
     return this.src[Math.floor(Math.random() * this.src.length)];

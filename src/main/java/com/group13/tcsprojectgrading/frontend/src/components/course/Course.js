@@ -3,10 +3,12 @@ import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
 import styles from "./course.module.css";
 import ProjectCard from "./ProjectCard";
-import {Breadcrumb} from "react-bootstrap";
+import {Breadcrumb, Button} from "react-bootstrap";
 import store from "../../redux/store";
 import {push} from "connected-react-router";
 import {URL_PREFIX} from "../../services/config";
+import Statistic from "../stat/Statistic";
+import EditProjectsModal from "./EditProjectsModal";
 
 
 class Course extends Component {
@@ -49,6 +51,16 @@ class Course extends Component {
       .catch(error => {
         console.error(error.message);
       });
+
+    request(`${BASE}stats/courses/${this.props.match.params.courseId}/count`)
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        this.setState({
+          stats: data
+        })
+      })
   }
 
   containsObject(obj, list) {
