@@ -117,6 +117,12 @@ class Project extends Component {
                     Grading Interface
                   </Link>
                 </Button>
+
+                <Button variant="primary">
+                  <Link className={styles.plainLink} to={this.props.match.url + "/feedback"}>
+                    Feedback Interface
+                  </Link>
+                </Button>
               </div>
             </Card.Body>
           </Card>

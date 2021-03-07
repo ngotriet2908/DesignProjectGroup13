@@ -9,6 +9,7 @@
     "@draft-js-plugins/static-toolbar": "^4.1.0",
     "all": "^0.0.0",
     "bootstrap": "^4.6.0",
+    "chart.js": "^2.9.4",
     "chartjs-plugin-colorschemes": "^0.4.0",
     "connected-react-router": "^6.9.1",
     "css-loader": "^5.0.2",

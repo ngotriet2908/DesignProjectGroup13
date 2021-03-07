@@ -95,6 +95,18 @@ class CoursesController {
         }
     }
 
+    @RequestMapping(value = "/{course_id}/students", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    protected ResponseEntity<String> getCourseStudents(@PathVariable String course_id) throws JsonProcessingException {
+        List<String> response = this.canvasApi.getCanvasCoursesApi().getCourseStudents(course_id);
+
+        if (response == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        } else {
+            return new ResponseEntity<>(response.get(0), HttpStatus.OK);
+        }
+    }
+
     @RequestMapping(value = "/{course_id}/addProject/getAllProjects", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     protected ResponseEntity<ArrayNode> getCourseCanvas(@PathVariable String course_id) throws JsonProcessingException {
