@@ -4,19 +4,5 @@
     "type": "number",
     "data": 34,
     "unit": "TAs"
-  },
-  {
-    "title": "Submissions graded",
-    "type": "piechart",
-    "data": [
-      {
-        "label": "graded",
-        "count": 200
-      },
-      {
-        "label": "ungraded",
-        "count": 100
-      }
-    ]
   }
 ]
