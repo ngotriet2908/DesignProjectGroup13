@@ -52,14 +52,12 @@ class Course extends Component {
         console.error(error.message);
       });
 
-    request(`${BASE}stats/courses/${this.props.match.params.courseId}/count`)
+    request(`${BASE}courses/${this.props.match.params.courseId}/stats/count`)
       .then(response => {
         return response.json();
       })
       .then(data => {
-        this.setState({
-          stats: data
-        })
+        this.setState({ stats: data })
       })
   }
 
@@ -260,7 +258,7 @@ class Course extends Component {
             {this.state.stats.map(stat => {
               return (
                 <li className={styles.li} key={stat.title}>
-                  <Statistic name={stat.title}
+                  <Statistic title ={stat.title}
                              type={stat.type}
                              data={stat.data}
                              unit={stat.unit}/>

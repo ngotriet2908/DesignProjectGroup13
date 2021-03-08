@@ -9,10 +9,13 @@ import {Link, Route, Switch} from 'react-router-dom'
 import {v4 as uuidv4} from "uuid";
 import {removeRubric, saveRubric} from "../../redux/rubric/actions";
 import {connect} from "react-redux";
-import {Breadcrumb} from "react-bootstrap";
+import {Breadcrumb, CardColumns} from "react-bootstrap";
 import store from "../../redux/store";
 import {push} from "connected-react-router";
 import Card from "react-bootstrap/Card";
+
+import testStats from "../stat/testStats.json";
+import Statistic from "../stat/Statistic";
 
 class Project extends Component {
 
@@ -23,11 +26,14 @@ class Project extends Component {
       project: {},
       course: {},
       rubric: null,
+      stats: [],
     }
   }
 
   componentDidMount() {
-    request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId)
+    const courseId = this.props.match.params.courseId;
+    const projectId = this.props.match.params.projectId;
+    request(BASE + "courses/" + courseId + "/projects/" + projectId)
       .then(response => {
         return response.json();
       })
@@ -43,6 +49,22 @@ class Project extends Component {
       .catch(error => {
         console.error(error.message);
       });
+
+    request(`${BASE}courses/${courseId}/projects/${projectId}/stats/submissions`)
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        this.setState({ stats: [data] })
+      })
+      .catch(error => console.log(error.message));
+
+    request(`${BASE}courses/${courseId}/projects/${projectId}/stats/grades`)
+      .then(response => response.json())
+      .then(data =>{
+        const newStats = this.state.stats.concat(data);
+        this.setState( {stats: newStats });
+      })
+      .catch(error => console.log(error.message));
   }
 
   /*
@@ -140,6 +162,35 @@ class Project extends Component {
                   <Button variant="primary" onClick={this.onClickCreateRubric}>Create rubric</Button>
                 </div>
               }
+            </Card.Body>
+          </Card>
+        </div>
+
+        <div className={styles.sectionContainer}>
+          <Card>
+            <Card.Body>
+              <Card.Title>
+                <h3 className={styles.sectionTitle}>Statistics</h3>
+              </Card.Title>
+              <div>
+               <CardColumns className={styles.stats}>
+                  {testStats.map(stat => {
+                    return (
+                      <Statistic title={stat.title}
+                                 type={stat.type}
+                                 data={stat.data}
+                                 unit={stat.unit}/>
+                    );
+                  }).concat(this.state.stats.map(stat => {
+                    return (
+                      <Statistic title={stat.title}
+                                 type={stat.type}
+                                 data={stat.data}
+                                 unit={stat.unit}/>
+                    );
+                  }))}
+               </CardColumns>
+              </div>
             </Card.Body>
           </Card>
         </div>
