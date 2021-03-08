@@ -1,0 +1,345 @@
+.container {
+    /*padding: 2rem;*/
+    /*background-color: red;*/
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: 30% auto;
+    position: relative;
+}
+
+.spinner {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    color: dodgerblue;
+}
+
+
+
+/* outline */
+.outline {
+    padding: 1rem 1rem 1rem 2rem;
+    border-right: 1px solid #dfdfdf;
+}
+
+.outlineContainer {
+    height: 100%;
+    overflow: scroll;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.outlineContainer > div {
+    display: flex;
+    flex-direction: row;
+}
+
+.outlineContainer > div > div {
+    /*flex: 1;*/
+}
+
+.outlineContainer ul {
+    padding: 0;
+    list-style-type: none;
+    flex: 1;
+}
+
+.outlineHeader {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+.outlineHeader h4 {
+    padding: 0.5rem 0.5rem 0.5rem 0;
+    margin: 0 0 0 0.5rem;
+}
+
+.outlineHeader div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.outlineHeader div div {
+    color: lightgray;
+    font-size: 1rem;
+}
+
+.outlineHeader span {
+    font-size: 1.5rem;
+}
+
+.outlineGroup {
+    transition: all 1s ease-out;
+}
+
+.outlineGroupCollapsed {
+    display: none;
+}
+
+.outlineElementContainer {
+    border-left: 4px solid transparent;
+}
+
+.outlineElementContainerSelected {
+    /*color: orange;*/
+    border-left: 4px solid #337ab7;
+}
+
+/*.outlineElementContainerSelected .outlineElementIcon {*/
+/*    color: #337ab7;*/
+/*}*/
+
+.outlineElement {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    /*color: red;*/
+    cursor: pointer;
+    /*background-color: green;*/
+    border-top: 1px solid #dfdfdf;
+    padding: 0.5rem 0.5rem 0.5rem 0;
+
+    position: relative;
+}
+
+.outlineContainer > div > ul > div:last-child .outlineElement {
+    /*border-bottom: 1px solid #dfdfdf;*/
+}
+
+.outlineElementLeft {
+    display: flex;
+    flex-direction: row;
+}
+
+.outlineElementRight {
+    visibility: hidden;
+    margin-left: 0.5rem;
+}
+
+.outlineElement:hover .outlineElementRight {
+    visibility: visible;
+}
+
+.outlineElementText {
+
+}
+
+.outlineElementIcon {
+    margin-right: 0.3rem;
+}
+
+.addElementMenu {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.2rem;
+}
+
+.addElementMenu button {
+    margin: 0.2rem;
+}
+
+
+
+
+/* editor/viewer */
+.editor {
+    min-height:100%;
+    padding: 1rem 2rem 0 1rem;
+    background-color: #f7f8fb;
+}
+
+.editorContainer {
+    height: 0;
+    min-height:100%;
+}
+
+.editorCard {
+    min-height:100%;
+    border-bottom: none;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+
+    padding: 1rem;
+}
+
+.viewerHeader {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.viewerHeader h2 {
+    margin: 0;
+}
+
+.viewerHeader button {
+    margin-left: 0.5rem;
+}
+
+.viewerSectionContainer {
+    margin: 1rem 0;
+}
+
+.viewerSectionContainer h4 {
+    margin: 0;
+    padding: 0.4rem 0;
+}
+
+.viewerSectionContainerButton {
+    margin-left: 0.5rem;
+}
+
+.viewerSectionTitle {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.viewerSectionContainer input {
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+
+    cursor: text;
+    padding: 6px 12px;
+
+    width: 100%;
+}
+
+.viewerGradeSectionContainer {
+
+}
+
+.viewerGradeSectionContainer input {
+    width: 6rem;
+}
+
+.viewerGradeSectionContent {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.viewerGradeSectionContent > div {
+    margin-right: 0.5rem;
+}
+
+.viewerGradeSectionContent > div label {
+    margin-right: 0.3rem;
+}
+
+
+
+
+/* rich text editor and toolbar */
+.richTextEditor {
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+
+    cursor: text;
+    padding: 6px 12px;
+}
+
+.richTextEditor :global(.public-DraftEditor-content) {
+    min-height: 3rem;
+}
+
+.toolbar {
+    margin-top: 0.5rem;
+    visibility: hidden;
+    /*transition: visibility 1s ease-in-out;*/
+}
+
+.editorFocused .toolbar {
+    visibility: visible;
+}
+
+.toolbar .visible {
+    margin-top: 0.5rem;
+    visibility: visible;
+}
+
+.toolbar div {
+    display: flex;
+    flex-direction: row;
+}
+
+.toolbarButton {
+    background-color: white;
+    border: 1px solid #6c757d;
+    border-radius: 4px;
+    margin-right: 0.1rem;
+}
+
+.toolbarButton:hover {
+    background-color: #6c757d;
+}
+
+.toolbarButton:hover > svg {
+    fill: white;
+}
+
+.toolbarButton svg {
+    fill: #6c757d;
+}
+
+.toolbarButtonWrapper {
+
+}
+
+.toolbarButtonActive {
+    background-color: #6c757d;
+}
+
+.toolbarButtonActive svg {
+    fill: white;
+}
+
+
+
+/* control bar */
+.controlBar {
+    margin: 0 0 0.5rem 0;
+}
+
+.controlBarCard {
+
+}
+
+
+
+/* (sticky) control (bottom) bar */
+.controlBottomBar {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    background-color: white;
+    padding: 1rem 2rem;
+
+    display: flex;
+    justify-content: flex-end;
+
+    height: 5rem;
+
+    border-top: 1px solid #dfdfdf;
+}
+
+.controlBottomBar button:first-child {
+    margin-right: 0.5rem;
+}
+
+
+
+

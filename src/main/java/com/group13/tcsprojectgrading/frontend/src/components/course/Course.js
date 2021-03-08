@@ -204,7 +204,7 @@ class Course extends Component {
           <h3 className={styles.sectionTitle}>Overview/Stats</h3>
           <div>
             <p>Blablabla here...</p>
-            <p>Some people like Sponge Bob while some are in love with anime. @Y (NB: me.interests.contains(anime) == false)</p>
+            <p>And more blablabla: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi mollis consectetur elit ut sagittis. Aenean sit amet tempor enim, et finibus nisi. Phasellus imperdiet molestie blandit. </p>
           </div>
         </div>
 
@@ -212,8 +212,8 @@ class Course extends Component {
           <div className={styles.projectsToolBar}>
             <h3 className={styles.projectsToolBarText}>Course projects</h3>
             <Button className={styles.projectsToolBarButton}
-                    variant="primary"
-                    onClick={this.modalEditProjectsHandleShow}>
+              variant="primary"
+              onClick={this.modalEditProjectsHandleShow}>
               edit projects
             </Button>
           </div>
@@ -261,9 +261,9 @@ class Course extends Component {
               return (
                 <li className={styles.li} key={stat.title}>
                   <Statistic name={stat.title}
-                             type={stat.type}
-                             data={stat.data}
-                             unit={stat.unit}/>
+                    type={stat.type}
+                    data={stat.data}
+                    unit={stat.unit}/>
                 </li>
               );
             })}

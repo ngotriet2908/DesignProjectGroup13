@@ -7,12 +7,12 @@ import {URL_PREFIX} from "../../services/config";
 import {Link, Route, Switch} from 'react-router-dom'
 
 import {v4 as uuidv4} from "uuid";
-import {removeRubric, saveRubric} from "../../redux/rubric/actions";
 import {connect} from "react-redux";
 import {Breadcrumb} from "react-bootstrap";
 import store from "../../redux/store";
 import {push} from "connected-react-router";
 import Card from "react-bootstrap/Card";
+import {deleteRubric, saveRubric} from "../../redux/rubricNew/actions";
 
 class Project extends Component {
 
@@ -49,9 +49,12 @@ class Project extends Component {
   Creates a new rubric object and saves it to the store
   */
   onClickCreateRubric = () => {
+    console.log("Creating rubric for project " + parseInt(this.props.match.params.projectId));
+
     let rubric = {
       id: uuidv4(),
-      blocks: []
+      projectId: this.props.match.params.projectId,
+      children: []
     }
 
     request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/rubric", "POST", rubric)
@@ -68,7 +71,7 @@ class Project extends Component {
     request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/rubric", "DELETE")
       .then(data => {
         console.log(data);
-        this.props.removeRubric();
+        this.props.deleteRubric();
       })
       .catch(error => {
         console.error(error.message);
@@ -138,7 +141,7 @@ class Project extends Component {
                 <div>
                   <Button variant="primary"><Link className={styles.plainLink} to={this.props.match.url + "/rubric"}>Open
                       rubric</Link></Button>
-                  <Button variant="danger" onClick={this.onClickRemoveRubric}>Remove rubric (disabled)</Button>
+                  <Button variant="danger" onClick={this.onClickRemoveRubric}>Remove rubric</Button>
                 </div>
                 :
                 <div>
@@ -156,13 +159,14 @@ class Project extends Component {
 
 const mapStateToProps = state => {
   return {
-    rubric: state.rubric.rubric
+    rubric: state.rubricNew.rubric
   };
 };
 
 const actionCreators = {
   saveRubric,
-  removeRubric
+  deleteRubric
+  // removeRubric
 }
 
 export default connect(mapStateToProps, actionCreators)(Project)
