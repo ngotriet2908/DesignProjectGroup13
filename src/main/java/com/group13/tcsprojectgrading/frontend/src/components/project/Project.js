@@ -7,12 +7,15 @@ import {URL_PREFIX} from "../../services/config";
 import {Link, Route, Switch} from 'react-router-dom'
 
 import {v4 as uuidv4} from "uuid";
-import {removeRubric, saveRubric} from "../../redux/rubric/actions";
 import {connect} from "react-redux";
-import {Breadcrumb} from "react-bootstrap";
+import {Breadcrumb, CardColumns} from "react-bootstrap";
 import store from "../../redux/store";
 import {push} from "connected-react-router";
 import Card from "react-bootstrap/Card";
+import {deleteRubric, saveRubric} from "../../redux/rubricNew/actions";
+
+import testStats from "../stat/testStats.json";
+import Statistic from "../stat/Statistic";
 
 class Project extends Component {
 
@@ -23,11 +26,14 @@ class Project extends Component {
       project: {},
       course: {},
       rubric: null,
+      stats: [],
     }
   }
 
   componentDidMount() {
-    request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId)
+    const courseId = this.props.match.params.courseId;
+    const projectId = this.props.match.params.projectId;
+    request(BASE + "courses/" + courseId + "/projects/" + projectId)
       .then(response => {
         return response.json();
       })
@@ -43,15 +49,34 @@ class Project extends Component {
       .catch(error => {
         console.error(error.message);
       });
+
+    request(`${BASE}courses/${courseId}/projects/${projectId}/stats/submissions`)
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        this.setState({ stats: [data] })
+      })
+      .catch(error => console.log(error.message));
+
+    request(`${BASE}courses/${courseId}/projects/${projectId}/stats/grades`)
+      .then(response => response.json())
+      .then(data =>{
+        const newStats = this.state.stats.concat(data);
+        this.setState( {stats: newStats });
+      })
+      .catch(error => console.log(error.message));
   }
 
   /*
   Creates a new rubric object and saves it to the store
   */
   onClickCreateRubric = () => {
+    console.log("Creating rubric for project " + parseInt(this.props.match.params.projectId));
+
     let rubric = {
       id: uuidv4(),
-      blocks: []
+      projectId: this.props.match.params.projectId,
+      children: []
     }
 
     request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/rubric", "POST", rubric)
@@ -68,7 +93,7 @@ class Project extends Component {
     request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/rubric", "DELETE")
       .then(data => {
         console.log(data);
-        this.props.removeRubric();
+        this.props.deleteRubric();
       })
       .catch(error => {
         console.error(error.message);
@@ -123,6 +148,12 @@ class Project extends Component {
                     Grading Interface
                   </Link>
                 </Button>
+
+                <Button variant="primary">
+                  <Link className={styles.plainLink} to={this.props.match.url + "/feedback"}>
+                    Feedback Interface
+                  </Link>
+                </Button>
               </div>
             </Card.Body>
           </Card>
@@ -138,7 +169,7 @@ class Project extends Component {
                 <div>
                   <Button variant="primary"><Link className={styles.plainLink} to={this.props.match.url + "/rubric"}>Open
                       rubric</Link></Button>
-                  <Button variant="danger" onClick={this.onClickRemoveRubric}>Remove rubric (disabled)</Button>
+                  <Button variant="danger" onClick={this.onClickRemoveRubric}>Remove rubric</Button>
                 </div>
                 :
                 <div>
@@ -149,6 +180,35 @@ class Project extends Component {
             </Card.Body>
           </Card>
         </div>
+
+        <div className={styles.sectionContainer}>
+          <Card>
+            <Card.Body>
+              <Card.Title>
+                <h3 className={styles.sectionTitle}>Statistics</h3>
+              </Card.Title>
+              <div>
+               <CardColumns className={styles.stats}>
+                  {testStats.map(stat => {
+                    return (
+                      <Statistic title={stat.title}
+                                 type={stat.type}
+                                 data={stat.data}
+                                 unit={stat.unit}/>
+                    );
+                  }).concat(this.state.stats.map(stat => {
+                    return (
+                      <Statistic title={stat.title}
+                                 type={stat.type}
+                                 data={stat.data}
+                                 unit={stat.unit}/>
+                    );
+                  }))}
+               </CardColumns>
+              </div>
+            </Card.Body>
+          </Card>
+        </div>
       </div>
     )
   }
@@ -156,13 +216,14 @@ class Project extends Component {
 
 const mapStateToProps = state => {
   return {
-    rubric: state.rubric.rubric
+    rubric: state.rubricNew.rubric
   };
 };
 
 const actionCreators = {
   saveRubric,
-  removeRubric
+  deleteRubric
+  // removeRubric
 }
 
 export default connect(mapStateToProps, actionCreators)(Project)

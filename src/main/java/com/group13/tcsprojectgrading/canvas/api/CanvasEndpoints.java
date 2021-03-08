@@ -35,4 +35,5 @@ public class CanvasEndpoints {
     public static final String SUBMISSIONS_PATH = "/api/v1/courses/{courseId}/assignments/{assignmentId}/submissions";
 
     public static final String SUBMISSION_PATH = "/api/v1/courses/{course_id}/assignments/{assignment_id}/submissions/{user_id}";
+    public static final String SUBMISSION_SUMMARY_PATH = "/api/v1/courses/{courseId}/assignments/{assignmentId}/submission_summary";
 }

@@ -12,6 +12,7 @@ import CourseRoutes from "./course/CourseRoutes";
 import NavigationBar from "./navigation/NavigationBar";
 import Footer from "./navigation/Footer";
 import styles from "./main.module.css";
+import RubricNew from "./rubricNew/RubricNew";
 
 
 class Main extends React.Component {
@@ -69,6 +70,9 @@ class Main extends React.Component {
             <div className={styles.content}>
               <Switch>
                 <Route path={URL_PREFIX + "/courses/:courseId"} component={CourseRoutes}/>
+                <Route exact path={URL_PREFIX + "/test"}>
+                  <RubricNew/>
+                </Route>
                 <Route exact path={URL_PREFIX + "/"}>
                   <Home/>
                 </Route>

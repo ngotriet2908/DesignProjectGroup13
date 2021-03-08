@@ -28,16 +28,19 @@ class Statistic extends Component {
         </Card>
       );
     case 'piechart':
+      console.log(generatePieData(this.state.data));
       return (
         <Card>
           <Card.Body>
             <Card.Title className={styles.statTitle}>{this.state.title}</Card.Title>
             <Pie data={generatePieData(this.state.data)}/>
           </Card.Body>
+          <Card.Footer>Total: {Object.values(this.state.data).reduce((acc,cur) => acc + cur)}</Card.Footer>
         </Card>
       );
     default:
       console.error("Invalid statistic type.");
+      console.log(this.props);
     }
   }
 }
@@ -46,9 +49,9 @@ function generatePieData(data) {
   return (
     {
       datasets: [{
-        data: data.map(entry => entry.count)
+        data: Object.values(data)
       }],
-      labels: data.map(entry => entry.label),
+      labels: Object.keys(data),
       options: {
         plugins: {
           colorschemes: {

@@ -68,15 +68,14 @@ public class ProjectsController {
         JsonNode courseJson = objectMapper.readTree(courseResponse);
 
         // including rubric to the response
-        List<Rubric> rubric = rubricService.getAllRubrics();
+        Rubric rubric = rubricService.getRubricByProjectId(projectId);
         JsonNode rubricJson;
-        if (rubric.size() == 0) {
-            rubricJson = objectMapper.readTree("{\"rubric\": null}");
-        } else {
-            String rubricString = objectMapper.writeValueAsString(rubric.get(0));
-            String response = "{\"rubric\":" + rubricString + "}";
-            rubricJson = objectMapper.readTree(response);
-        }
+//        if (rubric == null) {
+//            rubricJson = objectMapper.readTree("null");
+//        } else {
+            String rubricString = objectMapper.writeValueAsString(rubric);
+            rubricJson = objectMapper.readTree(rubricString);
+//        }
 
         ObjectNode resultJson = objectMapper.createObjectNode();
         resultJson.set("course", courseJson);
@@ -201,14 +200,14 @@ public class ProjectsController {
     }
 
     @GetMapping("/{projectId}/rubric")
-    public ResponseEntity<String> getProject() throws JsonProcessingException {
-        List<Rubric> rubric = rubricService.getAllRubrics();
+    public ResponseEntity<String> getProject(@PathVariable String projectId) throws JsonProcessingException {
+        Rubric rubric = rubricService.getRubricByProjectId(projectId);
 
-        if (rubric.size() == 0) {
-            return new ResponseEntity<>("{\"rubric\": null}", HttpStatus.OK);
+        if (rubric == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
             ObjectMapper objectMapper = new ObjectMapper();
-            String rubricString = objectMapper.writeValueAsString(rubric.get(0));
+            String rubricString = objectMapper.writeValueAsString(rubric);
             String response = "{\"rubric\":" + rubricString + "}";
             System.out.println(response);
             return new ResponseEntity<>(response, HttpStatus.OK);
@@ -221,12 +220,10 @@ public class ProjectsController {
         return rubricService.addNewRubric(newRubric);
     }
 
-    @DeleteMapping("/{projectId}/rubric")
-    public void deleteRubric() {
+    @DeleteMapping("{projectId}/rubric")
+    public void deleteRubric(@PathVariable String projectId) {
         System.out.println("Deleting the rubric...");
-        // TODO currently deletes all rubrics
-//        rubricService.removeRubric();
-//        return rubricService.addNewRubric(newRubric);
+        rubricService.deleteRubric(projectId);
     }
 
     // TODO temporary unsafe method

@@ -13,12 +13,12 @@ class CourseRoutes extends Component {
 
   render () {
     return (
-      <div>
-        <Switch>
-          <Route exact path={this.props.match.path + ""} component={Course}/>
-          <Route path={this.props.match.path + "/projects/:projectId"} component={ProjectRoutes}/>
-        </Switch>
-      </div>
+      // <div>
+      <Switch>
+        <Route exact path={this.props.match.path + ""} component={Course}/>
+        <Route path={this.props.match.path + "/projects/:projectId"} component={ProjectRoutes}/>
+      </Switch>
+      // </div>
     )
   }
 }

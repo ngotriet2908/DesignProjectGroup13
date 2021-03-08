@@ -290,6 +290,22 @@ public class CanvasCoursesApi {
         }
     }
 
+    public String getSubmissionsSummary(String courseId, Long assignmentId) {
+        OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
+
+        if (authorizedClient == null) {
+            return null;
+        } else {
+            URI uri = UriComponentsBuilder.newInstance()
+                    .scheme(CanvasEndpoints.SCHEME)
+                    .host(CanvasEndpoints.HOST)
+                    .path(CanvasEndpoints.SUBMISSION_SUMMARY_PATH)
+                    .build(courseId, assignmentId);
+
+            return this.canvasApi.sendRequest(uri, HttpMethod.GET, authorizedClient);
+        }
+    }
+
     public String getCourseProject(String courseId, String projectId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
@@ -305,4 +321,6 @@ public class CanvasCoursesApi {
             return this.canvasApi.sendRequest(uri, HttpMethod.GET, authorizedClient);
         }
     }
+
+
 }
