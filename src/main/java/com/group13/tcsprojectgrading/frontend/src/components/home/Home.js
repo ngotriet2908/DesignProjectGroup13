@@ -3,12 +3,13 @@ import CourseCard from './CourseCard'
 
 import styles from './home.module.css'
 import {request} from "../../services/request";
-import {BASE, USER_COURSES, USER_INFO} from "../../services/endpoints";
+import {BASE, USER_COURSES, USER_INFO, USER_TASKS} from "../../services/endpoints";
 import {USER_RECENT} from "../../services/endpoints";
 import ProjectCard from "../course/ProjectCard";
 import {connect} from "react-redux";
 import {saveUser} from "../../redux/user/actions";
 import Breadcrumb from "react-bootstrap/Breadcrumb";
+import HomeTaskCard from "./HomeTaskCard";
 
 class Home extends Component {
   constructor (props) {
@@ -17,6 +18,7 @@ class Home extends Component {
       courses: [],
       recentProjects: [],
       loaded: false,
+      tasks: []
     }
   }
 
@@ -55,6 +57,20 @@ class Home extends Component {
         console.log(data);
         this.setState({
           recentProjects: data
+        })
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
+
+    request(BASE + USER_TASKS)
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        console.log(data);
+        this.setState({
+          tasks: data
         })
       })
       .catch(error => {
@@ -103,6 +119,20 @@ class Home extends Component {
               }
             </div>
           </div>
+
+          <div className={styles.homeTasksContainer}>
+            <h2>My Tasks</h2>
+            <ul className={styles.ul}>
+              {this.state.tasks.map(task => {
+                return (
+                  <li className={styles.li} key={task.project.id +"/"+task.course.id}>
+                    <HomeTaskCard task={task}/>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+
         </div>
       </div>
     )

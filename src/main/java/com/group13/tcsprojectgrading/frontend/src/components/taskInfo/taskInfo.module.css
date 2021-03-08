@@ -1,0 +1,63 @@
+.container {
+    padding: 2rem;
+    width: 100%;
+}
+
+.spinner{
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    color: dodgerblue;
+}
+
+.header {
+    display: flex;
+}
+
+.gradingButton {
+    margin-left: 2rem;
+}
+
+.bodyContainer {
+    padding: 1rem 1rem;
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.infoContainer {
+    width: 25rem;
+    margin-right: 2rem;
+    margin-bottom: 2rem;
+}
+
+.attachmentContainer {
+    width: 20rem;
+    margin-right: 2rem;
+    margin-bottom: 2rem;
+}
+
+.discussionContainer {
+    width: 20rem;
+    margin-right: 2rem;
+    margin-bottom: 2rem;
+}
+
+.memberContainer {
+    width: 50rem;
+    margin-right: 2rem;
+    margin-bottom: 2rem;
+}
+
+.memberItem {
+    width: 100%;
+    display: inline-grid;
+    grid-template-columns: 50% 50%;
+}
+
+
+
+.plainLink, .plainLink:hover {
+    text-decoration: none;
+    color: white;
+}

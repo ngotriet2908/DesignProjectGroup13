@@ -4,6 +4,9 @@ import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
 import {Breadcrumb, Button, ListGroup, ListGroupItem, Spinner, ButtonGroup, DropdownButton, Dropdown, FormControl} from "react-bootstrap";
 import GroupCard from "./GroupCard";
+import store from "../../redux/store";
+import {URL_PREFIX} from "../../services/config";
+import {push} from "connected-react-router";
 
 
 class Groups extends Component {
@@ -13,6 +16,7 @@ class Groups extends Component {
     this.state = {
       groups: [],
       project: {},
+      course: {},
       isLoading: true,
       filterChoice: "all",
       searchString: "",
@@ -32,6 +36,7 @@ class Groups extends Component {
         this.setState({
           groups: data.groups,
           project: data.project,
+          course: data.course,
           isLoading: false
         })
       })
@@ -124,8 +129,20 @@ class Groups extends Component {
         </Spinner>
         :
       <div className={styles.container}>
+        <Breadcrumb>
+          <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumb.Item>
+          <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id ))}>
+            {this.state.course.name}
+          </Breadcrumb.Item>
+          <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id + "/projects/"+this.state.project.id))}>
+            {this.state.project.name}
+          </Breadcrumb.Item>
+          <Breadcrumb.Item active>
+            Groups
+          </Breadcrumb.Item>
+        </Breadcrumb>
         <div className={styles.header}>
-          <h2>{(this.state.project != null)? this.state.project.name : null} groups</h2>
+          <h2>{this.state.project.name} groups</h2>
         </div>
         <div className={styles.toolbar}>
           <FormControl className={styles.groupsSearchBar}

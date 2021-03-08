@@ -20,13 +20,16 @@ public class Task {
 
     private String submissionId;
 
+    private String submitterId;
+
     private String name;
 
-    public Task(String id, Boolean isGroup, Project project, String submissionId, String name) {
+    public Task(String id, Boolean isGroup, Project project, String submissionId, String submitterId, String name) {
         this.id = id;
         this.isGroup = isGroup;
         this.project = project;
         this.submissionId = submissionId;
+        this.submitterId = submitterId;
         this.name = name;
     }
 
@@ -84,6 +87,14 @@ public class Task {
         this.name = name;
     }
 
+    public String getSubmitterId() {
+        return submitterId;
+    }
+
+    public void setSubmitterId(String submitterId) {
+        this.submitterId = submitterId;
+    }
+
     @Override
     public String toString() {
         return "Task{" +
@@ -92,6 +103,7 @@ public class Task {
                 ", project=" + project +
                 ", grader=" + grader +
                 ", submissionId='" + submissionId + '\'' +
+                ", submitterId='" + submitterId + '\'' +
                 ", name='" + name + '\'' +
                 '}';
     }
