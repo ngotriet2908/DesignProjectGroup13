@@ -9,6 +9,7 @@ import ProjectCard from "../course/ProjectCard";
 import {connect} from "react-redux";
 import {saveUser} from "../../redux/user/actions";
 import Breadcrumb from "react-bootstrap/Breadcrumb";
+import {Spinner} from "react-bootstrap";
 
 class Home extends Component {
   constructor (props) {
@@ -16,45 +17,27 @@ class Home extends Component {
     this.state = {
       courses: [],
       recentProjects: [],
-      loaded: false,
+      isLoaded: false,
     }
   }
 
   componentDidMount () {
-    request(BASE + USER_COURSES)
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        console.log(data);
-        this.setState({
-          courses: data
-        })
-      })
-      .catch(error => {
-        console.error(error.message);
-      });
+    Promise.all([
+      request(BASE + USER_INFO),
+      request(BASE + USER_COURSES),
+      request(BASE + USER_RECENT)
+    ])
+      .then(async([res1, res2, res3]) => {
+        const user = await res1.json();
+        const courses = await res2.json();
+        const recent = await res3.json();
 
-    request(BASE + USER_INFO)
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        console.log(data);
-        this.props.saveUser(data);
-      })
-      .catch(error => {
-        console.error(error.message)
-      });
+        this.props.saveUser(user);
 
-    request(BASE + USER_RECENT)
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        console.log(data);
         this.setState({
-          recentProjects: data
+          recentProjects: recent,
+          courses: courses,
+          isLoaded: true
         })
       })
       .catch(error => {
@@ -63,6 +46,16 @@ class Home extends Component {
   }
 
   render () {
+    if (!this.state.isLoaded) {
+      return(
+        <div className={styles.container}>
+          <Spinner className={styles.spinner} animation="border" role="status">
+            <span className="sr-only">Loading...</span>
+          </Spinner>
+        </div>
+      )
+    }
+
     return (
       <div>
         <div className={styles.container}>

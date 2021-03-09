@@ -45,7 +45,7 @@ class NavigationBar extends React.Component {
         </Navbar.Brand>
         <div id={styles.navBarUserInfoContainer}>
           <div >
-            Hi, {this.props.user != null && this.props.user.name}
+            {this.props.user != null && this.props.user.name}
           </div>
           <Button variant="primary" onClick={this.onClickSignOut}><FaSignOutAlt size={20}/></Button>
         </div>

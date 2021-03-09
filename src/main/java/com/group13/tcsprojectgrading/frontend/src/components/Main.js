@@ -70,9 +70,6 @@ class Main extends React.Component {
             <div className={styles.content}>
               <Switch>
                 <Route path={URL_PREFIX + "/courses/:courseId"} component={CourseRoutes}/>
-                <Route exact path={URL_PREFIX + "/test"}>
-                  <RubricNew/>
-                </Route>
                 <Route exact path={URL_PREFIX + "/"}>
                   <Home/>
                 </Route>

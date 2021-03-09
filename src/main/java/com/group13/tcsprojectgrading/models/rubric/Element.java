@@ -1,9 +1,11 @@
 package com.group13.tcsprojectgrading.models.rubric;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.data.annotation.Id;
 
 import java.util.List;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Element {
     public RubricContent content;
     public List<Element> children;

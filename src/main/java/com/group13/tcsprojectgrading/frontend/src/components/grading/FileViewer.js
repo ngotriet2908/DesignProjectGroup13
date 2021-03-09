@@ -37,30 +37,33 @@ class FileViewer extends Component {
 
   render () {
     return (
-      <Card>
-        <Card.Body>
-          <div>
-            <Document
-              file="/api/courses/120/projects/158/submissions/sample"
-              onLoadSuccess={this.onDocumentLoadSuccess}
-              options={options}
-            >
-              {
-                Array.from(
-                  new Array(this.state.numPages),
-                  (el, index) => (
-                    <Page
-                      key={`page_${index + 1}`}
-                      pageNumber={index + 1}
-                    />
-                  ),
-                )
-              }
-            </Document>
-            <p>Page {this.state.pageNumber} of {this.state.numPages}</p>
-          </div>
-        </Card.Body>
-      </Card>
+      <div className={styles.fileViewerContainer}>
+        <Card className={styles.fileViewerCard}>
+          <Card.Body>
+            <div>
+              File
+              {/*<Document*/}
+              {/*  file="/api/courses/120/projects/158/submissions/sample"*/}
+              {/*  onLoadSuccess={this.onDocumentLoadSuccess}*/}
+              {/*  options={options}*/}
+              {/*>*/}
+              {/*  {*/}
+              {/*    Array.from(*/}
+              {/*      new Array(this.state.numPages),*/}
+              {/*      (el, index) => (*/}
+              {/*        <Page*/}
+              {/*          key={`page_${index + 1}`}*/}
+              {/*          pageNumber={index + 1}*/}
+              {/*        />*/}
+              {/*      ),*/}
+              {/*    )*/}
+              {/*  }*/}
+              {/*</Document>*/}
+              {/*<p>Page {this.state.pageNumber} of {this.state.numPages}</p>*/}
+            </div>
+          </Card.Body>
+        </Card>
+      </div>
     )
   }
 }

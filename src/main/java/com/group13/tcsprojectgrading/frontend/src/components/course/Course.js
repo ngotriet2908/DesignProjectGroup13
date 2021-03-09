@@ -1,9 +1,9 @@
 import React, {Component} from "react";
 import {request} from "../../services/request";
-import {BASE} from "../../services/endpoints";
+import {BASE, USER_COURSES, USER_INFO, USER_RECENT} from "../../services/endpoints";
 import styles from "./course.module.css";
 import ProjectCard from "./ProjectCard";
-import {Breadcrumb, Button} from "react-bootstrap";
+import {Breadcrumb, Button, Spinner} from "react-bootstrap";
 import store from "../../redux/store";
 import {push} from "connected-react-router";
 import {URL_PREFIX} from "../../services/config";
@@ -18,8 +18,7 @@ class Course extends Component {
       projects: [],
       course: {},
       stats: [],
-      loaded: false,
-
+      isLoaded: false,
 
       modalEditProjectActiveProjects: [],
       modalEditProjectAvailableProjects: [],
@@ -30,35 +29,28 @@ class Course extends Component {
   }
 
   componentDidMount() {
-    console.log("Course mounted.")
-    // console.log(this.props)
-
-    this.reloadPageData()
+    this.reloadPageData();
   }
 
   reloadPageData = () => {
-    request(BASE + "courses/" + this.props.match.params.courseId)
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        // console.log(data);
+    Promise.all([
+      request(BASE + "courses/" + this.props.match.params.courseId),
+      request(`${BASE}courses/${this.props.match.params.courseId}/stats/count`)
+    ])
+      .then(async([res1, res2]) => {
+        const courses = await res1.json();
+        const stats = await res2.json();
+
         this.setState({
-          projects: data.projects,
-          course: data.course
+          projects: courses.projects,
+          course: courses.course,
+          stats: stats,
+          isLoaded: true,
         })
       })
       .catch(error => {
         console.error(error.message);
       });
-
-    request(`${BASE}courses/${this.props.match.params.courseId}/stats/count`)
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        this.setState({ stats: data })
-      })
   }
 
   containsObject(obj, list) {
@@ -185,6 +177,16 @@ class Course extends Component {
   }
 
   render () {
+    if (!this.state.isLoaded) {
+      return(
+        <div className={styles.container}>
+          <Spinner className={styles.spinner} animation="border" role="status">
+            <span className="sr-only">Loading...</span>
+          </Spinner>
+        </div>
+      )
+    }
+
     return (
       <div className={styles.container}>
         <Breadcrumb>
@@ -212,18 +214,24 @@ class Course extends Component {
             <Button className={styles.projectsToolBarButton}
               variant="primary"
               onClick={this.modalEditProjectsHandleShow}>
-              edit projects
+              Edit projects
             </Button>
           </div>
-          <ul className={styles.ul}>
-            {this.state.projects.map(project => {
-              return (
-                <li className={styles.li} key={project.id}>
-                  <ProjectCard data={project}/>
-                </li>
-              )
-            })}
-          </ul>
+          {this.state.projects.length > 0 ?
+            <ul className={styles.ul}>
+              {this.state.projects.map(project => {
+                return (
+                  <li className={styles.li} key={project.id}>
+                    <ProjectCard data={project}/>
+                  </li>
+                )
+              })}
+            </ul>
+            :
+            <div>
+              No courses here
+            </div>
+          }
         </div>
 
 
@@ -259,9 +267,9 @@ class Course extends Component {
               return (
                 <li className={styles.li} key={stat.title}>
                   <Statistic title ={stat.title}
-                             type={stat.type}
-                             data={stat.data}
-                             unit={stat.unit}/>
+                    type={stat.type}
+                    data={stat.data}
+                    unit={stat.unit}/>
                 </li>
               );
             })}

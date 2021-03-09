@@ -7,7 +7,6 @@ import RubricOutlineElement from "./RubricOutlineElement";
 class RubricOutlineGroup extends Component {
   constructor (props) {
     super(props);
-
     this.padding = this.props.padding + 1.4;
   }
 
@@ -20,6 +19,7 @@ class RubricOutlineGroup extends Component {
               key={index}
               data={m}
               padding={this.padding}
+              onClickElement={this.props.onClickElement}
             />
           );
         })}
@@ -59,10 +59,11 @@ class RubricOutlineInnerGroup extends Component {
           data={this.props.data.content}
           padding={this.props.padding}
           collapsed={this.state.collapsed}
+          onClickElement={this.props.onClickElement}
         />
 
         <div className={className}>
-          {this.props.data.children && <RubricOutlineGroup padding={this.props.padding} data={this.props.data.children}/>}
+          {this.props.data.children && <RubricOutlineGroup onClickElement={this.props.onClickElement} padding={this.props.padding} data={this.props.data.children}/>}
         </div>
       </div>
     );

@@ -1,33 +1,35 @@
-import React, { Component } from 'react'
+import React, {Component} from 'react'
 
-import styles from './rubric.module.css'
+import rubricStyles from '../rubricNew/rubric.module.css';
+import styles from './grading.module.css'
 import {connect} from "react-redux";
-import RubricOutlineGroup from "./RubricOutlineGroup";
-import {FaMinus, FaPlus} from "react-icons/fa";
 import {setSelectedElement} from "../../redux/rubricNew/actions";
+import RubricOutlineGroup from "../rubricNew/RubricOutlineGroup";
 
 
-class RubricOutline extends Component {
+class RubricViewerOutline extends Component {
   constructor (props) {
     super(props);
-
     this.padding = 0;
   }
 
   onClickElement = (id) => {
+    this.props.hiddenCallback(true);
     this.props.setSelectedElement(id);
   }
 
   render () {
-    let classNames = `${styles.outlineElementContainer}`;
+    let classNames = `${rubricStyles.outlineElementContainer}`;
     if (this.props.selectedElement != null) {
       classNames += " " + (this.props.rubric.id === this.props.selectedElement &&
-        `${styles.outlineElementContainerSelected}`);
+        `${rubricStyles.outlineElementContainerSelected}`);
     }
 
+    let hidden = this.props.isOutlineHidden ? ` ${styles.rubricViewerOutlineHidden}` : "";
+
     return (
-      <div className={styles.outlineContainer}>
-        <div className={styles.outlineHeader} onClick={() => this.onClickElement(this.props.rubric.id)}>
+      <div className={`${rubricStyles.outlineContainer} ${styles.rubricViewerOutline}${hidden}`}>
+        <div className={rubricStyles.outlineHeader} onClick={() => this.onClickElement(this.props.rubric.id)}>
           <div className={classNames}>
             <h4>Rubric</h4>
             <div>{this.props.isEditing && (<span>Editing</span>)}</div>
@@ -60,4 +62,4 @@ const actionCreators = {
   setSelectedElement
 }
 
-export default connect(mapStateToProps, actionCreators)(RubricOutline)
+export default connect(mapStateToProps, actionCreators)(RubricViewerOutline)

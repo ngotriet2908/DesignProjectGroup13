@@ -15,18 +15,18 @@ class RubricOutlineElement extends Component {
     super(props);
 
     this.state = {
-      selected: false,
+      // selected: false,
       showMenu: false,
     }
   }
 
-  onClickElement = () => {
-    this.setState({
-      selected: true,
-    })
-
-    this.props.setSelectedElement(this.props.data.id);
-  }
+  // onClickElement = () => {
+  //   // this.setState({
+  //   //   selected: true,
+  //   // })
+  //
+  //   this.props.setSelectedElement(this.props.data.id);
+  // }
 
   render () {
     let classNames = `${styles.outlineElementContainer}`;
@@ -37,7 +37,7 @@ class RubricOutlineElement extends Component {
 
     return (
       <div>
-        <div onClick={this.onClickElement}>
+        <div onClick={() => this.props.onClickElement(this.props.data.id)}>
           <div className={classNames}>
             <div className={styles.outlineElement} style={{paddingLeft: `${this.props.padding}rem`}}>
               <div className={styles.outlineElementLeft}>
