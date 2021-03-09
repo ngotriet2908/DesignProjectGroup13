@@ -106,6 +106,57 @@ public class ProjectsController {
         }
     }
 
+    @PostMapping(value = "/{projectId}/feedback")
+    @ResponseBody
+    protected void sendFeedback(@PathVariable String courseId,
+                                @PathVariable String projectId,
+                                @RequestBody ObjectNode feedback,
+                                Principal principal) throws JsonProcessingException, ParseException {
+        Project project = projectService.getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "entity not found"
+            );
+        }
+
+        String id = feedback.get("id").asText();
+        boolean isGroup = feedback.get("isGroup").asBoolean();
+        String body = feedback.get("body").asText();
+        String subject = feedback.get("subject").asText();
+
+        this.canvasApi.getCanvasUsersApi().sendMessageWithId(
+                (!isGroup)? id: null,
+                (isGroup)? id: null,
+                subject,
+                body
+        );
+
+    }
+
+    @GetMapping(value = "/{projectId}/feedback")
+    @ResponseBody
+    protected ObjectNode getFeedbackInfoPage(@PathVariable String courseId,
+                                       @PathVariable String projectId,
+                                       Principal principal) throws JsonProcessingException, ParseException {
+        Project project = projectService.getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "entity not found"
+            );
+        }
+        String projectResponse = this.canvasApi.getCanvasCoursesApi().getCourseProject(courseId, projectId);
+        String courseString = this.canvasApi.getCanvasCoursesApi().getUserCourse(courseId);
+        ObjectMapper objectMapper = new ObjectMapper();
+        ArrayNode usersNode = groupPages(objectMapper, this.canvasApi.getCanvasCoursesApi().getCourseParticipants(courseId));
+        ObjectNode resultNode = objectMapper.createObjectNode();
+        resultNode.set("users", usersNode);
+        resultNode.set("course", objectMapper.readTree(courseString));
+        resultNode.set("project", objectMapper.readTree(projectResponse));
+
+        return resultNode;
+
+    }
+
     @GetMapping(value = "/{projectId}/groups")
     @ResponseBody
     protected JsonNode getProjectGroup(@PathVariable String courseId, @PathVariable String projectId, Principal principal) throws JsonProcessingException, ParseException {

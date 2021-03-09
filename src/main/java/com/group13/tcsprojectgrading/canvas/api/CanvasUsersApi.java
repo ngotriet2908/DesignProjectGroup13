@@ -48,5 +48,33 @@ public class CanvasUsersApi {
             return this.canvasApi.sendRequest(uri, HttpMethod.GET, authorizedClient);
         }
     }
+
+    public void sendMessageWithId(String userId, String groupId, String subject, String body) {
+        OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
+
+        if (authorizedClient == null) {
+            return;
+        } else {
+            String rep = "";
+            if (userId == null) {
+                rep = "group_" + groupId;
+            } else {
+                rep = userId;
+            }
+
+            URI uri = UriComponentsBuilder.newInstance()
+                    .scheme(CanvasEndpoints.SCHEME)
+                    .host(CanvasEndpoints.HOST)
+                    .path(CanvasEndpoints.CONVERSATIONS_PATH)
+                    .queryParam("recipients[]", rep)
+                    .queryParam("subject", subject)
+                    .queryParam("body", body)
+                    .queryParam("force_new", true)
+                    .queryParam("group_conversation", (groupId != null))
+                    .build(userId);
+
+            this.canvasApi.sendRequest(uri, HttpMethod.POST, authorizedClient);
+        }
+    }
 }
 
