@@ -3,13 +3,14 @@ import CourseCard from './CourseCard'
 
 import styles from './home.module.css'
 import {request} from "../../services/request";
-import {BASE, USER_COURSES, USER_INFO} from "../../services/endpoints";
+import {BASE, USER_COURSES, USER_INFO, USER_TASKS} from "../../services/endpoints";
 import {USER_RECENT} from "../../services/endpoints";
 import ProjectCard from "../course/ProjectCard";
 import {connect} from "react-redux";
 import {saveUser} from "../../redux/user/actions";
 import Breadcrumb from "react-bootstrap/Breadcrumb";
 import {Spinner} from "react-bootstrap";
+import HomeTaskCard from "./HomeTaskCard";
 
 class Home extends Component {
   constructor (props) {
@@ -18,6 +19,7 @@ class Home extends Component {
       courses: [],
       recentProjects: [],
       isLoaded: false,
+      tasks: []
     }
   }
 
@@ -25,19 +27,22 @@ class Home extends Component {
     Promise.all([
       request(BASE + USER_INFO),
       request(BASE + USER_COURSES),
-      request(BASE + USER_RECENT)
+      request(BASE + USER_RECENT),
+      request(BASE + USER_TASKS)
     ])
-      .then(async([res1, res2, res3]) => {
+      .then(async([res1, res2, res3, res4]) => {
         const user = await res1.json();
         const courses = await res2.json();
         const recent = await res3.json();
+        const tasks = await res4.json();
 
         this.props.saveUser(user);
 
         this.setState({
           recentProjects: recent,
           courses: courses,
-          isLoaded: true
+          isLoaded: true,
+          tasks: tasks
         })
       })
       .catch(error => {
@@ -96,6 +101,20 @@ class Home extends Component {
               }
             </div>
           </div>
+
+          <div className={styles.homeTasksContainer}>
+            <h2>My Tasks</h2>
+            <ul className={styles.ul}>
+              {this.state.tasks.map(task => {
+                return (
+                  <li className={styles.li} key={task.project.id +"/"+task.course.id}>
+                    <HomeTaskCard task={task}/>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+
         </div>
       </div>
     )

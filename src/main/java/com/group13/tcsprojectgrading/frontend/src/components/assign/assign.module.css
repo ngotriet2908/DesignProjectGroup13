@@ -42,6 +42,7 @@
 }
 
 .graderManagement {
+    width: 100%;
     height: inherit;
     padding: 1rem 1rem;
 }

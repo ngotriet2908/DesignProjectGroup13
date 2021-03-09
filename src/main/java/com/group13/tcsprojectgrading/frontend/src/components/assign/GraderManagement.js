@@ -4,18 +4,23 @@ import GraderCard from "./GraderCard";
 import {ListGroup, ListGroupItem} from "react-bootstrap";
 import TaskCard from "./TaskCard";
 import {notAssignedGroupsData, gradersData} from './GradersData'
-import {Button, Card, FormControl, Modal, Alert, Spinner} from 'react-bootstrap'
+import {Button, Card, FormControl, Modal, Alert, Spinner, Breadcrumb} from 'react-bootstrap'
 import {request} from "../../services/request";
 import {BASE, COURSES, PROJECT, USER_COURSES} from "../../services/endpoints";
 import AssigningModal from "./AssigningModal";
 import { withRouter } from 'react-router-dom'
 import EditGradersModal from "./EditGradersModal";
+import store from "../../redux/store";
+import {URL_PREFIX} from "../../services/config";
+import {push} from "connected-react-router";
 
 class GraderManagement extends Component {
 
   constructor(props) {
     super(props)
     this.state = {
+      project: {},
+      course: {},
       graders : [],
       notAssigned: [],
       groupsFilterString: "",
@@ -53,6 +58,24 @@ class GraderManagement extends Component {
     this.setState({
       isLoading: true
     })
+
+    request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId)
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        console.log(data);
+        this.setState({
+          project: data.project,
+          course: data.course,
+        })
+
+        this.props.saveRubric(data.rubric);
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
+
     this.projectManagementHandler()
 
     // this.setState({
@@ -396,14 +419,25 @@ class GraderManagement extends Component {
           <span className="sr-only">Loading...</span>
         </Spinner>
         :
-        <div className={styles.graderManagement}>
-          {(!this.state.alertShow)? null :
-            <Alert variant="success" onClose={() => {this.setState({alertShow:false})}} dismissible>
-              <p>
-                {this.state.alertBody}
-              </p>
-            </Alert>}
-
+      <div className={styles.graderManagement}>
+        {(!this.state.alertShow)? null :
+          <Alert variant="success" onClose={() => {this.setState({alertShow:false})}} dismissible>
+            <p>
+              {this.state.alertBody}
+            </p>
+          </Alert>}
+        <Breadcrumb>
+          <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumb.Item>
+          <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id ))}>
+            {this.state.course.name}
+          </Breadcrumb.Item>
+          <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id + "/projects/"+this.state.project.id))}>
+            {this.state.project.name}
+          </Breadcrumb.Item>
+          <Breadcrumb.Item active>
+            Manage Graders
+          </Breadcrumb.Item>
+        </Breadcrumb>
 
           <Card border="secondary" className={styles.gradersCardContainer}>
             <div className={styles.manageTaToolbar}>

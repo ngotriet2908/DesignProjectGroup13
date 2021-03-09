@@ -43,6 +43,14 @@ public class TaskService {
         return repository.findById(new TaskId(id, isGroup, project.getProjectCompositeKey())).orElse(null);
     }
 
+    public List<Task> findTaskByUserId(String userId) {
+        return repository.findTasksByGrader_UserId(userId);
+    }
+
+    public List<Task> findTaskInProjectWithUserId(Project project, String userId) {
+        return repository.findTasksByProjectAndGrader_UserId(project, userId);
+    }
+
     public void deleteTask(Task task) {
         repository.delete(task);
     }

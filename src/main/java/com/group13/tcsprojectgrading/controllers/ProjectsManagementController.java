@@ -10,11 +10,9 @@ import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.Grader;
 import com.group13.tcsprojectgrading.models.Project;
 import com.group13.tcsprojectgrading.models.Task;
-import com.group13.tcsprojectgrading.services.ActivityService;
 import com.group13.tcsprojectgrading.services.GraderService;
 import com.group13.tcsprojectgrading.services.ProjectService;
 import com.group13.tcsprojectgrading.services.TaskService;
-import com.group13.tcsprojectgrading.services.rubric.RubricService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -106,6 +104,7 @@ public class ProjectsManagementController {
                     isGroup,
                     project,
                     jsonNode.get("id").asText(),
+                    jsonNode.get("user_id").asText(),
                     name
             );
             validSubmissionId.add(task.getSubmissionId());

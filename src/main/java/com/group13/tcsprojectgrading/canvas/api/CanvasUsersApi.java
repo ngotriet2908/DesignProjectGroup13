@@ -32,5 +32,21 @@ public class CanvasUsersApi {
             return this.canvasApi.sendRequest(uri, HttpMethod.GET, authorizedClient);
         }
     }
+
+    public String getAccountWithId(String userId) {
+        OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
+
+        if (authorizedClient == null) {
+            return null;
+        } else {
+            URI uri = UriComponentsBuilder.newInstance()
+                    .scheme(CanvasEndpoints.SCHEME)
+                    .host(CanvasEndpoints.HOST)
+                    .path(CanvasEndpoints.PROFILE_USER_URL)
+                    .build(userId);
+
+            return this.canvasApi.sendRequest(uri, HttpMethod.GET, authorizedClient);
+        }
+    }
 }
 

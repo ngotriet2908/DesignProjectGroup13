@@ -135,6 +135,12 @@ class Project extends Component {
                 </Button>
 
                 <Button variant="primary">
+                  <Link className={styles.plainLink} to={this.props.match.url + "/tasks"}>
+                    My tasks
+                  </Link>
+                </Button>
+
+                <Button variant="primary">
                   <Link className={styles.plainLink} to={this.props.match.url + "/graders"}>
                       Manage graders
                   </Link>

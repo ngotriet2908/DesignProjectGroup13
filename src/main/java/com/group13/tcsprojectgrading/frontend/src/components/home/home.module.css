@@ -48,3 +48,11 @@
     width: 100%;
     display: block;
 }
+
+.homeTasksContainer {
+    width: 100%;
+}
+
+.cardBlock {
+    display: block;
+}

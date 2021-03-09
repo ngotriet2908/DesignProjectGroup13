@@ -5,6 +5,7 @@ import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.OneToMany;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @IdClass(ProjectId.class)
@@ -83,5 +84,18 @@ public class Project {
                 "courseId='" + courseId + '\'' +
                 ", projectId='" + projectId + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Project project = (Project) o;
+        return Objects.equals(courseId, project.courseId) && Objects.equals(projectId, project.projectId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(courseId, projectId);
     }
 }
