@@ -10,6 +10,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
@@ -83,6 +84,7 @@ public class CanvasApi {
         WebClient.UriSpec<WebClient.RequestBodySpec> uriSpec = webClient.method(httpMethod);
         WebClient.RequestBodySpec bodySpec = uriSpec.uri(uri);
         bodySpec.attributes(ServletOAuth2AuthorizedClientExchangeFilterFunction.oauth2AuthorizedClient(authorizedClient));
+        bodySpec.retrieve();
         return bodySpec.retrieve().toEntity(String.class);
     }
 

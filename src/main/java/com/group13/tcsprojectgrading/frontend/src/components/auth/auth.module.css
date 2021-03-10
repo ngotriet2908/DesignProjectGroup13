@@ -7,7 +7,8 @@
 }
 
 .card {
-    width: 20rem;
+    width: 18rem;
+    padding: 2rem 0;
 
     grid-column: 1 / 2;
     grid-row: 1 / 2;
@@ -22,4 +23,17 @@
 .plainLink, .plainLink:hover {
     text-decoration: none;
     color: white;
+}
+
+.logoContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+
+.logoContainer h2 {
+    margin: 0 0 0 0.5rem;
 }

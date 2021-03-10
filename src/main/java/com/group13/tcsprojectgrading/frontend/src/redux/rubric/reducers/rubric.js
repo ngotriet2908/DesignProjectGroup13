@@ -23,9 +23,9 @@ import {
 } from "../functions";
 
 const initialState = {
-  rubric: null,
-  rubricCopy: null,
-  isEditing: false,
+  // rubric: null,
+  // rubricCopy: null,
+  // isEditing: false,
 };
 
 export default function(state = initialState, action) {

@@ -42,6 +42,7 @@
 }
 
 .graderManagement {
+    width: 100%;
     height: inherit;
     padding: 1rem 1rem;
 }
@@ -228,6 +229,7 @@
 .editGradersModalCard {
     margin-bottom: 2rem;
 }
+
 
 /*::-webkit-scrollbar {*/
 /*    display: none;*/

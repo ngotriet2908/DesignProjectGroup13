@@ -7,21 +7,23 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.Activity;
+import com.group13.tcsprojectgrading.models.Grader;
+import com.group13.tcsprojectgrading.models.Project;
+import com.group13.tcsprojectgrading.models.Task;
 import com.group13.tcsprojectgrading.services.ActivityService;
+import com.group13.tcsprojectgrading.services.GraderService;
+import com.group13.tcsprojectgrading.services.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/users")
@@ -30,10 +32,16 @@ class UsersController {
 
     private final ActivityService activityService;
 
+    private final TaskService taskService;
+
+    private final GraderService graderService;
+
     @Autowired
-    public UsersController(CanvasApi canvasApi, ActivityService activityService) {
+    public UsersController(CanvasApi canvasApi, ActivityService activityService, TaskService taskService, GraderService graderService) {
         this.canvasApi = canvasApi;
         this.activityService = activityService;
+        this.taskService = taskService;
+        this.graderService = graderService;
     }
 
     @RequestMapping(value = "/self", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -65,5 +73,41 @@ class UsersController {
 
 //        return nodes.subList(0, Math.min(3, nodes.size()));
         return activities.subList(0, Math.min(3, activities.size()));
+    }
+
+    @GetMapping(value = "/tasks")
+    protected ArrayNode getTasks(Principal principal) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<Task> tasks = taskService.findTaskByUserId(principal.getName());
+        Map<Project, List<Task>> projectListMap = new HashMap<>();
+
+        for(Task task : tasks) {
+            if (!projectListMap.containsKey(task.getProject())) {
+                List<Task> tasks1 = new ArrayList<>();
+                tasks1.add(task);
+                projectListMap.put(task.getProject(), tasks1);
+            } else {
+                projectListMap.get(task.getProject()).add(task);
+            }
+        }
+
+        ArrayNode arrayNode = objectMapper.createArrayNode();
+
+        for(Map.Entry<Project, List<Task>> entry: projectListMap.entrySet()) {
+            JsonNode node = objectMapper.createObjectNode();
+
+            String courseString = this.canvasApi.getCanvasCoursesApi().getUserCourse(entry.getKey().getCourseId());
+            String projectResponse = this.canvasApi.getCanvasCoursesApi().getCourseProject(entry.getKey().getCourseId(), entry.getKey().getProjectId());
+
+            ((ObjectNode) node).set("course", objectMapper.readTree(courseString));
+            ((ObjectNode) node).set("project", objectMapper.readTree(projectResponse));
+            ((ObjectNode) node).put("tasks", entry.getValue().size());
+            ((ObjectNode) node).put("progress", (int)(Math.random()*100));
+
+            arrayNode.add(node);
+        }
+
+//        return nodes.subList(0, Math.min(3, nodes.size()));
+        return arrayNode;
     }
 }

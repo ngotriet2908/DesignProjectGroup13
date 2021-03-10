@@ -107,6 +107,14 @@ class CoursesController {
         }
     }
 
+    @RequestMapping(value = "/{course_id}/allUsers", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    protected ArrayNode getCourseUser(@PathVariable String course_id) throws JsonProcessingException {
+        List<String> response = this.canvasApi.getCanvasCoursesApi().getCourseParticipants(course_id);
+
+        return groupPages(new ObjectMapper(), response);
+    }
+
     @RequestMapping(value = "/{course_id}/addProject/getAllProjects", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     protected ResponseEntity<ArrayNode> getCourseCanvas(@PathVariable String course_id) throws JsonProcessingException {

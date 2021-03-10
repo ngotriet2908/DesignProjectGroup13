@@ -7,11 +7,22 @@ import java.util.List;
 public class Rubric {
     @Id
     public String id;
-    private List<Block> blocks;
+    public String projectId;
 
-    public Rubric(String id, List<Block> blocks) {
+    public List<Element> children;
+
+    public Rubric(String id, String projectId, List<Element> children) {
         this.id = id;
-        this.blocks = blocks;
+        this.projectId = projectId;
+        this.children = children;
+    }
+
+    public Rubric(String id, List<Element> children) {
+        this.id = id;
+        this.children = children;
+    }
+
+    public Rubric() {
     }
 
     public String getId() {
@@ -22,11 +33,19 @@ public class Rubric {
         this.id = id;
     }
 
-    public List<Block> getBlocks() {
-        return blocks;
+    public String getProjectId() {
+        return projectId;
     }
 
-    public void setBlocks(List<Block> blocks) {
-        this.blocks = blocks;
+    public void setProjectId(String projectId) {
+        this.projectId = projectId;
+    }
+
+    public List<Element> getChildren() {
+        return children;
+    }
+
+    public void setChildren(List<Element> children) {
+        this.children = children;
     }
 }

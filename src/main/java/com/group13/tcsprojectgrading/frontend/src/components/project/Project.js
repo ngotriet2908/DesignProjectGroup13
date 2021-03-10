@@ -1,24 +1,23 @@
 import React, {Component} from "react";
 import styles from "../project/project.module.css";
 import {request} from "../../services/request";
-import {BASE } from "../../services/endpoints";
+import {BASE, USER_COURSES, USER_INFO, USER_RECENT} from "../../services/endpoints";
 import Button from 'react-bootstrap/Button'
 import {URL_PREFIX} from "../../services/config";
-import {Link, Route, Switch} from 'react-router-dom'
+import {Link} from 'react-router-dom'
 
 import {v4 as uuidv4} from "uuid";
-import {removeRubric, saveRubric} from "../../redux/rubric/actions";
 import {connect} from "react-redux";
-import {Breadcrumb, CardColumns} from "react-bootstrap";
+import {Breadcrumb, CardColumns, Spinner} from "react-bootstrap";
 import store from "../../redux/store";
 import {push} from "connected-react-router";
 import Card from "react-bootstrap/Card";
+import {deleteRubric, saveRubric} from "../../redux/rubricNew/actions";
 
 import testStats from "../stat/testStats.json";
 import Statistic from "../stat/Statistic";
 
 class Project extends Component {
-
   constructor(props) {
     super(props)
 
@@ -27,53 +26,50 @@ class Project extends Component {
       course: {},
       rubric: null,
       stats: [],
+      isLoaded: false
     }
   }
 
   componentDidMount() {
     const courseId = this.props.match.params.courseId;
     const projectId = this.props.match.params.projectId;
-    request(BASE + "courses/" + courseId + "/projects/" + projectId)
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        console.log(data);
-        this.setState({
-          project: data.project,
-          course: data.course,
-        })
 
-        this.props.saveRubric(data.rubric);
+    Promise.all([
+      request(BASE + "courses/" + courseId + "/projects/" + projectId),
+      request(`${BASE}courses/${courseId}/projects/${projectId}/stats/submissions`),
+      request(`${BASE}courses/${courseId}/projects/${projectId}/stats/grades`)
+    ])
+      .then(async([res1, res2, res3]) => {
+        const project = await res1.json();
+        const statsSubmissions = await res2.json();
+        const statsGrades = await res3.json();
+
+        const stats = [statsSubmissions].concat(statsGrades);
+
+        this.props.saveRubric(project.rubric);
+
+        this.setState({
+          project: project.project,
+          course: project.course,
+          stats: stats,
+          isLoaded: true
+        });
       })
       .catch(error => {
         console.error(error.message);
       });
-
-    request(`${BASE}courses/${courseId}/projects/${projectId}/stats/submissions`)
-      .then(response => response.json())
-      .then(data => {
-        console.log(data);
-        this.setState({ stats: [data] })
-      })
-      .catch(error => console.log(error.message));
-
-    request(`${BASE}courses/${courseId}/projects/${projectId}/stats/grades`)
-      .then(response => response.json())
-      .then(data =>{
-        const newStats = this.state.stats.concat(data);
-        this.setState( {stats: newStats });
-      })
-      .catch(error => console.log(error.message));
   }
 
   /*
   Creates a new rubric object and saves it to the store
   */
   onClickCreateRubric = () => {
+    console.log("Creating rubric for project " + parseInt(this.props.match.params.projectId));
+
     let rubric = {
       id: uuidv4(),
-      blocks: []
+      projectId: this.props.match.params.projectId,
+      children: []
     }
 
     request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/rubric", "POST", rubric)
@@ -90,7 +86,7 @@ class Project extends Component {
     request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/rubric", "DELETE")
       .then(data => {
         console.log(data);
-        this.props.removeRubric();
+        this.props.deleteRubric();
       })
       .catch(error => {
         console.error(error.message);
@@ -98,6 +94,16 @@ class Project extends Component {
   }
 
   render () {
+    if (!this.state.isLoaded) {
+      return(
+        <div className={styles.container}>
+          <Spinner className={styles.spinner} animation="border" role="status">
+            <span className="sr-only">Loading...</span>
+          </Spinner>
+        </div>
+      )
+    }
+
     return (
       <div className={styles.projectContainer}>
         <Breadcrumb>
@@ -125,6 +131,12 @@ class Project extends Component {
                 <Button variant="primary">
                   <Link className={styles.plainLink} to={this.props.match.url + "/groups"}>
                       Groups
+                  </Link>
+                </Button>
+
+                <Button variant="primary">
+                  <Link className={styles.plainLink} to={this.props.match.url + "/tasks"}>
+                    My tasks
                   </Link>
                 </Button>
 
@@ -160,7 +172,7 @@ class Project extends Component {
                 <div>
                   <Button variant="primary"><Link className={styles.plainLink} to={this.props.match.url + "/rubric"}>Open
                       rubric</Link></Button>
-                  <Button variant="danger" onClick={this.onClickRemoveRubric}>Remove rubric (disabled)</Button>
+                  <Button variant="danger" onClick={this.onClickRemoveRubric}>Remove rubric</Button>
                 </div>
                 :
                 <div>
@@ -182,19 +194,20 @@ class Project extends Component {
                 {testStats.map(stat => {
                   return (
                     <Statistic title={stat.title}
-                               type={stat.type}
-                               data={stat.data}
-                               unit={stat.unit}/>
+                      type={stat.type}
+                      data={stat.data}
+                      unit={stat.unit}/>
                   );
-                }).concat(this.state.stats.map(stat => {
+                }).concat(this.state.stats.map((stat, index) => {
                   return (
                     <Statistic title={stat.title}
-                               type={stat.type}
-                               data={stat.data}
-                               unit={stat.unit}/>
+                      key={index}
+                      type={stat.type}
+                      data={stat.data}
+                      unit={stat.unit}/>
                   );
                 }))}
-                </CardColumns>
+              </CardColumns>
             </Card.Body>
           </Card>
         </div>
@@ -205,13 +218,14 @@ class Project extends Component {
 
 const mapStateToProps = state => {
   return {
-    rubric: state.rubric.rubric
+    rubric: state.rubricNew.rubric
   };
 };
 
 const actionCreators = {
   saveRubric,
-  removeRubric
+  deleteRubric
+  // removeRubric
 }
 
 export default connect(mapStateToProps, actionCreators)(Project)

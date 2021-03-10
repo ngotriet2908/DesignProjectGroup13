@@ -26,8 +26,13 @@ class SignIn extends Component {
       <div className={styles.container}>
         <Card className={styles.card}>
           <Card.Body>
-            <Card.Title>Grading System</Card.Title>
-            <Button variant="primary" href="/oauth2/authorization/canvas">
+            {/*<Card.Text><img height="50" width="50" src="http://localhost:8080/img/logo.png"/></Card.Text>*/}
+            {/*<Card.Title><h2>ProGrader</h2></Card.Title>*/}
+            <div className={styles.logoContainer}>
+              <img height="40" width="40" src="http://localhost:8080/img/logo.png" alt="logo"/>
+              <h2>ProGrader</h2>
+            </div>
+            <Button size="lg" variant="primary" href="/oauth2/authorization/canvas">
                 Sign in with UT
             </Button>
           </Card.Body>

@@ -46,6 +46,9 @@ export function request(url, method = "GET", data = {}) {
       if (response.status === 401) {
         store.dispatch(push(URL_PREFIX + "/login/"))
         throw new Error("Not authenticated: 401")
+      } else if (response.status === 404) {
+        store.dispatch(push(URL_PREFIX + "/notfound/"))
+        throw new Error("Not found: 404")
       } else {
         return response;
       }

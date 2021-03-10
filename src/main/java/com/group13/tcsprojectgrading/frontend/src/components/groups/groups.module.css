@@ -1,0 +1,60 @@
+.container {
+    padding: 2rem;
+    width: 100%;
+}
+
+.spinner{
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    color: dodgerblue;
+}
+
+.header {
+
+}
+.badge {
+    margin-left: 0.5rem;
+}
+
+.toolbar {
+    display: flex;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    border-bottom:1px solid gray;
+
+}
+
+.groupsSearchBar {
+    display: flex;
+    margin-right: 1rem;
+    width: 100%;
+}
+
+.toolbarButton {
+    margin-top: 1rem;
+    display: flex;
+}
+
+.groupsContainer {
+    display: block;
+    list-style-type: none;
+    padding-right: 1rem;
+}
+
+.groupInfo {
+
+}
+
+.ul {
+    margin-top: 1rem;
+    padding-inline-start: 0;
+    display: block;
+}
+
+.userInfo {
+    width: 100%;
+    display: inline-grid;
+    grid-template-columns: 20% 20% 40% 20%;
+}
+
