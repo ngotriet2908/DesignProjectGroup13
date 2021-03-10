@@ -38,10 +38,8 @@ class HomeTaskCard extends Component {
         <Card.Body className={styles.cardBodyContainer}>
           <div className={styles.cardContentContainer}>
             <h5>{this.props.task.project.name}</h5>
-            <h5>Course: {this.props.task.course.name}</h5>
-            <h5>Number of tasks: {this.props.task.tasks}</h5>
-
-            <div>Created on {(new Date(this.props.data.created_at)).toDateString()}</div>
+            <div>Course: {this.props.task.course.name}</div>
+            <div>Number of tasks: {this.props.task.tasks}</div>
           </div>
           <div className={styles.cardButtonContainer}>
             <div onClick={this.onClickSeeMore}>
