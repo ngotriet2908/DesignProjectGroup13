@@ -1,9 +1,25 @@
-.statTextValue {
+.stat {
+    min-width: 10rem;
+    max-width: 20rem;
+}
+
+.statTitle {
+    text-align: center;
+}
+
+.statText {
+    text-align: center;
+}
+
+.statNumber {
     text-align: center;
     font-size: 4rem;
     font-weight: bold;
 }
 
-.statTextUnit{
+.statUnit {
     text-align: center;
+}
+
+.piechart {
 }
