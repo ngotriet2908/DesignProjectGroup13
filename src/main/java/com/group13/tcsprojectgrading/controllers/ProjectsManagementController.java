@@ -390,4 +390,113 @@ public class ProjectsManagementController {
 
         return resultNode;
     }
+
+    @PostMapping(value = "/bulkAssign")
+    protected JsonNode bulkAssign(@PathVariable String courseId,
+                                   @PathVariable String projectId,
+                                   @RequestBody ObjectNode object,
+                                   Principal principal) throws JsonProcessingException, ParseException {
+        Project project = projectService.getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "entity not found"
+            );
+        }
+        List<Task> tasks1 = taskService.getTasksFromId(project);
+
+        List<Task> notAssigned = new ArrayList<>();
+        for(Task task: tasks1) {
+            if (task.getGrader() == null) {
+                notAssigned.add(task);
+            }
+        }
+
+        int notAssignNum = object.get("tasks").asInt();
+        if (notAssignNum > notAssigned.size()) {
+            System.out.println("different sync");
+            return null;
+        }
+        ObjectMapper objectMapper = new ObjectMapper();
+        Collections.shuffle(notAssigned);
+        ArrayNode gradersNeedToAssign = (ArrayNode) object.get("graders");
+        List<JsonNode> gradersNeedToBeAssigned = new ArrayList<>();
+        for (Iterator<JsonNode> it = gradersNeedToAssign.elements(); it.hasNext(); ) {
+            JsonNode node = it.next();
+            gradersNeedToBeAssigned.add(node);
+        }
+
+        int[] amountOfTasks = new int[gradersNeedToBeAssigned.size()];
+
+        Arrays.fill(amountOfTasks, (int) notAssignNum / amountOfTasks.length);
+        Random rand = new Random();
+        notAssignNum -= amountOfTasks.length*((int) notAssignNum / amountOfTasks.length);
+
+        while(notAssignNum > 0) {
+            int random = rand.nextInt(amountOfTasks.length);
+            amountOfTasks[random] += 1;
+            notAssignNum -= 1;
+        }
+
+        for(int i = 0; i < gradersNeedToBeAssigned.size(); i++) {
+            JsonNode grader = gradersNeedToBeAssigned.get(i);
+            int num = amountOfTasks[i];
+            for(int j = 0; j < num; j++) {
+                if (notAssigned.size() == 0) {
+                    System.out.println("something is wrong, not assigned is overflow");
+                    break;
+                }
+                Task task = notAssigned.remove(0);
+                Grader grader1 = graderService.getGraderFromGraderId(grader.get("id").asText(), project);
+                if (grader1 == null) {
+                    System.out.println("Grader not found");
+                    return null;
+                }
+                task.setGrader(grader1);
+                taskService.addNewTask(task);
+            }
+        }
+
+
+        //remake notAssigned & graders
+
+        List<Grader> graders = graderService.getGraderFromProject(project);
+        JsonNode resultNode = objectMapper.createObjectNode();
+        ArrayNode notAssignedArray = objectMapper.createArrayNode();
+        ArrayNode gradersArray = objectMapper.createArrayNode();
+
+        Map<String, ArrayNode> graderMap = new HashMap<>();
+        for (Grader grader1: graders) {
+            JsonNode formatNode = objectMapper.createObjectNode();
+            ArrayNode tasksArray = objectMapper.createArrayNode();
+            graderMap.put(grader1.getUserId(), tasksArray);
+            ((ObjectNode) formatNode).put("id", grader1.getUserId());
+            ((ObjectNode) formatNode).put("name", grader1.getName());
+            ((ObjectNode) formatNode).put("role", grader1.getRole().toString());
+            ((ObjectNode) formatNode).set("groups", tasksArray);
+            gradersArray.add(formatNode);
+        }
+
+        List<Task> tasks = taskService.getTasksFromId(project);
+        System.out.println(tasks);
+        for (Task task1: tasks) {
+
+            JsonNode taskNode = objectMapper.createObjectNode();
+            ((ObjectNode) taskNode).put("id", task1.getId());
+            ((ObjectNode) taskNode).put("submission_id", task1.getSubmissionId());
+            ((ObjectNode) taskNode).put("isGroup", task1.isGroup());
+            ((ObjectNode) taskNode).put("name", task1.getName());
+
+            if (task1.getGrader() == null) {
+                notAssignedArray.add(taskNode);
+            } else {
+                graderMap.get(task1.getGrader().getUserId()).add(taskNode);
+            }
+        }
+
+        ((ObjectNode)resultNode).set("graders", gradersArray);
+        ((ObjectNode)resultNode).set("notAssigned", notAssignedArray);
+
+        return resultNode;
+    }
+
 }

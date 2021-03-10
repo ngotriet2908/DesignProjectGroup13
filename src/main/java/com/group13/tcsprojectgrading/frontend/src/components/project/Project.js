@@ -204,26 +204,24 @@ class Project extends Component {
               <Card.Title>
                 <h3 className={styles.sectionTitle}>Statistics</h3>
               </Card.Title>
-              <div>
-                <CardColumns className={styles.stats}>
-                  {testStats.map(stat => {
-                    return (
-                      <Statistic title={stat.title}
-                        type={stat.type}
-                        data={stat.data}
-                        unit={stat.unit}/>
-                    );
-                  }).concat(this.state.stats.map((stat, index) => {
-                    return (
-                      <Statistic title={stat.title}
-                        key={index}
-                        type={stat.type}
-                        data={stat.data}
-                        unit={stat.unit}/>
-                    );
-                  }))}
-                </CardColumns>
-              </div>
+              <CardColumns className={styles.stats}>
+                {testStats.map(stat => {
+                  return (
+                    <Statistic title={stat.title}
+                      type={stat.type}
+                      data={stat.data}
+                      unit={stat.unit}/>
+                  );
+                }).concat(this.state.stats.map((stat, index) => {
+                  return (
+                    <Statistic title={stat.title}
+                      key={index}
+                      type={stat.type}
+                      data={stat.data}
+                      unit={stat.unit}/>
+                  );
+                }))}
+              </CardColumns>
             </Card.Body>
           </Card>
         </div>

@@ -103,6 +103,13 @@ class Course extends Component {
       .catch(error => {
         console.error(error.message);
       });
+    //     this.setState({
+    //       modalEditProjectActiveProjects: activeProjects,
+    //       modalEditProjectAvailableProjects: availableProjects,
+    //       modalEditProjectsShow: true,
+    //       modalEditShowAlert: false,
+    //       modalEditAlertBody: "",
+    //     }
   }
 
   modalEditProjectsHandleClose = () => {

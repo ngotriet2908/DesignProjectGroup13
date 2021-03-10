@@ -13,6 +13,7 @@ import EditGradersModal from "./EditGradersModal";
 import store from "../../redux/store";
 import {URL_PREFIX} from "../../services/config";
 import {push} from "connected-react-router";
+import BulkAssignModal from "./BulkAssignModal";
 
 class GraderManagement extends Component {
 
@@ -32,6 +33,10 @@ class GraderManagement extends Component {
       modalGraderShow: false,
       modalGraderObj: null,
 
+      //bulk assign tasks modal
+      modalBulkAssignShow: false,
+      modalBulkAssignObj: null,
+
       //assign tasks modal
       modalAssignShow: false,
       modalAssignGrader: null,
@@ -39,7 +44,7 @@ class GraderManagement extends Component {
       modalAssignIsFromNotAssigned: false,
       modalAssignGraderChoice: null,
 
-      //assign tasks modal
+      //edit tasks modal
       modalEditGradersShow: false,
       modalEditGradersActiveGraders: [],
       modalEditGradersAvailableGraders: [],
@@ -412,6 +417,40 @@ class GraderManagement extends Component {
     })
   }
 
+  modalBulkAssignHandleShow = () => {
+    this.setState({
+      modalBulkAssignShow: true
+    })
+  }
+
+  modalBulkAssignHandleClose = () => {
+    this.setState({
+      modalBulkAssignShow: false
+    })
+  }
+
+  modalBulkAssignHandleAccept = (object) => {
+    request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management/bulkAssign`,
+      "POST",
+      object
+    )
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        console.log(data)
+
+        this.setState({
+          modalBulkAssignShow: false,
+          graders: data.graders,
+          notAssigned: data.notAssigned
+        })
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
+  }
+
   render () {
     return (
       (this.state.isLoading)?
@@ -501,7 +540,7 @@ class GraderManagement extends Component {
               }
               <Button className={styles.notAssignedButton}
                 variant="primary"
-                onClick={null}>
+                onClick={this.modalBulkAssignHandleShow}>
                 bulk assign
               </Button>
               <h5 className={styles.notAssignedCount}> Submissions: {this.state.notAssigned.length}</h5>
@@ -566,6 +605,14 @@ class GraderManagement extends Component {
             showAlert={this.state.modalEditShowAlert}
             alertBody={this.state.modalEditAlertBody}
             closeAlertHandle={this.modalEditGradersHandleCloseAlert}
+          />
+
+          <BulkAssignModal
+            show={this.state.modalBulkAssignShow}
+            graders={this.state.graders}
+            notAssigned={this.state.notAssigned}
+            onClose={this.modalBulkAssignHandleClose}
+            onAccept={this.modalBulkAssignHandleAccept}
           />
 
         </div>
