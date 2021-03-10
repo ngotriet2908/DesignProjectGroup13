@@ -18,6 +18,7 @@
     "draft-js-import-html": "^1.4.1",
     "fast-json-patch": "^3.0.0-1",
     "lodash.clonedeep": "^4.5.0",
+    "postcss-modules-values": "^4.0.0",
     "prop-types": "^15.7.2",
     "react": "^16.14.0",
     "react-beautiful-dnd": "^13.0.0",
@@ -52,6 +53,8 @@
     "eslint-plugin-react": "^7.22.0",
     "history": "^4.10.1",
     "node-sass": "^5.0.0",
+    "postcss": "^8.2.8",
+    "postcss-loader": "^5.1.0",
     "sass-loader": "^11.0.1"
   },
   "scripts": {

@@ -21,9 +21,6 @@ class TaskInfo extends Component {
   }
 
   componentDidMount() {
-    this.setState({
-      isLoading: true
-    })
     request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/tasks/${this.props.match.params.isGroup}/${this.props.match.params.taskId}`)
       .then(response => {
         return response.json();

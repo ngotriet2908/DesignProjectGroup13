@@ -1,4 +1,5 @@
 var path = require("path");
+var values = require('postcss-modules-values');
 
 module.exports = {
   // entry: './rootReducer.js',
@@ -62,7 +63,22 @@ module.exports = {
               modules: true
             }
           },
-          'sass-loader'
+          {
+            loader: 'postcss-loader',
+            options: {
+              postcssOptions: {
+                plugins: [
+                  [
+                    'postcss-modules-values',
+                    {
+                      // Options
+                    },
+                  ],
+                ],
+              },
+            }
+          },
+          'sass-loader',
         ]
       },
     ]

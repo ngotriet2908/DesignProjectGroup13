@@ -10,13 +10,13 @@ import {IoArrowForward} from "react-icons/io5";
 import store from "../../redux/store";
 import {push} from "connected-react-router";
 
-class CourseCard extends Component {
+class ProjectCard extends Component {
   constructor (props) {
     super(props)
   }
 
   onClickSeeMore = () => {
-    store.dispatch(push(`${URL_PREFIX}/${COURSES}/${this.props.data.id}`));
+    store.dispatch(push("/app/courses/" + this.props.data.course_id + "/projects/" + this.props.data.id));
   }
 
   render () {
@@ -25,7 +25,7 @@ class CourseCard extends Component {
         <Card.Body className={styles.cardBodyContainer}>
           <div className={styles.cardContentContainer}>
             <h5>{this.props.data.name}</h5>
-            <div>Active in year {(new Date(this.props.data.start_at)).getFullYear()}</div>
+            <div>Created on {(new Date(this.props.data.created_at)).toDateString()}</div>
           </div>
           <div className={styles.cardButtonContainer}>
             <div onClick={this.onClickSeeMore}>
@@ -38,8 +38,8 @@ class CourseCard extends Component {
   }
 }
 
-CourseCard.propTypes = {
+ProjectCard.propTypes = {
   data: PropTypes.object
 }
 
-export default CourseCard
+export default ProjectCard

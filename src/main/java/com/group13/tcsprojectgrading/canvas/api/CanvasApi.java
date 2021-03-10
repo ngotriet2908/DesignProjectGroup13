@@ -10,6 +10,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
@@ -28,7 +29,6 @@ public class CanvasApi {
 
     public CanvasApi(WebClient webClient) {
         this.webClient = webClient;
-
         this.canvasUsersApi = new CanvasUsersApi(this);
         this.canvasCoursesApi = new CanvasCoursesApi(this);
     }
@@ -68,14 +68,13 @@ public class CanvasApi {
 //                .bodyToMono(String.class)
 //                .block();
         // TODO: catch errors here and in other request functions (!important)
-        return bodySpec
-                .retrieve()
-//                .onStatus(status -> status == HttpStatus.OK,
-//                        clientResponse -> Mono.empty()
-////                                Mono.error(new SomeCustomAuthorizationException("Some failure exception"))
-//                )
-                .bodyToMono(String.class)
-                .block();
+            return bodySpec
+                    .retrieve()
+//                    .onStatus(status -> status == HttpStatus.UNAUTHORIZED,
+//                            clientResponse -> Mono.error(new CanvasAuthorisationException("Unauthorised 401."))
+//                    )
+                    .bodyToMono(String.class)
+                    .block();
     }
 
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
-import Loader from "react-loader-spinner";
+
+import spinner from './helpers/spinner.css'
 
 import {URL_PREFIX} from "../services/config";
 import {request} from "../services/request";
@@ -9,10 +10,10 @@ import SignIn from "./auth/SignIn";
 import Home from "./home/Home";
 import NotFound from "./error/NotFound";
 import CourseRoutes from "./course/CourseRoutes";
-import NavigationBar from "./navigation/NavigationBar";
-import Footer from "./navigation/Footer";
 import styles from "./main.module.css";
-import RubricNew from "./rubricNew/RubricNew";
+import Sidebar from "./navigation/Sidebar";
+import './helpers/spinner.css'
+import {Spinner} from "react-bootstrap";
 
 
 class Main extends React.Component {
@@ -20,7 +21,7 @@ class Main extends React.Component {
     super(props);
 
     this.state = {
-      loaded: false,
+      isLoaded: false,
     }
   }
 
@@ -33,28 +34,24 @@ class Main extends React.Component {
       .then(response => {
         // this.props.setAuthState(true);
         this.setState({
-          loaded: true,
+          isLoaded: true,
         })
       })
       .catch(error => {
         console.error(error.message)
         this.setState({
-          loaded: true,
+          isLoaded: true,
         })
       })
   }
 
   render() {
-    if (!this.state.loaded) {
-      return (
-        <div>
-          <Loader
-            type="Puff"
-            color="#00BFFF"
-            height={100}
-            width={100}
-            // timeout={3000}
-          />
+    if (!this.state.isLoaded) {
+      return(
+        <div className={styles.container}>
+          <Spinner className={spinner.spinner} animation="border" role="status">
+            <span className="sr-only">Loading...</span>
+          </Spinner>
         </div>
       )
     }
@@ -66,8 +63,8 @@ class Main extends React.Component {
         </Route>
         <Route>
           <div className={styles.container}>
-            <NavigationBar/>
-            <div className={styles.content}>
+            <Sidebar/>
+            <div className={styles.contentContainer}>
               <Switch>
                 <Route path={URL_PREFIX + "/courses/:courseId"} component={CourseRoutes}/>
                 <Route exact path={URL_PREFIX + "/"}>
@@ -79,7 +76,6 @@ class Main extends React.Component {
                 </Route>
               </Switch>
             </div>
-            <Footer/>
           </div>
         </Route>
       </Switch>

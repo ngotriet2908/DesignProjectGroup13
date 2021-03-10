@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import styles from './auth.module.css'
 import Card from 'react-bootstrap/Card'
 import Button from 'react-bootstrap/Button'
+import CustomButton from "../helpers/CustomButton";
 
 class SignIn extends Component {
   constructor (props) {
@@ -30,13 +31,18 @@ class SignIn extends Component {
             {/*<Card.Title><h2>ProGrader</h2></Card.Title>*/}
             <div className={styles.logoContainer}>
               <img height="40" width="40" src="http://localhost:8080/img/logo.png" alt="logo"/>
-              <h2>ProGrader</h2>
+              <h1>ProGrader</h1>
             </div>
-            <Button size="lg" variant="primary" href="/oauth2/authorization/canvas">
-                Sign in with UT
-            </Button>
+            {/*<Button className={styles.signInButton} size="lg" variant="primary" href="/oauth2/authorization/canvas">*/}
+            {/*    Sign in with UT Canvas*/}
+            {/*</Button>*/}
+            <CustomButton className={styles.signInButton} size="lg" variant="primary" href="/oauth2/authorization/canvas">
+              Sign in with UT Canvas
+            </CustomButton>
           </Card.Body>
         </Card>
+        <div className={styles.stripesContainer}>
+        </div>
       </div>
     )
   }

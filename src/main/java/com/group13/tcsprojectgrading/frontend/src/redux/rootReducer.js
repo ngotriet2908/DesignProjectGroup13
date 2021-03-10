@@ -1,6 +1,6 @@
 import { combineReducers } from "redux";
 import user from "./user/reducers/user";
-import rubric from "./rubric/reducers/rubric";
+import navigation from "./navigation/reducers/navigation";
 import rubricNew from "./rubricNew/reducers/rubric";
 import { connectRouter } from 'connected-react-router'
 //
@@ -11,7 +11,8 @@ const createRootReducer = (history) => combineReducers({
   router: connectRouter(history),
   user,
   // rubric,
-  rubricNew
+  rubricNew,
+  navigation
 })
 
 export default createRootReducer;

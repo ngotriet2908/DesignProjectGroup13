@@ -1,16 +1,20 @@
 import React, { Component } from 'react'
-import CourseCard from './CourseCard'
 
 import styles from './home.module.css'
+import spinner from '../helpers/spinner.css'
+
 import {request} from "../../services/request";
 import {BASE, USER_COURSES, USER_INFO, USER_TASKS} from "../../services/endpoints";
 import {USER_RECENT} from "../../services/endpoints";
-import ProjectCard from "../course/ProjectCard";
 import {connect} from "react-redux";
 import {saveUser} from "../../redux/user/actions";
-import Breadcrumb from "react-bootstrap/Breadcrumb";
 import {Spinner} from "react-bootstrap";
-import HomeTaskCard from "./HomeTaskCard";
+import Breadcrumbs from "../helpers/Breadcrumbs";
+import HomeTasksContainer from "./HomeTasksContainer";
+import HomeCoursesContainer from "./HomeCoursesContainer";
+import HomeRecentContainer from "./HomeRecentContainer";
+import {setCurrentLocation} from "../../redux/navigation/actions";
+import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 
 class Home extends Component {
   constructor (props) {
@@ -24,6 +28,8 @@ class Home extends Component {
   }
 
   componentDidMount () {
+    this.props.setCurrentLocation(LOCATIONS.home);
+
     Promise.all([
       request(BASE + USER_INFO),
       request(BASE + USER_COURSES),
@@ -54,7 +60,7 @@ class Home extends Component {
     if (!this.state.isLoaded) {
       return(
         <div className={styles.container}>
-          <Spinner className={styles.spinner} animation="border" role="status">
+          <Spinner className={spinner.spinner} animation="border" role="status">
             <span className="sr-only">Loading...</span>
           </Spinner>
         </div>
@@ -62,60 +68,21 @@ class Home extends Component {
     }
 
     return (
-      <div>
-        <div className={styles.container}>
-          <Breadcrumb>
-            <Breadcrumb.Item active>Home</Breadcrumb.Item>
-          </Breadcrumb>
+      <div className={styles.container}>
+        <Breadcrumbs>
+          {[{
+            name: "Home",
+            active: true,
+          }]}
+        </Breadcrumbs>
 
-          <div className={styles.coursesContainer}>
-            <h2>My Courses</h2>
-            <ul className={styles.ul}>
-              {this.state.courses.map(course => {
-                return (
-                  <li className={styles.li} key={course.uuid}>
-                    <CourseCard data={course}/>
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
-
-          <div className={styles.recentContainer}>
-            <h2>Recent Activity</h2>
-            <div>
-              {this.state.recentProjects.length > 0 ?
-                (<ul className={styles.ul}>
-                  {this.state.recentProjects.map(project => {
-                    return (
-                      <li className={styles.li} key={project.id}>
-                        <ProjectCard data={project}/>
-                      </li>
-                    )
-                  })}
-                </ul>)
-                :
-                (<div>
-                  No recent activity
-                </div>)
-              }
-            </div>
-          </div>
-
-          <div className={styles.homeTasksContainer}>
-            <h2>My Tasks</h2>
-            <ul className={styles.ul}>
-              {this.state.tasks.map(task => {
-                return (
-                  <li className={styles.li} key={task.project.id +"/"+task.course.id}>
-                    <HomeTaskCard task={task}/>
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
-
+        <div className={styles.coursesContainer}>
+          <h1>Hi, {this.props.user && this.props.user.name}!</h1>
         </div>
+
+        <HomeCoursesContainer courses={this.state.courses}/>
+        <HomeTasksContainer tasks={this.state.tasks}/>
+        <HomeRecentContainer recentProjects={this.state.recentProjects}/>
       </div>
     )
   }
@@ -123,6 +90,13 @@ class Home extends Component {
 
 const actionCreators = {
   saveUser,
+  setCurrentLocation
 }
 
-export default connect(null, actionCreators)(Home)
+const mapStateToProps = state => {
+  return {
+    user: state.user.user
+  };
+};
+
+export default connect(mapStateToProps, actionCreators)(Home)

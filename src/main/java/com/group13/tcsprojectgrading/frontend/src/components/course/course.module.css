@@ -1,37 +1,82 @@
+@value primary, secondary, ternary, quaternary, quinary, primaryShade, lightGray from '../helpers/colors.css';
+
 .container {
     padding: 2rem;
     width: 100%;
+    background-color: lightGray;
 }
 
-.spinner {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    color: dodgerblue;
-}
-
-.titleContainer {
-    margin-bottom: 1.2rem;
-}
-
-.projectsContainer {
+/* section */
+.sectionContainer {
     width: 100%;
     display: block;
 }
 
-.projectsToolBar {
-    display: inline;
-    /*margin-bottom: 3rem;*/
+.sectionTitle {
+    margin: 2rem 0 1rem 0;
 }
 
-.projectsToolBarText {
-    display: inline;
-    margin-right: 1rem;
+.sectionTitleH {
+    margin: 0 1rem 0 0;
 }
 
-.projectsToolBarButton {
-    display: inline;
+.sectionTitleButton {
+    cursor: pointer;
+    color: primary;
+    transition: color 0.1s ease-in;
 }
+
+.sectionTitleButton:hover {
+    color: secondary;
+}
+
+.titleContainer h2 {
+    margin: 0;
+}
+
+.titleContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+}
+
+.titleContainer span {
+    margin-left: 1rem;
+    font-size: 1.6rem;
+    color: #a2a1a1;
+}
+
+.sectionTitleWithButton {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+}
+
+
+
+
+
+
+
+
+
+/*.projectsContainer {*/
+/*    width: 100%;*/
+/*    display: block;*/
+/*}*/
+
+/*.projectsToolBar {*/
+/*    display: inline;*/
+/*}*/
+
+/*.projectsToolBarText {*/
+/*    display: inline;*/
+/*    margin-right: 1rem;*/
+/*}*/
+
+/*.projectsToolBarButton {*/
+/*    display: inline;*/
+/*}*/
 
 .editProjectsModalCard {
     margin-bottom: 2rem;

@@ -11,10 +11,10 @@ class EditProjectsModal extends Component {
   render() {
     return(
       <Modal centered
-             backdrop="static"
-             size="lg"
-             show={this.props.show}
-             onHide={this.props.onClose}>
+        backdrop="static"
+        size="lg"
+        show={this.props.show}
+        onHide={this.props.onClose}>
         <Modal.Header closeButton>
           <Modal.Title>Group Details</Modal.Title>
         </Modal.Header>
@@ -71,17 +71,17 @@ class EditProjectsModal extends Component {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary"
-                  onClick={() => {
-                    this.props.onClose()
-                  }}>
+            onClick={() => {
+              this.props.onClose()
+            }}>
             Cancel
           </Button>
 
           <Button variant="primary"
-                  onClick={() =>
-                  {
-                    this.props.onAccept()
-                  }}>
+            onClick={() =>
+            {
+              this.props.onAccept()
+            }}>
             Apply changes
           </Button>
         </Modal.Footer>

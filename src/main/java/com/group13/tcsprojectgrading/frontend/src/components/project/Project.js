@@ -16,6 +16,7 @@ import {deleteRubric, saveRubric} from "../../redux/rubricNew/actions";
 
 import testStats from "../stat/testStats.json";
 import Statistic from "../stat/Statistic";
+import TaskContainer from "./TaskContainer";
 
 class Project extends Component {
   constructor(props) {
@@ -119,6 +120,19 @@ class Project extends Component {
         <div className={styles.titleContainer}>
           <h2>{this.state.project.name}</h2>
         </div>
+
+        {/*<div className={styles.tasksContainer}>*/}
+        {/*  <Card>*/}
+        {/*    <Card.Body>*/}
+        {/*      <Card.Title>*/}
+        {/*        <h3 className={styles.sectionTitle}>My Tasks</h3>*/}
+        {/*      </Card.Title>*/}
+
+        {/*      <TaskContainer/>*/}
+        {/*        */}
+        {/*    </Card.Body>*/}
+        {/*  </Card>*/}
+        {/*</div>*/}
 
         <div className={styles.sectionContainer}>
           <Card>

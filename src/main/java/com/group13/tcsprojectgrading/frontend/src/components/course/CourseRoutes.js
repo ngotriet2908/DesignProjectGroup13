@@ -2,8 +2,6 @@ import React, {Component} from "react";
 import {Route, Switch} from "react-router-dom";
 import Course from "./Course";
 import ProjectRoutes from "../project/ProjectRoutes";
-import NavigationBar from "../navigation/NavigationBar";
-import Footer from "../navigation/Footer";
 
 
 class CourseRoutes extends Component {

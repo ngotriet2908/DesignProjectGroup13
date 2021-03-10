@@ -28,7 +28,6 @@ class ProjectCard extends Component {
   render () {
     return (
       <Card className={styles.card}>
-        <Card.Img className={styles.cardImg} height="150" variant="cover" src={this.randomSrc()}/>
         <Card.Body>
           <Card.Title>{this.state.project.name}</Card.Title>
           <Card.Text>

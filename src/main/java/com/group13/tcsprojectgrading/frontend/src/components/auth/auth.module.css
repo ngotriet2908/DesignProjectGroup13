@@ -6,6 +6,29 @@
     width: 100vw;
 }
 
+.stripesContainer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: 15rem;
+    width: 15rem;
+
+    background: linear-gradient(
+            45deg,
+            rgba(38,70,83,1) 0%,
+            rgba(38,70,83,1) 10%,
+            rgba(42,157,143,1) 10%,
+            rgba(42,157,143,1) 20%,
+            rgba(233,196,106,1) 20%,
+            rgba(233,196,106,1) 30%,
+            rgba(244,162,97,1) 30%,
+            rgba(244,162,97,1) 40%,
+            rgba(231,111,81,1) 40%,
+            rgba(231,111,81,1) 50%,
+            rgba(255, 255 ,255, 1) 50%
+    );
+}
+
 .card {
     width: 18rem;
     padding: 2rem 0;
@@ -28,12 +51,11 @@
 .logoContainer {
     display: flex;
     flex-direction: row;
-    align-items: flex-end;
+    align-items: flex-start;
     justify-content: center;
     margin-bottom: 1.5rem;
 }
 
-
-.logoContainer h2 {
-    margin: 0 0 0 0.5rem;
+.logoContainer h1 {
+    margin: 0 0 0 0.8rem;
 }

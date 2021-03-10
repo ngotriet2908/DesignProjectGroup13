@@ -1,19 +1,26 @@
 import React, {Component} from "react";
 import {request} from "../../services/request";
-import {BASE, USER_COURSES, USER_INFO, USER_RECENT} from "../../services/endpoints";
+import {BASE} from "../../services/endpoints";
+
 import styles from "./course.module.css";
-import ProjectCard from "./ProjectCard";
-import {Breadcrumb, Button, Spinner} from "react-bootstrap";
+import spinner from '../helpers/spinner.css'
+
+import { Button, Spinner} from "react-bootstrap";
 import store from "../../redux/store";
 import {push} from "connected-react-router";
 import {URL_PREFIX} from "../../services/config";
 import Statistic from "../stat/Statistic";
 import EditProjectsModal from "./EditProjectsModal";
+import Breadcrumbs from "../helpers/Breadcrumbs";
+import ProjectCard from "../home/ProjectCard";
+import {IoPencil} from "react-icons/io5";
+import StatsCard from "../home/StatsCard";
 
 
 class Course extends Component {
   constructor (props) {
     super(props)
+
     this.state = {
       projects: [],
       course: {},
@@ -180,7 +187,7 @@ class Course extends Component {
     if (!this.state.isLoaded) {
       return(
         <div className={styles.container}>
-          <Spinner className={styles.spinner} animation="border" role="status">
+          <Spinner className={spinner.spinner} animation="border" role="status">
             <span className="sr-only">Loading...</span>
           </Spinner>
         </div>
@@ -189,34 +196,34 @@ class Course extends Component {
 
     return (
       <div className={styles.container}>
-        <Breadcrumb>
-          <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumb.Item>
-          <Breadcrumb.Item active>
-            {this.state.course.name}
-          </Breadcrumb.Item>
-        </Breadcrumb>
+        <Breadcrumbs>
+          {[
+            {
+              name: "Home",
+              onClick: () => store.dispatch(push(URL_PREFIX + "/")),
+            },
+            {
+              name: this.state.course.name,
+              active: true,
+            }
+          ]}
+        </Breadcrumbs>
 
-        <div className={styles.titleContainer}>
-          <h2>{this.state.course.name}</h2>
+        <div className={[styles.sectionTitle, styles.titleContainer].join(" ")}>
+          <h2>{this.state.course.name}</h2><span>{(new Date(this.state.course.start_at)).getFullYear()}</span>
         </div>
 
-        <div className={styles.overviewContainer}>
-          <h3 className={styles.sectionTitle}>Overview/Stats</h3>
-          <div>
-            <p>Blablabla here...</p>
-            <p>And more blablabla: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi mollis consectetur elit ut sagittis. Aenean sit amet tempor enim, et finibus nisi. Phasellus imperdiet molestie blandit. </p>
-          </div>
-        </div>
 
-        <div className={styles.projectsContainer}>
-          <div className={styles.projectsToolBar}>
-            <h3 className={styles.projectsToolBarText}>Course projects</h3>
-            <Button className={styles.projectsToolBarButton}
-              variant="primary"
-              onClick={this.modalEditProjectsHandleShow}>
-              Edit projects
-            </Button>
+
+        <div className={styles.sectionContainer}>
+          <div className={[styles.sectionTitle, styles.sectionTitleWithButton].join(" ")}>
+            <h3 className={styles.sectionTitleH}>Course projects</h3>
+
+            <div className={styles.sectionTitleButton} onClick={this.modalEditProjectsHandleShow}>
+              <IoPencil size={28}/>
+            </div>
           </div>
+
           {this.state.projects.length > 0 ?
             <ul className={styles.ul}>
               {this.state.projects.map(project => {
@@ -228,12 +235,11 @@ class Course extends Component {
               })}
             </ul>
             :
-            <div>
-              No courses here
-            </div>
+            (<div>
+              <p>No projects selected in this course. Click on the 'Edit' button to select course projects.</p>
+            </div>)
           }
         </div>
-
 
         <EditProjectsModal
           show={this.state.modalEditProjectsShow}
@@ -249,33 +255,27 @@ class Course extends Component {
           closeAlertHandle={this.modalEditProjectsHandleCloseAlert}
         />
 
-        <div className={styles.statsContainer}>
-          <h2>Course statistics</h2>
+        <div className={styles.sectionContainer}>
+          <div className={[styles.sectionTitle, styles.sectionTitleWithButton].join(" ")}>
+            <h3 className={styles.sectionTitleH}>Course statistics</h3>
+          </div>
+
           <ul className={styles.ul}>
-            {/*{testStats.map(stat => {*/}
+            {/*{this.state.stats.map(stat => {*/}
             {/*  return (*/}
             {/*    <li className={styles.li} key={stat.title}>*/}
-            {/*      <Statistic name={stat.title}*/}
-            {/*                 type={stat.type}*/}
-            {/*                 data={stat.data}*/}
-            {/*                 unit={stat.unit}/>*/}
+            {/*      <Statistic title ={stat.title}*/}
+            {/*        type={stat.type}*/}
+            {/*        data={stat.data}*/}
+            {/*        unit={stat.unit}/>*/}
             {/*    </li>*/}
             {/*  );*/}
             {/*})}*/}
 
-            {this.state.stats.map(stat => {
-              return (
-                <li className={styles.li} key={stat.title}>
-                  <Statistic title ={stat.title}
-                    type={stat.type}
-                    data={stat.data}
-                    unit={stat.unit}/>
-                </li>
-              );
-            })}
+            <StatsCard data={this.state.stats}/>
+
           </ul>
         </div>
-
       </div>
     )
   }
