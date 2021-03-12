@@ -8,12 +8,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.Activity;
 import com.group13.tcsprojectgrading.models.Project;
-import com.group13.tcsprojectgrading.models.Task;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.services.ActivityService;
 import com.group13.tcsprojectgrading.services.ProjectService;
 import com.group13.tcsprojectgrading.services.TaskService;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.PdfWriter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -21,6 +22,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,6 +33,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
 
 import static com.group13.tcsprojectgrading.controllers.Utils.groupPages;
 
@@ -130,7 +134,103 @@ public class ProjectsController {
                 subject,
                 body
         );
+    }
 
+//    @PostMapping(value = "/{projectId}/feedbackPdf", produces = "application/pdf")
+    @PostMapping(value = "/{projectId}/feedbackPdf")
+    @ResponseBody
+    protected ResponseEntity<byte[]> sendFeedbackPdf(@PathVariable String courseId,
+                                                     @PathVariable String projectId,
+                                                     @RequestBody ObjectNode feedback,
+                                                     Principal principal) throws IOException, ParseException, DocumentException {
+        Project project = projectService.getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "entity not found"
+            );
+        }
+
+        String id = feedback.get("id").asText();
+        boolean isGroup = feedback.get("isGroup").asBoolean();
+        String body = feedback.get("body").asText();
+        String subject = feedback.get("subject").asText();
+
+        String fileName = id + "_" + subject + ".pdf";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData(fileName, fileName);
+        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+//        response.setContentType("blob");
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        Document document = new Document();
+        PdfWriter.getInstance(document, byteArrayOutputStream);
+
+        document.open();
+        Font fontSubject = FontFactory.getFont(FontFactory.COURIER, 22, BaseColor.BLACK);
+
+        Font fontBody = FontFactory.getFont(FontFactory.COURIER, 13, BaseColor.BLACK);
+        Paragraph preface = new Paragraph();
+        addEmptyLine(preface, 1);
+
+        Paragraph paragraph = new Paragraph(subject, fontSubject);
+        preface.add(paragraph);
+        addEmptyLine(preface, 2);
+
+        paragraph = new Paragraph(body, fontBody);
+        preface.add(paragraph);
+
+        document.add(preface);
+        document.close();
+
+
+        System.out.println(Arrays.toString(byteArrayOutputStream.toByteArray()));
+
+        return new ResponseEntity<byte[]>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.OK);
+    }
+
+    private static void addEmptyLine(Paragraph paragraph, int number) {
+        for (int i = 0; i < number; i++) {
+            paragraph.add(new Paragraph(" "));
+        }
+    }
+
+    @GetMapping(value = "/{projectId}/feedbackPdf")
+    @ResponseBody
+    protected ResponseEntity<byte[]> sendFeedbackPdfTemplate(@PathVariable String courseId,
+                                                     @PathVariable String projectId,
+                                                     Principal principal) throws IOException, ParseException, DocumentException {
+        Project project = projectService.getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "entity not found"
+            );
+        }
+
+        String fileName = "hello.pdf";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData(fileName, fileName);
+        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+//        response.setContentType("blob");
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        Document document = new Document();
+        PdfWriter.getInstance(document, byteArrayOutputStream);
+
+        document.open();
+        Font font = FontFactory.getFont(FontFactory.COURIER, 16, BaseColor.BLACK);
+        Chunk subjectChunk = new Chunk("subject", font);
+        Chunk bodyChunk = new Chunk("bodyyyyy", font);
+
+        document.add(subjectChunk);
+        document.add(bodyChunk);
+        document.close();
+
+
+        System.out.println(Arrays.toString(byteArrayOutputStream.toByteArray()));
+
+        return new ResponseEntity<byte[]>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.OK);
     }
 
     @GetMapping(value = "/{projectId}/feedback")
