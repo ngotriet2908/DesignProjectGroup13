@@ -7,7 +7,8 @@ public class CanvasEndpoints {
     public static final String BASE_URL = SCHEME + "://" + HOST;
 
     public static final String PROFILE_URL = "/api/v1/users/self/profile";
-    public static final String PROFILE_USER_URL = "/api/v1/users/:userId/profile";
+    public static final String PROFILE_USER_URL = "/api/v1/users/{userId}/profile";
+    public static final String USER_ENROLMENT_PATH = "/api/v1/users/{userId}/enrollments";
     public static final String CONVERSATIONS_PATH = "/api/v1/conversations";
 
     public static final String SELF_COURSE_URL = "/api/v1/courses";

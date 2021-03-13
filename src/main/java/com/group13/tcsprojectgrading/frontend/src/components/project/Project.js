@@ -17,6 +17,7 @@ import {deleteRubric, saveRubric} from "../../redux/rubricNew/actions";
 import testStats from "../stat/testStats.json";
 import Statistic from "../stat/Statistic";
 import TaskContainer from "./TaskContainer";
+import {Can, ability, updateAbility} from "../permissions/ProjectAbility";
 
 class Project extends Component {
   constructor(props) {
@@ -26,6 +27,7 @@ class Project extends Component {
       project: {},
       course: {},
       rubric: null,
+      grader: {},
       stats: [],
       isLoaded: false
     }
@@ -49,10 +51,18 @@ class Project extends Component {
 
         this.props.saveRubric(project.rubric);
 
+        if (project.grader !== null && project.grader.privileges !== null) {
+          updateAbility(ability, project.grader.privileges)
+        } else {
+          console.log("no grader or privileges found")
+        }
+        console.log(ability.rules)
+
         this.setState({
           project: project.project,
           course: project.course,
           stats: stats,
+          grader: project.grader,
           isLoaded: true
         });
       })
@@ -154,11 +164,13 @@ class Project extends Component {
                   </Link>
                 </Button>
 
-                <Button variant="primary">
-                  <Link className={styles.plainLink} to={this.props.match.url + "/graders"}>
+                <Can I="open" a={"ManageGraders"}>
+                  <Button variant="primary">
+                    <Link className={styles.plainLink} to={this.props.match.url + "/graders"}>
                       Manage graders
-                  </Link>
-                </Button>
+                    </Link>
+                  </Button>
+                </Can>
 
                 <Button variant="primary">
                   <Link className={styles.plainLink} to={this.props.match.url + "/grading"}>
@@ -184,14 +196,20 @@ class Project extends Component {
               </Card.Title>
               {this.props.rubric != null ?
                 <div>
-                  <Button variant="primary"><Link className={styles.plainLink} to={this.props.match.url + "/rubric"}>Open
+                  <Can I="read" a="Rubric">
+                    <Button variant="primary"><Link className={styles.plainLink} to={this.props.match.url + "/rubric"}>Open
                       rubric</Link></Button>
-                  <Button variant="danger" onClick={this.onClickRemoveRubric}>Remove rubric</Button>
+                  </Can>
+                  <Can I="write" a="Rubric">
+                    <Button variant="danger" onClick={this.onClickRemoveRubric}>Remove rubric</Button>
+                  </Can>
                 </div>
                 :
                 <div>
                   <div>No rubric</div>
-                  <Button variant="primary" onClick={this.onClickCreateRubric}>Create rubric</Button>
+                  <Can I="write" a="Rubric">
+                    <Button variant="primary" onClick={this.onClickCreateRubric}>Create rubric</Button>
+                  </Can>
                 </div>
               }
             </Card.Body>

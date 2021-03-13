@@ -13,6 +13,7 @@ import {BASE } from "../../services/endpoints";
 import {saveRubric, saveRubricTemp, setSelectedElement} from "../../redux/rubricNew/actions";
 import {Spinner} from "react-bootstrap";
 import RubricViewer from "./RubricViewer";
+import {Can, ability, updateAbility} from "../permissions/ProjectAbility";
 
 
 class RubricNew extends Component {
@@ -21,10 +22,31 @@ class RubricNew extends Component {
 
     this.state = {
       isLoaded: false,
+      project: {}
     }
   }
 
   componentDidMount() {
+
+    //TODO in case of directly load this page or refresh page <=> no ability is found
+    if (ability.rules.length === 0) {
+      request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId)
+        .then(response => {
+          return response.json()
+        })
+        .then(data => {
+          if (data.grader !== null && data.grader.privileges !== null) {
+            updateAbility(ability, data.grader.privileges)
+            this.setState({
+              project: data
+            })
+          } else {
+            console.log("no grader or privileges found")
+          }
+          console.log(ability.rules)
+        })
+    }
+
     request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/rubric")
       .then(response => {
         return response.json();

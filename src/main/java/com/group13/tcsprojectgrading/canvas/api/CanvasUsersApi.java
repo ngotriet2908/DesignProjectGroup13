@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @Component
 public class CanvasUsersApi {
@@ -49,11 +50,26 @@ public class CanvasUsersApi {
         }
     }
 
+    public List<String> getEnrolments(String userId) {
+        OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
+
+        if (authorizedClient == null) {
+            return null;
+        } else {
+            URI uri = UriComponentsBuilder.newInstance()
+                    .scheme(CanvasEndpoints.SCHEME)
+                    .host(CanvasEndpoints.HOST)
+                    .path(CanvasEndpoints.USER_ENROLMENT_PATH)
+                    .build(userId);
+
+            return this.canvasApi.sendRequestWithPagination(uri, HttpMethod.GET, authorizedClient);
+        }
+    }
+
     public void sendMessageWithId(String userId, String groupId, String subject, String body) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
         if (authorizedClient == null) {
-            return;
         } else {
             String rep = "";
             if (userId == null) {

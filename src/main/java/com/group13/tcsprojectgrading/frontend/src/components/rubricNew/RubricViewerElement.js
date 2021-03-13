@@ -7,6 +7,7 @@ import Button from "react-bootstrap/Button";
 import {saveRubric, saveRubricTemp, setEditingRubric} from "../../redux/rubricNew/actions";
 import RubricViewerElementGrade from "./RubricViewerElementGrade";
 import RubricViewerElementChildren from "./RubricViewerElementChildren";
+import {Can, ability, updateAbility} from "../permissions/ProjectAbility";
 
 
 class RubricViewerElement extends Component {
@@ -28,7 +29,9 @@ class RubricViewerElement extends Component {
         <div>
           <div className={styles.viewerHeader}>
             <h2>Rubric</h2>
-            <Button variant="secondary" onClick={this.onClickEdit}>Edit</Button>
+            <Can I="write" a="Rubric">
+              <Button variant="secondary" onClick={this.onClickEdit}>Edit</Button>
+            </Can>
           </div>
           <RubricViewerElementChildren data={this.props.data}/>
         </div>

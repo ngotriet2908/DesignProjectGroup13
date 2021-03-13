@@ -1,7 +1,14 @@
 package com.group13.tcsprojectgrading.models;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -16,17 +23,26 @@ public class Grader {
 
     private String name;
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
-
     @OneToMany(mappedBy = "grader")
     private List<Task> tasks;
 
-    public Grader(Project project, String userId, String name, Role role) {
+    @ManyToMany
+    private Collection<ProjectRole> projectRoles;
+
+    public Grader(Project project, String userId, String name, ProjectRole role) {
         this.project = project;
         this.userId = userId;
         this.name = name;
-        this.role = role;
+        List<ProjectRole> roles = new ArrayList<>();
+        roles.add(role);
+        this.projectRoles = roles;
+    }
+
+    public Grader(Project project, String userId, String name, Collection<ProjectRole> projectRoles) {
+        this.project = project;
+        this.userId = userId;
+        this.name = name;
+        this.projectRoles = projectRoles;
     }
 
     public Grader() {
@@ -64,21 +80,61 @@ public class Grader {
         this.name = name;
     }
 
-    public Role getRole() {
-        return role;
+    public Collection<ProjectRole> getProjectRoles() {
+        return projectRoles;
     }
 
-    public void setRole(Role role) {
-        this.role = role;
+    public void setProjectRoles(Collection<ProjectRole> projectRoles) {
+        this.projectRoles = projectRoles;
     }
 
-    public static Role getRoleFromString(String role) {
-        if (role.equals("TeacherEnrollment")) {
-            return Role.TEACHER;
-        } else if (role.equals("TaEnrollment")) {
-            return Role.TEACHING_ASSISTANT;
+    public ArrayNode getRolesArrayNode() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ArrayNode result = objectMapper.createArrayNode();
+
+        for(ProjectRole projectRole: projectRoles) {
+            Role role = projectRole.getRole();
+            ObjectNode roleNode = objectMapper.createObjectNode();
+            roleNode.put("name", role.getName());
+            result.add(roleNode);
         }
-        return Role.STUDENT;
+        return result;
+    }
+
+    public ArrayNode getPrivilegesArrayNode() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ArrayNode result = objectMapper.createArrayNode();
+
+        for(ProjectRole projectRole: projectRoles) {
+            if (projectRole.getPrivileges() == null) continue;
+            for (Privilege privilege: projectRole.getPrivileges()) {
+                ObjectNode privilegeNode = objectMapper.createObjectNode();
+                privilegeNode.put("name", privilege.getName());
+                result.add(privilegeNode);
+            }
+        }
+        return result;
+    }
+
+    public List<String> getRolesListString() {
+        List<String> rolesString = new ArrayList<>();
+
+        for(ProjectRole projectRole: projectRoles) {
+            Role role = projectRole.getRole();
+            rolesString.add(role.getName());
+        }
+        return rolesString;
+    }
+
+    public JsonNode getGraderJson() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode graderNode = objectMapper.createObjectNode();
+        ((ObjectNode) graderNode).put("id", this.getUserId());
+        ((ObjectNode) graderNode).put("project_id", this.getProject().getProjectId());
+        ((ObjectNode) graderNode).put("name", this.getName());
+        ((ObjectNode) graderNode).set("roles", this.getRolesArrayNode());
+        ((ObjectNode) graderNode).set("privileges", this.getPrivilegesArrayNode());
+        return graderNode;
     }
 
     @Override
@@ -87,7 +143,6 @@ public class Grader {
                 "project=" + project +
                 ", userId='" + userId + '\'' +
                 ", name='" + name + '\'' +
-                ", role=" + role +
                 '}';
     }
 }

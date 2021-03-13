@@ -1,4 +1,5 @@
 import React, {Component} from "react";
+import {Ability, AbilityBuilder } from "@casl/ability";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
 
@@ -15,7 +16,10 @@ import Breadcrumbs from "../helpers/Breadcrumbs";
 import ProjectCard from "../home/ProjectCard";
 import {IoPencil} from "react-icons/io5";
 import StatsCard from "../home/StatsCard";
+import {Can, ability, updateAbilityCoursePage} from "../permissions/CoursePageAbility";
+import { subject } from '@casl/ability';
 
+import course from "../../redux/course/reducers/course";
 
 class Course extends Component {
   constructor (props) {
@@ -26,6 +30,7 @@ class Course extends Component {
       course: {},
       stats: [],
       isLoaded: false,
+      user: {},
 
       modalEditProjectActiveProjects: [],
       modalEditProjectAvailableProjects: [],
@@ -47,13 +52,17 @@ class Course extends Component {
       .then(async([res1, res2]) => {
         const courses = await res1.json();
         const stats = await res2.json();
+        updateAbilityCoursePage(ability, courses.user)
 
         this.setState({
           projects: courses.projects,
           course: courses.course,
           stats: stats,
           isLoaded: true,
+          user: courses.user
         })
+
+        console.log(ability.rules)
       })
       .catch(error => {
         console.error(error.message);
@@ -226,9 +235,12 @@ class Course extends Component {
           <div className={[styles.sectionTitle, styles.sectionTitleWithButton].join(" ")}>
             <h3 className={styles.sectionTitleH}>Course projects</h3>
 
-            <div className={styles.sectionTitleButton} onClick={this.modalEditProjectsHandleShow}>
-              <IoPencil size={28}/>
-            </div>
+            <Can I="write" a="Projects">
+              <div className={styles.sectionTitleButton} onClick={this.modalEditProjectsHandleShow}>
+                <IoPencil size={28}/>
+              </div>
+            </Can>
+
           </div>
 
           {this.state.projects.length > 0 ?
