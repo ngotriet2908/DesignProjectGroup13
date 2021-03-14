@@ -19,7 +19,11 @@ public class GraderService {
     }
 
     public Grader addNewGrader(Grader grader) {
-        return repository.save(grader);
+        Grader grader1 = repository.findById(new GraderId(grader.getUserId(), grader.getProject().getProjectCompositeKey())).orElse(null);
+        if (grader1 == null) {
+            return repository.save(grader);
+        }
+        return grader1;
     }
 
     public List<Grader> getGraderFromProject(Project project) {

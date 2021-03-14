@@ -1,4 +1,5 @@
 import React, {Component} from "react";
+import {Ability, AbilityBuilder } from "@casl/ability";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
 
@@ -14,6 +15,8 @@ import Breadcrumbs from "../helpers/Breadcrumbs";
 import ProjectCard from "../home/ProjectCard";
 import {IoPencil} from "react-icons/io5";
 import StatsCard from "../home/StatsCard";
+import {Can, ability, updateAbilityCoursePage} from "../permissions/CoursePageAbility";
+import { subject } from '@casl/ability';
 import {connect} from "react-redux";
 import {deleteCurrentCourse, saveCurrentCourse} from "../../redux/courses/actions";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
@@ -23,6 +26,7 @@ import SectionContainer from "../home/SectionContainer";
 import globalStyles from '../helpers/global.module.css';
 import {IoFileTrayOutline} from "react-icons/io5";
 
+import course from "../../redux/course/reducers/course";
 
 class Course extends Component {
   constructor (props) {
@@ -33,6 +37,7 @@ class Course extends Component {
       course: {},
       stats: [],
       isLoaded: false,
+      user: {},
 
       showModal: false,
     }
@@ -53,6 +58,7 @@ class Course extends Component {
       .then(async([res1, res2]) => {
         const courses = await res1.json();
         const stats = await res2.json();
+        updateAbilityCoursePage(ability, courses.user)
 
         this.props.saveCurrentCourse(courses.course);
 
@@ -61,7 +67,10 @@ class Course extends Component {
           course: courses.course,
           stats: stats,
           isLoaded: true,
+          user: courses.user
         })
+
+        console.log(ability.rules)
       })
       .catch(error => {
         console.error(error.message);
@@ -115,6 +124,12 @@ class Course extends Component {
         <div className={[globalStyles.titleContainer].join(" ")}>
           <h1>{this.state.course.name}</h1><span>{(new Date(this.state.course.start_at)).getFullYear()}</span>
         </div>
+
+        {/*<Can I="write" a="Projects">*/}
+        {/*  <div className={styles.sectionTitleButton} onClick={this.modalEditProjectsHandleShow}>*/}
+        {/*    <IoPencil size={28}/>*/}
+        {/*  </div>*/}
+        {/*</Can>*/}
 
         <div className={styles.container}>
           <SectionContainer

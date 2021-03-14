@@ -24,6 +24,8 @@ import globalStyles from '../helpers/global.module.css';
 import HomeTaskCard from "../home/HomeTaskCard";
 import SectionContainer from "../home/SectionContainer";
 import {IoCheckboxOutline} from "react-icons/io5";
+import TaskContainer from "./TaskContainer";
+import {Can, ability, updateAbility} from "../permissions/ProjectAbility";
 
 class Project extends Component {
   constructor(props) {
@@ -33,6 +35,7 @@ class Project extends Component {
       project: {},
       course: {},
       rubric: null,
+      grader: {},
       stats: [],
       isLoaded: false
     }
@@ -58,10 +61,18 @@ class Project extends Component {
 
         this.props.saveRubric(project.rubric);
 
+        if (project.grader !== null && project.grader.privileges !== null) {
+          updateAbility(ability, project.grader.privileges)
+        } else {
+          console.log("no grader or privileges found")
+        }
+        console.log(ability.rules)
+
         this.setState({
           project: project.project,
           course: project.course,
           stats: stats,
+          grader: project.grader,
           isLoaded: true
         });
       })
@@ -155,11 +166,13 @@ class Project extends Component {
                       </Link>
                     </Button>
 
+                    <Can I="open" a={"ManageGraders"}>
                     <Button variant="lightGreen">
                       <Link className={globalStyles.plainLink} to={this.props.match.url + "/graders"}>
                       Manage graders
                       </Link>
                     </Button>
+                    </Can>
 
                     <Button variant="lightGreen">
                       <Link className={globalStyles.plainLink} to={this.props.match.url + "/grading"}>
@@ -199,6 +212,8 @@ class Project extends Component {
                         <div>No rubric</div>
                         <Button variant="primary" onClick={this.onClickCreateRubric}>Create rubric</Button>
                       </div>
+
+
                     }
                   </Card.Body>
                 </Card>

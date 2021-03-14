@@ -11,14 +11,18 @@ import com.group13.tcsprojectgrading.services.ActivityService;
 import com.group13.tcsprojectgrading.services.GraderService;
 import com.group13.tcsprojectgrading.services.ProjectService;
 import com.group13.tcsprojectgrading.services.TaskService;
+import com.group13.tcsprojectgrading.services.*;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.web.server.ResponseStatusException;
+
 import static com.group13.tcsprojectgrading.controllers.Utils.groupPages;
 
+import java.security.Principal;
 import java.util.*;
 
 @RestController
@@ -43,15 +47,26 @@ class CoursesController {
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
-    protected ResponseEntity<String> courses() {
+    protected ResponseEntity<ArrayNode> courses() throws JsonProcessingException {
         List<String> response = this.canvasApi.getCanvasCoursesApi().getUserCourseList();
 
         if (response == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        } else {
-            // TODO: the following line sends back only the first batch of the list of courses!!!
-            return new ResponseEntity<>(response.get(0), HttpStatus.OK);
         }
+
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayNode courses = groupPages(mapper, response);
+        ArrayNode finalCourses = mapper.createArrayNode();
+
+        for (Iterator<JsonNode> it = courses.elements(); it.hasNext(); ) {
+            JsonNode course = it.next();
+            RoleEnum role = RoleEnum.getRoleFromEnrolment(course.get("enrollments").get(0).get("role").asText());
+            if (role.equals(RoleEnum.TEACHER) || role.equals(RoleEnum.TA)) {
+                finalCourses.add(course);
+            }
+        }
+
+        return new ResponseEntity<>(courses, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{course_id}", method = RequestMethod.GET, produces = "application/json")
@@ -75,6 +90,37 @@ class CoursesController {
         ObjectNode resultNode = objectMapper.createObjectNode();
         resultNode.set("course", jsonCourseNode);
         resultNode.set("projects", arrayNode);
+        JsonNode resultNode = objectMapper.createObjectNode();
+
+
+        String userResponse = this.canvasApi.getCanvasCoursesApi().getCourseUser(course_id, principal.getName());
+        ArrayNode enrolmentsNode = groupPages(objectMapper, this.canvasApi.getCanvasUsersApi().getEnrolments(principal.getName()));
+        JsonNode userJson = objectMapper.readTree(userResponse);
+
+        RoleEnum roleEnum = null;
+
+        for (Iterator<JsonNode> it = enrolmentsNode.elements(); it.hasNext(); ) {
+            JsonNode enrolmentNode = it.next();
+            if (enrolmentNode.get("course_id").asText().equals(course_id)) {
+                roleEnum = RoleEnum.getRoleFromEnrolment(enrolmentNode.get("role").asText());
+            }
+        }
+
+        if (roleEnum == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "Enrolment not found"
+            );
+        }
+
+        if (roleEnum.equals(RoleEnum.TEACHER)) {
+            ((ObjectNode) userJson).put("role", "teacher");
+        } else if (roleEnum.equals(RoleEnum.TA)) {
+            ((ObjectNode) userJson).put("role", "ta");
+        }
+
+        ((ObjectNode)resultNode).set("course", jsonCourseNode);
+        ((ObjectNode)resultNode).set("projects", arrayNode);
+        ((ObjectNode)resultNode).set("user", userJson);
 
         if (arrayNode == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

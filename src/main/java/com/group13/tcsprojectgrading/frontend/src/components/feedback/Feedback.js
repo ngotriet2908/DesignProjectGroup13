@@ -6,6 +6,7 @@ import {BASE} from "../../services/endpoints";
 import styles from "./feedback.module.css";
 import store from "../../redux/store";
 import {URL_PREFIX} from "../../services/config";
+import { saveAs } from 'file-saver';
 
 class Feedback extends Component {
   constructor(props) {
@@ -18,7 +19,8 @@ class Feedback extends Component {
       body: "",
       receiver: {},
       isLoading: true,
-      isSending: false,
+      isSendingFeedback: false,
+      isSendingPdf: false
     }
 
   }
@@ -53,16 +55,65 @@ class Feedback extends Component {
       "body": this.state.body,
     }
     this.setState({
-      isSending: true
+      isSendingFeedback: true,
     })
 
     request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/feedback`, "POST", object)
       .then(response => {
         this.setState({
-          isSending: false
+          isSendingFeedback: false
         })
         if (response.status === 200) {
 
+        }
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
+  }
+
+  handleGetPdf = (isDownload) => {
+    let object = {
+      "id": this.state.receiver,
+      "isGroup": false,
+      "subject": this.state.subject,
+      "body": this.state.body,
+    }
+    this.setState({
+      isSendingPdf: true
+    })
+
+    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/feedbackPdf`, "POST", object, 'application/pdf')
+      .then(response => {
+        this.setState({
+          isSendingPdf: false
+        })
+        if (response.status === 200) {
+          //Create a Blob from the PDF Stream
+          // console.log(response.blob())
+          // // console.log(response.formData())
+          // console.log(response.type)
+          //
+          // const file = new Blob([response.blob().]);
+          // //Build a URL from the file
+          // const fileURL = URL.createObjectURL(file);
+          // //Open the URL on new Window
+          // window.open(fileURL);
+          // // saveAs(file, 'fileName.pdf');
+           return response.blob()
+        }
+      })
+      .then((blob) => {
+        console.log(blob)
+        const file = new Blob([blob], {
+          type: 'application/pdf',
+        });
+
+        if (isDownload) {
+          saveAs(file, 'feedback.pdf');
+        } else {
+          const fileURL = URL.createObjectURL(file);
+          window.open(fileURL);
         }
       })
       .catch(error => {
@@ -141,14 +192,25 @@ class Feedback extends Component {
               </Form.Group>
 
               <Button
-                disabled={this.state.isSending}
+                disabled={this.state.isSendingFeedback}
                 onClick={this.handleSendFeedback} variant="primary">
-                {this.state.isSending ? 'Sending...' : 'Click to send'}
+                {this.state.isSendingFeedback ? 'Sending...' : 'Click to send feedback'}
               </Button>
+
+              <Button
+                disabled={this.state.isSendingPdf}
+                onClick={() => this.handleGetPdf(true)} variant="primary">
+                {this.state.isSendingPdf ? 'Sending...' : 'Click to download Pdf'}
+              </Button>
+
+              {/*<Button*/}
+              {/*  disabled={this.state.isSendingPdf}*/}
+              {/*  onClick={() => this.handleGetPdf(false)} variant="primary">*/}
+              {/*  {this.state.isSendingPdf ? 'Sending...' : 'Click to open Pdf in a new tab'}*/}
+              {/*</Button>*/}
 
             </Form>
           </Card>
-
         </div>
 
     )

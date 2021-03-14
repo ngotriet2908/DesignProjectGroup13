@@ -1,9 +1,19 @@
 package com.group13.tcsprojectgrading;
 
+import com.group13.tcsprojectgrading.models.Privilege;
+import com.group13.tcsprojectgrading.models.Role;
 import com.group13.tcsprojectgrading.repositories.rubric.RubricRepository;
+import com.group13.tcsprojectgrading.models.PrivilegeEnum;
+import com.group13.tcsprojectgrading.services.PrivilegeService;
+import com.group13.tcsprojectgrading.models.RoleEnum;
+import com.group13.tcsprojectgrading.services.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+
+import java.util.List;
 
 @SpringBootApplication
 //public class TcsProjectGradingApplication implements CommandLineRunner {
@@ -29,4 +39,28 @@ public class TcsProjectGradingApplication {
 ////        }
 ////        System.out.println();
 //    }
+
+    @Bean
+    public CommandLineRunner demoData(RoleService roleService, PrivilegeService privilegeService) {
+        return args -> {
+            Privilege mangeGradersOpen = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.MANAGE_GRADERS_OPEN.toString());
+            Privilege rubricRead = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.RUBRIC_READ.toString());
+            Privilege rubricWrite = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.RUBRIC_WRITE.toString());
+
+            Role teacherRole = roleService.addRoleIfNotExist(
+                    RoleEnum.TEACHER.toString(),
+                    List.of(mangeGradersOpen,
+                            rubricRead,
+                            rubricWrite
+                            )
+            );
+
+            Role taRole = roleService.addRoleIfNotExist(
+                    RoleEnum.TA.toString(),
+                    List.of(mangeGradersOpen,
+                            rubricRead
+                            )
+            );
+        };
+    }
 }

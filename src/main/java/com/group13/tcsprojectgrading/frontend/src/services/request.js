@@ -8,20 +8,20 @@ function getCookie(name) {
   if (parts.length === 2) return parts.pop().split(';').shift();
 }
 
-export function request(url, method = "GET", data = {}) {
+export function request(url, method = "GET", data = {}, accept = 'application/json') {
   let init;
   if (method === "GET") {
     init = {
       method: method,
       headers: {
-        'Accept': 'application/json',
+        'Accept': accept,
       },
     }
   } else if (method === "POST") {
     init = {
       method: method,
       headers: {
-        'Accept': 'application/json',
+        'Accept': accept,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(data)

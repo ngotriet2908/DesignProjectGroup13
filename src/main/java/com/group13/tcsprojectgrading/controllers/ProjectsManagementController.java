@@ -9,10 +9,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.Grader;
 import com.group13.tcsprojectgrading.models.Project;
+import com.group13.tcsprojectgrading.models.RoleEnum;
 import com.group13.tcsprojectgrading.models.Task;
-import com.group13.tcsprojectgrading.services.GraderService;
-import com.group13.tcsprojectgrading.services.ProjectService;
-import com.group13.tcsprojectgrading.services.TaskService;
+import com.group13.tcsprojectgrading.services.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -30,12 +29,16 @@ public class ProjectsManagementController {
     private final GraderService graderService;
     private final TaskService taskService;
     private final ProjectService projectService;
+    private final RoleService roleService;
+    private final ProjectRoleService projectRoleService;
 
-    public ProjectsManagementController(CanvasApi canvasApi, GraderService graderService, TaskService taskService, ProjectService projectService) {
+    public ProjectsManagementController(CanvasApi canvasApi, GraderService graderService, TaskService taskService, ProjectService projectService, RoleService roleService, ProjectRoleService projectRoleService) {
         this.canvasApi = canvasApi;
         this.graderService = graderService;
         this.taskService = taskService;
         this.projectService = projectService;
+        this.roleService = roleService;
+        this.projectRoleService = projectRoleService;
     }
 
     @GetMapping(value = "")
@@ -124,7 +127,8 @@ public class ProjectsManagementController {
             graderMap.put(grader.getUserId(), tasksArray);
             ((ObjectNode) formatNode).put("id", grader.getUserId());
             ((ObjectNode) formatNode).put("name", grader.getName());
-            ((ObjectNode) formatNode).put("role", grader.getRole().toString());
+            ((ObjectNode) formatNode).set("role", grader.getRolesArrayNode());
+            ((ObjectNode) formatNode).set("privileges", grader.getPrivilegesArrayNode());
             ((ObjectNode) formatNode).set("groups", tasksArray);
             gradersArray.add(formatNode);
         }
@@ -179,8 +183,9 @@ public class ProjectsManagementController {
                     project,
                     node.get("id").asText(),
                     node.get("name").asText(),
-                    Grader.getRoleFromString(node.get("enrollments").get(0).get("type").asText()))
-            );
+                    //TODO check whether enrolment contains more than 1 course
+                    projectRoleService.findByProjectAndRole(project, roleService.findRoleByName(RoleEnum.getRoleFromEnrolment(node.get("enrollments").get(0).get("type").asText()).toString()))
+            ));
         }
 
         for (Iterator<JsonNode> it = activeGraders.elements(); it.hasNext(); ) {
@@ -211,7 +216,8 @@ public class ProjectsManagementController {
             graderMap.put(grader1.getUserId(), tasksArray);
             ((ObjectNode) formatNode).put("id", grader1.getUserId());
             ((ObjectNode) formatNode).put("name", grader1.getName());
-            ((ObjectNode) formatNode).put("role", grader1.getRole().toString());
+            ((ObjectNode) formatNode).set("role", grader1.getRolesArrayNode());
+            ((ObjectNode) formatNode).set("privileges", grader1.getPrivilegesArrayNode());
             ((ObjectNode) formatNode).set("groups", tasksArray);
             gradersArray.add(formatNode);
         }
@@ -252,7 +258,7 @@ public class ProjectsManagementController {
             JsonNode grader = objectMapper.createObjectNode();
             ((ObjectNode) grader).put("id", node.get("id").asText());
             ((ObjectNode) grader).put("name", node.get("name").asText());
-            ((ObjectNode) grader).put("role", Grader.getRoleFromString(node.get("enrollments").get(0).get("type").asText()).toString());
+            ((ObjectNode) grader).put("role", RoleEnum.getRoleFromEnrolment(node.get("enrollments").get(0).get("type").asText()).toString());
             results.add(grader);
         }
         return results;
@@ -299,7 +305,8 @@ public class ProjectsManagementController {
             graderMap.put(grader1.getUserId(), tasksArray);
             ((ObjectNode) formatNode).put("id", grader1.getUserId());
             ((ObjectNode) formatNode).put("name", grader1.getName());
-            ((ObjectNode) formatNode).put("role", grader1.getRole().toString());
+            ((ObjectNode) formatNode).set("role", grader1.getRolesArrayNode());
+            ((ObjectNode) formatNode).set("privileges", grader1.getPrivilegesArrayNode());
             ((ObjectNode) formatNode).set("groups", tasksArray);
             gradersArray.add(formatNode);
         }
@@ -363,7 +370,8 @@ public class ProjectsManagementController {
             graderMap.put(grader1.getUserId(), tasksArray);
             ((ObjectNode) formatNode).put("id", grader1.getUserId());
             ((ObjectNode) formatNode).put("name", grader1.getName());
-            ((ObjectNode) formatNode).put("role", grader1.getRole().toString());
+            ((ObjectNode) formatNode).set("role", grader1.getRolesArrayNode());
+            ((ObjectNode) formatNode).set("privileges", grader1.getPrivilegesArrayNode());
             ((ObjectNode) formatNode).set("groups", tasksArray);
             gradersArray.add(formatNode);
         }
@@ -471,7 +479,8 @@ public class ProjectsManagementController {
             graderMap.put(grader1.getUserId(), tasksArray);
             ((ObjectNode) formatNode).put("id", grader1.getUserId());
             ((ObjectNode) formatNode).put("name", grader1.getName());
-            ((ObjectNode) formatNode).put("role", grader1.getRole().toString());
+            ((ObjectNode) formatNode).set("role", grader1.getRolesArrayNode());
+            ((ObjectNode) formatNode).set("privileges", grader1.getPrivilegesArrayNode());
             ((ObjectNode) formatNode).set("groups", tasksArray);
             gradersArray.add(formatNode);
         }

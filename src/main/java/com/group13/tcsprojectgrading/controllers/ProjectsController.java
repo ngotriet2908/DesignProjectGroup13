@@ -7,13 +7,14 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.Activity;
+import com.group13.tcsprojectgrading.models.Grader;
 import com.group13.tcsprojectgrading.models.Project;
-import com.group13.tcsprojectgrading.models.Task;
+import com.group13.tcsprojectgrading.models.RoleEnum;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
-import com.group13.tcsprojectgrading.services.ActivityService;
-import com.group13.tcsprojectgrading.services.ProjectService;
-import com.group13.tcsprojectgrading.services.TaskService;
+import com.group13.tcsprojectgrading.services.*;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.PdfWriter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -21,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,6 +32,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
 
 import static com.group13.tcsprojectgrading.controllers.Utils.groupPages;
 
@@ -41,13 +44,19 @@ public class ProjectsController {
     private final RubricService rubricService;
     private final ProjectService projectService;
     private final TaskService taskService;
+    private final RoleService roleService;
+    private final GraderService graderService;
+    private final ProjectRoleService projectRoleService;
 
-    public ProjectsController(CanvasApi canvasApi, ActivityService activityService, RubricService rubricService, ProjectService projectService, TaskService taskService) {
+    public ProjectsController(CanvasApi canvasApi, ActivityService activityService, RubricService rubricService, ProjectService projectService, TaskService taskService, RoleService roleService, GraderService graderService, ProjectRoleService projectRoleService) {
         this.canvasApi = canvasApi;
         this.activityService = activityService;
         this.rubricService = rubricService;
         this.projectService = projectService;
         this.taskService = taskService;
+        this.roleService = roleService;
+        this.graderService = graderService;
+        this.projectRoleService = projectRoleService;
     }
 
     @RequestMapping(value = "/{projectId}", method = RequestMethod.GET, produces = "application/json")
@@ -67,6 +76,48 @@ public class ProjectsController {
         JsonNode projectJson = objectMapper.readTree(projectResponse);
         JsonNode courseJson = objectMapper.readTree(courseResponse);
 
+        projectService.addProjectRoles(project);
+
+        //create teacher's grader object on first enter project page
+        String userResponse = this.canvasApi.getCanvasCoursesApi().getCourseUser(courseId, principal.getName());
+        ArrayNode enrolmentsNode = groupPages(objectMapper, this.canvasApi.getCanvasUsersApi().getEnrolments(principal.getName()));
+        JsonNode userJson = objectMapper.readTree(userResponse);
+
+        RoleEnum roleEnum = null;
+        Grader grader;
+
+        for (Iterator<JsonNode> it = enrolmentsNode.elements(); it.hasNext(); ) {
+            JsonNode enrolmentNode = it.next();
+            if (enrolmentNode.get("course_id").asText().equals(courseId)) {
+                roleEnum = RoleEnum.getRoleFromEnrolment(enrolmentNode.get("role").asText());
+            }
+        }
+
+        if (roleEnum == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "Enrolment not found"
+            );
+        }
+
+        if (roleEnum.equals(RoleEnum.TEACHER)) {
+            grader = graderService.addNewGrader(new Grader(
+                    project,
+                    userJson.get("id").asText(),
+                    userJson.get("name").asText(),
+                    projectRoleService.findByProjectAndRole(project, roleService.findRoleByName(roleEnum.toString()))
+            ));
+        } else {
+            grader = graderService.getGraderFromGraderId(userJson.get("id").asText(), project);
+        }
+
+        if (grader == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "Grader not found"
+            );
+        }
+
+        JsonNode graderNode = grader.getGraderJson();
+
         // including rubric to the response
         Rubric rubric = rubricService.getRubricByProjectId(projectId);
         JsonNode rubricJson;
@@ -81,6 +132,7 @@ public class ProjectsController {
         resultJson.set("course", courseJson);
         resultJson.set("project", projectJson);
         resultJson.set("rubric", rubricJson);
+        resultJson.set("grader", graderNode);
 
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 
@@ -130,7 +182,103 @@ public class ProjectsController {
                 subject,
                 body
         );
+    }
 
+//    @PostMapping(value = "/{projectId}/feedbackPdf", produces = "application/pdf")
+    @PostMapping(value = "/{projectId}/feedbackPdf")
+    @ResponseBody
+    protected ResponseEntity<byte[]> sendFeedbackPdf(@PathVariable String courseId,
+                                                     @PathVariable String projectId,
+                                                     @RequestBody ObjectNode feedback,
+                                                     Principal principal) throws IOException, ParseException, DocumentException {
+        Project project = projectService.getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "entity not found"
+            );
+        }
+
+        String id = feedback.get("id").asText();
+        boolean isGroup = feedback.get("isGroup").asBoolean();
+        String body = feedback.get("body").asText();
+        String subject = feedback.get("subject").asText();
+
+        String fileName = id + "_" + subject + ".pdf";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData(fileName, fileName);
+        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+//        response.setContentType("blob");
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        Document document = new Document();
+        PdfWriter.getInstance(document, byteArrayOutputStream);
+
+        document.open();
+        Font fontSubject = FontFactory.getFont(FontFactory.COURIER, 22, BaseColor.BLACK);
+
+        Font fontBody = FontFactory.getFont(FontFactory.COURIER, 13, BaseColor.BLACK);
+        Paragraph preface = new Paragraph();
+        addEmptyLine(preface, 1);
+
+        Paragraph paragraph = new Paragraph(subject, fontSubject);
+        preface.add(paragraph);
+        addEmptyLine(preface, 2);
+
+        paragraph = new Paragraph(body, fontBody);
+        preface.add(paragraph);
+
+        document.add(preface);
+        document.close();
+
+
+        System.out.println(Arrays.toString(byteArrayOutputStream.toByteArray()));
+
+        return new ResponseEntity<byte[]>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.OK);
+    }
+
+    private static void addEmptyLine(Paragraph paragraph, int number) {
+        for (int i = 0; i < number; i++) {
+            paragraph.add(new Paragraph(" "));
+        }
+    }
+
+    @GetMapping(value = "/{projectId}/feedbackPdf")
+    @ResponseBody
+    protected ResponseEntity<byte[]> sendFeedbackPdfTemplate(@PathVariable String courseId,
+                                                     @PathVariable String projectId,
+                                                     Principal principal) throws IOException, ParseException, DocumentException {
+        Project project = projectService.getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "entity not found"
+            );
+        }
+
+        String fileName = "hello.pdf";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData(fileName, fileName);
+        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+//        response.setContentType("blob");
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        Document document = new Document();
+        PdfWriter.getInstance(document, byteArrayOutputStream);
+
+        document.open();
+        Font font = FontFactory.getFont(FontFactory.COURIER, 16, BaseColor.BLACK);
+        Chunk subjectChunk = new Chunk("subject", font);
+        Chunk bodyChunk = new Chunk("bodyyyyy", font);
+
+        document.add(subjectChunk);
+        document.add(bodyChunk);
+        document.close();
+
+
+        System.out.println(Arrays.toString(byteArrayOutputStream.toByteArray()));
+
+        return new ResponseEntity<byte[]>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.OK);
     }
 
     @GetMapping(value = "/{projectId}/feedback")
