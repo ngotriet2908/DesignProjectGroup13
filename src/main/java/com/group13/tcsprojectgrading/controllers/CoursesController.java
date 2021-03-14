@@ -70,7 +70,7 @@ class CoursesController {
     }
 
     @RequestMapping(value = "/{course_id}", method = RequestMethod.GET, produces = "application/json")
-    protected ResponseEntity<JsonNode> getCourse(@PathVariable String course_id) throws JsonProcessingException {
+    protected ResponseEntity<JsonNode> getCourse(@PathVariable String course_id, Principal principal) throws JsonProcessingException {
         String courseString = this.canvasApi.getCanvasCoursesApi().getUserCourse(course_id);
         List<Project> projects = projectService.getProjectsByCourseId(course_id);
 
@@ -90,7 +90,7 @@ class CoursesController {
         ObjectNode resultNode = objectMapper.createObjectNode();
         resultNode.set("course", jsonCourseNode);
         resultNode.set("projects", arrayNode);
-        JsonNode resultNode = objectMapper.createObjectNode();
+//        JsonNode resultNode = objectMapper.createObjectNode();
 
 
         String userResponse = this.canvasApi.getCanvasCoursesApi().getCourseUser(course_id, principal.getName());

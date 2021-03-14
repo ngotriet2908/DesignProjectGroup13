@@ -18,6 +18,8 @@ import globalStyles from '../helpers/global.module.css';
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 import {setCurrentLocation} from "../../redux/navigation/actions";
 
+import {Can, ability, updateAbility} from "../permissions/ProjectAbility";
+
 
 class Rubric extends Component {
   constructor (props) {
@@ -25,11 +27,31 @@ class Rubric extends Component {
 
     this.state = {
       isLoaded: false,
+      project: {}
     }
   }
 
   componentDidMount() {
     this.props.setCurrentLocation(LOCATIONS.rubric);
+
+    //TODO in case of directly load this page or refresh page <=> no ability is found
+    if (ability.rules.length === 0) {
+      request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId)
+        .then(response => {
+          return response.json()
+        })
+        .then(data => {
+          if (data.grader !== null && data.grader.privileges !== null) {
+            updateAbility(ability, data.grader.privileges)
+            this.setState({
+              project: data
+            })
+          } else {
+            console.log("no grader or privileges found")
+          }
+          console.log(ability.rules)
+        })
+    }
 
     request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/rubric")
       .then(response => {

@@ -14,7 +14,6 @@ import java.util.List;
 public class ProjectService {
     private final ProjectRepository repository;
 
-    private ProjectRepository repository;
     private ProjectRoleService projectRoleService;
     private RoleService roleService;
 

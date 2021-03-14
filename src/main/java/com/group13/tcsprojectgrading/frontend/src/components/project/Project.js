@@ -167,11 +167,11 @@ class Project extends Component {
                     </Button>
 
                     <Can I="open" a={"ManageGraders"}>
-                    <Button variant="lightGreen">
-                      <Link className={globalStyles.plainLink} to={this.props.match.url + "/graders"}>
+                      <Button variant="lightGreen">
+                        <Link className={globalStyles.plainLink} to={this.props.match.url + "/graders"}>
                       Manage graders
-                      </Link>
-                    </Button>
+                        </Link>
+                      </Button>
                     </Can>
 
                     <Button variant="lightGreen">
@@ -202,18 +202,22 @@ class Project extends Component {
                   <Card.Body>
                     {this.props.rubric != null ?
                       <div>
-                        <Button variant="lightGreen">
-                          <Link className={globalStyles.plainLink} to={this.props.match.url + "/rubric"}>Open rubric</Link>
-                        </Button>
-                        <Button variant="red" onClick={this.onClickRemoveRubric}>Remove rubric</Button>
+                        <Can I="read" a="Rubric">
+                          <Button variant="lightGreen">
+                            <Link className={globalStyles.plainLink} to={this.props.match.url + "/rubric"}>Open rubric</Link>
+                          </Button>
+                        </Can>
+                        <Can I="write" a="Rubric">
+                          <Button variant="red" onClick={this.onClickRemoveRubric}>Remove rubric</Button>
+                        </Can>
                       </div>
                       :
                       <div>
                         <div>No rubric</div>
-                        <Button variant="primary" onClick={this.onClickCreateRubric}>Create rubric</Button>
+                        <Can I="write" a="Rubric">
+                          <Button variant="primary" onClick={this.onClickCreateRubric}>Create rubric</Button>
+                        </Can>
                       </div>
-
-
                     }
                   </Card.Body>
                 </Card>
