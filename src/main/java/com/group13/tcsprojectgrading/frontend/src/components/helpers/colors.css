@@ -11,8 +11,31 @@
 /* orange */
 @value quaternary: #f4a261;
 
-/* red */
+/* tomato */
 @value quinary: #e76f51;
 
+/* red */
+@value senary: #e63946;
+@value senaryShade: #d4333f;
+
 /* light gray */
-@value lightGray: #f2f5fa;
+/*@value lightGray: #f2f5fa;*/
+/*@value ultraLightGray: #eceff1;*/
+/*@value ultraLightGray: #f1f4f5;*/
+@value ultraLightGray: #f7f8fb;
+
+@value pinkishGray: #efeae9;
+
+@value lightGray: #e0e1e5;
+
+/* dark gray / light black */
+/*@value darkishGray: #4c4c4c;*/
+@value darkishGray: #5b5b5b;
+
+@value moderateGray: #cacaca;
+
+
+/* just a colour picker for intellij */
+.iAmASimpleColourPickerThatIsHereOnlyForEasyColourPicking {
+    color: #efeae9;
+}

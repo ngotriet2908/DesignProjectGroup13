@@ -38,18 +38,20 @@ export function request(url, method = "GET", data = {}) {
     init.headers["X-XSRF-TOKEN"] = getCookie('XSRF-TOKEN');
   }
 
-  let promise = fetch(url, init);
+  // let promise = fetch(url, init);
 
-  return promise
+  return fetch(url, init)
     .then(response => {
       // TODO other responses
       if (response.status === 401) {
         store.dispatch(push(URL_PREFIX + "/login/"))
         throw new Error("Not authenticated: 401")
-      } else if (response.status === 404) {
-        store.dispatch(push(URL_PREFIX + "/notfound/"))
-        throw new Error("Not found: 404")
-      } else {
+      }
+      // else if (response.status === 404) {
+      //   store.dispatch(push(URL_PREFIX + "/notfound/"))
+      //   throw new Error("Not found: 404")
+      // }
+      else {
         return response;
       }
     })

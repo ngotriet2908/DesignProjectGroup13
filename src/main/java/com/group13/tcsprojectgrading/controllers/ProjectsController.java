@@ -173,6 +173,8 @@ public class ProjectsController {
         List<String> submissionsString = this.canvasApi.getCanvasCoursesApi().getSubmissionsInfo(courseId, Long.parseLong(projectId));
         List<String> studentsString = this.canvasApi.getCanvasCoursesApi().getCourseStudents(courseId);
 
+        System.out.println(submissionsString);
+
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode resultNode = objectMapper.createObjectNode();
         ((ObjectNode) resultNode).set("project", objectMapper.readTree(projectResponse));

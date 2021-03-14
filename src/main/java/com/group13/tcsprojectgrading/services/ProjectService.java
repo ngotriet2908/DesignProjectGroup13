@@ -11,19 +11,22 @@ import java.util.List;
 
 @Service
 public class ProjectService {
-
-    private ProjectRepository repository;
+    private final ProjectRepository repository;
 
     @Autowired
     public ProjectService(ProjectRepository repository) {
         this.repository = repository;
     }
 
-    public List<Project> getProjectByCourseId(String courseId) {
+    public List<Project> getProjectsByCourseId(String courseId) {
         return repository.findProjectsByCourseId(courseId);
     }
 
     public void addNewProject(Project project) {
+        repository.save(project);
+    }
+
+    public void getOrUpdateProject(Project project) {
         repository.save(project);
     }
 

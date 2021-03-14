@@ -3,6 +3,9 @@ import {SET_CURRENT_LOCATION} from "../actionTypes";
 export const LOCATIONS = Object.freeze(
   {
     "home": 1,
+    "course": 2,
+    "project": 3,
+    "rubric": 4,
   })
 
 const initialState = {

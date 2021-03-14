@@ -4,16 +4,19 @@ public class Grade {
     private int grade;
     private String comment;
     private String criterionId;
+    private String userId;
 
-    public Grade(int grade, String comment, String criterionId) {
+    public Grade(int grade, String comment, String criterionId, String userId) {
         this.grade = grade;
         this.comment = comment;
         this.criterionId = criterionId;
+        this.userId = userId;
     }
 
-    public Grade(int grade, String criterionId) {
+    public Grade(int grade, String criterionId, String userId) {
         this.grade = grade;
         this.criterionId = criterionId;
+        this.userId = userId;
     }
 
     public Grade() {
@@ -43,5 +46,11 @@ public class Grade {
         this.comment = comment;
     }
 
+    public String getUserId() {
+        return userId;
+    }
 
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 }

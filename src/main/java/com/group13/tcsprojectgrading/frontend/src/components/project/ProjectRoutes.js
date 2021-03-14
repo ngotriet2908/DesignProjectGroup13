@@ -8,7 +8,6 @@ import Grading from "../grading/Grading";
 import Tasks from "../tasks/Tasks";
 import TaskInfo from "../taskInfo/TaskInfo";
 import Feedback from "../feedback/Feedback";
-import RubricNew from "../rubricNew/RubricNew";
 
 
 class ProjectRoutes extends Component {
@@ -20,9 +19,11 @@ class ProjectRoutes extends Component {
     return (
       <Switch>
         <Route path={this.props.match.path + "/groups"} component={Groups}/>
-        <Route path={this.props.match.path + "/rubric"} component={RubricNew}/>
+        <Route path={this.props.match.path + "/rubric"} component={Rubric}/>
         <Route path={this.props.match.path + "/graders"} component={GraderManagement}/>
-        <Route path={this.props.match.path + "/grading"} component={Grading}/>
+        {/*<Route path={this.props.match.path + "/grading"} component={Grading}/>*/}
+        {/*<Route path={this.props.match.path + "/tasks/:taskId/grading"} component={Grading}/>*/}
+        <Route path={this.props.match.path + "/submissions/:submissionId/grading"} component={Grading}/>
         <Route path={this.props.match.path + "/tasks/:isGroup/:taskId"} component={TaskInfo}/>
         <Route path={this.props.match.path + "/tasks"} component={Tasks}/>
         <Route path={this.props.match.path + "/feedback"} component={Feedback}/>

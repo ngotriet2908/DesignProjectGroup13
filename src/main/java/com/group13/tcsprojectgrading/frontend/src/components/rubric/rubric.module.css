@@ -1,109 +1,244 @@
+@value primary, secondary, ternary, quaternary, quinary, ultraLightGray, primaryShade, lightGray, darkishGray, moderateGray from '../helpers/colors.css';
+
 .container {
-    padding: 2rem;
     width: 100%;
+    display: grid;
+    grid-template-columns: 30% auto;
+    position: relative;
 }
 
-/* rubric controls */
-#rubricTitleContainer {
+/* outline */
+.outline {
+    padding: 2rem 1rem 1rem 1rem;
+    border-right: 1px solid #dfdfdf;
+}
+
+.outlineContainer {
+    height: 100%;
+    overflow: scroll;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.outlineContainer > div {
+    display: flex;
+    flex-direction: row;
+}
+
+.outlineContainer ul {
+    padding: 0;
+    list-style-type: none;
+    flex: 1;
+}
+
+.outlineHeader {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    cursor: pointer;
 }
 
-#rubricTitleContainer button:first-child {
-    margin-right: 0.5rem;
+.outlineHeader h4 {
+    padding: 0.5rem 0.5rem 0.5rem 0;
+    margin: 0 0 0 0.5rem;
 }
 
-#blocksContainer {
+.outlineHeader div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.outlineHeader div div {
+    color: lightgray;
+    font-size: 1rem;
+}
+
+.outlineHeader span {
+    font-size: 1.5rem;
+}
+
+.outlineGroup {
+    transition: all 1s ease-out;
+}
+
+.outlineGroupCollapsed {
+    display: none;
+}
+
+.outlineElementContainer {
+    border-left: 4px solid transparent;
+}
+
+.outlineElementContainerSelected {
+    /*color: orange;*/
+    border-left: 4px solid primary;
+}
+
+.outlineElement {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    /*color: red;*/
+    cursor: pointer;
+    /*background-color: green;*/
+    border-top: 1px solid #dfdfdf;
+    padding: 0.5rem 0.5rem 0.5rem 0;
+
+    position: relative;
+}
+
+.outlineContainer > div > ul > div:last-child .outlineElement {
+    /*border-bottom: 1px solid #dfdfdf;*/
+}
+
+.outlineElementLeft {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+}
+
+.outlineElementRight {
+    visibility: hidden;
+    margin-left: 0.5rem;
+}
+
+.outlineElement:hover .outlineElementRight {
+    visibility: visible;
+}
+
+.outlineElementText {
+
+}
+
+.outlineElementIcon {
+    margin-right: 0.3rem;
+
+    transform: rotate(0deg);
+    transition: transform .1s ease-in-out;
+}
+
+/*.outlineElementIcon svg {*/
+/*    transform: rotate(0deg);*/
+/*    transition: transform .1s ease-in-out;*/
+/*}*/
+
+.outlineElementIconRotated {
+    transform: rotate(90deg);
+    /*transition: transform .1s ease-in-out;*/
+}
+
+.addElementMenu {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.2rem;
+}
+
+.addElementMenu button {
+    margin: 0.2rem;
+}
+
+
+
+
+/* editor/viewer */
+.editor {
+    min-height:100%;
+    padding: 1rem 2rem 0 1rem;
+    background-color: #f7f8fb;
+}
+
+.editorContainer {
+    height: 0;
+    min-height:100%;
+}
+
+.editorCard {
+    min-height:100%;
+    border-bottom: none;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+
+    padding: 1rem;
+}
+
+.viewerHeader {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.viewerHeader h2 {
+    margin: 0;
+}
+
+.viewerHeader button {
+    margin-left: 0.5rem;
+}
+
+.viewerSectionContainer {
     margin: 1rem 0;
 }
 
-/* blocks */
-.blockCard {
-    /*height: 73px;*/
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-}
-.blockCard h3 {
+.viewerSectionContainer h4 {
     margin: 0;
+    padding: 0.4rem 0;
 }
 
-.blockCard button:first-child {
-    margin: 0 0.5rem;
+.viewerSectionContainerButton {
+    margin-left: 0.5rem;
 }
 
-.blockCardTitle {
+.viewerSectionTitle {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
     align-items: center;
-    height: 40px;
+    margin-bottom: 0.5rem;
 }
 
-.blockCard input {
-    flex-grow: 1;
-    /*margin-right: 0.5rem;*/
-    display: block;
-    padding: 6px 12px;
-    background-color: #fff;
+.viewerSectionContainer input {
+    box-sizing: border-box;
     border: 1px solid #ccc;
     border-radius: 4px;
-    font-size: 28px;
+
+    cursor: text;
+    padding: 6px 12px;
+
+    width: 100%;
 }
 
-.blockContentContainer {
-    /*margin-left: 1rem;*/
-    margin: 1rem 0 1rem 2rem;
+.viewerGradeSectionContainer {
+
 }
 
-.arrowsIcon {
-    color: gray;
+.viewerGradeSectionContainer input {
+    width: 6rem;
+}
+
+.viewerGradeSectionContent {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.viewerGradeSectionContent > div {
     margin-right: 0.5rem;
 }
 
-#addBlockButtonContainer {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
+.viewerGradeSectionContent > div label {
+    margin-right: 0.3rem;
 }
 
-.noCriteriaPlaceholder {
-    border-style: dashed;
-}
 
-/* criteria */
-.criterionCard {
-    margin: 1rem 0 0 0;
-}
 
-.criterionCard p {
-    margin: 0;
-}
 
-.criterionCardTitle {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    height: 40px;
-}
-
-.criterionCardTitle input {
-    flex-grow: 1;
-    margin-right: 0.5rem;
-    display: block;
-    padding: 6px 12px;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-/* editor and editor's toolbar */
-.editor {
+/* rich text editor and toolbar */
+.richTextEditor {
     box-sizing: border-box;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -112,7 +247,7 @@
     padding: 6px 12px;
 }
 
-.editor :global(.public-DraftEditor-content) {
+.richTextEditor :global(.public-DraftEditor-content) {
     min-height: 3rem;
 }
 
@@ -165,4 +300,37 @@
 
 .toolbarButtonActive svg {
     fill: white;
+}
+
+
+
+/* control bar */
+.controlBar {
+    margin: 0 0 0.5rem 0;
+}
+
+.controlBarCard {
+
+}
+
+
+/* (sticky) control (bottom) bar */
+.controlBottomBar {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    background-color: white;
+    padding: 1rem 2rem;
+
+    display: flex;
+    justify-content: flex-end;
+
+    height: 5rem;
+
+    border-top: 1px solid #dfdfdf;
+}
+
+.controlBottomBar button:first-child {
+    margin-right: 0.5rem;
 }

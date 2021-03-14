@@ -1,22 +1,29 @@
 import React, {Component} from "react";
 import styles from "../project/project.module.css";
 import {request} from "../../services/request";
-import {BASE, USER_COURSES, USER_INFO, USER_RECENT} from "../../services/endpoints";
+import {BASE} from "../../services/endpoints";
 import Button from 'react-bootstrap/Button'
 import {URL_PREFIX} from "../../services/config";
 import {Link} from 'react-router-dom'
 
 import {v4 as uuidv4} from "uuid";
 import {connect} from "react-redux";
-import {Breadcrumb, CardColumns, Spinner} from "react-bootstrap";
+import {CardColumns, Spinner} from "react-bootstrap";
 import store from "../../redux/store";
 import {push} from "connected-react-router";
 import Card from "react-bootstrap/Card";
-import {deleteRubric, saveRubric} from "../../redux/rubricNew/actions";
+import {deleteRubric, saveRubric} from "../../redux/rubric/actions";
 
 import testStats from "../stat/testStats.json";
 import Statistic from "../stat/Statistic";
-import TaskContainer from "./TaskContainer";
+import {setCurrentLocation} from "../../redux/navigation/actions";
+import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
+import Breadcrumbs from "../helpers/Breadcrumbs";
+
+import globalStyles from '../helpers/global.module.css';
+import HomeTaskCard from "../home/HomeTaskCard";
+import SectionContainer from "../home/SectionContainer";
+import {IoCheckboxOutline} from "react-icons/io5";
 
 class Project extends Component {
   constructor(props) {
@@ -32,6 +39,8 @@ class Project extends Component {
   }
 
   componentDidMount() {
+    this.props.setCurrentLocation(LOCATIONS.project);
+
     const courseId = this.props.match.params.courseId;
     const projectId = this.props.match.params.projectId;
 
@@ -65,7 +74,7 @@ class Project extends Component {
   Creates a new rubric object and saves it to the store
   */
   onClickCreateRubric = () => {
-    console.log("Creating rubric for project " + parseInt(this.props.match.params.projectId));
+    // console.log("Creating rubric for project " + parseInt(this.props.match.params.projectId));
 
     let rubric = {
       id: uuidv4(),
@@ -75,7 +84,7 @@ class Project extends Component {
 
     request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/rubric", "POST", rubric)
       .then(data => {
-        console.log(data);
+        // console.log(data);
         this.props.saveRubric(rubric);
       })
       .catch(error => {
@@ -86,7 +95,7 @@ class Project extends Component {
   onClickRemoveRubric = () => {
     request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/rubric", "DELETE")
       .then(data => {
-        console.log(data);
+        // console.log(data);
         this.props.deleteRubric();
       })
       .catch(error => {
@@ -97,8 +106,8 @@ class Project extends Component {
   render () {
     if (!this.state.isLoaded) {
       return(
-        <div className={styles.container}>
-          <Spinner className={styles.spinner} animation="border" role="status">
+        <div className={globalStyles.container}>
+          <Spinner className={globalStyles.spinner} animation="border" role="status">
             <span className="sr-only">Loading...</span>
           </Spinner>
         </div>
@@ -106,124 +115,140 @@ class Project extends Component {
     }
 
     return (
-      <div className={styles.projectContainer}>
-        <Breadcrumb>
-          <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumb.Item>
-          <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id ))}>
+      <div className={globalStyles.container}>
+
+        <Breadcrumbs>
+          <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumbs.Item>
+          <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id ))}>
             {this.state.course.name}
-          </Breadcrumb.Item>
-          <Breadcrumb.Item active>
+          </Breadcrumbs.Item>
+          <Breadcrumbs.Item active>
             {this.state.project.name}
-          </Breadcrumb.Item>
-        </Breadcrumb>
+          </Breadcrumbs.Item>
+        </Breadcrumbs>
 
-        <div className={styles.titleContainer}>
-          <h2>{this.state.project.name}</h2>
+        <div className={globalStyles.titleContainer}>
+          <h1>{this.state.project.name}</h1>
         </div>
 
-        {/*<div className={styles.tasksContainer}>*/}
-        {/*  <Card>*/}
-        {/*    <Card.Body>*/}
-        {/*      <Card.Title>*/}
-        {/*        <h3 className={styles.sectionTitle}>My Tasks</h3>*/}
-        {/*      </Card.Title>*/}
-
-        {/*      <TaskContainer/>*/}
-        {/*        */}
-        {/*    </Card.Body>*/}
-        {/*  </Card>*/}
-        {/*</div>*/}
-
-        <div className={styles.sectionContainer}>
-          <Card>
-            <Card.Body>
-              <Card.Title>
-                <h3 className={styles.sectionTitle}>Administration</h3>
-              </Card.Title>
-
-              <div>
-                <Button variant="primary">
-                  <Link className={styles.plainLink} to={this.props.match.url + "/groups"}>
-                      Groups
-                  </Link>
-                </Button>
-
-                <Button variant="primary">
-                  <Link className={styles.plainLink} to={this.props.match.url + "/tasks"}>
-                    My tasks
-                  </Link>
-                </Button>
-
-                <Button variant="primary">
-                  <Link className={styles.plainLink} to={this.props.match.url + "/graders"}>
-                      Manage graders
-                  </Link>
-                </Button>
-
-                <Button variant="primary">
-                  <Link className={styles.plainLink} to={this.props.match.url + "/grading"}>
-                    Grading Interface
-                  </Link>
-                </Button>
-
-                <Button variant="primary">
-                  <Link className={styles.plainLink} to={this.props.match.url + "/feedback"}>
-                    Feedback Interface
-                  </Link>
-                </Button>
+        <div className={styles.container}>
+          <div>
+            <div className={[globalStyles.sectionContainer, styles.administrationSectionContainer].join(" ")}>
+              <div className={[globalStyles.sectionTitle, globalStyles.sectionTitleWithButton].join(" ")}>
+                <h3 className={globalStyles.sectionTitleH}>
+                Administration
+                </h3>
               </div>
-            </Card.Body>
-          </Card>
-        </div>
 
-        <div className={styles.sectionContainer}>
-          <Card>
-            <Card.Body>
-              <Card.Title>
-                <h3 className={styles.sectionTitle}>Rubric</h3>
-              </Card.Title>
-              {this.props.rubric != null ?
-                <div>
-                  <Button variant="primary"><Link className={styles.plainLink} to={this.props.match.url + "/rubric"}>Open
-                      rubric</Link></Button>
-                  <Button variant="danger" onClick={this.onClickRemoveRubric}>Remove rubric</Button>
-                </div>
-                :
-                <div>
-                  <div>No rubric</div>
-                  <Button variant="primary" onClick={this.onClickCreateRubric}>Create rubric</Button>
-                </div>
-              }
-            </Card.Body>
-          </Card>
-        </div>
+              <div className={globalStyles.sectionFlexContainer}>
+                <Card className={styles.card}>
+                  <Card.Body className={[styles.cardBody, styles.administrationSectionContainerBody].join(" ")}>
+                    <Button variant="lightGreen">
+                      <Link className={globalStyles.plainLink} to={this.props.match.url + "/groups"}>
+                      Groups
+                      </Link>
+                    </Button>
 
-        <div className={styles.sectionContainer}>
-          <Card>
-            <Card.Body>
-              <Card.Title>
-                <h3 className={styles.sectionTitle}>Statistics</h3>
-              </Card.Title>
-              <CardColumns className={styles.stats}>
-                {testStats.map(stat => {
-                  return (
-                    <Statistic title={stat.title}
-                      type={stat.type}
-                      data={stat.data}
-                      unit={stat.unit}/>
-                  );
-                }).concat(this.state.stats.map((stat, index) => {
-                  return (
-                    <Statistic title={stat.title}
-                      key={index}
-                      type={stat.type}
-                      data={stat.data}
-                      unit={stat.unit}/>
-                  );
-                }))}
-              </CardColumns>
-            </Card.Body>
-          </Card>
+                    <Button variant="lightGreen">
+                      <Link className={globalStyles.plainLink} to={this.props.match.url + "/tasks"}>
+                      My tasks
+                      </Link>
+                    </Button>
+
+                    <Button variant="lightGreen">
+                      <Link className={globalStyles.plainLink} to={this.props.match.url + "/graders"}>
+                      Manage graders
+                      </Link>
+                    </Button>
+
+                    <Button variant="lightGreen">
+                      <Link className={globalStyles.plainLink} to={this.props.match.url + "/grading"}>
+                      Grading Interface
+                      </Link>
+                    </Button>
+
+                    <Button variant="lightGreen">
+                      <Link className={globalStyles.plainLink} to={this.props.match.url + "/feedback"}>
+                      Feedback Interface
+                      </Link>
+                    </Button>
+                  </Card.Body>
+                </Card>
+              </div>
+            </div>
+
+            <div className={[globalStyles.sectionContainer, styles.rubricSectionContainer].join(" ")}>
+              <div className={[globalStyles.sectionTitle, globalStyles.sectionTitleWithButton].join(" ")}>
+                <h3 className={globalStyles.sectionTitleH}>
+                Rubric
+                </h3>
+              </div>
+
+              <div className={globalStyles.sectionFlexContainer}>
+                <Card>
+                  <Card.Body>
+                    {this.props.rubric != null ?
+                      <div>
+                        <Button variant="lightGreen">
+                          <Link className={globalStyles.plainLink} to={this.props.match.url + "/rubric"}>Open rubric</Link>
+                        </Button>
+                        <Button variant="red" onClick={this.onClickRemoveRubric}>Remove rubric</Button>
+                      </div>
+                      :
+                      <div>
+                        <div>No rubric</div>
+                        <Button variant="primary" onClick={this.onClickCreateRubric}>Create rubric</Button>
+                      </div>
+                    }
+                  </Card.Body>
+                </Card>
+              </div>
+            </div>
+
+            <div className={[globalStyles.sectionContainer, styles.statisticSectionContainer].join(" ")}>
+              <div className={[globalStyles.sectionTitle, globalStyles.sectionTitleWithButton].join(" ")}>
+                <h3 className={globalStyles.sectionTitleH}>
+                Statistics
+                </h3>
+              </div>
+              <Card>
+                <Card.Body>
+                Here comes the Sun
+                  {/*<CardColumns className={styles.stats}>*/}
+                  {/*  {testStats.map(stat => {*/}
+                  {/*    return (*/}
+                  {/*      <Statistic title={stat.title}*/}
+                  {/*        type={stat.type}*/}
+                  {/*        data={stat.data}*/}
+                  {/*        unit={stat.unit}/>*/}
+                  {/*    );*/}
+                  {/*  }).concat(this.state.stats.map((stat, index) => {*/}
+                  {/*    return (*/}
+                  {/*      <Statistic title={stat.title}*/}
+                  {/*        key={index}*/}
+                  {/*        type={stat.type}*/}
+                  {/*        data={stat.data}*/}
+                  {/*        unit={stat.unit}/>*/}
+                  {/*    );*/}
+                  {/*  }))}*/}
+                  {/*</CardColumns>*/}
+                </Card.Body>
+              </Card>
+            </div>
+          </div>
+
+          {/*<div>*/}
+          <SectionContainer
+            title={"To-Do list"}
+            data={[]}
+            // emptyText={"Your tasks will appear here when they are assigned to you."}
+            emptyText={"Nothing to do"}
+            Component={HomeTaskCard}
+            className={styles.tasksSectionContainer}
+            EmptyIcon={IoCheckboxOutline}
+          />
+          {/*</div>*/}
+
         </div>
       </div>
     )
@@ -232,14 +257,14 @@ class Project extends Component {
 
 const mapStateToProps = state => {
   return {
-    rubric: state.rubricNew.rubric
+    rubric: state.rubric.rubric
   };
 };
 
 const actionCreators = {
   saveRubric,
-  deleteRubric
-  // removeRubric
+  deleteRubric,
+  setCurrentLocation
 }
 
 export default connect(mapStateToProps, actionCreators)(Project)

@@ -1,82 +1,25 @@
-@value primary, secondary, ternary, quaternary, quinary, primaryShade, lightGray from '../helpers/colors.css';
+@value primary, secondary, ternary, quaternary, quinary, ultraLightGray, primaryShade, lightGray, darkishGray, moderateGray from '../helpers/colors.css';
+
+
+
+
+
+
+
+
+
 
 .container {
-    padding: 2rem;
-    width: 100%;
-    background-color: lightGray;
+    display: grid;
+    grid-template-columns: 47% 47%;
+    column-gap: 6%;
 }
 
-/* section */
-.sectionContainer {
-    width: 100%;
-    display: block;
-}
-
-.sectionTitle {
-    margin: 2rem 0 1rem 0;
-}
-
-.sectionTitleH {
-    margin: 0 1rem 0 0;
-}
-
-.sectionTitleButton {
-    cursor: pointer;
-    color: primary;
-    transition: color 0.1s ease-in;
-}
-
-.sectionTitleButton:hover {
-    color: secondary;
-}
-
-.titleContainer h2 {
-    margin: 0;
-}
-
-.titleContainer {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-end;
-}
-
-.titleContainer span {
-    margin-left: 1rem;
-    font-size: 1.6rem;
-    color: #a2a1a1;
-}
-
-.sectionTitleWithButton {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-end;
+.container > * {
+    grid-column: 1 / 2;
 }
 
 
-
-
-
-
-
-
-
-/*.projectsContainer {*/
-/*    width: 100%;*/
-/*    display: block;*/
-/*}*/
-
-/*.projectsToolBar {*/
-/*    display: inline;*/
-/*}*/
-
-/*.projectsToolBarText {*/
-/*    display: inline;*/
-/*    margin-right: 1rem;*/
-/*}*/
-
-/*.projectsToolBarButton {*/
-/*    display: inline;*/
-/*}*/
 
 .editProjectsModalCard {
     margin-bottom: 2rem;
@@ -128,13 +71,80 @@
     width: 18rem;
 }
 
-.cardImg {
-    object-position: top center;
-    object-fit: cover;
+
+
+/* modal */
+.modalContainer {
+    padding: 2rem 2rem 1rem 2rem;
+    max-height: calc(100vh - 3.5rem);
 }
 
+.modalHeaderContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
 
-.plainLink, .plainLink:hover {
-    text-decoration: none;
+.modalHeaderContainer h2 {
+    margin: 0;
+}
+
+.modalHeaderContainerButton {
+    cursor: pointer;
+    color: darkishGray
+}
+
+.modalDescriptionContainer {
+    margin: 1rem 0;
+}
+
+.modalBodyContainer {
+    overflow: scroll;
+    max-height: 30rem;
+}
+
+.modalBodyContainerRow {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 0.5rem 0;
+
+    border: 1px solid moderateGray;
+
+    cursor: pointer;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.modalBodyContainerRow span {
+    margin-left: 0.5rem;
+}
+
+.modalBodyContainerRowActive {
+    background-color: primary;
     color: white;
+    border: 1px solid primary;
+}
+
+.modalFooterContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+
+    padding-top: 1rem;
+    margin-top: 1rem;
+
+    border-top: 1px solid lightGray;
+}
+
+.modalFooterContainerButtonGroup {
+
+}
+
+.modalFooterContainerButtonGroup > *:first-child {
+    margin-right: 0.5rem;
 }
