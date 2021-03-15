@@ -9,7 +9,6 @@ import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.services.ActivityService;
 import com.group13.tcsprojectgrading.services.GraderService;
 import com.group13.tcsprojectgrading.services.ProjectService;
-import com.group13.tcsprojectgrading.services.TaskService;
 import com.group13.tcsprojectgrading.services.grading.GradingService;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,17 +30,15 @@ public class GradingController {
     private final ActivityService activityService;
     private final RubricService rubricService;
     private final GraderService graderService;
-    private final TaskService taskService;
     private final ProjectService projectService;
     private final GradingService gradingService;
 
     @Autowired
-    public GradingController(CanvasApi canvasApi, ActivityService activityService, RubricService rubricService, GraderService graderService, TaskService taskService, ProjectService projectService, GradingService gradingService) {
+    public GradingController(CanvasApi canvasApi, ActivityService activityService, RubricService rubricService, GraderService graderService , ProjectService projectService, GradingService gradingService) {
         this.canvasApi = canvasApi;
         this.activityService = activityService;
         this.rubricService = rubricService;
         this.graderService = graderService;
-        this.taskService = taskService;
         this.projectService = projectService;
         this.gradingService = gradingService;
     }

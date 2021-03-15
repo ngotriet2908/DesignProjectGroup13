@@ -83,17 +83,17 @@ class BulkAssignModal extends Component {
       && (this.state.notAssigned.length >= this.state.numTasks)
     ) {
       let object = {
-        tasks: this.state.numTasks,
+        submissions: this.state.numTasks,
         graders: this.state.graders.filter((grader) => {
           return grader.checked
         })
       }
       this.props.onAccept(object)
     } else {
-      let message = "" + ((this.state.numTasks > 0)? "" : "number of tasks need to be larger than 0, \n") +
-                    ((this.state.notAssigned.length > 0)? "" : "number of not assigned tasks need to be larger than 0, \n") +
+      let message = "" + ((this.state.numTasks > 0)? "" : "number of submissions need to be larger than 0, \n") +
+                    ((this.state.notAssigned.length > 0)? "" : "number of not assigned submissions need to be larger than 0, \n") +
                     ((this.getChosenNum() > 0)? "" : "number of chosen graders needs to be larger than 0, \n") +
-                    ((this.state.notAssigned.length >= this.state.numTasks)? "" : "number of tasks need to be assigned have to be smaller or equal than number of available tasks");
+                    ((this.state.notAssigned.length >= this.state.numTasks)? "" : "number of submissions need to be assigned have to be smaller or equal than number of available submissions");
       console.log(message)
       this.setState({
         showAlert: true,
@@ -131,14 +131,14 @@ class BulkAssignModal extends Component {
                   </p>
                 </Alert>}
               <h6>Number of available graders: {this.state.graders.length}</h6>
-              <h6>Number of not assigned tasks: {this.state.notAssigned.length}</h6>
+              <h6>Number of not assigned submissions: {this.state.notAssigned.length}</h6>
 
               <h6>Number of chosen graders: {this.getChosenNum()}</h6>
               <InputGroup>
                 <InputGroup.Prepend>
-                  <InputGroup.Text>Number of want to assign tasks</InputGroup.Text>
+                  <InputGroup.Text>Number of want to assign submissions</InputGroup.Text>
                 </InputGroup.Prepend>
-                <FormControl onChange={this.handleChangedAssignedWantToBeTask} placeholder="Tasks"/>
+                <FormControl onChange={this.handleChangedAssignedWantToBeTask} placeholder="Submissions"/>
               </InputGroup>
 
               <Card>
@@ -156,7 +156,7 @@ class BulkAssignModal extends Component {
                     return (
                       <Form.Check
                         type={"checkbox"}
-                        label={"name: " + grader.name + ", current task: " + grader.groups.length}
+                        label={"name: " + grader.name + ", current submission: " + grader.groups.length}
                         checked={grader.checked}
                         onChange={(event) => this.handleCheckedChangeHandler(grader, event)}
                         id={"checkbox-" + grader.id}

@@ -10,7 +10,6 @@ import com.group13.tcsprojectgrading.models.*;
 import com.group13.tcsprojectgrading.services.ActivityService;
 import com.group13.tcsprojectgrading.services.GraderService;
 import com.group13.tcsprojectgrading.services.ProjectService;
-import com.group13.tcsprojectgrading.services.TaskService;
 import com.group13.tcsprojectgrading.services.*;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,16 +32,16 @@ class CoursesController {
     private final ActivityService activityService;
     private final RubricService rubricService;
     private final GraderService graderService;
-    private final TaskService taskService;
+    private final SubmissionService submissionService;
     private final ProjectService projectService;
 
     @Autowired
-    public CoursesController(CanvasApi canvasApi, ActivityService activityService, RubricService rubricService, GraderService graderService, TaskService taskService, ProjectService projectService) {
+    public CoursesController(CanvasApi canvasApi, ActivityService activityService, RubricService rubricService, GraderService graderService, SubmissionService submissionService, ProjectService projectService) {
         this.canvasApi = canvasApi;
         this.activityService = activityService;
         this.rubricService = rubricService;
         this.graderService = graderService;
-        this.taskService = taskService;
+        this.submissionService = submissionService;
         this.projectService = projectService;
     }
 
@@ -162,7 +161,7 @@ class CoursesController {
                 if (project != null) {
                     isVolatile = (activityService.getActivitiesByProject(project).size() > 0) ||
                             (graderService.getGraderFromProject(project).size() > 0) ||
-                            (taskService.getTasksFromId(project).size() > 0);
+                            (submissionService.findSubmissionWithProject(project).size() > 0);
                 }
 
                 ObjectNode projectNode = objectMapper.createObjectNode();

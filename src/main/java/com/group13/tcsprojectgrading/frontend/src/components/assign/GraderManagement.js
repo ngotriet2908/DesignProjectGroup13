@@ -186,7 +186,7 @@ class GraderManagement extends Component {
   }
 
   handleReturnTask = (grader, task) => {
-    request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management/assign/${task.id}/${task.isGroup}/notAssigned`)
+    request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management/assign/${task.id}/notAssigned`)
       .then(response => {
         return response.json();
       })
@@ -203,7 +203,7 @@ class GraderManagement extends Component {
   }
 
   handleAssignTask = (fromGrader, isFromNotAssigned,toGrader, task) => {
-    request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management/assign/${task.id}/${task.isGroup}/${toGrader.id}`)
+    request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management/assign/${task.id}/${toGrader.id}`)
       .then(response => {
         return response.json();
       })

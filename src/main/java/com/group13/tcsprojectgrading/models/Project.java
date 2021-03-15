@@ -24,7 +24,7 @@ public class Project {
     private List<Grader> graders;
 
     @OneToMany(mappedBy = "project")
-    private List<Task> tasks;
+    private List<Submission> submissions;
 
     public Project(String courseId, String projectId) {
         this.courseId = courseId;
@@ -70,12 +70,12 @@ public class Project {
         this.graders = graders;
     }
 
-    public List<Task> getTasks() {
-        return tasks;
+    public List<Submission> getSubmissions() {
+        return submissions;
     }
 
-    public void setTasks(List<Task> tasks) {
-        this.tasks = tasks;
+    public void setSubmissions(List<Submission> submissions) {
+        this.submissions = submissions;
     }
 
     @Override

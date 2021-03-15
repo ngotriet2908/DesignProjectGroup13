@@ -10,8 +10,9 @@ import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.Grader;
 import com.group13.tcsprojectgrading.models.Project;
 import com.group13.tcsprojectgrading.models.RoleEnum;
-import com.group13.tcsprojectgrading.models.Task;
+import com.group13.tcsprojectgrading.models.Submission;
 import com.group13.tcsprojectgrading.services.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -27,18 +28,19 @@ import static com.group13.tcsprojectgrading.controllers.Utils.groupPages;
 public class ProjectsManagementController {
     private final CanvasApi canvasApi;
     private final GraderService graderService;
-    private final TaskService taskService;
     private final ProjectService projectService;
     private final RoleService roleService;
     private final ProjectRoleService projectRoleService;
+    private final SubmissionService submissionService;
 
-    public ProjectsManagementController(CanvasApi canvasApi, GraderService graderService, TaskService taskService, ProjectService projectService, RoleService roleService, ProjectRoleService projectRoleService) {
+    @Autowired
+    public ProjectsManagementController(CanvasApi canvasApi, GraderService graderService, ProjectService projectService, RoleService roleService, ProjectRoleService projectRoleService, SubmissionService submissionService) {
         this.canvasApi = canvasApi;
         this.graderService = graderService;
-        this.taskService = taskService;
         this.projectService = projectService;
         this.roleService = roleService;
         this.projectRoleService = projectRoleService;
+        this.submissionService = submissionService;
     }
 
     @GetMapping(value = "")
@@ -92,32 +94,27 @@ public class ProjectsManagementController {
 
         ArrayNode submissionArray = groupPages(objectMapper, submissionsString);
         List<String> validSubmissionId = new ArrayList<>();
+        List<Submission> validSubmissions = new ArrayList<>();
 
         for (Iterator<JsonNode> it = submissionArray.elements(); it.hasNext(); ) {
             JsonNode jsonNode = it.next();
 
-            if (!jsonNode.get("workflow_state").asText().equals("submitted")) continue;
+            if (jsonNode.get("workflow_state").asText().equals("unsubmitted")) continue;
             if (!studentMap.containsKey(jsonNode.get("user_id").asText())) continue;
 
             boolean isGroup = userIdToGroupIdMap.containsKey(jsonNode.get("user_id").asText());
-            String id = (isGroup)? userIdToGroupIdMap.get(jsonNode.get("user_id").asText()): jsonNode.get("user_id").asText();
-            String name = (isGroup)? groupIdToNameMap.get(userIdToGroupIdMap.get(jsonNode.get("user_id").asText())): studentMap.get(id).get("name").asText();
-            Task task = new Task(
-                    id,
-                    isGroup,
+            String user_id = jsonNode.get("user_id").asText();
+            String group_id = (isGroup)? userIdToGroupIdMap.get(jsonNode.get("user_id").asText()): null;
+            String name = (isGroup)? groupIdToNameMap.get(userIdToGroupIdMap.get(jsonNode.get("user_id").asText())): studentMap.get(user_id).get("name").asText();
+            Submission submission = new Submission(
+                    user_id,
                     project,
-                    jsonNode.get("id").asText(),
-                    jsonNode.get("user_id").asText(),
-                    name
-            );
-            validSubmissionId.add(task.getSubmissionId());
-            Task existedTask = taskService.findTaskById(jsonNode.get("id").asText(), project);
-            if (existedTask != null) {
-                if (existedTask.isGroup() != isGroup || !existedTask.getId().equals(id)) {
-                    taskService.deleteTask(existedTask);
-                }
-            }
-            taskService.addNewTask(task);
+                    name,
+                    group_id
+                    );
+
+            validSubmissionId.add(submission.getId());
+            validSubmissions.add(submission);
         }
 
         Map<String, ArrayNode> graderMap = new HashMap<>();
@@ -133,23 +130,30 @@ public class ProjectsManagementController {
             gradersArray.add(formatNode);
         }
 
-        List<Task> tasks = taskService.getTasksFromId(project);
-        for (Task task: tasks) {
-            if (!validSubmissionId.contains(task.getSubmissionId())) {
-                taskService.deleteTask(task);
-                continue;
+//        List<Task> tasks = taskService.getTasksFromId(project);
+        List<Submission> submissions = submissionService.findSubmissionWithProject(project);
+        for(Submission submission: submissions) {
+            if (!validSubmissionId.contains(submission.getId())) {
+                submissionService.deleteSubmission(submission);
             }
+        }
+        for(Submission submission: validSubmissions) {
+            submissionService.addNewSubmission(submission);
+        }
+
+        submissions = submissionService.findSubmissionWithProject(project);
+        for(Submission submission: submissions) {
 
             JsonNode taskNode = objectMapper.createObjectNode();
-            ((ObjectNode) taskNode).put("id", task.getId());
-            ((ObjectNode) taskNode).put("submission_id", task.getSubmissionId());
-            ((ObjectNode) taskNode).put("isGroup", task.isGroup());
-            ((ObjectNode) taskNode).put("name", task.getName());
+            ((ObjectNode) taskNode).put("id", submission.getId());
+//            ((ObjectNode) taskNode).put("submission_id", submission.getId());
+            ((ObjectNode) taskNode).put("isGroup", submission.getGroupId() != null);
+            ((ObjectNode) taskNode).put("name", submission.getName());
 
-            if (task.getGrader() == null) {
+            if (submission.getGrader() == null) {
                 notAssignedArray.add(taskNode);
             } else {
-                graderMap.get(task.getGrader().getUserId()).add(taskNode);
+                graderMap.get(submission.getGrader().getUserId()).add(taskNode);
             }
         }
 
@@ -203,7 +207,12 @@ public class ProjectsManagementController {
         }
 
         //remake notAssigned & graders
+        return remakeNotAssignedAndGraders(project);
 
+    }
+
+    public JsonNode remakeNotAssignedAndGraders(Project project) {
+        ObjectMapper objectMapper = new ObjectMapper();
         List<Grader> graders = graderService.getGraderFromProject(project);
         JsonNode resultNode = objectMapper.createObjectNode();
         ArrayNode notAssignedArray = objectMapper.createArrayNode();
@@ -222,20 +231,19 @@ public class ProjectsManagementController {
             gradersArray.add(formatNode);
         }
 
-        List<Task> tasks = taskService.getTasksFromId(project);
-        System.out.println(tasks);
-        for (Task task1: tasks) {
+        List<Submission> submissions = submissionService.findSubmissionWithProject(project);
+        for(Submission submission: submissions) {
 
             JsonNode taskNode = objectMapper.createObjectNode();
-            ((ObjectNode) taskNode).put("id", task1.getId());
-            ((ObjectNode) taskNode).put("submission_id", task1.getSubmissionId());
-            ((ObjectNode) taskNode).put("isGroup", task1.isGroup());
-            ((ObjectNode) taskNode).put("name", task1.getName());
+            ((ObjectNode) taskNode).put("id", submission.getId());
+//            ((ObjectNode) taskNode).put("submission_id", submission.getId());
+            ((ObjectNode) taskNode).put("isGroup", submission.getGroupId() != null);
+            ((ObjectNode) taskNode).put("name", submission.getName());
 
-            if (task1.getGrader() == null) {
+            if (submission.getGrader() == null) {
                 notAssignedArray.add(taskNode);
             } else {
-                graderMap.get(task1.getGrader().getUserId()).add(taskNode);
+                graderMap.get(submission.getGrader().getUserId()).add(taskNode);
             }
         }
 
@@ -243,7 +251,6 @@ public class ProjectsManagementController {
         ((ObjectNode)resultNode).set("notAssigned", notAssignedArray);
 
         return resultNode;
-
     }
 
     @GetMapping(value = "/addGraders/getAllGraders")
@@ -264,12 +271,11 @@ public class ProjectsManagementController {
         return results;
     }
 
-    @GetMapping(value = "/assign/{assignmentId}/{isGroup}/{toUserId}")
+    @GetMapping(value = "/assign/{id}/{toUserId}")
     @ResponseBody
-    protected JsonNode assignTask(@PathVariable String courseId,
+    protected JsonNode assignSubmission(@PathVariable String courseId,
                                   @PathVariable String projectId,
-                                  @PathVariable String assignmentId,
-                                  @PathVariable Boolean isGroup,
+                                  @PathVariable String id,
 //                                  @PathVariable String fromUserId,
                                   @PathVariable String toUserId,
                                   Principal principal) throws JsonProcessingException, ParseException {
@@ -279,59 +285,20 @@ public class ProjectsManagementController {
                     HttpStatus.NOT_FOUND, "entity not found"
             );
         }
-        Task task = taskService.findTaskByTaskId(assignmentId, isGroup, project);
+        Submission submission = submissionService.findSubmissionById(id, project);
         Grader grader = graderService.getGraderFromGraderId(toUserId, project);
-        if (task == null) return null;
+        if (submission == null) return null;
         if (!toUserId.equals("notAssigned")) {
             if (grader == null) return null;
-            task.setGrader(grader);
+            submission.setGrader(grader);
         } else {
             System.out.println("notAssigned");
-            task.setGrader(null);
+            submission.setGrader(null);
         }
-        taskService.addNewTask(task);
+        submissionService.addNewSubmission(submission);
 
         //remake notAssigned & graders
-        List<Grader> graders = graderService.getGraderFromProject(project);
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode resultNode = objectMapper.createObjectNode();
-        ArrayNode notAssignedArray = objectMapper.createArrayNode();
-        ArrayNode gradersArray = objectMapper.createArrayNode();
-
-        Map<String, ArrayNode> graderMap = new HashMap<>();
-        for (Grader grader1: graders) {
-            JsonNode formatNode = objectMapper.createObjectNode();
-            ArrayNode tasksArray = objectMapper.createArrayNode();
-            graderMap.put(grader1.getUserId(), tasksArray);
-            ((ObjectNode) formatNode).put("id", grader1.getUserId());
-            ((ObjectNode) formatNode).put("name", grader1.getName());
-            ((ObjectNode) formatNode).set("role", grader1.getRolesArrayNode());
-            ((ObjectNode) formatNode).set("privileges", grader1.getPrivilegesArrayNode());
-            ((ObjectNode) formatNode).set("groups", tasksArray);
-            gradersArray.add(formatNode);
-        }
-
-        List<Task> tasks = taskService.getTasksFromId(project);
-        System.out.println(tasks);
-        for (Task task1: tasks) {
-
-            JsonNode taskNode = objectMapper.createObjectNode();
-            ((ObjectNode) taskNode).put("id", task1.getId());
-            ((ObjectNode) taskNode).put("submission_id", task1.getSubmissionId());
-            ((ObjectNode) taskNode).put("isGroup", task1.isGroup());
-            ((ObjectNode) taskNode).put("name", task1.getName());
-
-            if (task1.getGrader() == null) {
-                notAssignedArray.add(taskNode);
-            } else {
-                graderMap.get(task1.getGrader().getUserId()).add(taskNode);
-            }
-        }
-
-        ((ObjectNode)resultNode).set("graders", gradersArray);
-        ((ObjectNode)resultNode).set("notAssigned", notAssignedArray);
-
-        return resultNode;
+        return remakeNotAssignedAndGraders(project);
     }
 
     @GetMapping(value = "/return/{userId}")
@@ -346,57 +313,16 @@ public class ProjectsManagementController {
                     HttpStatus.NOT_FOUND, "entity not found"
             );
         }
-        List<Task> tasks1 = taskService.getTasksFromId(project);
-        for(Task task: tasks1) {
-            if (task.getGrader() == null) continue;
-            if (task.getGrader().getUserId().equals(userId)) {
-                task.setGrader(null);
-                taskService.addNewTask(task);
+        List<Submission> submissions = submissionService.findSubmissionWithProject(project);
+        for(Submission submission: submissions) {
+            if (submission.getGrader() == null) continue;
+            if (submission.getGrader().getUserId().equals(userId)) {
+                submission.setGrader(null);
+                submissionService.addNewSubmission(submission);
             }
         }
 
-        //remake notAssigned & graders
-
-        List<Grader> graders = graderService.getGraderFromProject(project);
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode resultNode = objectMapper.createObjectNode();
-        ArrayNode notAssignedArray = objectMapper.createArrayNode();
-        ArrayNode gradersArray = objectMapper.createArrayNode();
-
-        Map<String, ArrayNode> graderMap = new HashMap<>();
-        for (Grader grader1: graders) {
-            JsonNode formatNode = objectMapper.createObjectNode();
-            ArrayNode tasksArray = objectMapper.createArrayNode();
-            graderMap.put(grader1.getUserId(), tasksArray);
-            ((ObjectNode) formatNode).put("id", grader1.getUserId());
-            ((ObjectNode) formatNode).put("name", grader1.getName());
-            ((ObjectNode) formatNode).set("role", grader1.getRolesArrayNode());
-            ((ObjectNode) formatNode).set("privileges", grader1.getPrivilegesArrayNode());
-            ((ObjectNode) formatNode).set("groups", tasksArray);
-            gradersArray.add(formatNode);
-        }
-
-        List<Task> tasks = taskService.getTasksFromId(project);
-        System.out.println(tasks);
-        for (Task task1: tasks) {
-
-            JsonNode taskNode = objectMapper.createObjectNode();
-            ((ObjectNode) taskNode).put("id", task1.getId());
-            ((ObjectNode) taskNode).put("submission_id", task1.getSubmissionId());
-            ((ObjectNode) taskNode).put("isGroup", task1.isGroup());
-            ((ObjectNode) taskNode).put("name", task1.getName());
-
-            if (task1.getGrader() == null) {
-                notAssignedArray.add(taskNode);
-            } else {
-                graderMap.get(task1.getGrader().getUserId()).add(taskNode);
-            }
-        }
-
-        ((ObjectNode)resultNode).set("graders", gradersArray);
-        ((ObjectNode)resultNode).set("notAssigned", notAssignedArray);
-
-        return resultNode;
+        return remakeNotAssignedAndGraders(project);
     }
 
     @PostMapping(value = "/bulkAssign")
@@ -410,16 +336,16 @@ public class ProjectsManagementController {
                     HttpStatus.NOT_FOUND, "entity not found"
             );
         }
-        List<Task> tasks1 = taskService.getTasksFromId(project);
+        List<Submission> submissions = submissionService.findSubmissionWithProject(project);
 
-        List<Task> notAssigned = new ArrayList<>();
-        for(Task task: tasks1) {
-            if (task.getGrader() == null) {
-                notAssigned.add(task);
+        List<Submission> notAssigned = new ArrayList<>();
+        for(Submission submission: submissions) {
+            if (submission.getGrader() == null) {
+                notAssigned.add(submission);
             }
         }
 
-        int notAssignNum = object.get("tasks").asInt();
+        int notAssignNum = object.get("submissions").asInt();
         if (notAssignNum > notAssigned.size()) {
             System.out.println("different sync");
             return null;
@@ -453,59 +379,18 @@ public class ProjectsManagementController {
                     System.out.println("something is wrong, not assigned is overflow");
                     break;
                 }
-                Task task = notAssigned.remove(0);
+                Submission submission = notAssigned.remove(0);
                 Grader grader1 = graderService.getGraderFromGraderId(grader.get("id").asText(), project);
                 if (grader1 == null) {
                     System.out.println("Grader not found");
                     return null;
                 }
-                task.setGrader(grader1);
-                taskService.addNewTask(task);
+                submission.setGrader(grader1);
+                submissionService.addNewSubmission(submission);
             }
         }
 
-
-        //remake notAssigned & graders
-
-        List<Grader> graders = graderService.getGraderFromProject(project);
-        JsonNode resultNode = objectMapper.createObjectNode();
-        ArrayNode notAssignedArray = objectMapper.createArrayNode();
-        ArrayNode gradersArray = objectMapper.createArrayNode();
-
-        Map<String, ArrayNode> graderMap = new HashMap<>();
-        for (Grader grader1: graders) {
-            JsonNode formatNode = objectMapper.createObjectNode();
-            ArrayNode tasksArray = objectMapper.createArrayNode();
-            graderMap.put(grader1.getUserId(), tasksArray);
-            ((ObjectNode) formatNode).put("id", grader1.getUserId());
-            ((ObjectNode) formatNode).put("name", grader1.getName());
-            ((ObjectNode) formatNode).set("role", grader1.getRolesArrayNode());
-            ((ObjectNode) formatNode).set("privileges", grader1.getPrivilegesArrayNode());
-            ((ObjectNode) formatNode).set("groups", tasksArray);
-            gradersArray.add(formatNode);
-        }
-
-        List<Task> tasks = taskService.getTasksFromId(project);
-        System.out.println(tasks);
-        for (Task task1: tasks) {
-
-            JsonNode taskNode = objectMapper.createObjectNode();
-            ((ObjectNode) taskNode).put("id", task1.getId());
-            ((ObjectNode) taskNode).put("submission_id", task1.getSubmissionId());
-            ((ObjectNode) taskNode).put("isGroup", task1.isGroup());
-            ((ObjectNode) taskNode).put("name", task1.getName());
-
-            if (task1.getGrader() == null) {
-                notAssignedArray.add(taskNode);
-            } else {
-                graderMap.get(task1.getGrader().getUserId()).add(taskNode);
-            }
-        }
-
-        ((ObjectNode)resultNode).set("graders", gradersArray);
-        ((ObjectNode)resultNode).set("notAssigned", notAssignedArray);
-
-        return resultNode;
+        return remakeNotAssignedAndGraders(project);
     }
 
 }

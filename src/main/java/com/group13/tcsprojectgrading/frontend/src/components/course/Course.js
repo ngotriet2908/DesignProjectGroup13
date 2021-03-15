@@ -26,7 +26,7 @@ import SectionContainer from "../home/SectionContainer";
 import globalStyles from '../helpers/global.module.css';
 import {IoFileTrayOutline} from "react-icons/io5";
 
-import course from "../../redux/course/reducers/course";
+// import course from "../../redux/course/reducers/course";
 
 class Course extends Component {
   constructor (props) {

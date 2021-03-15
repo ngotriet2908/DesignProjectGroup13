@@ -43,17 +43,15 @@ public class ProjectsController {
     private final ActivityService activityService;
     private final RubricService rubricService;
     private final ProjectService projectService;
-    private final TaskService taskService;
     private final RoleService roleService;
     private final GraderService graderService;
     private final ProjectRoleService projectRoleService;
 
-    public ProjectsController(CanvasApi canvasApi, ActivityService activityService, RubricService rubricService, ProjectService projectService, TaskService taskService, RoleService roleService, GraderService graderService, ProjectRoleService projectRoleService) {
+    public ProjectsController(CanvasApi canvasApi, ActivityService activityService, RubricService rubricService, ProjectService projectService, RoleService roleService, GraderService graderService, ProjectRoleService projectRoleService) {
         this.canvasApi = canvasApi;
         this.activityService = activityService;
         this.rubricService = rubricService;
         this.projectService = projectService;
-        this.taskService = taskService;
         this.roleService = roleService;
         this.graderService = graderService;
         this.projectRoleService = projectRoleService;

@@ -24,7 +24,7 @@ public class Grader {
     private String name;
 
     @OneToMany(mappedBy = "grader")
-    private List<Task> tasks;
+    private List<Submission> submissions;
 
     @ManyToMany
     private Collection<ProjectRole> projectRoles;
@@ -56,12 +56,12 @@ public class Grader {
         this.project = project;
     }
 
-    public List<Task> getTasks() {
-        return tasks;
+    public List<Submission> getSubmissions() {
+        return submissions;
     }
 
-    public void setTasks(List<Task> tasks) {
-        this.tasks = tasks;
+    public void setSubmissions(List<Submission> submissions) {
+        this.submissions = submissions;
     }
 
     public String getUserId() {
@@ -136,6 +136,12 @@ public class Grader {
         ((ObjectNode) graderNode).set("privileges", this.getPrivilegesArrayNode());
         return graderNode;
     }
+
+    //TODO do this
+    public boolean hasPrivileges(PrivilegeEnum privilegeEnum) {
+        return false;
+    }
+
 
     @Override
     public String toString() {

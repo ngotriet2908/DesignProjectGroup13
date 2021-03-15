@@ -7,12 +7,11 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.Activity;
-import com.group13.tcsprojectgrading.models.Grader;
 import com.group13.tcsprojectgrading.models.Project;
-import com.group13.tcsprojectgrading.models.Task;
+import com.group13.tcsprojectgrading.models.Submission;
 import com.group13.tcsprojectgrading.services.ActivityService;
 import com.group13.tcsprojectgrading.services.GraderService;
-import com.group13.tcsprojectgrading.services.TaskService;
+import com.group13.tcsprojectgrading.services.SubmissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -32,16 +31,16 @@ class UsersController {
 
     private final ActivityService activityService;
 
-    private final TaskService taskService;
-
     private final GraderService graderService;
 
+    private final SubmissionService submissionService;
+
     @Autowired
-    public UsersController(CanvasApi canvasApi, ActivityService activityService, TaskService taskService, GraderService graderService) {
+    public UsersController(CanvasApi canvasApi, ActivityService activityService, GraderService graderService, SubmissionService submissionService) {
         this.canvasApi = canvasApi;
         this.activityService = activityService;
-        this.taskService = taskService;
         this.graderService = graderService;
+        this.submissionService = submissionService;
     }
 
     @RequestMapping(value = "/self", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -75,25 +74,25 @@ class UsersController {
         return activities.subList(0, Math.min(3, activities.size()));
     }
 
-    @GetMapping(value = "/tasks")
+    @GetMapping(value = "/submissions")
     protected ArrayNode getTasks(Principal principal) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
-        List<Task> tasks = taskService.findTaskByUserId(principal.getName());
-        Map<Project, List<Task>> projectListMap = new HashMap<>();
+        List<Submission> submissions = submissionService.findSubmissionsForGraderAll(principal.getName());
+        Map<Project, List<Submission>> projectListMap = new HashMap<>();
 
-        for(Task task : tasks) {
-            if (!projectListMap.containsKey(task.getProject())) {
-                List<Task> tasks1 = new ArrayList<>();
-                tasks1.add(task);
-                projectListMap.put(task.getProject(), tasks1);
+        for(Submission submission : submissions) {
+            if (!projectListMap.containsKey(submission.getProject())) {
+                List<Submission> tasks1 = new ArrayList<>();
+                tasks1.add(submission);
+                projectListMap.put(submission.getProject(), tasks1);
             } else {
-                projectListMap.get(task.getProject()).add(task);
+                projectListMap.get(submission.getProject()).add(submission);
             }
         }
 
         ArrayNode arrayNode = objectMapper.createArrayNode();
 
-        for(Map.Entry<Project, List<Task>> entry: projectListMap.entrySet()) {
+        for(Map.Entry<Project, List<Submission>> entry: projectListMap.entrySet()) {
             JsonNode node = objectMapper.createObjectNode();
 
             String courseString = this.canvasApi.getCanvasCoursesApi().getUserCourse(entry.getKey().getCourseId());
@@ -101,7 +100,7 @@ class UsersController {
 
             ((ObjectNode) node).set("course", objectMapper.readTree(courseString));
             ((ObjectNode) node).set("project", objectMapper.readTree(projectResponse));
-            ((ObjectNode) node).put("tasks", entry.getValue().size());
+            ((ObjectNode) node).put("submissions", entry.getValue().size());
             ((ObjectNode) node).put("progress", (int)(Math.random()*100));
 
             arrayNode.add(node);
