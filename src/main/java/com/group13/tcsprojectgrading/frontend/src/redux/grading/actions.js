@@ -1,0 +1,29 @@
+import {
+  ALTER_GRADE, ALTER_TEMP_ASSESSMENT_GRADE, SAVE_TEMP_ASSESSMENT,
+} from "./actionTypes";
+
+// temporary assessment
+export const saveTempAssessment = (tempAssessment) => ({
+  type: SAVE_TEMP_ASSESSMENT,
+  payload: tempAssessment
+})
+
+export const alterTempAssessmentGrade = (criterionId, newGrade) => ({
+  type: ALTER_TEMP_ASSESSMENT_GRADE,
+  payload: {criterionId, newGrade}
+})
+
+
+// stored assessment
+export const alterGrade = (criterionId, newGrade) => ({
+  type: ALTER_GRADE,
+  payload: {criterionId, newGrade}
+})
+
+
+
+
+
+
+
+

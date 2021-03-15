@@ -15,6 +15,7 @@ public class TaskId implements Serializable {
     }
 
     public TaskId() {
+
     }
 
     public ProjectId getProject() {

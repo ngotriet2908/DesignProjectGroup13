@@ -1,10 +1,10 @@
 import React, {Component} from 'react'
 
-import rubricStyles from '../rubricNew/rubric.module.css';
+import rubricStyles from '../rubric/rubric.module.css';
 import styles from './grading.module.css'
 import {connect} from "react-redux";
-import {setSelectedElement} from "../../redux/rubricNew/actions";
-import RubricOutlineGroup from "../rubricNew/RubricOutlineGroup";
+import {setSelectedElement} from "../../redux/rubric/actions";
+import RubricOutlineGroup from "../rubric/RubricOutlineGroup";
 
 
 class RubricViewerOutline extends Component {
@@ -52,9 +52,9 @@ class RubricViewerOutline extends Component {
 
 const mapStateToProps = state => {
   return {
-    rubric: state.rubricNew.rubric,
-    selectedElement: state.rubricNew.selectedElement,
-    isEditing: state.rubricNew.isEditing
+    rubric: state.rubric.rubric,
+    selectedElement: state.rubric.selectedElement,
+    isEditing: state.rubric.isEditing
   };
 };
 

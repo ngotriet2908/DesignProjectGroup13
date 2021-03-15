@@ -1,102 +1,185 @@
-export const appendCriterion = (blocks, blockId, criterion) => {
-  let newBlockList = JSON.parse(JSON.stringify(blocks));
+import cloneDeep from 'lodash/cloneDeep';
+import {isCriterion} from "../../components/rubric/helpers";
 
-  newBlockList.map(block => {
-    if (block.id === blockId) {
-      let newBlockCriteria = [...block.criteria]
-      newBlockCriteria.push(criterion);
-      block.criteria = newBlockCriteria;
+export function findById(where, id) {
+  if (where.id === id) {
+    return where;
+  } else {
+    return _findById(where.children, id)
+  }
+}
+
+export function _findById(where, id) {
+  let result = null;
+  if(where instanceof Array) {
+    for(let i = 0; i < where.length; i++) {
+      result = _findById(where[i], id);
+      if (result) {
+        break;
+      }
     }
-  })
-
-  return newBlockList;
-}
-
-export const removeCriterion = (blocks, blockId, criterionId) => {
-  let newBlockList = JSON.parse(JSON.stringify(blocks));
-
-  newBlockList.map(block => {
-    if (block.id === blockId) {
-      block.criteria = block.criteria.filter(criterion => {
-        return (criterion.id !== criterionId)
-      })
+  } else {
+    if (where.content.id === id) {
+      return where;
     }
-  })
 
-  return newBlockList;
+    if (where.hasOwnProperty('children')) {
+      result = _findById(where.children, id);
+    }
+  }
+  return result;
 }
 
-export const removeBlock = (blocks, blockId) => {
-  let newBlockList = JSON.parse(JSON.stringify(blocks));
-
-  newBlockList = newBlockList.filter(block => {
-    return (block.id !== blockId)
-  })
-
-  return newBlockList;
-}
-
-export const alterCriterion = (blocks, newCriterion, criterionId, blockId) => {
-  let newBlockList = JSON.parse(JSON.stringify(blocks));
-
-  newBlockList.map(block => {
-    if (block.id === blockId) {
-      block.criteria.map(criterion => {
-        if (criterion.id === criterionId) {
-          criterion.title = newCriterion.title;
-          criterion.text = newCriterion.text;
+export function removeById(where, id) {
+  let result = false;
+  if(where instanceof Array) {
+    var i = where.length;
+    while (i--) {
+      if (where[i].content.id === id) {
+        where.splice(i, 1);
+      } else {
+        result = removeById(where[i], id);
+        if (result) {
+          break;
         }
-      })
+      }
     }
-  })
+  }
+  else
+  {
+    // if (where.content.id === id) {
+    //   // delete where;
+    //   return where;
+    // }
 
-  return newBlockList;
-}
-
-export const alterBlockTitle = (blocks, title, blockId) => {
-  let newBlockList = JSON.parse(JSON.stringify(blocks));
-
-  newBlockList.map(block => {
-    if (block.id === blockId) {
-      block.title = title;
+    if (where.hasOwnProperty('children')) {
+      result = removeById(where.children, id);
     }
-  })
-
-  return newBlockList;
+  }
+  return result;
 }
 
-export const reorderCriterion = (blocks, blockId, sourceIndex, destinationIndex) => {
-  let newBlockList = JSON.parse(JSON.stringify(blocks));
-  let block = newBlockList.find(block => {
-    return block.id === blockId;
-  })
+export function addBlock(rubric, id, newBlock) {
+  let copy = cloneDeep(rubric);
 
-  const [removed] = block.criteria.splice(sourceIndex, 1);
-  block.criteria.splice(destinationIndex, 0, removed);
+  let element = findById(copy, id);
+  element.children.push(newBlock);
 
-  return newBlockList;
+  return copy;
 }
 
-export const moveCriterion = (blocks, sourceBlockId, destinationBlockId, sourceIndex, destinationIndex) => {
-  // TODO: the approach below works fine for non-complex objects, but will fail for anything with functions, classes etc.
-  // TODO: for that use cloneDeep() from lodash
-  let newBlockList = JSON.parse(JSON.stringify(blocks));
+export function addCriterion(rubric, id, newCriterion) {
+  let copy = cloneDeep(rubric);
 
-  // find source block
-  let sourceBlock = newBlockList.find(block => {
-    return block.id === sourceBlockId;
-  })
+  let element = findById(copy, id);
+  element.children.push(newCriterion);
 
-  // remove from source
-  const [removed] = sourceBlock.criteria.splice(sourceIndex, 1);
-
-  // find destination block
-  let destinationBlock = newBlockList.find(block => {
-    return block.id === destinationBlockId;
-  })
-
-  // paste to destination
-  destinationBlock.criteria.splice(destinationIndex, 0, removed);
-
-  return newBlockList;
+  return copy;
 }
+
+export function deleteElement(rubric, id) {
+  let copy = cloneDeep(rubric);
+  let isRemoved = removeById(copy, id);
+  return copy;
+}
+
+export function deleteAllElements(rubric) {
+  let copy = cloneDeep(rubric);
+  copy.children = [];
+  return copy;
+}
+
+export function changeTitle(rubric, id, newTitle) {
+  let copy = cloneDeep(rubric);
+
+  let element = findById(copy, id);
+  element.content.title = newTitle;
+
+  return copy;
+}
+
+export function changeText(rubric, id, newText) {
+  let copy = cloneDeep(rubric);
+
+  let element = findById(copy, id);
+  element.content.text = newText;
+
+  return copy;
+}
+
+export function changeGrade(rubric, id, newGrade) {
+  let copy = cloneDeep(rubric);
+
+  let element = findById(copy, id);
+  element.content.grade = newGrade;
+
+  return copy;
+}
+
+export function createAssessment(rubric) {
+  // let assessment = [];
+  // flattenCriteria(rubric, assessment);
+  // return assessment;
+  let assessment = {};
+  flattenCriteria(rubric, assessment);
+  return assessment;
+}
+
+export function flattenCriteria(rubric, resultsDictionary) {
+  return _flattenCriteria(rubric.children, resultsDictionary)
+}
+
+export function _flattenCriteria(where, resultsDictionary) {
+  if(where instanceof Array) {
+    for(let i = 0; i < where.length; i++) {
+      _flattenCriteria(where[i], resultsDictionary);
+    }
+  }
+  else {
+    if (isCriterion(where.content.type)) {
+      resultsDictionary[where.content.id] = {
+        // criterionId: where.content.id,
+        grade: 0,
+        comment: ""
+      };
+    }
+
+    if (where.hasOwnProperty('children')) {
+      _flattenCriteria(where.children, resultsDictionary);
+    }
+  }
+}
+
+// export function flattenCriteria(rubric, resultsList) {
+//   return _flattenCriteria(rubric.children, resultsList)
+// }
+//
+// export function _flattenCriteria(where, resultsList) {
+//   if(where instanceof Array) {
+//     for(let i = 0; i < where.length; i++) {
+//       _flattenCriteria(where[i], resultsList);
+//     }
+//   }
+//   else {
+//     if (isCriterion(where.content.type)) {
+//       let grade = {
+//         criterionId: where.content.id,
+//         grade: 0,
+//         comment: ""
+//       }
+//       resultsList.push(grade);
+//     }
+//
+//     if (where.hasOwnProperty('children')) {
+//       _flattenCriteria(where.children, resultsList);
+//     }
+//   }
+// }
+
+
+
+
+
+
+
+

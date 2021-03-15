@@ -1,8 +1,6 @@
 import React from 'react';
 import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 
-import spinner from './helpers/spinner.css'
-
 import {URL_PREFIX} from "../services/config";
 import {request} from "../services/request";
 import {Redirect, Route, Switch} from "react-router-dom";
@@ -12,8 +10,9 @@ import NotFound from "./error/NotFound";
 import CourseRoutes from "./course/CourseRoutes";
 import styles from "./main.module.css";
 import Sidebar from "./navigation/Sidebar";
-import './helpers/spinner.css'
 import {Spinner} from "react-bootstrap";
+
+import globalStyles from './helpers/global.module.css';
 
 
 class Main extends React.Component {
@@ -48,8 +47,8 @@ class Main extends React.Component {
   render() {
     if (!this.state.isLoaded) {
       return(
-        <div className={styles.container}>
-          <Spinner className={spinner.spinner} animation="border" role="status">
+        <div className={globalStyles.container}>
+          <Spinner className={globalStyles.spinner} animation="border" role="status">
             <span className="sr-only">Loading...</span>
           </Spinner>
         </div>

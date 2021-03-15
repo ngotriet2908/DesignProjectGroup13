@@ -8,7 +8,7 @@ import storage from 'redux-persist/lib/storage'
 const persistConfig = {
   key: 'root',
   storage,
-  blacklist: ['history', 'rubricNew']
+  blacklist: ['history', 'rubric', 'courses', 'grading']
 }
 
 export const history = createBrowserHistory();

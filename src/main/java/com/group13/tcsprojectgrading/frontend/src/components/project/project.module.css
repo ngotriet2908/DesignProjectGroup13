@@ -1,39 +1,59 @@
-.projectContainer {
-    padding: 2rem;
+@value primary, secondary, ternary, quaternary, quinary, ultraLightGray, primaryShade, lightGray, darkishGray, moderateGray from '../helpers/colors.css';
+
+.container {
+    display: grid;
+    grid-template-columns: 47% 47%;
+    grid-template-rows: auto;
+    column-gap: 6%;
+    justify-items: flex-start;
+}
+
+.container > div {
+    /*flex: 47%;*/
     width: 100%;
 }
 
-.spinner {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    color: dodgerblue;
+.administrationSectionContainer {
+
 }
 
-.titleContainer {
-    margin-bottom: 1.2rem;
+.rubricSectionContainer {
+    /*grid-column: 1 / 2;*/
 }
 
-.sectionTitle {
-    margin-bottom: 0.8rem;
+.statisticSectionContainer {
+    /*grid-column: 1 / 2;*/
 }
 
-.plainLink, .plainLink:hover {
-    text-decoration: none;
-    color: white;
+.tasksSectionContainer {
+    /*grid-column: 2 / 3*/
 }
 
-.sectionContainer {
+.administrationSectionContainerBody {
+    display: grid;
+    grid-template-columns: 47% 47%;
+    grid-template-rows: auto;
+    column-gap: 6%;
+    justify-items: flex-start;
+}
+
+.administrationSectionContainerBody > button {
+    width: 100%;
+}
+
+.administrationSectionContainerBody > button:not(:last-child) {
+    margin-bottom: 0.5rem;
+}
+
+
+
+.card {
+    min-height: 150px;
+    position:relative;
+    width: 100%;
     margin-bottom: 1rem;
 }
 
-.sectionContainer button {
-    margin-right: 0.5rem;
+.cardBody {
+
 }
-
-
-/* tasks */
-.tasksContainer {
-    margin-bottom: 1rem;
-}
-

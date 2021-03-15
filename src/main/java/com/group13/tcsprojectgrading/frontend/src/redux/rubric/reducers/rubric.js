@@ -1,138 +1,47 @@
 import {
-  APPEND_CRITERION,
-  APPEND_BLOCK,
-  SAVE_RUBRIC,
-  REMOVE_RUBRIC,
-  REMOVE_CRITERION,
-  ALTER_CRITERION,
-  ALTER_BLOCK_TITLE,
-  REORDER_CRITERION,
-  MOVE_CRITERION,
-  REMOVE_BLOCK,
-  EDITING_RUBRIC,
-  SAVE_RUBRIC_BACKUP
+  ADD_BLOCK, ADD_CRITERION,
+  ALTER_CRITERION_TEXT, ALTER_CRITERION_GRADE,
+  ALTER_TITLE, DELETE_ALL_ELEMENTS, DELETE_ELEMENT, DELETE_RUBRIC, PUSH_RUBRIC_PATH,
+  SAVE_RUBRIC, SAVE_TEMP_RUBRIC,
+  SET_SELECTED_ELEMENT, EDITING_RUBRIC
 } from "../actionTypes";
 import {
-  alterBlockTitle,
-  alterCriterion,
-  appendCriterion,
-  removeCriterion,
-  reorderCriterion,
-  moveCriterion,
-  removeBlock
+  addBlock,
+  addCriterion,
+  changeGrade,
+  changeText,
+  changeTitle,
+  deleteAllElements,
+  deleteElement
 } from "../functions";
 
 const initialState = {
-  // rubric: null,
-  // rubricCopy: null,
-  // isEditing: false,
+  selectedElement: null,
+  rubric: null,
+  rubricTemp: null,
+  rubricPath: [],
+  isEditing: false,
 };
 
 export default function(state = initialState, action) {
   switch (action.type) {
+  case SET_SELECTED_ELEMENT: {
+    return {
+      ...state,
+      selectedElement: action.payload
+    };
+  }
   case SAVE_RUBRIC: {
     return {
       ...state,
-      ...action.payload,
+      rubric: action.payload
     };
   }
-  case REMOVE_RUBRIC: {
+  case DELETE_RUBRIC: {
     return {
       ...state,
       rubric: null,
-    };
-  }
-  case APPEND_BLOCK: {
-    return {
-      ...state,
-      rubric: {
-        ...state.rubric,
-        blocks: [
-          ...state.rubric.blocks,
-          action.payload
-        ]
-      }
-    };
-  }
-  case REMOVE_BLOCK: {
-    let newBlockList = removeBlock(state.rubric.blocks, action.payload.blockId);
-    return {
-      ...state,
-      rubric: {
-        ...state.rubric,
-        blocks: newBlockList
-      }
-    };
-  }
-  case APPEND_CRITERION: {
-    let newBlockList = appendCriterion(state.rubric.blocks, action.payload.blockId, action.payload.criterion);
-    return {
-      ...state,
-      rubric: {
-        ...state.rubric,
-        blocks: newBlockList
-      }
-    };
-  }
-  case REMOVE_CRITERION: {
-    let newBlockList = removeCriterion(state.rubric.blocks, action.payload.blockId, action.payload.criterionId);
-    return {
-      ...state,
-      rubric: {
-        ...state.rubric,
-        blocks: newBlockList
-      }
-    };
-  }
-  case ALTER_CRITERION: {
-    let newBlockList = alterCriterion(state.rubric.blocks, action.payload.criterion, action.payload.criterionId, action.payload.blockId);
-    return {
-      ...state,
-      rubric: {
-        ...state.rubric,
-        blocks: newBlockList
-      }
-    };
-  }
-  case ALTER_BLOCK_TITLE: {
-    let newBlockList = alterBlockTitle(state.rubric.blocks, action.payload.title, action.payload.blockId);
-    return {
-      ...state,
-      rubric: {
-        ...state.rubric,
-        blocks: newBlockList
-      }
-    };
-  }
-  case REORDER_CRITERION: {
-    let newBlockList = reorderCriterion(
-      state.rubric.blocks,
-      action.payload.blockId,
-      action.payload.sourceIndex,
-      action.payload.destinationIndex
-    );
-    return {
-      ...state,
-      rubric: {
-        ...state.rubric,
-        blocks: newBlockList
-      }
-    };
-  }
-  case MOVE_CRITERION: {
-    let newBlockList = moveCriterion(
-      state.rubric.blocks,
-      action.payload.sourceBlockId,
-      action.payload.destinationBlockId,
-      action.payload.sourceIndex,
-      action.payload.destinationIndex
-    );
-    return {
-      ...state,
-      rubric: {
-        ...state.rubric,
-        blocks: newBlockList
-      }
+      rubricTemp: null
     };
   }
   case EDITING_RUBRIC: {
@@ -141,13 +50,75 @@ export default function(state = initialState, action) {
       isEditing: action.payload.isEditing,
     };
   }
-  case SAVE_RUBRIC_BACKUP: {
+  case SAVE_TEMP_RUBRIC: {
     return {
       ...state,
-      ...action.payload,
+      rubricTemp: action.payload
+    };
+  }
+  case ADD_BLOCK: {
+    const newRubric = addBlock(state.rubric, action.payload.id, action.payload.newBlock)
+
+    return {
+      ...state,
+      rubric: newRubric
+    };
+  }
+  case ADD_CRITERION: {
+    const newRubric = addCriterion(state.rubric, action.payload.id, action.payload.newCriterion)
+
+    return {
+      ...state,
+      rubric: newRubric
+    };
+  }
+  case DELETE_ELEMENT: {
+    const newRubric = deleteElement(state.rubric, action.payload.id)
+
+    return {
+      ...state,
+      rubric: newRubric
+    };
+  }
+  case DELETE_ALL_ELEMENTS: {
+    const newRubric = deleteAllElements(state.rubric)
+
+    return {
+      ...state,
+      rubric: newRubric
+    };
+  }
+  case ALTER_TITLE: {
+    const newRubric = changeTitle(state.rubric, action.payload.id, action.payload.newTitle)
+
+    return {
+      ...state,
+      rubric: newRubric
+    };
+  }
+  case ALTER_CRITERION_TEXT: {
+    const newRubric = changeText(state.rubric, action.payload.id, action.payload.newText)
+
+    return {
+      ...state,
+      rubric: newRubric
+    };
+  }
+  case ALTER_CRITERION_GRADE: {
+    const newRubric = changeGrade(state.rubric, action.payload.id, action.payload.newGrade)
+
+    return {
+      ...state,
+      rubric: newRubric
     };
   }
   default:
     return state;
   }
 }
+
+
+
+
+
+

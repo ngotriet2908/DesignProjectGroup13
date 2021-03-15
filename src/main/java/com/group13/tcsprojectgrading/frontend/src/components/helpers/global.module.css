@@ -1,0 +1,112 @@
+@value primary, secondary, ternary, quaternary, quinary, senary, senaryShade, ultraLightGray, primaryShade, lightGray, darkishGray, moderateGray from './colors.css';
+
+.spinner {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    color: primary;
+}
+
+.container {
+    padding: 2rem;
+    width: 100%;
+    background-color: ultraLightGray;
+}
+
+/* section */
+.sectionContainer {
+    width: 100%;
+    display: block;
+}
+
+.sectionTitle {
+    margin: 2rem 0 1rem 0;
+}
+
+.sectionTitleH {
+    margin: 0 1rem 0 0;
+}
+
+.sectionTitleButton {
+    cursor: pointer;
+    color: primary;
+    transition: color 0.1s ease-in;
+}
+
+.sectionTitleButton:hover {
+    color: secondary;
+}
+
+.titleContainer h1 {
+    margin: 0;
+}
+
+.titleContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+}
+
+.titleContainer span {
+    margin-left: 1rem;
+    font-size: 1.6rem;
+    color: #a2a1a1;
+}
+
+.sectionTitleWithButton {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+}
+
+.sectionFlexContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+.plainLink, .plainLink:hover {
+    text-decoration: none;
+    color: white;
+}
+
+
+
+
+
+:global(.modal-content) {
+    border-radius: 0.5rem;
+    border: 1px solid lightGray;
+}
+
+:global(.btn-lightGreen) {
+    background-color: primary;
+    color: white;
+}
+
+:global(.btn-lightGreen:hover) {
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    background-color: primaryShade;
+    color: white;
+}
+
+:global(.btn-red) {
+    background-color: senary;
+    color: white;
+}
+
+:global(.btn-red:hover) {
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    background-color: senaryShade;
+    color: white;
+}
+
+:global(.btn-linkLightGray) {
+    background: transparent;
+    color: darkishGray;
+}
+
+:global(.alert-custom) {
+    background: quinary;
+    color: white;
+    border-radius: 0.5rem;
+}

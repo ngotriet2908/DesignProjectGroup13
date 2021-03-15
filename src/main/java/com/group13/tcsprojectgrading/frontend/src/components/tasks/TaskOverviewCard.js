@@ -45,7 +45,7 @@ class TaskOverviewCard extends Component {
                 <Link className={styles.plainLink} to={{
                   // pathname: URL_PREFIX + "/" + COURSE_INFO + "/" + this.state.course.id
                   // pathname: `${URL_PREFIX}/${COURSES}/${this.state.course.id}`
-                  pathname: this.props.route.url + "/" + this.props.task.isGroup + "/" + this.props.task.taskId
+                  pathname: this.props.route.url + "/" + this.props.task.isGroup + "/" + this.props.task.taskId,
                 }}>Open
                 </Link>
               </Button>

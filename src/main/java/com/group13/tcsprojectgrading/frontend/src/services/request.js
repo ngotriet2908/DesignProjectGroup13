@@ -8,20 +8,20 @@ function getCookie(name) {
   if (parts.length === 2) return parts.pop().split(';').shift();
 }
 
-export function request(url, method = "GET", data = {}) {
+export function request(url, method = "GET", data = {}, accept = 'application/json') {
   let init;
   if (method === "GET") {
     init = {
       method: method,
       headers: {
-        'Accept': 'application/json',
+        'Accept': accept,
       },
     }
   } else if (method === "POST") {
     init = {
       method: method,
       headers: {
-        'Accept': 'application/json',
+        'Accept': accept,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(data)
@@ -38,18 +38,20 @@ export function request(url, method = "GET", data = {}) {
     init.headers["X-XSRF-TOKEN"] = getCookie('XSRF-TOKEN');
   }
 
-  let promise = fetch(url, init);
+  // let promise = fetch(url, init);
 
-  return promise
+  return fetch(url, init)
     .then(response => {
       // TODO other responses
       if (response.status === 401) {
         store.dispatch(push(URL_PREFIX + "/login/"))
         throw new Error("Not authenticated: 401")
-      } else if (response.status === 404) {
-        store.dispatch(push(URL_PREFIX + "/notfound/"))
-        throw new Error("Not found: 404")
-      } else {
+      }
+      // else if (response.status === 404) {
+      //   store.dispatch(push(URL_PREFIX + "/notfound/"))
+      //   throw new Error("Not found: 404")
+      // }
+      else {
         return response;
       }
     })

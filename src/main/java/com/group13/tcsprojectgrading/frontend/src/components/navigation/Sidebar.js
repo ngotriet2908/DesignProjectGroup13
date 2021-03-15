@@ -7,7 +7,8 @@ import {URL_PREFIX} from "../../services/config";
 import {request} from "../../services/request";
 import {connect} from "react-redux";
 import {removeUser} from "../../redux/user/actions";
-import {IoHomeOutline, IoLogOutOutline, IoMenuSharp} from "react-icons/io5";
+import {IoHomeOutline, IoGrid, IoLogOutOutline, IoMenuSharp, IoBookOutline, IoCreateOutline} from "react-icons/io5";
+import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 
 class Sidebar extends React.Component {
   constructor (props) {
@@ -44,6 +45,83 @@ class Sidebar extends React.Component {
       });
   }
 
+  tabs = () => {
+    let result;
+
+    if  (this.props.location === LOCATIONS.home) {
+      // home
+      result =
+        <div className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={this.onClickLogo}>
+          <div className={styles.sidebarBodyItemLeft}>
+            <IoHomeOutline className={styles.sidebarIcon} size={26}/>
+          </div>
+          {!this.state.isHidden &&
+        <span className={styles.sidebarBodyItemRight}>
+                  Home
+        </span>
+          }
+        </div>
+    } else {
+      result =
+        [<div key="home" className={`${styles.sidebarBodyItem}`} onClick={this.onClickLogo}>
+          <div className={styles.sidebarBodyItemLeft}>
+            <IoHomeOutline className={styles.sidebarIcon} size={26}/>
+          </div>
+          {!this.state.isHidden &&
+          <span className={styles.sidebarBodyItemRight}>
+                  Home
+          </span>
+          }
+        </div>]
+
+      if (this.props.location === LOCATIONS.course) {
+        // course
+        result.push(
+          (<div key="course" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {}}>
+            <div className={styles.sidebarBodyItemLeft}>
+              <IoBookOutline className={styles.sidebarIcon} size={26}/>
+            </div>
+            {!this.state.isHidden &&
+          <span className={styles.sidebarBodyItemRight}>
+                    Course
+          </span>
+            }
+          </div>)
+        )
+      } else if (this.props.location === LOCATIONS.project) {
+        // project
+        result.push(
+          (<div key="project" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {}}>
+            <div className={styles.sidebarBodyItemLeft}>
+              <IoCreateOutline className={styles.sidebarIcon} size={26}/>
+            </div>
+            {!this.state.isHidden &&
+            <span className={styles.sidebarBodyItemRight}>
+                    Project
+            </span>
+            }
+          </div>)
+        )
+      } else if (this.props.location === LOCATIONS.rubric) {
+        // project
+        result.push(
+          (<div key="rubric" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {}}>
+            <div className={styles.sidebarBodyItemLeft}>
+              <IoGrid className={styles.sidebarIcon} size={26}/>
+            </div>
+            {!this.state.isHidden &&
+            <span className={styles.sidebarBodyItemRight}>
+                    Rubric
+            </span>
+            }
+          </div>)
+        )
+      }
+    }
+
+    return result;
+  }
+
   render() {
     let className = `${styles.sidebar}`;
     if (this.state.isHidden) {
@@ -74,16 +152,7 @@ class Sidebar extends React.Component {
           </div>
 
           <div className={styles.sidebarBody}>
-            <div className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={this.onClickLogo}>
-              <div className={styles.sidebarBodyItemLeft}>
-                <IoHomeOutline className={styles.sidebarIcon} size={26}/>
-              </div>
-              {!this.state.isHidden &&
-                <span className={styles.sidebarBodyItemRight}>
-                  Home
-                </span>
-              }
-            </div>
+            {this.tabs()}
           </div>
         </div>
 
@@ -114,7 +183,8 @@ class Sidebar extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    user: state.user.user
+    user: state.user.user,
+    location: state.navigation.location
   };
 };
 

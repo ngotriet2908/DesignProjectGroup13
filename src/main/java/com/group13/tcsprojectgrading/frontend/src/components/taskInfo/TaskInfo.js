@@ -11,6 +11,8 @@ import {Link} from "react-router-dom";
 class TaskInfo extends Component {
   constructor(props) {
     super(props);
+
+    // TODO: don't save in state entities that won't be changed
     this.state = {
       course: {},
       project: {},
@@ -39,6 +41,10 @@ class TaskInfo extends Component {
         console.error(error.message);
       });
   }
+
+  // openGrading = () => {
+  //   store.dispatch(push(URL_PREFIX + "/"))
+  // }
 
   render() {
     return (
@@ -69,11 +75,8 @@ class TaskInfo extends Component {
           <div className={styles.header}>
             <h2>{this.state.task.name}</h2>
             <Button variant="primary" className={styles.gradingButton}>
-              <Link className={styles.plainLink} to={{
-                // pathname: URL_PREFIX + "/" + COURSE_INFO + "/" + this.state.course.id
-                // pathname: `${URL_PREFIX}/${COURSES}/${this.state.course.id}`
-                // pathname: this.props.route.url + "/" + this.props.task.isGroup + "/" + this.props.task.taskId
-              }}>Open Grading
+              <Link className={styles.plainLink} to={{pathname: URL_PREFIX + `/courses/${this.state.course.id}/projects/${this.state.project.id}/submissions/${this.state.submission.id}/grading`, submission: this.state.submission}}>
+                Grade
               </Link>
             </Button>
           </div>

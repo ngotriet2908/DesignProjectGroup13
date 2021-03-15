@@ -373,6 +373,11 @@ class GraderManagement extends Component {
       return
     }
 
+    if (grader.role === "TEACHER_ROLE") {
+      this.modalEditGradersHandleShowAlert(`${grader.name} is a teacher, can't remove grader`)
+      return
+    }
+
     let availableGraders = [...this.state.modalEditGradersAvailableGraders]
     availableGraders.push(grader)
     let activeGraders = [...this.state.modalEditGradersActiveGraders]

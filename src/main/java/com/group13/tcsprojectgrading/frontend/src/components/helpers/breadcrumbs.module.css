@@ -1,0 +1,36 @@
+/* breadcrumbs */
+.breadcrumbsContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: flex-end;
+
+    padding: 1rem 0;
+}
+
+.breadcrumbsActive {
+    color: #a2a7b0;
+}
+
+.breadcrumbsLink {
+    color: #707580;
+}
+
+.breadcrumbsLink:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.breadcrumbsArrow {
+    margin: 0 1rem;
+    color: #c0c4c6;
+}
+
+
+
+
+
+
+
+
+

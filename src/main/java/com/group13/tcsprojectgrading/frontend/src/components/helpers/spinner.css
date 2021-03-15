@@ -1,8 +1,0 @@
-@value primary from '../helpers/colors.css';
-
-.spinner {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    color: primary;
-}

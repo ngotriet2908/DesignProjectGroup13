@@ -1,4 +1,4 @@
-@value primary, secondary, ternary, primaryShade from '../helpers/colors.css';
+@value primary, secondary, ternary, primaryShade, moderateGray, pinkishGray from '../helpers/colors.css';
 
 
 /* sidebar */
@@ -16,7 +16,7 @@
 
     background-color: white;
 
-    border-right: 1px solid #efeae9;
+    border-right: 1px solid pinkishGray;
     transition: all .1s ease-out;
 
     display: flex;
@@ -41,7 +41,6 @@
     justify-content: space-between;
 
     padding: 2rem 1rem 3.6rem 1rem;
-
     transition: all .1s ease-out;
 }
 
@@ -88,18 +87,25 @@
 
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: flex-end;
 
     cursor: pointer;
     transition: all .1s ease-out;
+
+    margin: 1rem 0;
 }
 
 .sidebarBody .sidebarBodyItem:hover {
     background-color: primaryShade;
+    color: white;
 }
 
 .sidebarIcon {
-    color: #d4d4df;
+    /*color: moderateGray;*/
+}
+
+.sidebarBody .sidebarBodyItem:hover .sidebarIcon {
+    color: white;
 }
 
 .sidebarBodyItemActive .sidebarIcon {

@@ -21,21 +21,45 @@ class CourseCard extends Component {
 
   render () {
     return (
-      <Card className={styles.card}>
+      <Card className={[styles.card, styles.cardCourse].join(" ")}>
         <Card.Body className={styles.cardBodyContainer}>
-          <div className={styles.cardContentContainer}>
+          <div className={styles.cardBodyTitle}>
             <h5>{this.props.data.name}</h5>
-            <div>Active in year {(new Date(this.props.data.start_at)).getFullYear()}</div>
           </div>
-          <div className={styles.cardButtonContainer}>
-            <div onClick={this.onClickSeeMore}>
-              <IoArrowForward size={26}/>
+          <div className={styles.cardBodyContent}>
+            <div>Active in year {(new Date(this.props.data.start_at)).getFullYear()}</div>
+            <div className={styles.cardButtonContainer}>
+              <div onClick={this.onClickSeeMore}>
+                <IoArrowForward size={26}/>
+              </div>
             </div>
           </div>
+          {/*/!*<div className={styles.cardBodyCorner}>*!/</div>*/}
         </Card.Body>
       </Card>
     )
   }
+
+  // render () {
+  //   return (
+  //     <Card className={[styles.card, styles.cardCourse].join(" ")}>
+  //       <Card.Body className={styles.cardBodyContainer}>
+  //         <div className={styles.cardContentContainer}>
+  //           {/*<span className={[styles.cardContentType, styles.cardContentTypeCourse].join(" ")}>Course</span>*/}
+  //           <h5>{this.props.data.name}</h5>
+  //           <div>Active in year {(new Date(this.props.data.start_at)).getFullYear()}</div>
+  //         </div>
+  //         <div className={styles.cardButtonContainer}>
+  //           <div onClick={this.onClickSeeMore}>
+  //             <IoArrowForward size={26}/>
+  //           </div>
+  //         </div>
+  //
+  //         {/*/!*<div className={styles.cardBodyCorner}>*!/</div>*/}
+  //       </Card.Body>
+  //     </Card>
+  //   )
+  // }
 }
 
 CourseCard.propTypes = {

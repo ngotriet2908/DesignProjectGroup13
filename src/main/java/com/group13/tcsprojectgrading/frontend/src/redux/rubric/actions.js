@@ -1,89 +1,24 @@
 import {
-  APPEND_BLOCK,
-  REMOVE_BLOCK,
-  REMOVE_RUBRIC,
-  SAVE_RUBRIC,
-  APPEND_CRITERION,
-  REMOVE_CRITERION,
-  ALTER_CRITERION,
-  ALTER_BLOCK_TITLE,
-  REORDER_CRITERION,
-  MOVE_CRITERION,
-  EDITING_RUBRIC,
-  SAVE_RUBRIC_BACKUP
+  ADD_BLOCK, ADD_CRITERION,
+  ALTER_CRITERION_TEXT, ALTER_CRITERION_GRADE,
+  ALTER_TITLE, DELETE_ALL_ELEMENTS, DELETE_ELEMENT, DELETE_RUBRIC, PUSH_RUBRIC_PATH,
+  SAVE_RUBRIC, SAVE_TEMP_RUBRIC,
+  SET_SELECTED_ELEMENT,
+  EDITING_RUBRIC
 } from "./actionTypes";
+
+export const setSelectedElement = (element) => ({
+  type: SET_SELECTED_ELEMENT,
+  payload: element
+})
 
 export const saveRubric = (rubric) => ({
   type: SAVE_RUBRIC,
-  payload: { rubric }
+  payload: rubric
 })
 
-export const removeRubric = () => ({
-  type: REMOVE_RUBRIC,
-})
-
-export const appendBlock = (block) => ({
-  type: APPEND_BLOCK,
-  payload: block
-})
-
-export const removeBlock = (blockId) => ({
-  type: REMOVE_BLOCK,
-  payload: {
-    blockId
-  }
-})
-
-export const addCriterion = (criterion, blockId) => ({
-  type: APPEND_CRITERION,
-  payload: {
-    criterion,
-    blockId
-  }
-})
-
-export const removeCriterion = (blockId, criterionId) => ({
-  type: REMOVE_CRITERION,
-  payload: {
-    criterionId,
-    blockId
-  }
-})
-
-export const alterCriterion = (criterion, blockId, criterionId) => ({
-  type: ALTER_CRITERION,
-  payload: {
-    criterion,
-    blockId,
-    criterionId
-  }
-})
-
-export const alterBlockTitle = (title, blockId) => ({
-  type: ALTER_BLOCK_TITLE,
-  payload: {
-    title,
-    blockId,
-  }
-})
-
-export const reorderCriterion = (blockId, sourceIndex, destinationIndex) => ({
-  type: REORDER_CRITERION,
-  payload: {
-    blockId,
-    sourceIndex,
-    destinationIndex
-  }
-})
-
-export const moveCriterion = (sourceBlockId, destinationBlockId, sourceIndex, destinationIndex) => ({
-  type: MOVE_CRITERION,
-  payload: {
-    sourceBlockId,
-    destinationBlockId,
-    sourceIndex,
-    destinationIndex
-  }
+export const deleteRubric = () => ({
+  type: DELETE_RUBRIC,
 })
 
 export const setEditingRubric = (isEditing) => ({
@@ -93,13 +28,65 @@ export const setEditingRubric = (isEditing) => ({
   }
 })
 
-export const saveRubricBackup = (rubricCopy) => ({
-  type: SAVE_RUBRIC_BACKUP,
-  payload: { rubricCopy }
+export const saveRubricTemp = (rubric) => ({
+  type: SAVE_TEMP_RUBRIC,
+  payload: rubric
+})
+
+export const addBlock = (id, newBlock) => ({
+  type: ADD_BLOCK,
+  payload: {
+    id,
+    newBlock
+  }
+})
+
+export const addCriterion = (id, newCriterion) => ({
+  type: ADD_CRITERION,
+  payload: {
+    id,
+    newCriterion
+  }
+})
+
+export const deleteElement = (id) => ({
+  type: DELETE_ELEMENT,
+  payload: {
+    id
+  }
+})
+
+export const deleteAllElements= () => ({
+  type: DELETE_ALL_ELEMENTS,
 })
 
 
+export const alterTitle = (id, newTitle) => ({
+  type: ALTER_TITLE,
+  payload: {
+    id, newTitle
+  }
+})
 
+export const alterCriterionText = (id, newText) => ({
+  type: ALTER_CRITERION_TEXT,
+  payload: {
+    id, newText
+  }
+})
+
+export const alterGrade = (id, newGrade) => ({
+  type: ALTER_CRITERION_GRADE,
+  payload: {
+    id, newGrade
+  }
+})
+
+// rubric breadcrumbs
+export const pushRubricPath = (title) => ({
+  type: PUSH_RUBRIC_PATH,
+  payload: title
+})
 
 
 

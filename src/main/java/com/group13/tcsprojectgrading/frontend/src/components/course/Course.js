@@ -1,21 +1,32 @@
 import React, {Component} from "react";
+import {Ability, AbilityBuilder } from "@casl/ability";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
 
 import styles from "./course.module.css";
-import spinner from '../helpers/spinner.css'
 
-import { Button, Spinner} from "react-bootstrap";
+import Spinner from "react-bootstrap/Spinner";
 import store from "../../redux/store";
 import {push} from "connected-react-router";
 import {URL_PREFIX} from "../../services/config";
-import Statistic from "../stat/Statistic";
+// import Statistic from "../stat/Statistic";
 import EditProjectsModal from "./EditProjectsModal";
 import Breadcrumbs from "../helpers/Breadcrumbs";
 import ProjectCard from "../home/ProjectCard";
 import {IoPencil} from "react-icons/io5";
 import StatsCard from "../home/StatsCard";
+import {Can, ability, updateAbilityCoursePage} from "../permissions/CoursePageAbility";
+import { subject } from '@casl/ability';
+import {connect} from "react-redux";
+import {deleteCurrentCourse, saveCurrentCourse} from "../../redux/courses/actions";
+import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
+import {setCurrentLocation} from "../../redux/navigation/actions";
+import SectionContainer from "../home/SectionContainer";
 
+import globalStyles from '../helpers/global.module.css';
+import {IoFileTrayOutline} from "react-icons/io5";
+
+import course from "../../redux/course/reducers/course";
 
 class Course extends Component {
   constructor (props) {
@@ -26,16 +37,16 @@ class Course extends Component {
       course: {},
       stats: [],
       isLoaded: false,
+      user: {},
 
-      modalEditProjectActiveProjects: [],
-      modalEditProjectAvailableProjects: [],
-      modalEditProjectsShow: false,
-      modalEditShowAlert: false,
-      modalEditAlertBody: "",
+      showModal: false,
     }
   }
 
   componentDidMount() {
+    // TODO, the location won't be set if the component is not re-mounted, so we need to find a better location for the call below
+    // TODO, UPD2: I'm not sure anymore
+    this.props.setCurrentLocation(LOCATIONS.course);
     this.reloadPageData();
   }
 
@@ -47,154 +58,55 @@ class Course extends Component {
       .then(async([res1, res2]) => {
         const courses = await res1.json();
         const stats = await res2.json();
+        updateAbilityCoursePage(ability, courses.user)
+
+        this.props.saveCurrentCourse(courses.course);
 
         this.setState({
           projects: courses.projects,
           course: courses.course,
           stats: stats,
           isLoaded: true,
+          user: courses.user
         })
+
+        console.log(ability.rules)
       })
       .catch(error => {
         console.error(error.message);
       });
   }
 
-  containsObject(obj, list) {
-    let i;
-    for (i = 0; i < list.length; i++) {
-      if (parseInt(list[i].id, 10) === parseInt(obj.id, 10)) {
-        return true;
-      }
+  componentWillUnmount () {
+    this.props.deleteCurrentCourse();
+  }
+
+  openModal = () => {
+    this.setState({
+      showModal: true
+    })
+  }
+
+  setShow = (show, reload=false) => {
+    if (reload) {
+      this.setState({
+        showModal: show,
+        isLoaded: false,
+      })
+
+      this.reloadPageData();
+    } else {
+      this.setState({
+        showModal: show
+      })
     }
-    return false;
-  }
-
-  modalEditProjectsHandleShow = () => {
-    request(`${BASE}courses/${this.props.match.params.courseId}/addProject/getAllProjects`)
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        let activeProjects = [...data]
-        console.log(activeProjects)
-
-        activeProjects = activeProjects.filter((project) => {
-          return this.containsObject(project, [...this.state.projects])
-        })
-
-        let availableProjects = [...data]
-        console.log(availableProjects)
-
-        availableProjects = availableProjects.filter((project) => {
-          return !this.containsObject(project, [...this.state.projects])
-        })
-        console.log(activeProjects)
-        console.log(availableProjects)
-
-        this.setState({
-          modalEditProjectActiveProjects: activeProjects,
-          modalEditProjectAvailableProjects: availableProjects,
-          modalEditProjectsShow: true,
-          modalEditShowAlert: false,
-          modalEditAlertBody: "",
-        })
-      })
-      .catch(error => {
-        console.error(error.message);
-      });
-    //     this.setState({
-    //       modalEditProjectActiveProjects: activeProjects,
-    //       modalEditProjectAvailableProjects: availableProjects,
-    //       modalEditProjectsShow: true,
-    //       modalEditShowAlert: false,
-    //       modalEditAlertBody: "",
-    //     }
-  }
-
-  modalEditProjectsHandleClose = () => {
-    this.setState({
-      modalEditProjectActiveProjects: [],
-      modalEditProjectAvailableProjects: [],
-      modalEditProjectsShow: false,
-      modalEditShowAlert: false,
-      modalEditAlertBody: "",
-    })
-  }
-
-  modalEditProjectsHandleAccept = (event) => {
-    // request(BASE + "courses/" + this.props.match.params.courseId,
-    request(`${BASE}courses/${this.props.match.params.courseId}/addProject`,
-      "POST",
-      this.state.modalEditProjectActiveProjects
-    )
-      .then(() => {
-        this.setState({
-          modalEditProjectsShow: false,
-          modalEditShowAlert: false,
-          modalEditAlertBody: "",
-        })
-        this.reloadPageData();
-      })
-      .catch(error => {
-        console.error(error.message);
-      });
-  }
-
-  modalEditProjectsHandleActive = (project) => {
-    let activeProjects = [...this.state.modalEditProjectActiveProjects]
-    activeProjects.push(project)
-    let availableProjects = [...this.state.modalEditProjectAvailableProjects]
-    availableProjects = availableProjects.filter((project1) => {
-      return project1.id !== project.id
-    })
-    console.log(activeProjects)
-    console.log(availableProjects)
-    this.setState({
-      modalEditProjectActiveProjects: activeProjects,
-      modalEditProjectAvailableProjects: availableProjects,
-    })
-  }
-
-  modalEditProjectsHandleDeactive = (project) => {
-    if (project.isVolatile) {
-      this.modalEditProjectsHandleShowAlert(`Project ${project.name} is interacted , can't remove project`)
-      return
-    }
-
-    let availableProjects = [...this.state.modalEditProjectAvailableProjects]
-    availableProjects.push(project)
-    let activeProjects = [...this.state.modalEditProjectActiveProjects]
-    activeProjects = activeProjects.filter((project1) => {
-      return project1.id !== project.id
-    })
-    console.log(activeProjects)
-    console.log(availableProjects)
-    this.setState({
-      modalEditProjectActiveProjects: activeProjects,
-      modalEditProjectAvailableProjects: availableProjects,
-    })
-  }
-
-  modalEditProjectsHandleShowAlert = (body) => {
-    this.setState({
-      modalEditShowAlert: true,
-      modalEditAlertBody: body,
-    })
-  }
-
-  modalEditProjectsHandleCloseAlert = () => {
-    this.setState({
-      modalEditShowAlert: false,
-      modalEditAlertBody: "",
-    })
   }
 
   render () {
     if (!this.state.isLoaded) {
       return(
-        <div className={styles.container}>
-          <Spinner className={spinner.spinner} animation="border" role="status">
+        <div className={globalStyles.container}>
+          <Spinner className={globalStyles.spinner} animation="border" role="status">
             <span className="sr-only">Loading...</span>
           </Spinner>
         </div>
@@ -202,90 +114,76 @@ class Course extends Component {
     }
 
     return (
-      <div className={styles.container}>
+      <div className={globalStyles.container}>
+
         <Breadcrumbs>
-          {[
-            {
-              name: "Home",
-              onClick: () => store.dispatch(push(URL_PREFIX + "/")),
-            },
-            {
-              name: this.state.course.name,
-              active: true,
-            }
-          ]}
+          <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumbs.Item>
+          <Breadcrumbs.Item active>{this.state.course.name}</Breadcrumbs.Item>
         </Breadcrumbs>
 
-        <div className={[styles.sectionTitle, styles.titleContainer].join(" ")}>
-          <h2>{this.state.course.name}</h2><span>{(new Date(this.state.course.start_at)).getFullYear()}</span>
+        <div className={[globalStyles.titleContainer].join(" ")}>
+          <h1>{this.state.course.name}</h1><span>{(new Date(this.state.course.start_at)).getFullYear()}</span>
         </div>
 
+        {/*<Can I="write" a="Projects">*/}
+        {/*  <div className={styles.sectionTitleButton} onClick={this.modalEditProjectsHandleShow}>*/}
+        {/*    <IoPencil size={28}/>*/}
+        {/*  </div>*/}
+        {/*</Can>*/}
 
+        <div className={styles.container}>
+          <SectionContainer
+            title={"Course projects"}
+            data={this.state.projects}
+            emptyText={"No projects selected in this course. Click on the pencil button to select course projects."}
+            Component={ProjectCard}
+            icon={<IoPencil size={28} onClick={this.openModal}/>}
+            EmptyIcon={IoFileTrayOutline}
+          />
 
-        <div className={styles.sectionContainer}>
-          <div className={[styles.sectionTitle, styles.sectionTitleWithButton].join(" ")}>
-            <h3 className={styles.sectionTitleH}>Course projects</h3>
-
-            <div className={styles.sectionTitleButton} onClick={this.modalEditProjectsHandleShow}>
-              <IoPencil size={28}/>
+          <div className={globalStyles.sectionContainer}>
+            <div className={[globalStyles.sectionTitle, globalStyles.sectionTitleWithButton].join(" ")}>
+              <h3 className={globalStyles.sectionTitleH}>Course statistics</h3>
             </div>
-          </div>
 
-          {this.state.projects.length > 0 ?
             <ul className={styles.ul}>
-              {this.state.projects.map(project => {
-                return (
-                  <li className={styles.li} key={project.id}>
-                    <ProjectCard data={project}/>
-                  </li>
-                )
-              })}
+              {/*{this.state.stats.map(stat => {*/}
+              {/*  return (*/}
+              {/*    <li className={styles.li} key={stat.title}>*/}
+              {/*      <Statistic title ={stat.title}*/}
+              {/*        type={stat.type}*/}
+              {/*        data={stat.data}*/}
+              {/*        unit={stat.unit}/>*/}
+              {/*    </li>*/}
+              {/*  );*/}
+              {/*})}*/}
+
+              <StatsCard data={this.state.stats}/>
             </ul>
-            :
-            (<div>
-              <p>No projects selected in this course. Click on the 'Edit' button to select course projects.</p>
-            </div>)
-          }
-        </div>
-
-        <EditProjectsModal
-          show={this.state.modalEditProjectsShow}
-          activeProjects={this.state.modalEditProjectActiveProjects}
-          availableProjects={this.state.modalEditProjectAvailableProjects}
-          onClickDeactive={this.modalEditProjectsHandleDeactive}
-          onClickActive={this.modalEditProjectsHandleActive}
-          onClose={this.modalEditProjectsHandleClose}
-          onAccept={this.modalEditProjectsHandleAccept}
-
-          showAlert={this.state.modalEditShowAlert}
-          alertBody={this.state.modalEditAlertBody}
-          closeAlertHandle={this.modalEditProjectsHandleCloseAlert}
-        />
-
-        <div className={styles.sectionContainer}>
-          <div className={[styles.sectionTitle, styles.sectionTitleWithButton].join(" ")}>
-            <h3 className={styles.sectionTitleH}>Course statistics</h3>
           </div>
 
-          <ul className={styles.ul}>
-            {/*{this.state.stats.map(stat => {*/}
-            {/*  return (*/}
-            {/*    <li className={styles.li} key={stat.title}>*/}
-            {/*      <Statistic title ={stat.title}*/}
-            {/*        type={stat.type}*/}
-            {/*        data={stat.data}*/}
-            {/*        unit={stat.unit}/>*/}
-            {/*    </li>*/}
-            {/*  );*/}
-            {/*})}*/}
+          <EditProjectsModal
+            show={this.state.showModal}
+            setShow={this.setShow}
+            currentActive={this.state.projects}
+          />
 
-            <StatsCard data={this.state.stats}/>
-
-          </ul>
         </div>
       </div>
     )
   }
 }
 
-export default Course;
+// const mapStateToProps = state => {
+//   return {
+//
+//   };
+// };
+
+const actionCreators = {
+  saveCurrentCourse,
+  deleteCurrentCourse,
+  setCurrentLocation
+}
+
+export default connect(null, actionCreators)(Course)

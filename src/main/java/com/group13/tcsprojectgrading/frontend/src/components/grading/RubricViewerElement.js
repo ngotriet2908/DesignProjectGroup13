@@ -1,14 +1,14 @@
 import React, { Component } from 'react'
 import styles from './grading.module.css'
-import rubricStyles from '../rubricNew/rubric.module.css'
-import {saveRubric, setSelectedElement} from "../../redux/rubricNew/actions";
+import rubricStyles from '../rubric/rubric.module.css'
+import {saveRubric, setSelectedElement} from "../../redux/rubric/actions";
 import {connect} from "react-redux";
 import Button from "react-bootstrap/Button";
-import RubricViewerElementChildren from "../rubricNew/RubricViewerElementChildren";
-import {findById} from "../../redux/rubricNew/functions";
+import RubricViewerElementChildren from "../rubric/RubricViewerElementChildren";
+import {findById} from "../../redux/rubric/functions";
 import {FaArrowLeft} from "react-icons/fa";
-import {isBlock, isCriterion} from "../rubricNew/helpers";
-import RubricViewerElementGrade from "../rubricNew/RubricViewerElementGrade";
+import {isBlock, isCriterion} from "../rubric/helpers";
+import RubricViewerElementGrade from "../rubric/RubricViewerElementGrade";
 
 
 class RubricViewerElement extends Component {
@@ -89,8 +89,8 @@ class RubricViewerElement extends Component {
 
 const mapStateToProps = state => {
   return {
-    rubric: state.rubricNew.rubric,
-    selectedElement: state.rubricNew.selectedElement
+    rubric: state.rubric.rubric,
+    selectedElement: state.rubric.selectedElement
   };
 };
 
