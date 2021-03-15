@@ -45,6 +45,7 @@ public class StatsController {
         studentNode.put("title", "Amount of students");
         studentNode.put("type", "number");
         studentNode.put("data", studentCount);
+        studentNode.put("category", "Member");
         studentNode.put("unit", "Students");
 
         ArrayNode resultNode = mapper.createArrayNode();
@@ -72,6 +73,7 @@ public class StatsController {
         ObjectNode summaryNode = mapper.createObjectNode();
         summaryNode.put("title", "Submissions summary");
         summaryNode.put("type", "piechart");
+        summaryNode.put("category", "Submission");
 
         ObjectNode dataNode = mapper.createObjectNode();
         dataNode.put("graded", 100);
@@ -94,21 +96,25 @@ public class StatsController {
         ObjectNode meanNode = mapper.createObjectNode();
         meanNode.put("title","Mean grade");
         meanNode.put("type", "number");
+        meanNode.put("category", "Grade");
         meanNode.put("data", mean);
 
         ObjectNode medianNode = mapper.createObjectNode();
         medianNode.put("title","Median grade");
         medianNode.put("type", "number");
+        medianNode.put("category", "Grade");
         medianNode.put("data", median);
 
         ObjectNode minNode = mapper.createObjectNode();
         minNode.put("title","Min grade");
         minNode.put("type", "number");
+        minNode.put("category", "Grade");
         minNode.put("data", min);
 
         ObjectNode maxNode = mapper.createObjectNode();
         maxNode.put("title","Max grade");
         maxNode.put("type", "number");
+        maxNode.put("category", "Grade");
         maxNode.put("data", max);
 
         ArrayNode resultNode = mapper.createArrayNode();

@@ -16,6 +16,8 @@ import {deleteRubric, saveRubric} from "../../redux/rubricNew/actions";
 
 import testStats from "../stat/testStats.json";
 import Statistic from "../stat/Statistic";
+
+import Can from "../permissions/Can";
 import TaskContainer from "./TaskContainer";
 
 class Project extends Component {
@@ -142,60 +144,72 @@ class Project extends Component {
               </Card.Title>
 
               <div>
-                <Button variant="primary">
-                  <Link className={styles.plainLink} to={this.props.match.url + "/groups"}>
-                      Groups
-                  </Link>
-                </Button>
+                <Can I="view" a="Group">
+                  <Button variant="primary">
+                    <Link className={styles.plainLink} to={this.props.match.url + "/groups"}>
+                        Groups
+                    </Link>
+                  </Button>
+                </Can>
 
-                <Button variant="primary">
-                  <Link className={styles.plainLink} to={this.props.match.url + "/tasks"}>
-                    My tasks
-                  </Link>
-                </Button>
+                <Can I="view" a="Task">
+                  <Button variant="primary">
+                    <Link className={styles.plainLink} to={this.props.match.url + "/tasks"}>
+                      My tasks
+                    </Link>
+                  </Button>
+                </Can>
 
-                <Button variant="primary">
-                  <Link className={styles.plainLink} to={this.props.match.url + "/graders"}>
-                      Manage graders
-                  </Link>
-                </Button>
+                <Can I="modify" a="GradingAssignment">
+                  <Button variant="primary">
+                    <Link className={styles.plainLink} to={this.props.match.url + "/graders"}>
+                        Manage graders
+                    </Link>
+                  </Button>
+                </Can>
 
-                <Button variant="primary">
-                  <Link className={styles.plainLink} to={this.props.match.url + "/grading"}>
-                    Grading Interface
-                  </Link>
-                </Button>
+                <Can I="view" a="Grading">
+                  <Button variant="primary">
+                    <Link className={styles.plainLink} to={this.props.match.url + "/grading"}>
+                      Grading Interface
+                    </Link>
+                  </Button>
+                </Can>
 
-                <Button variant="primary">
-                  <Link className={styles.plainLink} to={this.props.match.url + "/feedback"}>
-                    Feedback Interface
-                  </Link>
-                </Button>
+                <Can I="view" a="Feedback">
+                  <Button variant="primary">
+                    <Link className={styles.plainLink} to={this.props.match.url + "/feedback"}>
+                      Feedback Interface
+                    </Link>
+                  </Button>
+                </Can>
               </div>
             </Card.Body>
           </Card>
         </div>
 
         <div className={styles.sectionContainer}>
-          <Card>
-            <Card.Body>
-              <Card.Title>
-                <h3 className={styles.sectionTitle}>Rubric</h3>
-              </Card.Title>
-              {this.props.rubric != null ?
-                <div>
-                  <Button variant="primary"><Link className={styles.plainLink} to={this.props.match.url + "/rubric"}>Open
-                      rubric</Link></Button>
-                  <Button variant="danger" onClick={this.onClickRemoveRubric}>Remove rubric</Button>
-                </div>
-                :
-                <div>
-                  <div>No rubric</div>
-                  <Button variant="primary" onClick={this.onClickCreateRubric}>Create rubric</Button>
-                </div>
-              }
-            </Card.Body>
-          </Card>
+          <Can i="modify" a="Rubric">
+            <Card>
+              <Card.Body>
+                <Card.Title>
+                  <h3 className={styles.sectionTitle}>Rubric</h3>
+                </Card.Title>
+                  {this.props.rubric != null ?
+                    <div>
+                      <Button variant="primary"><Link className={styles.plainLink} to={this.props.match.url + "/rubric"}>Open
+                          rubric</Link></Button>
+                      <Button variant="danger" onClick={this.onClickRemoveRubric}>Remove rubric</Button>
+                    </div>
+                    :
+                    <div>
+                      <div>No rubric</div>
+                      <Button variant="primary" onClick={this.onClickCreateRubric}>Create rubric</Button>
+                    </div>
+                  }
+              </Card.Body>
+            </Card>
+          </Can>
         </div>
 
         <div className={styles.sectionContainer}>
@@ -208,17 +222,19 @@ class Project extends Component {
                 {testStats.map(stat => {
                   return (
                     <Statistic title={stat.title}
-                      type={stat.type}
-                      data={stat.data}
-                      unit={stat.unit}/>
+                               type={stat.type}
+                               data={stat.data}
+                               category={stat.category}
+                               unit={stat.unit}/>
                   );
                 }).concat(this.state.stats.map((stat, index) => {
                   return (
                     <Statistic title={stat.title}
-                      key={index}
-                      type={stat.type}
-                      data={stat.data}
-                      unit={stat.unit}/>
+                               key={index}
+                               type={stat.type}
+                               data={stat.data}
+                               category={stat.category}
+                               unit={stat.unit}/>
                   );
                 }))}
               </CardColumns>

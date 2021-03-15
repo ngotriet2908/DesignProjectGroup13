@@ -2,7 +2,8 @@ import {REMOVE_USER, SAVE_USER, SET_AUTH_STATE} from "../actionTypes";
 
 const initialState = {
   signedIn: false,
-  user: null
+  role: 'ta',
+  user: null,
 };
 
 export default function(state = initialState, action) {
@@ -18,6 +19,7 @@ export default function(state = initialState, action) {
     return {
       ...state,
       user: action.payload,
+      role: 'teacher',
     };
   }
   case REMOVE_USER: {
