@@ -283,6 +283,7 @@ public class CanvasCoursesApi {
                     .scheme(CanvasEndpoints.SCHEME)
                     .host(CanvasEndpoints.HOST)
                     .path(CanvasEndpoints.SUBMISSION_PATH)
+                    .queryParam("include[]", "submission_comments")
                     .build(courseId, projectId, submitterId);
 
             return this.canvasApi.sendRequest(uri, HttpMethod.GET, authorizedClient);

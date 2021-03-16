@@ -9,8 +9,10 @@ function updateAbilityCoursePage(ability, user) {
 
   if (user.role === 'teacher') {
     can(['read', 'write'], 'Projects')
+    can(['read', 'write'], 'Statistic')
   } else if (user.role === 'ta') {
     can(['read'], 'Projects')
+    can(['read'], 'Statistic')
   }
 
   ability.update(rules)

@@ -10,6 +10,8 @@ import TaskOverviewCard from "./SubmissionsOverviewCard";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
 import SubmissionsOverviewCard from "./SubmissionsOverviewCard";
+import {Link} from "react-router-dom";
+import globalStyles from "../helpers/global.module.css";
 
 class Submissions extends Component {
   constructor(props) {
@@ -22,28 +24,34 @@ class Submissions extends Component {
       submissions: [],
       searchString: "",
       filterGroupChoice: "",
-      filterAssignedChoice: ""
+      filterAssignedChoice: "",
+      syncing: false
     }
   }
 
+  normalizeLowercase(name) {
+    return name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+  }
+  
   filterGroupSearchChange = (group) => {
-    let criteria = group.name.toLowerCase().includes(this.state.searchString.toLowerCase())
+    
+    let criteria = this.normalizeLowercase(group.name).includes(this.normalizeLowercase(this.state.searchString))
     if (criteria) return true
 
-    if (group.hasOwnProperty("sid")) {
-      criteria = group.sid.toLowerCase().includes(this.state.searchString.toLowerCase())
-      if (criteria) return true
-    }
-    if (group.hasOwnProperty("members")) {
-      let i;
-      for(i = 0; i < group.members.length; i++) {
-        criteria = group.members[i].name.toLowerCase().includes(this.state.searchString.toLowerCase())
-        if (criteria) return true
-
-        criteria = group.members[i].sid.toLowerCase().includes(this.state.searchString.toLowerCase())
-        if (criteria) return true
-      }
-    }
+    // if (group.hasOwnProperty("sid")) {
+    //   criteria = group.sid.normalizeLowercase().includes(this.state.searchString.normalizeLowercase())
+    //   if (criteria) return true
+    // }
+    // if (group.hasOwnProperty("members")) {
+    //   let i;
+    //   for(i = 0; i < group.members.length; i++) {
+    //     criteria = group.members[i].name.normalizeLowercase().includes(this.state.searchString.normalizeLowercase())
+    //     if (criteria) return true
+    //
+    //     criteria = group.members[i].sid.normalizeLowercase().includes(this.state.searchString.normalizeLowercase())
+    //     if (criteria) return true
+    //   }
+    // }
     return false
   }
 
@@ -98,6 +106,10 @@ class Submissions extends Component {
     this.setState({
       isLoading: true
     })
+    this.startThePage();
+  }
+
+  startThePage() {
     request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions`)
       .then(response => {
         return response.json();
@@ -111,8 +123,25 @@ class Submissions extends Component {
           isLoading: false,
           user: data.user,
           filterGroupChoice: "all",
-          filterAssignedChoice: "yours",
+          filterAssignedChoice: "all",
+          syncing: false,
         })
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
+  }
+
+  syncHandler = () => {
+    this.setState({
+      syncing: true
+    })
+
+    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/syncCanvas`)
+      .then(response => {
+        if (response.status === 200) {
+          this.startThePage()
+        }
       })
       .catch(error => {
         console.error(error.message);
@@ -150,6 +179,16 @@ class Submissions extends Component {
             <h6>All submissions count: {this.state.submissions.length}</h6>
             <h6>Deadline: ???</h6>
             <h6>Overall progress: {this.calculateOverallProgress()}%</h6>
+            <Button variant="lightGreen" onClick={this.syncHandler}>
+              {(!this.state.syncing)? "Sync with Canvas":
+                <Spinner
+                  as="span"
+                  animation="grow"
+                  size="sm"
+                  role="status"
+                  aria-hidden="true"/>
+              }
+            </Button>
           </div>
 
           <div className={styles.tasksList}>

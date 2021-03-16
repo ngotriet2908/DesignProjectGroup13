@@ -61,71 +61,7 @@ public class ProjectsManagementController {
         ArrayNode gradersArray = objectMapper.createArrayNode();
 
         //sync submissions <-> canvas submissions
-        List<String> submissionsString = this.canvasApi.getCanvasCoursesApi().getSubmissionsInfo(courseId, Long.parseLong(projectId));
-        List<String> studentsString = this.canvasApi.getCanvasCoursesApi().getCourseStudents(courseId);
 
-        JsonNode projectJson = objectMapper.readTree(projectResponse);
-        String projectCatId = projectJson.get("group_category_id").asText();
-        Map<String, String> groupIdToNameMap = new HashMap<>();
-        Map<String, String> userIdToGroupIdMap = new HashMap<>();
-
-        if (!projectCatId.equals("null")) {
-            ArrayNode groupsString = groupPages(objectMapper, canvasApi.getCanvasCoursesApi().getCourseGroupCategoryGroup(projectCatId));
-//            ArrayNode groupsString1 = groupPages(objectMapper, canvasApi.getCanvasCoursesApi().getCourseGroups(courseId));
-
-            for (Iterator<JsonNode> it = groupsString.elements(); it.hasNext(); ) {
-                JsonNode group = it.next();
-                if (group.get("members_count").asInt(0) <= 0) continue;
-                ArrayNode memberships = groupPages(objectMapper, this.canvasApi.getCanvasCoursesApi().getGroupMemberships(group.get("id").asText()));
-                groupIdToNameMap.put(group.get("id").asText(), group.get("name").asText());
-
-                for (Iterator<JsonNode> iter = memberships.elements(); iter.hasNext(); ) {
-                    JsonNode membership = iter.next();
-                    userIdToGroupIdMap.put(membership.get("user_id").asText(), membership.get("group_id").asText());
-                }
-            }
-        }
-        ArrayNode studentArray = groupPages(objectMapper, studentsString);
-        Map<String, JsonNode> studentMap = new HashMap<>();
-        for (Iterator<JsonNode> it = studentArray.elements(); it.hasNext(); ) {
-            JsonNode jsonNode = it.next();
-            studentMap.put(jsonNode.get("id").asText(), jsonNode);
-        }
-
-        ArrayNode submissionArray = groupPages(objectMapper, submissionsString);
-        List<String> validSubmissionId = new ArrayList<>();
-        List<Submission> validSubmissions = new ArrayList<>();
-
-        for (Iterator<JsonNode> it = submissionArray.elements(); it.hasNext(); ) {
-            JsonNode jsonNode = it.next();
-
-            if (jsonNode.get("workflow_state").asText().equals("unsubmitted")) continue;
-            if (!studentMap.containsKey(jsonNode.get("user_id").asText())) continue;
-
-            boolean isGroup = userIdToGroupIdMap.containsKey(jsonNode.get("user_id").asText());
-            String user_id = jsonNode.get("user_id").asText();
-            String group_id = (isGroup)? userIdToGroupIdMap.get(jsonNode.get("user_id").asText()): null;
-            String name = (isGroup)? groupIdToNameMap.get(userIdToGroupIdMap.get(jsonNode.get("user_id").asText())): studentMap.get(user_id).get("name").asText();
-            Submission submission = new Submission(
-                    user_id,
-                    project,
-                    name,
-                    group_id
-                    );
-
-            validSubmissionId.add(submission.getId());
-            validSubmissions.add(submission);
-        }
-
-        List<Submission> submissions = submissionService.findSubmissionWithProject(project);
-        for(Submission submission: submissions) {
-            if (!validSubmissionId.contains(submission.getId())) {
-                submissionService.deleteSubmission(submission);
-            }
-        }
-        for(Submission submission: validSubmissions) {
-            submissionService.addNewSubmission(submission);
-        }
         //sync submissions <-> canvas submissions
 
         List<Grader> graders = graderService.getGraderFromProject(project);
@@ -144,7 +80,7 @@ public class ProjectsManagementController {
 
 //        List<Task> tasks = taskService.getTasksFromId(project);
 
-        submissions = submissionService.findSubmissionWithProject(project);
+        List<Submission> submissions = submissionService.findSubmissionWithProject(project);
         for(Submission submission: submissions) {
 
             JsonNode taskNode = objectMapper.createObjectNode();
