@@ -175,7 +175,7 @@ class Project extends Component {
                     </Can>
 
                     <Button variant="lightGreen">
-                      <Link className={globalStyles.plainLink} to={this.props.match.url + "/grading"}>
+                      <Link className={globalStyles.plainLink} to={this.props.match.url + "/submissions/156/grading"}>
                       Grading Interface
                       </Link>
                     </Button>
@@ -200,25 +200,25 @@ class Project extends Component {
               <div className={globalStyles.sectionFlexContainer}>
                 <Card>
                   <Card.Body>
-                    {this.props.rubric != null ?
-                      <div>
-                        <Can I="read" a="Rubric">
-                          <Button variant="lightGreen">
-                            <Link className={globalStyles.plainLink} to={this.props.match.url + "/rubric"}>Open rubric</Link>
-                          </Button>
-                        </Can>
-                        <Can I="write" a="Rubric">
-                          <Button variant="red" onClick={this.onClickRemoveRubric}>Remove rubric</Button>
-                        </Can>
-                      </div>
-                      :
-                      <div>
-                        <div>No rubric</div>
-                        <Can I="write" a="Rubric">
-                          <Button variant="primary" onClick={this.onClickCreateRubric}>Create rubric</Button>
-                        </Can>
-                      </div>
-                    }
+                    {/*{this.props.rubric != null ?*/}
+                    <div>
+                      <Can I="read" a="Rubric">
+                        <Button variant="lightGreen">
+                          <Link className={globalStyles.plainLink} to={this.props.match.url + "/rubric"}>Open rubric</Link>
+                        </Button>
+                      </Can>
+                      {/*<Can I="write" a="Rubric">*/}
+                      {/*  <Button variant="red" onClick={this.onClickRemoveRubric}>Remove rubric</Button>*/}
+                      {/*</Can>*/}
+                    </div>
+                    {/*//   :*/}
+                    {/*//   <div>*/}
+                    {/*//     <div>No rubric</div>*/}
+                    {/*//     <Can I="write" a="Rubric">*/}
+                    {/*//       <Button variant="primary" onClick={this.onClickCreateRubric}>Create rubric</Button>*/}
+                    {/*//     </Can>*/}
+                    {/*//   </div>*/}
+                    {/*// }*/}
                   </Card.Body>
                 </Card>
               </div>
@@ -263,8 +263,8 @@ class Project extends Component {
             // emptyText={"Your tasks will appear here when they are assigned to you."}
             emptyText={"Nothing to do"}
             Component={HomeTaskCard}
-            className={styles.tasksSectionContainer}
             EmptyIcon={IoCheckboxOutline}
+            className={styles.tasksSectionContainer}
           />
           {/*</div>*/}
 

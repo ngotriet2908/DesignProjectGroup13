@@ -117,7 +117,7 @@ public class ProjectsController {
         JsonNode graderNode = grader.getGraderJson();
 
         // including rubric to the response
-        Rubric rubric = rubricService.getRubricByProjectId(projectId);
+        Rubric rubric = rubricService.getRubricById(projectId);
         JsonNode rubricJson;
 //        if (rubric == null) {
 //            rubricJson = objectMapper.readTree("null");
@@ -322,9 +322,9 @@ public class ProjectsController {
         System.out.println(submissionsString);
 
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode resultNode = objectMapper.createObjectNode();
-        ((ObjectNode) resultNode).set("project", objectMapper.readTree(projectResponse));
-        ((ObjectNode) resultNode).set("course", objectMapper.readTree(courseString));
+        ObjectNode resultNode = objectMapper.createObjectNode();
+        resultNode.set("project", objectMapper.readTree(projectResponse));
+        resultNode.set("course", objectMapper.readTree(courseString));
 
         JsonNode projectJson = objectMapper.readTree(projectResponse);
         String projectCatId = projectJson.get("group_category_id").asText();
@@ -370,37 +370,37 @@ public class ProjectsController {
             String id = (isGroup)? userIdToGroupIdMap.get(jsonNode.get("user_id").asText()): jsonNode.get("user_id").asText();
             String name = (isGroup)? groupIdToNameMap.get(userIdToGroupIdMap.get(jsonNode.get("user_id").asText())): studentMap.get(id).get("name").asText();
 
-            JsonNode entityNode = objectMapper.createObjectNode();
-            ((ObjectNode) entityNode).put("id", id);
-            if (!isGroup) ((ObjectNode) entityNode).put("sid", studentMap.get(jsonNode.get("user_id").asText()).get("login_id").asText());
-            ((ObjectNode) entityNode).put("name", name);
-            ((ObjectNode) entityNode).put("isGroup", isGroup);
-            ((ObjectNode) entityNode).put("status", jsonNode.get("workflow_state").asText());
+            ObjectNode entityNode = objectMapper.createObjectNode();
+            entityNode.put("id", id);
+            if (!isGroup) entityNode.put("sid", studentMap.get(jsonNode.get("user_id").asText()).get("login_id").asText());
+            entityNode.put("name", name);
+            entityNode.put("isGroup", isGroup);
+            entityNode.put("status", jsonNode.get("workflow_state").asText());
             if (isGroup) {
                 ArrayNode membersNode = objectMapper.createArrayNode();
                 if (!groupIdToMembership.containsKey(id)) continue;
                 for(String userId: groupIdToMembership.get(id)) {
-                    JsonNode memberNode = objectMapper.createObjectNode();
+                    ObjectNode memberNode = objectMapper.createObjectNode();
                     if (!studentMap.containsKey(userId)) continue;
-                    ((ObjectNode) memberNode).put("name", studentMap.get(userId).get("name").asText());
-                    ((ObjectNode) memberNode).put("sid", studentMap.get(userId).get("login_id").asText());
-                    ((ObjectNode) memberNode).put("sortable_name", studentMap.get(userId).get("sortable_name").asText());
-                    ((ObjectNode) memberNode).put("email", studentMap.get(userId).get("email").asText());
+                    memberNode.put("name", studentMap.get(userId).get("name").asText());
+                    memberNode.put("sid", studentMap.get(userId).get("login_id").asText());
+                    memberNode.put("sortable_name", studentMap.get(userId).get("sortable_name").asText());
+                    memberNode.put("email", studentMap.get(userId).get("email").asText());
                     membersNode.add(memberNode);
                 }
-                ((ObjectNode) entityNode).set("members", membersNode);
+                entityNode.set("members", membersNode);
             }
             groupsArray.add(entityNode);
         }
 
-        ((ObjectNode) resultNode).set("groups", groupsArray);
+        resultNode.set("groups", groupsArray);
 
         return resultNode;
     }
 
     @GetMapping("/{projectId}/rubric")
     public ResponseEntity<String> getProject(@PathVariable String projectId) throws JsonProcessingException {
-        Rubric rubric = rubricService.getRubricByProjectId(projectId);
+        Rubric rubric = rubricService.getRubricById(projectId);
 
         if (rubric == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -413,16 +413,11 @@ public class ProjectsController {
         }
     }
 
+    // TODO: submit only 'children'
     @PostMapping("/{projectId}/rubric")
     public Rubric newRubric(@RequestBody Rubric newRubric) {
         System.out.println("Creating a rubric...");
         return rubricService.addNewRubric(newRubric);
-    }
-
-    @DeleteMapping("{projectId}/rubric")
-    public void deleteRubric(@PathVariable String projectId) {
-        System.out.println("Deleting the rubric...");
-        rubricService.deleteRubric(projectId);
     }
 
     // TODO temporary unsafe method
@@ -436,8 +431,7 @@ public class ProjectsController {
         String filename = "output.pdf";
         headers.setContentDispositionFormData(filename, filename);
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-        ResponseEntity<byte[]> response = new ResponseEntity<>(contents, headers, HttpStatus.OK);
-        return response;
+        return new ResponseEntity<>(contents, headers, HttpStatus.OK);
     }
 }
 

@@ -15,8 +15,8 @@ import {URL_PREFIX} from "../../services/config";
 import {push} from "connected-react-router";
 import BulkAssignModal from "./BulkAssignModal";
 
-class GraderManagement extends Component {
 
+class GraderManagement extends Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -463,25 +463,25 @@ class GraderManagement extends Component {
           <span className="sr-only">Loading...</span>
         </Spinner>
         :
-      <div className={styles.graderManagement}>
-        {(!this.state.alertShow)? null :
-          <Alert variant="success" onClose={() => {this.setState({alertShow:false})}} dismissible>
-            <p>
-              {this.state.alertBody}
-            </p>
-          </Alert>}
-        <Breadcrumb>
-          <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumb.Item>
-          <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id ))}>
-            {this.state.course.name}
-          </Breadcrumb.Item>
-          <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id + "/projects/"+this.state.project.id))}>
-            {this.state.project.name}
-          </Breadcrumb.Item>
-          <Breadcrumb.Item active>
+        <div className={styles.graderManagement}>
+          {(!this.state.alertShow)? null :
+            <Alert variant="success" onClose={() => {this.setState({alertShow:false})}} dismissible>
+              <p>
+                {this.state.alertBody}
+              </p>
+            </Alert>}
+          <Breadcrumb>
+            <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumb.Item>
+            <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id ))}>
+              {this.state.course.name}
+            </Breadcrumb.Item>
+            <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id + "/projects/"+this.state.project.id))}>
+              {this.state.project.name}
+            </Breadcrumb.Item>
+            <Breadcrumb.Item active>
             Manage Graders
-          </Breadcrumb.Item>
-        </Breadcrumb>
+            </Breadcrumb.Item>
+          </Breadcrumb>
 
           <Card border="secondary" className={styles.gradersCardContainer}>
             <div className={styles.manageTaToolbar}>

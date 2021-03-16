@@ -14,8 +14,20 @@ public class GradingService {
         this.repository = repository;
     }
 
-    public SubmissionAssessment getAssessmentByTaskId(String submissionId) {
-        return repository.getBySubmissionId(submissionId);
+    public SubmissionAssessment getAssessmentByProjectIdAndId(String projectId, String userId) {
+        return repository.getByProjectIdAndUserId(projectId, userId);
+    }
+
+    public SubmissionAssessment createAssessment(SubmissionAssessment assessment) {
+        return repository.save(assessment);
+    }
+
+    public void deleteAssessment(SubmissionAssessment assessment) {
+        repository.delete(assessment);
+    }
+
+    public void deleteAssessment(String projectId, String userId) {
+        repository.deleteByProjectIdAndUserId(projectId, userId);
     }
 }
 

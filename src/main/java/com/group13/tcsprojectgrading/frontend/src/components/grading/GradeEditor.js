@@ -13,18 +13,12 @@ import {findCriterion} from "../../redux/grading/functions";
 class GradeEditor extends Component {
   constructor (props) {
     super(props)
-
-    // this.state = {
-    //   comment: "",
-    //   grade: 0,
-    // }
   }
 
   onChangeComment = (event) => {
     let criterion = findCriterion(this.props.tempAssessment, this.props.selectedElement);
 
     let newGrade = {
-      // criterionId: this.props.selectedElement,
       grade: criterion.grade,
       comment: event.target.value
     }
@@ -36,7 +30,6 @@ class GradeEditor extends Component {
     let criterion = findCriterion(this.props.tempAssessment, this.props.selectedElement);
 
     let newGrade = {
-      // criterionId: this.props.selectedElement,
       grade: event.target.value,
       comment: criterion.comment
     }
@@ -65,12 +58,14 @@ class GradeEditor extends Component {
     let element = findById(this.props.rubric, this.props.selectedElement)
     let criterion = findCriterion(this.props.tempAssessment, this.props.selectedElement);
 
+    console.log(element);
+    console.log(criterion);
+
     return (
       <div className={styles.gradeEditorContainer}>
-        {(element.content && isCriterion(element.content.type)) &&
+        {(element.content && criterion && isCriterion(element.content.type)) &&
         <Card className={styles.gradeEditorCard}>
           <Card.Body>
-            {/*{(element.content && isCriterion(element.content.type)) ?*/}
             <div>
               <div>
                 Grade:
@@ -84,11 +79,6 @@ class GradeEditor extends Component {
                 <Button variant="lightGreen" onClick={this.saveGrade}>Save</Button>
               </div>
             </div>
-            {/*  :*/}
-            {/*  <div>*/}
-            {/*    select criterion*/}
-            {/*  </div>*/}
-            {/*}*/}
           </Card.Body>
         </Card>
         }
@@ -98,6 +88,7 @@ class GradeEditor extends Component {
 }
 
 const mapStateToProps = state => {
+  console.log(state);
   return {
     user: state.user.user,
     selectedElement: state.rubric.selectedElement,

@@ -11,7 +11,10 @@ import com.group13.tcsprojectgrading.models.Grader;
 import com.group13.tcsprojectgrading.models.Project;
 import com.group13.tcsprojectgrading.models.RoleEnum;
 import com.group13.tcsprojectgrading.models.Submission;
+import com.group13.tcsprojectgrading.models.grading.SubmissionAssessment;
 import com.group13.tcsprojectgrading.services.*;
+import com.group13.tcsprojectgrading.services.grading.GradingService;
+import com.group13.tcsprojectgrading.services.rubric.RubricService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -32,15 +35,23 @@ public class ProjectsManagementController {
     private final RoleService roleService;
     private final ProjectRoleService projectRoleService;
     private final SubmissionService submissionService;
+    private final GradingService gradingService;
+    private final RubricService rubricService;
+
 
     @Autowired
-    public ProjectsManagementController(CanvasApi canvasApi, GraderService graderService, ProjectService projectService, RoleService roleService, ProjectRoleService projectRoleService, SubmissionService submissionService) {
+    public ProjectsManagementController(CanvasApi canvasApi, GraderService graderService, ProjectService projectService,
+                                        RoleService roleService, ProjectRoleService projectRoleService,
+                                        SubmissionService submissionService, GradingService gradingService,
+                                        RubricService rubricService) {
         this.canvasApi = canvasApi;
         this.graderService = graderService;
         this.projectService = projectService;
         this.roleService = roleService;
         this.projectRoleService = projectRoleService;
         this.submissionService = submissionService;
+        this.gradingService = gradingService;
+        this.rubricService = rubricService;
     }
 
     @GetMapping(value = "")
@@ -60,7 +71,7 @@ public class ProjectsManagementController {
         List<String> studentsString = this.canvasApi.getCanvasCoursesApi().getCourseStudents(courseId);
 
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode resultNode = objectMapper.createObjectNode();
+        ObjectNode resultNode = objectMapper.createObjectNode();
         ArrayNode notAssignedArray = objectMapper.createArrayNode();
         ArrayNode gradersArray = objectMapper.createArrayNode();
 
@@ -119,14 +130,14 @@ public class ProjectsManagementController {
 
         Map<String, ArrayNode> graderMap = new HashMap<>();
         for (Grader grader: graders) {
-            JsonNode formatNode = objectMapper.createObjectNode();
+            ObjectNode formatNode = objectMapper.createObjectNode();
             ArrayNode tasksArray = objectMapper.createArrayNode();
             graderMap.put(grader.getUserId(), tasksArray);
-            ((ObjectNode) formatNode).put("id", grader.getUserId());
-            ((ObjectNode) formatNode).put("name", grader.getName());
-            ((ObjectNode) formatNode).set("role", grader.getRolesArrayNode());
-            ((ObjectNode) formatNode).set("privileges", grader.getPrivilegesArrayNode());
-            ((ObjectNode) formatNode).set("groups", tasksArray);
+            formatNode.put("id", grader.getUserId());
+            formatNode.put("name", grader.getName());
+            formatNode.set("role", grader.getRolesArrayNode());
+            formatNode.set("privileges", grader.getPrivilegesArrayNode());
+            formatNode.set("groups", tasksArray);
             gradersArray.add(formatNode);
         }
 
@@ -135,20 +146,22 @@ public class ProjectsManagementController {
         for(Submission submission: submissions) {
             if (!validSubmissionId.contains(submission.getId())) {
                 submissionService.deleteSubmission(submission);
+                gradingService.deleteAssessment(projectId, submission.getId());
             }
         }
+
         for(Submission submission: validSubmissions) {
             submissionService.addNewSubmission(submission);
+            gradingService.createAssessment(new SubmissionAssessment(projectId, submission.getId()));
         }
 
         submissions = submissionService.findSubmissionWithProject(project);
         for(Submission submission: submissions) {
-
-            JsonNode taskNode = objectMapper.createObjectNode();
-            ((ObjectNode) taskNode).put("id", submission.getId());
+            ObjectNode taskNode = objectMapper.createObjectNode();
+            taskNode.put("id", submission.getId());
 //            ((ObjectNode) taskNode).put("submission_id", submission.getId());
-            ((ObjectNode) taskNode).put("isGroup", submission.getGroupId() != null);
-            ((ObjectNode) taskNode).put("name", submission.getName());
+            taskNode.put("isGroup", submission.getGroupId() != null);
+            taskNode.put("name", submission.getName());
 
             if (submission.getGrader() == null) {
                 notAssignedArray.add(taskNode);
@@ -157,8 +170,8 @@ public class ProjectsManagementController {
             }
         }
 
-        ((ObjectNode)resultNode).set("graders", gradersArray);
-        ((ObjectNode)resultNode).set("notAssigned", notAssignedArray);
+        resultNode.set("graders", gradersArray);
+        resultNode.set("notAssigned", notAssignedArray);
 
         return resultNode;
     }
@@ -214,31 +227,31 @@ public class ProjectsManagementController {
     public JsonNode remakeNotAssignedAndGraders(Project project) {
         ObjectMapper objectMapper = new ObjectMapper();
         List<Grader> graders = graderService.getGraderFromProject(project);
-        JsonNode resultNode = objectMapper.createObjectNode();
+        ObjectNode resultNode = objectMapper.createObjectNode();
         ArrayNode notAssignedArray = objectMapper.createArrayNode();
         ArrayNode gradersArray = objectMapper.createArrayNode();
 
         Map<String, ArrayNode> graderMap = new HashMap<>();
         for (Grader grader1: graders) {
-            JsonNode formatNode = objectMapper.createObjectNode();
+            ObjectNode formatNode = objectMapper.createObjectNode();
             ArrayNode tasksArray = objectMapper.createArrayNode();
             graderMap.put(grader1.getUserId(), tasksArray);
-            ((ObjectNode) formatNode).put("id", grader1.getUserId());
-            ((ObjectNode) formatNode).put("name", grader1.getName());
-            ((ObjectNode) formatNode).set("role", grader1.getRolesArrayNode());
-            ((ObjectNode) formatNode).set("privileges", grader1.getPrivilegesArrayNode());
-            ((ObjectNode) formatNode).set("groups", tasksArray);
+            formatNode.put("id", grader1.getUserId());
+            formatNode.put("name", grader1.getName());
+            formatNode.set("role", grader1.getRolesArrayNode());
+            formatNode.set("privileges", grader1.getPrivilegesArrayNode());
+            formatNode.set("groups", tasksArray);
             gradersArray.add(formatNode);
         }
 
         List<Submission> submissions = submissionService.findSubmissionWithProject(project);
         for(Submission submission: submissions) {
 
-            JsonNode taskNode = objectMapper.createObjectNode();
-            ((ObjectNode) taskNode).put("id", submission.getId());
+            ObjectNode taskNode = objectMapper.createObjectNode();
+            taskNode.put("id", submission.getId());
 //            ((ObjectNode) taskNode).put("submission_id", submission.getId());
-            ((ObjectNode) taskNode).put("isGroup", submission.getGroupId() != null);
-            ((ObjectNode) taskNode).put("name", submission.getName());
+            taskNode.put("isGroup", submission.getGroupId() != null);
+            taskNode.put("name", submission.getName());
 
             if (submission.getGrader() == null) {
                 notAssignedArray.add(taskNode);
@@ -247,8 +260,8 @@ public class ProjectsManagementController {
             }
         }
 
-        ((ObjectNode)resultNode).set("graders", gradersArray);
-        ((ObjectNode)resultNode).set("notAssigned", notAssignedArray);
+        resultNode.set("graders", gradersArray);
+        resultNode.set("notAssigned", notAssignedArray);
 
         return resultNode;
     }
@@ -262,10 +275,10 @@ public class ProjectsManagementController {
         ArrayNode gradersArrayFromCanvas = groupPages(objectMapper, gradersResponse);
         for (Iterator<JsonNode> it = gradersArrayFromCanvas.elements(); it.hasNext(); ) {
             JsonNode node = it.next();
-            JsonNode grader = objectMapper.createObjectNode();
-            ((ObjectNode) grader).put("id", node.get("id").asText());
-            ((ObjectNode) grader).put("name", node.get("name").asText());
-            ((ObjectNode) grader).put("role", RoleEnum.getRoleFromEnrolment(node.get("enrollments").get(0).get("type").asText()).toString());
+            ObjectNode grader = objectMapper.createObjectNode();
+            grader.put("id", node.get("id").asText());
+            grader.put("name", node.get("name").asText());
+            grader.put("role", RoleEnum.getRoleFromEnrolment(node.get("enrollments").get(0).get("type").asText()).toString());
             results.add(grader);
         }
         return results;

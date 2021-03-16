@@ -2,12 +2,7 @@ import React, { Component } from 'react'
 import Card from 'react-bootstrap/Card'
 
 import styles from './home.module.css'
-import {URL_PREFIX} from "../../services/config";
-import {COURSES} from "../../services/endpoints";
-import {IoArrowForward} from "react-icons/io5";
-import store from "../../redux/store";
-import {push} from "connected-react-router";
-import {IoCafe, IoCheckboxOutline} from "react-icons/io5";
+import classnames from 'classnames';
 
 class EmptyCard extends Component {
   constructor (props) {
@@ -16,10 +11,9 @@ class EmptyCard extends Component {
 
   render () {
     return (
-      <Card className={[styles.cardEmpty].join(" ")}>
+      <Card className={classnames(styles.cardEmpty)}>
         <Card.Body className={styles.emptyCardBodyContainer}>
           <div className={styles.emptyCardContentContainer}>
-            {/*<IoCheckboxOutline size={60}/>*/}
             {this.props.icon &&
               <this.props.icon className={styles.emptyCardContentIcon} size={60}/>
             }

@@ -10,7 +10,10 @@ public interface RubricRepository extends MongoRepository<Rubric, String> {
 //    public Rubric findByFirstName(String firstName);
 //    public List<Customer> findByLastName(String lastName);
 //    public void deleteByProjectId() {}
-    void deleteByProjectId(String projectId);
+//    void deleteByProjectId(String projectId);
+//
+//    Rubric getByProjectId(String projectId);
 
-    Rubric getByProjectId(String projectId);
+    void deleteById(String id);
+    Rubric getById(String id);
 }

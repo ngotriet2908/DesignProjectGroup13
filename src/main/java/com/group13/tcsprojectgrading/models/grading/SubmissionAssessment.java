@@ -2,47 +2,56 @@ package com.group13.tcsprojectgrading.models.grading;
 
 import javax.persistence.Id;
 import javax.persistence.IdClass;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @IdClass(SubmissionAssessmentKey.class)
 public class SubmissionAssessment {
-    private List<Grade> grades;
-    private String rubricId;
+//    private List<Grade> grades;
 
-    @Id
-    private String courseId;
+    private Map<String, List<Grade>> grades;
+
     @Id
     private String projectId;
-    @Id
-    private String submissionId;
 
-    public SubmissionAssessment(List<Grade> grades, String rubricId, String courseId, String projectId, String taskId) {
+    @Id
+    private String userId;
+
+    public SubmissionAssessment(Map<String, List<Grade>> grades, String projectId, String userId) {
         this.grades = grades;
-        this.rubricId = rubricId;
-        this.courseId = courseId;
+//        this.rubricId = rubricId;
         this.projectId = projectId;
-        this.submissionId = taskId;
+        this.userId = userId;
+    }
+
+    public SubmissionAssessment(String projectId, String userId) {
+        this.grades = new HashMap<>();
+//        this.rubricId = rubricId;
+        this.projectId = projectId;
+        this.userId = userId;
     }
 
     public SubmissionAssessment() {
 
     }
 
-    public List<Grade> getGrades() {
+    public Map<String, List<Grade>> getGrades() {
         return grades;
     }
 
-    public void setGrades(List<Grade> gradeDetails) {
+    public void setGrades(Map<String, List<Grade>> gradeDetails) {
         this.grades = gradeDetails;
     }
 
-    public String getRubricId() {
-        return rubricId;
-    }
-
-    public void setRubricId(String rubricId) {
-        this.rubricId = rubricId;
-    }
+//    public String getRubricId() {
+//        return rubricId;
+//    }
+//
+//    public void setRubricId(String rubricId) {
+//        this.rubricId = rubricId;
+//    }
 
     public String getProjectId() {
         return projectId;
@@ -52,19 +61,11 @@ public class SubmissionAssessment {
         this.projectId = projectId;
     }
 
-    public String getCourseId() {
-        return courseId;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setCourseId(String courseId) {
-        this.courseId = courseId;
-    }
-
-    public String getSubmissionId() {
-        return submissionId;
-    }
-
-    public void setSubmissionId(String submissionId) {
-        this.submissionId = submissionId;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

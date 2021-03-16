@@ -19,6 +19,11 @@ import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 import {setCurrentLocation} from "../../redux/navigation/actions";
 
 import {Can, ability, updateAbility} from "../permissions/ProjectAbility";
+import Breadcrumbs from "../helpers/Breadcrumbs";
+import store from "../../redux/store";
+import {push} from "connected-react-router";
+import {URL_PREFIX} from "../../services/config";
+import {IoReturnDownBackOutline} from "react-icons/io5";
 
 
 class Rubric extends Component {
@@ -94,6 +99,13 @@ class Rubric extends Component {
         </div>
 
         <div className={styles.editor}>
+          <Breadcrumbs>
+            <Breadcrumbs.Item onClick={
+              () => store.dispatch(push(URL_PREFIX + "/courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId))
+            }>
+              <IoReturnDownBackOutline/> Return to project</Breadcrumbs.Item>
+          </Breadcrumbs>
+
           {this.props.isEditing ?
             <RubricEditor/>
             :

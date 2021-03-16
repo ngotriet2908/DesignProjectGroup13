@@ -50,17 +50,11 @@ export function alterGrade(oldGrades, criterionId, newGrade) {
   if (newGrades[criterionId]) {
     newGrades[criterionId].push(
       newGrade
-      // {
-      //   [userId]: newGrade
-      // }
     )
   } else {
     console.log("here")
     newGrades[criterionId] = [
       newGrade
-      // {
-      //   [userId]: newGrade
-      // }
     ]
   }
 
@@ -90,7 +84,12 @@ export function alterGrade(oldGrades, criterionId, newGrade) {
 // }
 
 export function findCriterion(assessment, criterionId) {
-  return assessment[criterionId];
+  if (assessment.hasOwnProperty("grades")) {
+    console.log(assessment.grades[criterionId]);
+    return assessment.grades[criterionId];
+  } else {
+    return null;
+  }
 }
 
 // export function findCriterion(assessment, criterionId) {

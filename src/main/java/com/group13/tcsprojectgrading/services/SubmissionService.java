@@ -11,7 +11,7 @@ import java.util.List;
 
 @Service
 public class SubmissionService {
-    private SubmissionRepository repository;
+    private final SubmissionRepository repository;
 
     @Autowired
     public SubmissionService(SubmissionRepository repository) {
@@ -19,15 +19,12 @@ public class SubmissionService {
     }
 
     public Submission addNewSubmission(Submission submission) {
-        Submission current_Submission = repository.findById(
+        repository.findById(
                 new SubmissionId(
                         submission.getId(),
                         submission.getProject().getProjectCompositeKey()
                 )
-        ).orElse(null);
-        if (current_Submission != null) {
-            submission.setGrader(current_Submission.getGrader());
-        }
+        ).ifPresent(current_Submission -> submission.setGrader(current_Submission.getGrader()));
         return repository.save(submission);
     }
 

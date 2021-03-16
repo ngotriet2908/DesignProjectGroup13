@@ -10,9 +10,8 @@ import {Spinner} from "react-bootstrap";
 
 import globalStyles from '../helpers/global.module.css';
 import {createAssessment} from "../../redux/rubric/functions";
-import {saveTempAssessment} from "../../redux/grading/actions";
+import {saveAssessment, saveTempAssessment} from "../../redux/grading/actions";
 import {request} from "../../services/request";
-import {BASE} from "../../services/endpoints";
 
 
 class Grading extends Component {
@@ -30,12 +29,13 @@ class Grading extends Component {
   }
 
   componentDidMount() {
+    // TODO if no rubric exists - should not be possible
+    // TODO, create a default empty rubric for each project
+
     this.props.setSelectedElement(this.rubric.id);
     this.props.saveRubric(this.rubric);
 
-    // this.getCurrentAssessment();
-
-    this.createGradingSheet();
+    this.getCurrentAssessment();
 
     this.setState({
       isLoaded: true
@@ -50,7 +50,11 @@ class Grading extends Component {
 
         if (response.status !== 404) {
           let assessment = await response.json();
-          console.log(assessment);
+          // initialise (empty) state for input fields
+          this.createGradingSheet();
+
+          // load grading data
+          this.props.saveAssessment(assessment);
         }
       })
       .catch(error => {
@@ -95,7 +99,8 @@ const mapStateToProps = state => {
 const actionCreators = {
   setSelectedElement,
   saveRubric,
-  saveTempAssessment
+  saveTempAssessment,
+  saveAssessment
 }
 
 export default connect(mapStateToProps, actionCreators)(Grading)

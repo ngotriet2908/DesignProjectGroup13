@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.*;
+import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.services.ActivityService;
 import com.group13.tcsprojectgrading.services.GraderService;
 import com.group13.tcsprojectgrading.services.ProjectService;
@@ -36,7 +37,8 @@ class CoursesController {
     private final ProjectService projectService;
 
     @Autowired
-    public CoursesController(CanvasApi canvasApi, ActivityService activityService, RubricService rubricService, GraderService graderService, SubmissionService submissionService, ProjectService projectService) {
+    public CoursesController(CanvasApi canvasApi, ActivityService activityService, RubricService rubricService,
+                             GraderService graderService, SubmissionService submissionService, ProjectService projectService) {
         this.canvasApi = canvasApi;
         this.activityService = activityService;
         this.rubricService = rubricService;
@@ -210,12 +212,14 @@ class CoursesController {
 
         for (Project project: projectsDatabase) {
             if (!editedActiveProject.contains(project.getProjectId())) {
+                rubricService.deleteRubric(project.getProjectId());
                 projectService.deleteProject(project);
             }
         }
 
         for(String activeProjectId: editedActiveProject) {
             projectService.addNewProject(availableProjects.get(activeProjectId));
-        }
+            rubricService.addNewRubric(new Rubric(activeProjectId))
+;       }
     }
 }
