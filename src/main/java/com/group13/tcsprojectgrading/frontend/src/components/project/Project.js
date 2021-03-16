@@ -161,8 +161,8 @@ class Project extends Component {
                     </Button>
 
                     <Button variant="lightGreen">
-                      <Link className={globalStyles.plainLink} to={this.props.match.url + "/tasks"}>
-                      My tasks
+                      <Link className={globalStyles.plainLink} to={this.props.match.url + "/submissions"}>
+                      Submissions
                       </Link>
                     </Button>
 

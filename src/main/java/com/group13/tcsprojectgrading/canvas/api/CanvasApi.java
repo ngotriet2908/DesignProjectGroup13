@@ -68,13 +68,15 @@ public class CanvasApi {
 //                .bodyToMono(String.class)
 //                .block();
         // TODO: catch errors here and in other request functions (!important)
-            return bodySpec
-                    .retrieve()
+        String result = bodySpec
+                .retrieve()
 //                    .onStatus(status -> status == HttpStatus.UNAUTHORIZED,
 //                            clientResponse -> Mono.error(new CanvasAuthorisationException("Unauthorised 401."))
 //                    )
-                    .bodyToMono(String.class)
-                    .block();
+                .bodyToMono(String.class)
+                .block();
+        System.out.println(result);
+            return result;
     }
 
 

@@ -8,6 +8,7 @@ import Grading from "../grading/Grading";
 import Tasks from "../tasks/Tasks";
 import TaskInfo from "../taskInfo/TaskInfo";
 import Feedback from "../feedback/Feedback";
+import Submissions from "../submissions/Submissions";
 
 
 class ProjectRoutes extends Component {
@@ -24,8 +25,8 @@ class ProjectRoutes extends Component {
         {/*<Route path={this.props.match.path + "/grading"} component={Grading}/>*/}
         {/*<Route path={this.props.match.path + "/tasks/:taskId/grading"} component={Grading}/>*/}
         <Route path={this.props.match.path + "/submissions/:submissionId/grading"} component={Grading}/>
-        <Route path={this.props.match.path + "/tasks/:isGroup/:taskId"} component={TaskInfo}/>
-        <Route path={this.props.match.path + "/tasks"} component={Tasks}/>
+        <Route path={this.props.match.path + "/submissions/:submissionId"} component={TaskInfo}/>
+        <Route path={this.props.match.path + "/submissions"} component={Submissions}/>
         <Route path={this.props.match.path + "/feedback"} component={Feedback}/>
         <Route path={this.props.match.path + ""} component={Project}/>
       </Switch>

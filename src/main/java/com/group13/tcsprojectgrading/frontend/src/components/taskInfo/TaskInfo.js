@@ -23,17 +23,17 @@ class TaskInfo extends Component {
   }
 
   componentDidMount() {
-    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/tasks/${this.props.match.params.isGroup}/${this.props.match.params.taskId}`)
+    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}`)
       .then(response => {
         return response.json();
       })
       .then(data => {
         console.log(data);
         this.setState({
-          task: data.task,
+          task: data.submission,
           project: data.project,
           course: data.course,
-          submission: data.submission,
+          submission: data.submissionCanvas,
           isLoading: false
         })
       })

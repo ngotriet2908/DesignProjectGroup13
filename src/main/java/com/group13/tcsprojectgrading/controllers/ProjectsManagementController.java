@@ -66,14 +66,14 @@ public class ProjectsManagementController {
             );
         }
 
-        List<Grader> graders = graderService.getGraderFromProject(project);
-        List<String> submissionsString = this.canvasApi.getCanvasCoursesApi().getSubmissionsInfo(courseId, Long.parseLong(projectId));
-        List<String> studentsString = this.canvasApi.getCanvasCoursesApi().getCourseStudents(courseId);
-
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode resultNode = objectMapper.createObjectNode();
         ArrayNode notAssignedArray = objectMapper.createArrayNode();
         ArrayNode gradersArray = objectMapper.createArrayNode();
+
+        //sync submissions <-> canvas submissions
+        List<String> submissionsString = this.canvasApi.getCanvasCoursesApi().getSubmissionsInfo(courseId, Long.parseLong(projectId));
+        List<String> studentsString = this.canvasApi.getCanvasCoursesApi().getCourseStudents(courseId);
 
         JsonNode projectJson = objectMapper.readTree(projectResponse);
         String projectCatId = projectJson.get("group_category_id").asText();
@@ -128,6 +128,18 @@ public class ProjectsManagementController {
             validSubmissions.add(submission);
         }
 
+        List<Submission> submissions = submissionService.findSubmissionWithProject(project);
+        for(Submission submission: submissions) {
+            if (!validSubmissionId.contains(submission.getId())) {
+                submissionService.deleteSubmission(submission);
+            }
+        }
+        for(Submission submission: validSubmissions) {
+            submissionService.addNewSubmission(submission);
+        }
+        //sync submissions <-> canvas submissions
+
+        List<Grader> graders = graderService.getGraderFromProject(project);
         Map<String, ArrayNode> graderMap = new HashMap<>();
         for (Grader grader: graders) {
             ObjectNode formatNode = objectMapper.createObjectNode();

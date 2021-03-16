@@ -46,14 +46,14 @@ class Tasks extends Component {
     this.setState({
       isLoading: true
     })
-    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/tasks`)
+    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions`)
       .then(response => {
         return response.json();
       })
       .then(data => {
         console.log(data);
         this.setState({
-          tasks: data.tasks,
+          tasks: data.submissions,
           project: data.project,
           course: data.course,
           isLoading: false

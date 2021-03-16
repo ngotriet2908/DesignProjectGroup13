@@ -15,7 +15,7 @@ class HomeTaskCard extends Component {
   }
 
   onClickSeeMore = () => {
-    store.dispatch(push(`${URL_PREFIX}/${COURSES}/${this.props.data.course.id}/projects/${this.props.data.project.id}/tasks`));
+    store.dispatch(push(`${URL_PREFIX}/${COURSES}/${this.props.data.course.id}/projects/${this.props.data.project.id}/submissions`));
   }
 
   render() {
