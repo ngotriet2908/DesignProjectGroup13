@@ -102,10 +102,10 @@ public class CanvasApi {
                         }
                     }
                     if (next == null) {
-                        System.out.println("next == null");
+//                        System.out.println("next == null");
                         return Mono.empty();
                     }
-                    System.out.println(next);
+//                    System.out.println(next);
                     URI uri = null;
                     try {
                         uri = new URI(next);
@@ -116,7 +116,7 @@ public class CanvasApi {
                 }).flatMap(clientResponse -> Mono.just(clientResponse.getBody())).collectList();
 
         List<String> res = entityMono.block();
-        System.out.println(Arrays.toString(res.toArray()));
+//        System.out.println(Arrays.toString(res.toArray()));
         return res;
     }
 }

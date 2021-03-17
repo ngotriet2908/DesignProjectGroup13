@@ -5,7 +5,6 @@ import Rubric from "../rubric/Rubric";
 import GraderManagement from "../assign/GraderManagement";
 import Groups from "../groups/Groups";
 import Grading from "../grading/Grading";
-import Tasks from "../tasks/Tasks";
 import TaskInfo from "../taskInfo/TaskInfo";
 import Feedback from "../feedback/Feedback";
 import Submissions from "../submissions/Submissions";

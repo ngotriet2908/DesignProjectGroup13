@@ -62,7 +62,7 @@ public class CanvasOAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSucc
         //Syncing with Canvas
         long begin = System.currentTimeMillis();
 
-        System.out.println(oauth2User.getAttributes());
+//        System.out.println(oauth2User.getAttributes());
 
 //        //Sync account
 //        userSyncService.syncUser();
@@ -93,7 +93,7 @@ public class CanvasOAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSucc
 //            coursesSyncService.syncSubmission(project.getId());
 //        }
 
-        System.out.println("time: " + (System.currentTimeMillis()-begin));
+//        System.out.println("time: " + (System.currentTimeMillis()-begin));
 
         redirectStrategy.sendRedirect(request, response, "/");
     }

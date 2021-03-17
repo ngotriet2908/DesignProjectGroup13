@@ -230,7 +230,7 @@ public class ProjectsController {
         document.close();
 
 
-        System.out.println(Arrays.toString(byteArrayOutputStream.toByteArray()));
+//        System.out.println(Arrays.toString(byteArrayOutputStream.toByteArray()));
 
         return new ResponseEntity<byte[]>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.OK);
     }
@@ -274,7 +274,7 @@ public class ProjectsController {
         document.close();
 
 
-        System.out.println(Arrays.toString(byteArrayOutputStream.toByteArray()));
+//        System.out.println(Arrays.toString(byteArrayOutputStream.toByteArray()));
 
         return new ResponseEntity<byte[]>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.OK);
     }
@@ -319,7 +319,7 @@ public class ProjectsController {
         List<String> submissionsString = this.canvasApi.getCanvasCoursesApi().getSubmissionsInfo(courseId, Long.parseLong(projectId));
         List<String> studentsString = this.canvasApi.getCanvasCoursesApi().getCourseStudents(courseId);
 
-        System.out.println(submissionsString);
+//        System.out.println(submissionsString);
 
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode resultNode = objectMapper.createObjectNode();
@@ -407,16 +407,16 @@ public class ProjectsController {
         } else {
             ObjectMapper objectMapper = new ObjectMapper();
             String rubricString = objectMapper.writeValueAsString(rubric);
-            String response = "{\"rubric\":" + rubricString + "}";
-            System.out.println(response);
-            return new ResponseEntity<>(response, HttpStatus.OK);
+//            String response = "{\"rubric\":" + rubricString + "}";
+//            System.out.println(rubricString);
+            return new ResponseEntity<>(rubricString, HttpStatus.OK);
         }
     }
 
     // TODO: submit only 'children'
     @PostMapping("/{projectId}/rubric")
     public Rubric newRubric(@RequestBody Rubric newRubric) {
-        System.out.println("Creating a rubric...");
+//        System.out.println("Creating a rubric...");
         return rubricService.addNewRubric(newRubric);
     }
 

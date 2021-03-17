@@ -17,7 +17,7 @@ export function request(url, method = "GET", data = {}, accept = 'application/js
         'Accept': accept,
       },
     }
-  } else if (method === "POST") {
+  } else if (method === "POST" || method === "PUT") {
     init = {
       method: method,
       headers: {
@@ -37,8 +37,6 @@ export function request(url, method = "GET", data = {}, accept = 'application/js
     // TODO don't send the token to external urls
     init.headers["X-XSRF-TOKEN"] = getCookie('XSRF-TOKEN');
   }
-
-  // let promise = fetch(url, init);
 
   return fetch(url, init)
     .then(response => {

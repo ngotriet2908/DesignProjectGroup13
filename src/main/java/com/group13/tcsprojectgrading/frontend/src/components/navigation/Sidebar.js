@@ -2,13 +2,23 @@ import React from "react";
 import {Nav} from "react-bootstrap";
 import styles from "./navigation.module.css"
 import store from "../../redux/store";
-import {push} from "connected-react-router";
+import {goBack, push} from "connected-react-router";
 import {URL_PREFIX} from "../../services/config";
 import {request} from "../../services/request";
 import {connect} from "react-redux";
 import {removeUser} from "../../redux/user/actions";
-import {IoHomeOutline, IoGrid, IoLogOutOutline, IoMenuSharp, IoBookOutline, IoCreateOutline} from "react-icons/io5";
+import {
+  IoHomeOutline,
+  IoGrid,
+  IoLogOutOutline,
+  IoMenuSharp,
+  IoBookOutline,
+  IoCreateOutline,
+  IoReturnDownBackOutline,
+  IoPencilSharp
+} from "react-icons/io5";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
+import classnames from 'classnames';
 
 class Sidebar extends React.Component {
   constructor (props) {
@@ -48,9 +58,39 @@ class Sidebar extends React.Component {
   tabs = () => {
     let result;
 
+    result = []
+
+    if (this.props.location !== LOCATIONS.home) {
+      result.push(
+        <div key="back" className={`${styles.sidebarBodyItem}`} onClick={() => store.dispatch(goBack())}>
+          <div className={styles.sidebarBodyItemLeft}>
+            <IoReturnDownBackOutline className={styles.sidebarIcon} size={26}/>
+          </div>
+          {!this.state.isHidden &&
+            <span className={styles.sidebarBodyItemRight}>
+                  Back
+            </span>
+          }
+        </div>
+      )
+    } else {
+      result.push(
+        <div key="back" className={classnames(styles.sidebarBodyItem, styles.sidebarBodyItemHidden)} onClick={() => store.dispatch(goBack())}>
+          <div className={styles.sidebarBodyItemLeft}>
+            <IoReturnDownBackOutline className={styles.sidebarIcon} size={26}/>
+          </div>
+          {!this.state.isHidden &&
+            <span className={styles.sidebarBodyItemRight}>
+                  Back
+            </span>
+          }
+        </div>
+      )
+    }
+
     if  (this.props.location === LOCATIONS.home) {
       // home
-      result =
+      result.push(
         <div className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={this.onClickLogo}>
           <div className={styles.sidebarBodyItemLeft}>
             <IoHomeOutline className={styles.sidebarIcon} size={26}/>
@@ -61,9 +101,10 @@ class Sidebar extends React.Component {
         </span>
           }
         </div>
+      )
     } else {
-      result =
-        [<div key="home" className={`${styles.sidebarBodyItem}`} onClick={this.onClickLogo}>
+      result.push(
+        <div key="home" className={`${styles.sidebarBodyItem}`} onClick={this.onClickLogo}>
           <div className={styles.sidebarBodyItemLeft}>
             <IoHomeOutline className={styles.sidebarIcon} size={26}/>
           </div>
@@ -72,52 +113,69 @@ class Sidebar extends React.Component {
                   Home
           </span>
           }
-        </div>]
+        </div>
+      )
+    }
 
-      if (this.props.location === LOCATIONS.course) {
-        // course
-        result.push(
-          (<div key="course" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {}}>
-            <div className={styles.sidebarBodyItemLeft}>
-              <IoBookOutline className={styles.sidebarIcon} size={26}/>
-            </div>
-            {!this.state.isHidden &&
+    if (this.props.location === LOCATIONS.course) {
+      // course
+      result.push(
+        (<div key="course" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {}}>
+          <div className={styles.sidebarBodyItemLeft}>
+            <IoBookOutline className={styles.sidebarIcon} size={26}/>
+          </div>
+          {!this.state.isHidden &&
           <span className={styles.sidebarBodyItemRight}>
                     Course
           </span>
-            }
-          </div>)
-        )
-      } else if (this.props.location === LOCATIONS.project) {
-        // project
-        result.push(
-          (<div key="project" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {}}>
-            <div className={styles.sidebarBodyItemLeft}>
-              <IoCreateOutline className={styles.sidebarIcon} size={26}/>
-            </div>
-            {!this.state.isHidden &&
+          }
+        </div>)
+      )
+    } else if (this.props.location === LOCATIONS.project) {
+      // project
+      result.push(
+        (<div key="project" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {}}>
+          <div className={styles.sidebarBodyItemLeft}>
+            <IoCreateOutline className={styles.sidebarIcon} size={26}/>
+          </div>
+          {!this.state.isHidden &&
             <span className={styles.sidebarBodyItemRight}>
                     Project
             </span>
-            }
-          </div>)
-        )
-      } else if (this.props.location === LOCATIONS.rubric) {
-        // project
-        result.push(
-          (<div key="rubric" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {}}>
-            <div className={styles.sidebarBodyItemLeft}>
-              <IoGrid className={styles.sidebarIcon} size={26}/>
-            </div>
-            {!this.state.isHidden &&
+          }
+        </div>)
+      )
+    } else if (this.props.location === LOCATIONS.rubric) {
+      // rubric
+      result.push(
+        (<div key="rubric" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {}}>
+          <div className={styles.sidebarBodyItemLeft}>
+            <IoGrid className={styles.sidebarIcon} size={26}/>
+          </div>
+          {!this.state.isHidden &&
             <span className={styles.sidebarBodyItemRight}>
                     Rubric
             </span>
-            }
-          </div>)
-        )
-      }
+          }
+        </div>)
+      )
+    } else if (this.props.location === LOCATIONS.grading) {
+      // grading
+      result.push(
+        (<div key="grading" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
+        }}>
+          <div className={styles.sidebarBodyItemLeft}>
+            <IoPencilSharp className={styles.sidebarIcon} size={26}/>
+          </div>
+          {!this.state.isHidden &&
+            <span className={styles.sidebarBodyItemRight}>
+                    Grading
+            </span>
+          }
+        </div>)
+      )
     }
+    // }
 
     return result;
   }

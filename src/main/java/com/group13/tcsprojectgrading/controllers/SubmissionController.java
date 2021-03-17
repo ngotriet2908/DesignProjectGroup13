@@ -111,12 +111,14 @@ public class SubmissionController {
             validSubmissionId.add(submission.getId());
             validSubmissions.add(submission);
         }
+
         List<Submission> submissions = submissionService.findSubmissionWithProject(project);
         for(Submission submission: submissions) {
             if (!validSubmissionId.contains(submission.getId())) {
                 submissionService.deleteSubmission(submission);
             }
         }
+
         for(Submission submission: validSubmissions) {
             submissionService.addNewSubmission(submission);
         }

@@ -117,23 +117,9 @@ export function changeGrade(rubric, id, newGrade) {
 }
 
 export function createAssessment(rubric) {
-  // let grades = {}
-  // flattenCriteria(rubric, grades);
-  //
-  // let assessment = {
-  //   grades: grades
-  // };
-  //
-  // return assessment;
-
   let grades = {}
   flattenCriteria(rubric, grades);
-
-  let assessment = {
-    grades: grades
-  };
-
-  return assessment;
+  return grades;
 }
 
 export function flattenCriteria(rubric, results) {
@@ -149,13 +135,9 @@ export function _flattenCriteria(where, results) {
   else {
     if (isCriterion(where.content.type)) {
       results[where.content.id] = {
-        // criterionId: where.content.id,
         grade: 0,
-        comment: ""
+        comment: "",
       };
-      // results.push(
-      //
-      // )
     }
 
     if (where.hasOwnProperty('children')) {

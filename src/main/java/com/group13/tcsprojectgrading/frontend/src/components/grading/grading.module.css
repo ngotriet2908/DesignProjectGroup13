@@ -52,6 +52,30 @@
     height: 100%;
 }
 
+/* control bar */
+.controlBarBody {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.controlBarButton {
+    /*font-size: 1.3rem;*/
+    padding: 0.8rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all .1s ease-out;
+    margin: 1rem 0;
+}
+
+.controlBarButton:hover {
+    background-color: primaryShade;
+    color: white;
+}
+
 
 /* grading panel */
 .gradingContainer {
@@ -68,6 +92,8 @@
     padding: 1rem 1rem 1rem 0;
 
     z-index: 45;
+
+    overflow: auto;
 
     /*height: 5rem;*/
     /*border-bottom: 1px solid #dfdfdf;*/
@@ -147,6 +173,59 @@
     min-height: 100%;
 }
 
+.gradeEditorCardItem {
+    margin-bottom: 1rem;
+}
+
+.gradeEditorCardItem input {
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+
+    cursor: text;
+    padding: 6px 12px;
+
+    width: 100%;
+
+    margin-top: 0.3rem;
+}
+
+.gradeEditorCardFooter {
+    /*float: right;*/
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
+.gradeEditorGradedContainer {
+    text-align: center;
+}
+
+.gradeEditorGradedContainer > div:not(:last-child) {
+    margin-bottom: 1rem;
+}
+
+.gradeEditorGradedIcon {
+    color: primary;
+}
+
+.gradeEditorGradedDescription {
+    margin-bottom: 1rem;
+}
+
+.gradeEditorGradedExpand {
+    cursor: pointer;
+    margin-left: 0.5rem;
+    color: primary;
+}
+
+.gradeEditorGradedClose {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    cursor: pointer;
+}
+
 /* grade viewer */
 .gradeViewerContainer {
 
@@ -154,4 +233,41 @@
 
 .gradeViewerCard {
     margin-left: 0.5rem;
+}
+
+.gradeViewerRow {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 0.5rem 0;
+
+    border: 1px solid moderateGray;
+
+    cursor: pointer;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.gradeViewerRowActive {
+    border: 1px solid primary;
+    /*background-color: primary;*/
+    /*color: white;*/
+}
+.gradeViewerRowActive .gradeViewerRowIcon {
+    color: primary;
+}
+
+
+.gradeViewerRowIcon {
+    margin-right: 1rem;
+}
+
+.gradeViewerRowContent {
+
+}
+
+.gradeViewerRowExplanation {
+    margin-top: 0.5rem;
+    margin-left: 1rem;
 }

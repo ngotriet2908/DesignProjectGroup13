@@ -154,36 +154,36 @@ class Project extends Component {
               <div className={globalStyles.sectionFlexContainer}>
                 <Card className={styles.card}>
                   <Card.Body className={[styles.cardBody, styles.administrationSectionContainerBody].join(" ")}>
-                    <Button variant="lightGreen">
-                      <Link className={globalStyles.plainLink} to={this.props.match.url + "/groups"}>
+                    <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/groups"))}>
+                      {/*<Link className={globalStyles.plainLink} to={this.props.match.url + "/groups"}>*/}
                       Groups
-                      </Link>
+                      {/*</Link>*/}
                     </Button>
 
-                    <Button variant="lightGreen">
-                      <Link className={globalStyles.plainLink} to={this.props.match.url + "/submissions"}>
+                    <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/submissions"))}>
+                      {/*<Link className={globalStyles.plainLink} to={this.props.match.url + "/submissions"}>*/}
                       Submissions
-                      </Link>
+                      {/*</Link>*/}
                     </Button>
 
                     <Can I="open" a={"ManageGraders"}>
-                      <Button variant="lightGreen">
-                        <Link className={globalStyles.plainLink} to={this.props.match.url + "/graders"}>
-                      Manage graders
-                        </Link>
+                      <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/graders"))}>
+                        {/*<Link className={globalStyles.plainLink} to={this.props.match.url + "/graders"}>*/}
+                      Graders
+                        {/*</Link>*/}
                       </Button>
                     </Can>
 
-                    <Button variant="lightGreen">
-                      <Link className={globalStyles.plainLink} to={this.props.match.url + "/submissions/156/grading"}>
-                      Grading Interface
-                      </Link>
-                    </Button>
+                    {/*<Button variant="lightGreen">*/}
+                    {/*  <Link className={globalStyles.plainLink} to={this.props.match.url + "/submissions/156/grading"}>*/}
+                    {/*  Grading Interface*/}
+                    {/*  </Link>*/}
+                    {/*</Button>*/}
 
-                    <Button variant="lightGreen">
-                      <Link className={globalStyles.plainLink} to={this.props.match.url + "/feedback"}>
-                      Feedback Interface
-                      </Link>
+                    <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/feedback"))}>
+                      {/*<Link className={globalStyles.plainLink} to={this.props.match.url + "/feedback"}>*/}
+                        Feedback
+                      {/*</Link>*/}
                     </Button>
                   </Card.Body>
                 </Card>
@@ -203,22 +203,15 @@ class Project extends Component {
                     {/*{this.props.rubric != null ?*/}
                     <div>
                       <Can I="read" a="Rubric">
-                        <Button variant="lightGreen">
-                          <Link className={globalStyles.plainLink} to={this.props.match.url + "/rubric"}>Open rubric</Link>
+                        <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/rubric"))}>
+                          {/*<Link className={globalStyles.plainLink} to={this.props.match.url + "/rubric"}>Open rubric</Link>*/}
+                          Open rubric
                         </Button>
                       </Can>
                       {/*<Can I="write" a="Rubric">*/}
                       {/*  <Button variant="red" onClick={this.onClickRemoveRubric}>Remove rubric</Button>*/}
                       {/*</Can>*/}
                     </div>
-                    {/*//   :*/}
-                    {/*//   <div>*/}
-                    {/*//     <div>No rubric</div>*/}
-                    {/*//     <Can I="write" a="Rubric">*/}
-                    {/*//       <Button variant="primary" onClick={this.onClickCreateRubric}>Create rubric</Button>*/}
-                    {/*//     </Can>*/}
-                    {/*//   </div>*/}
-                    {/*// }*/}
                   </Card.Body>
                 </Card>
               </div>

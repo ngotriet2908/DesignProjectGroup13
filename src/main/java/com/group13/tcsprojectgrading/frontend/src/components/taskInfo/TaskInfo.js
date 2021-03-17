@@ -75,7 +75,16 @@ class TaskInfo extends Component {
           <div className={styles.header}>
             <h2>{this.state.task.name}</h2>
             <Button variant="primary" className={styles.gradingButton}>
-              <Link className={styles.plainLink} to={{pathname: URL_PREFIX + `/courses/${this.state.course.id}/projects/${this.state.project.id}/submissions/${this.state.submission.id}/grading`, submission: this.state.submission}}>
+              <Link
+                className={styles.plainLink}
+                to={
+                  {
+                    pathname: URL_PREFIX + `/courses/${this.state.course.id}/projects/${this.state.project.id}/submissions/${this.state.task.id}/grading`,
+                    data: {
+                      "submission": this.state.task,
+                      "submissionCanvas": this.state.submission
+                    }
+                  }}>
                 Grade
               </Link>
             </Button>

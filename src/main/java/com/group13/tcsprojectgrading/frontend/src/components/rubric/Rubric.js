@@ -65,8 +65,8 @@ class Rubric extends Component {
       .then(data => {
         console.log(data);
 
-        this.props.saveRubric(data.rubric);
-        this.props.setSelectedElement(data.rubric.id);
+        this.props.saveRubric(data);
+        this.props.setSelectedElement(data.id);
 
         this.setState({
           isLoaded: true
@@ -99,13 +99,6 @@ class Rubric extends Component {
         </div>
 
         <div className={styles.editor}>
-          <Breadcrumbs>
-            <Breadcrumbs.Item onClick={
-              () => store.dispatch(push(URL_PREFIX + "/courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId))
-            }>
-              <IoReturnDownBackOutline/> Return to project</Breadcrumbs.Item>
-          </Breadcrumbs>
-
           {this.props.isEditing ?
             <RubricEditor/>
             :

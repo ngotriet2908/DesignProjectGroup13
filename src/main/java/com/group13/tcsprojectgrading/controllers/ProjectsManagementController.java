@@ -128,15 +128,6 @@ public class ProjectsManagementController {
             validSubmissions.add(submission);
         }
 
-        List<Submission> submissions = submissionService.findSubmissionWithProject(project);
-        for(Submission submission: submissions) {
-            if (!validSubmissionId.contains(submission.getId())) {
-                submissionService.deleteSubmission(submission);
-            }
-        }
-        for(Submission submission: validSubmissions) {
-            submissionService.addNewSubmission(submission);
-        }
         //sync submissions <-> canvas submissions
 
         List<Grader> graders = graderService.getGraderFromProject(project);
@@ -153,21 +144,19 @@ public class ProjectsManagementController {
             gradersArray.add(formatNode);
         }
 
-//        List<Task> tasks = taskService.getTasksFromId(project);
         List<Submission> submissions = submissionService.findSubmissionWithProject(project);
         for(Submission submission: submissions) {
             if (!validSubmissionId.contains(submission.getId())) {
                 submissionService.deleteSubmission(submission);
-                gradingService.deleteAssessment(projectId, submission.getId());
             }
         }
 
         for(Submission submission: validSubmissions) {
             submissionService.addNewSubmission(submission);
-            gradingService.createAssessment(new SubmissionAssessment(projectId, submission.getId()));
         }
 
         submissions = submissionService.findSubmissionWithProject(project);
+
         for(Submission submission: submissions) {
             ObjectNode taskNode = objectMapper.createObjectNode();
             taskNode.put("id", submission.getId());
@@ -317,7 +306,7 @@ public class ProjectsManagementController {
             if (grader == null) return null;
             submission.setGrader(grader);
         } else {
-            System.out.println("notAssigned");
+//            System.out.println("notAssigned");
             submission.setGrader(null);
         }
         submissionService.addNewSubmission(submission);
@@ -372,7 +361,7 @@ public class ProjectsManagementController {
 
         int notAssignNum = object.get("submissions").asInt();
         if (notAssignNum > notAssigned.size()) {
-            System.out.println("different sync");
+//            System.out.println("different sync");
             return null;
         }
         ObjectMapper objectMapper = new ObjectMapper();
@@ -401,13 +390,13 @@ public class ProjectsManagementController {
             int num = amountOfTasks[i];
             for(int j = 0; j < num; j++) {
                 if (notAssigned.size() == 0) {
-                    System.out.println("something is wrong, not assigned is overflow");
+//                    System.out.println("something is wrong, not assigned is overflow");
                     break;
                 }
                 Submission submission = notAssigned.remove(0);
                 Grader grader1 = graderService.getGraderFromGraderId(grader.get("id").asText(), project);
                 if (grader1 == null) {
-                    System.out.println("Grader not found");
+//                    System.out.println("Grader not found");
                     return null;
                 }
                 submission.setGrader(grader1);

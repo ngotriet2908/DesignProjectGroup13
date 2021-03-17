@@ -4,6 +4,8 @@ import com.group13.tcsprojectgrading.models.Project;
 import com.group13.tcsprojectgrading.models.Submission;
 import com.group13.tcsprojectgrading.models.SubmissionId;
 import com.group13.tcsprojectgrading.repositories.SubmissionRepository;
+import com.group13.tcsprojectgrading.repositories.grading.GradingRepository;
+import com.group13.tcsprojectgrading.services.grading.GradingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,19 +14,27 @@ import java.util.List;
 @Service
 public class SubmissionService {
     private final SubmissionRepository repository;
+    private final GradingService gradingService;
 
     @Autowired
-    public SubmissionService(SubmissionRepository repository) {
+    public SubmissionService(SubmissionRepository repository, GradingService gradingService) {
         this.repository = repository;
+        this.gradingService = gradingService;
     }
 
     public Submission addNewSubmission(Submission submission) {
-        repository.findById(
+        Submission currentSubmission = repository.findById(
                 new SubmissionId(
                         submission.getId(),
                         submission.getProject().getProjectCompositeKey()
                 )
-        ).ifPresent(current_Submission -> submission.setGrader(current_Submission.getGrader()));
+        ).orElse(null);
+
+        if (currentSubmission != null) {
+            submission.setGrader(currentSubmission.getGrader());
+        }
+
+        gradingService.saveAssessment(submission.getProject().getProjectId(), submission.getId());
         return repository.save(submission);
     }
 
@@ -33,6 +43,7 @@ public class SubmissionService {
     }
 
     public void deleteSubmission(Submission submission) {
+        gradingService.deleteAssessment(submission.getProject().getProjectId(), submission.getId());
         repository.delete(submission);
     }
 

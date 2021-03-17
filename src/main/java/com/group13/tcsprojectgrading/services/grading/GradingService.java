@@ -14,11 +14,16 @@ public class GradingService {
         this.repository = repository;
     }
 
-    public SubmissionAssessment getAssessmentByProjectIdAndId(String projectId, String userId) {
-        return repository.getByProjectIdAndUserId(projectId, userId);
+    public SubmissionAssessment getAssessmentByProjectIdAndUserId(String projectId, String userId) {
+        return repository.getById(new SubmissionAssessment.SubmissionAssessmentKey(projectId, userId));
     }
 
-    public SubmissionAssessment createAssessment(SubmissionAssessment assessment) {
+    public SubmissionAssessment saveAssessment(String projectId, String userId) {
+        return repository.save(new SubmissionAssessment(new SubmissionAssessment.SubmissionAssessmentKey(projectId, userId))
+        );
+    }
+
+    public SubmissionAssessment saveAssessment(SubmissionAssessment assessment) {
         return repository.save(assessment);
     }
 
@@ -27,7 +32,7 @@ public class GradingService {
     }
 
     public void deleteAssessment(String projectId, String userId) {
-        repository.deleteByProjectIdAndUserId(projectId, userId);
+        repository.deleteById(new SubmissionAssessment.SubmissionAssessmentKey(projectId, userId));
     }
 }
 
