@@ -59,7 +59,7 @@ class SubmissionInfo extends Component {
               {this.state.project.name}
             </Breadcrumb.Item>
             <Breadcrumb.Item
-              onClick={() => store.dispatch(push(`${URL_PREFIX}/courses/${this.state.course.id}/projects/${this.state.project.id}/tasks`))}>
+              onClick={() => store.dispatch(push(`${URL_PREFIX}/courses/${this.state.course.id}/projects/${this.state.project.id}/submissions`))}>
               Submissions
             </Breadcrumb.Item>
             <Breadcrumb.Item active>
@@ -74,9 +74,9 @@ class SubmissionInfo extends Component {
                 className={styles.plainLink}
                 to={
                   {
-                    pathname: URL_PREFIX + `/courses/${this.state.course.id}/projects/${this.state.project.id}/submissions/${this.state.task.id}/grading`,
+                    pathname: URL_PREFIX + `/courses/${this.state.course.id}/projects/${this.state.project.id}/submissions/${this.state.submission.id}/grading`,
                     data: {
-                      "submission": this.state.task,
+                      "submission": this.state.submission,
                       "submissionCanvas": this.state.submission
                     }
                   }}>

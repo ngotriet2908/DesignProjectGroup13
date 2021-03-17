@@ -15,7 +15,8 @@ public enum PrivilegeEnum {
     STUDENT_PERSONAL_VIEW("studentView_view"),
 
     GRADING_WRITE_ALL("Grading_write_all"),
-    GRADING_WRITE_SINGLE("Grading_write_assigned")
+    GRADING_WRITE_SINGLE("Grading_write_assigned"),
+    GRADING_READ("Grading_read")
 
     ;
 
