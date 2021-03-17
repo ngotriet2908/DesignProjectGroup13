@@ -39,23 +39,20 @@ public class SubmissionController {
         this.graderService = graderService;
     }
 
-    @GetMapping(value = "")
-    protected JsonNode getSubmissions(@PathVariable String courseId, @PathVariable String projectId, Principal principal) throws JsonProcessingException {
-        String projectResponse = this.canvasApi.getCanvasCoursesApi().getCourseProject(courseId, projectId);
-        String courseString = this.canvasApi.getCanvasCoursesApi().getUserCourse(courseId);
-        String userString = this.canvasApi.getCanvasUsersApi().getAccountWithId(principal.getName());
-
-        ObjectMapper objectMapper = new ObjectMapper();
+    @GetMapping(value = "/syncCanvas")
+    protected void syncWithCanvas(@PathVariable String courseId,
+                                      @PathVariable String projectId,
+                                      Principal principal) throws JsonProcessingException {
 
         Project project = projectService.getProjectById(courseId, projectId);
         if (project == null) {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "entity not found"
+                    HttpStatus.NOT_FOUND, "project not found"
             );
         }
 
-        //sync submissions <-> canvas submissions
-
+        String projectResponse = this.canvasApi.getCanvasCoursesApi().getCourseProject(courseId, projectId);
+        ObjectMapper objectMapper = new ObjectMapper();
         List<Grader> graders = graderService.getGraderFromProject(project);
         List<String> submissionsString = this.canvasApi.getCanvasCoursesApi().getSubmissionsInfo(courseId, Long.parseLong(projectId));
         List<String> studentsString = this.canvasApi.getCanvasCoursesApi().getCourseStudents(courseId);
@@ -123,9 +120,28 @@ public class SubmissionController {
             submissionService.addNewSubmission(submission);
         }
 
+    }
+
+    @GetMapping(value = "")
+    protected JsonNode getSubmissions(@PathVariable String courseId, @PathVariable String projectId, Principal principal) throws JsonProcessingException {
+        String projectResponse = this.canvasApi.getCanvasCoursesApi().getCourseProject(courseId, projectId);
+        String courseString = this.canvasApi.getCanvasCoursesApi().getUserCourse(courseId);
+        String userString = this.canvasApi.getCanvasUsersApi().getAccountWithId(principal.getName());
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        Project project = projectService.getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "entity not found"
+            );
+        }
+
         //sync submissions <-> canvas submissions
 
-        submissions =  submissionService.findSubmissionWithProject(project);
+        //sync submissions <-> canvas submissions
+
+        List<Submission> submissions =  submissionService.findSubmissionWithProject(project);
         ArrayNode arrayNode = objectMapper.createArrayNode();
         ObjectNode resultNode = objectMapper.createObjectNode();
 
@@ -149,7 +165,13 @@ public class SubmissionController {
             node.put("stringId", String.format("%s/%s", (submission.getGroupId() != null)? submission.getGroupId():"individual", submission.getId()));
             node.put("id", submission.getId());
             node.put("isGroup", (submission.getGroupId() != null));
-            node.put("name", submission.getName());
+//            node.put("name", submission.getName());
+            // TODO delete this shit
+            Random random = new Random();
+            String stupidName = (random.nextInt(3) == 2)? "Ömer Şakar " + submission.getName(): submission.getName();
+            node.put("name", stupidName);
+            // TODO delete this shit
+
             node.put("progress", (int) (Math.random() * 100));
             node.put("submittedAt", submissionNode.get("submitted_at").asText());
             node.put("attempt", submissionNode.get("attempt").asText());
@@ -199,13 +221,19 @@ public class SubmissionController {
         }
 
         String submissionResponse = this.canvasApi.getCanvasCoursesApi().getSubmission(courseId, projectId, submission.getId());
-        resultNode.set("submissionCanvas", objectMapper.readTree(submissionResponse));
+        JsonNode submissionCanvas = objectMapper.readTree(submissionResponse);
 
         ObjectNode node = objectMapper.createObjectNode();
         node.put("stringId", String.format("%s/%s", (submission.getGroupId() != null)? submission.getGroupId():"individual", submission.getId()));
         node.put("id", submission.getId());
         node.put("isGroup", (submission.getGroupId() != null));
+        node.set("workflow_state", submissionCanvas.get("workflow_state"));
+        node.set("attempt", submissionCanvas.get("attempt"));
+        node.set("submitted_at", submissionCanvas.get("submitted_at"));
+        node.set("attachments", submissionCanvas.get("attachments"));
+        node.set("submission_comments", submissionCanvas.get("submission_comments"));
         node.put("name", submission.getName());
+
         node.put("progress", (int) (Math.random() * 100));
 
         if (submission.getGrader() != null) {
@@ -217,7 +245,7 @@ public class SubmissionController {
         }
 
         if (submission.getGroupId() != null) {
-            ArrayNode memberships = groupPages(objectMapper, this.canvasApi.getCanvasCoursesApi().getGroupUsers(submission.getId()));
+            ArrayNode memberships = groupPages(objectMapper, this.canvasApi.getCanvasCoursesApi().getGroupUsers(submission.getGroupId()));
             node.set("members", memberships);
         }
         resultNode.set("submission", node);

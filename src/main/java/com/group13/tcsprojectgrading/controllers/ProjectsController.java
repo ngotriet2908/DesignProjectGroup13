@@ -6,10 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
-import com.group13.tcsprojectgrading.models.Activity;
-import com.group13.tcsprojectgrading.models.Grader;
-import com.group13.tcsprojectgrading.models.Project;
-import com.group13.tcsprojectgrading.models.RoleEnum;
+import com.group13.tcsprojectgrading.models.*;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.services.*;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
@@ -108,10 +105,32 @@ public class ProjectsController {
             grader = graderService.getGraderFromGraderId(userJson.get("id").asText(), project);
         }
 
-        if (grader == null) {
+
+        if (grader == null && !roleEnum.equals(RoleEnum.STUDENT)) {
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED, "Grader not found"
             );
+        } else if (roleEnum.equals(RoleEnum.STUDENT)) {
+
+            ObjectNode graderNode = objectMapper.createObjectNode();
+            ArrayNode privilegesNode = objectMapper.createArrayNode();
+            List<Privilege> privileges = projectRoleService.findPrivilegesByProjectAndRoleEnum(project, RoleEnum.STUDENT);
+            for (Privilege privilege: privileges) {
+                ObjectNode privilegeNode = objectMapper.createObjectNode();
+                privilegeNode.put("name", privilege.getName());
+                privilegesNode.add(privilegeNode);
+            }
+            graderNode.set("privileges", privilegesNode);
+
+            ObjectNode resultJson = objectMapper.createObjectNode();
+            resultJson.set("course", courseJson);
+            resultJson.set("project", projectJson);
+            resultJson.set("grader", graderNode);
+            if (projectResponse == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            } else {
+                return new ResponseEntity<>(resultJson, HttpStatus.OK);
+            }
         }
 
         JsonNode graderNode = grader.getGraderJson();

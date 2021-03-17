@@ -28,6 +28,7 @@ class GraderManagement extends Component {
       gradersFilterString: "",
       hideSearch: true,
       isLoading: true,
+      syncing: false,
 
       //return tasks modal
       modalGraderShow: false,
@@ -89,6 +90,22 @@ class GraderManagement extends Component {
     // })
   }
 
+  syncHandler = () => {
+    this.setState({
+      syncing: true
+    })
+
+    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/syncCanvas`)
+      .then(response => {
+        if (response.status === 200) {
+          this.projectManagementHandler()
+        }
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
+  }
+
   hasTasks = (graderId) => {
     let i;
     for(i = 0; i < this.state.graders.length; i++) {
@@ -110,7 +127,8 @@ class GraderManagement extends Component {
         this.setState({
           graders: data.graders,
           notAssigned: data.notAssigned,
-          isLoading: false
+          isLoading: false,
+          syncing: false,
         })
       })
       .catch(error => {
@@ -500,6 +518,18 @@ class GraderManagement extends Component {
                 variant="primary"
                 onClick={null}>
               sort
+              </Button>
+              <Button className={styles.manageTaToolbarButton}
+                      variant="primary"
+                      onClick={this.syncHandler}>
+                {(!this.state.syncing)? "Sync with Canvas":
+                  <Spinner
+                    as="span"
+                    animation="grow"
+                    size="sm"
+                    role="status"
+                    aria-hidden="true"/>
+                }
               </Button>
             </div>
 
