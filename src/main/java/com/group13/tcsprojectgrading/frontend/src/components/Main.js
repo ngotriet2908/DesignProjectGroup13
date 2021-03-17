@@ -1,5 +1,4 @@
 import React from 'react';
-import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 
 import {URL_PREFIX} from "../services/config";
 import {request} from "../services/request";

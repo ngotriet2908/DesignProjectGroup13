@@ -19,6 +19,11 @@ import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 import {setCurrentLocation} from "../../redux/navigation/actions";
 
 import {Can, ability, updateAbility} from "../permissions/ProjectAbility";
+import Breadcrumbs from "../helpers/Breadcrumbs";
+import store from "../../redux/store";
+import {push} from "connected-react-router";
+import {URL_PREFIX} from "../../services/config";
+import {IoReturnDownBackOutline} from "react-icons/io5";
 
 
 class Rubric extends Component {
@@ -60,8 +65,8 @@ class Rubric extends Component {
       .then(data => {
         console.log(data);
 
-        this.props.saveRubric(data.rubric);
-        this.props.setSelectedElement(data.rubric.id);
+        this.props.saveRubric(data);
+        this.props.setSelectedElement(data.id);
 
         this.setState({
           isLoaded: true

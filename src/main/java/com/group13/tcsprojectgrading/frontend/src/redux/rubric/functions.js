@@ -117,35 +117,31 @@ export function changeGrade(rubric, id, newGrade) {
 }
 
 export function createAssessment(rubric) {
-  // let assessment = [];
-  // flattenCriteria(rubric, assessment);
-  // return assessment;
-  let assessment = {};
-  flattenCriteria(rubric, assessment);
-  return assessment;
+  let grades = {}
+  flattenCriteria(rubric, grades);
+  return grades;
 }
 
-export function flattenCriteria(rubric, resultsDictionary) {
-  return _flattenCriteria(rubric.children, resultsDictionary)
+export function flattenCriteria(rubric, results) {
+  return _flattenCriteria(rubric.children, results)
 }
 
-export function _flattenCriteria(where, resultsDictionary) {
+export function _flattenCriteria(where, results) {
   if(where instanceof Array) {
     for(let i = 0; i < where.length; i++) {
-      _flattenCriteria(where[i], resultsDictionary);
+      _flattenCriteria(where[i], results);
     }
   }
   else {
     if (isCriterion(where.content.type)) {
-      resultsDictionary[where.content.id] = {
-        // criterionId: where.content.id,
+      results[where.content.id] = {
         grade: 0,
-        comment: ""
+        comment: "",
       };
     }
 
     if (where.hasOwnProperty('children')) {
-      _flattenCriteria(where.children, resultsDictionary);
+      _flattenCriteria(where.children, results);
     }
   }
 }

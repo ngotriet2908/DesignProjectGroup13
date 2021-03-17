@@ -30,16 +30,7 @@ class RubricOutlineElement extends Component {
               <div className={styles.outlineElementLeft}>
                 <div className={[styles.outlineElementIcon, !this.props.collapsed && styles.outlineElementIconRotated].join(" ")}>
                   {isBlock(this.props.data.type) ?
-                  // (this.props.collapsed ?
-                  //   <FaChevronRight onClick={this.props.onClickBlockCollapse}/>
-                  //   :
-                  //   <FaChevronDown onClick={this.props.onClickBlockCollapse}/>
-                  // )
-                    
-                    // (this.props.collapsed ?
                     <FaChevronRight onClick={this.props.onClickBlockCollapse}/>
-
-
                     :
                     <FaHandPointRight/>
                   }

@@ -21,8 +21,8 @@ class GradingSideBar extends Component {
     return (
       <div className={styles.gradingContainer}>
         <RubricViewer/>
-        <GradeEditor/>
-        <GradeViewer/>
+        <GradeEditor match={this.props.match}/>
+        <GradeViewer match={this.props.match}/>
       </div>
     )
   }

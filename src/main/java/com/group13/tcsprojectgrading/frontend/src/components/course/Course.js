@@ -26,7 +26,7 @@ import SectionContainer from "../home/SectionContainer";
 import globalStyles from '../helpers/global.module.css';
 import {IoFileTrayOutline} from "react-icons/io5";
 
-import course from "../../redux/course/reducers/course";
+// import course from "../../redux/course/reducers/course";
 
 class Course extends Component {
   constructor (props) {
@@ -137,30 +137,36 @@ class Course extends Component {
             data={this.state.projects}
             emptyText={"No projects selected in this course. Click on the pencil button to select course projects."}
             Component={ProjectCard}
-            icon={<IoPencil size={28} onClick={this.openModal}/>}
+            icon={
+              <Can I="write" a="Projects">
+                <IoPencil size={28} onClick={this.openModal}/>
+              </Can>
+            }
             EmptyIcon={IoFileTrayOutline}
           />
 
-          <div className={globalStyles.sectionContainer}>
-            <div className={[globalStyles.sectionTitle, globalStyles.sectionTitleWithButton].join(" ")}>
-              <h3 className={globalStyles.sectionTitleH}>Course statistics</h3>
+          <Can I="read" a="Statistic">
+            <div className={globalStyles.sectionContainer}>
+              <div className={[globalStyles.sectionTitle, globalStyles.sectionTitleWithButton].join(" ")}>
+                <h3 className={globalStyles.sectionTitleH}>Course statistics</h3>
+              </div>
+
+              <ul className={styles.ul}>
+                {/*{this.state.stats.map(stat => {*/}
+                {/*  return (*/}
+                {/*    <li className={styles.li} key={stat.title}>*/}
+                {/*      <Statistic title ={stat.title}*/}
+                {/*        type={stat.type}*/}
+                {/*        data={stat.data}*/}
+                {/*        unit={stat.unit}/>*/}
+                {/*    </li>*/}
+                {/*  );*/}
+                {/*})}*/}
+
+                <StatsCard data={this.state.stats}/>
+              </ul>
             </div>
-
-            <ul className={styles.ul}>
-              {/*{this.state.stats.map(stat => {*/}
-              {/*  return (*/}
-              {/*    <li className={styles.li} key={stat.title}>*/}
-              {/*      <Statistic title ={stat.title}*/}
-              {/*        type={stat.type}*/}
-              {/*        data={stat.data}*/}
-              {/*        unit={stat.unit}/>*/}
-              {/*    </li>*/}
-              {/*  );*/}
-              {/*})}*/}
-
-              <StatsCard data={this.state.stats}/>
-            </ul>
-          </div>
+          </Can>
 
           <EditProjectsModal
             show={this.state.showModal}

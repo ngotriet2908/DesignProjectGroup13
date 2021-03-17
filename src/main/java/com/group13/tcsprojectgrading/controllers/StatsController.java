@@ -34,7 +34,7 @@ public class StatsController {
     @ResponseBody
     protected ResponseEntity<ArrayNode> getCount(@PathVariable String courseId) throws JsonProcessingException {
         List<String> students = this.canvasApi.getCanvasCoursesApi().getCourseStudents(courseId);
-        System.out.println(students);
+//        System.out.println(students);
         int studentCount = 0;
         for(String studentsPage : students) {
             ArrayNode arrayNode = mapper.readValue(studentsPage, ArrayNode.class);

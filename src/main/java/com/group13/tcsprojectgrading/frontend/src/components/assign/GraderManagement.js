@@ -15,8 +15,8 @@ import {URL_PREFIX} from "../../services/config";
 import {push} from "connected-react-router";
 import BulkAssignModal from "./BulkAssignModal";
 
-class GraderManagement extends Component {
 
+class GraderManagement extends Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -28,6 +28,7 @@ class GraderManagement extends Component {
       gradersFilterString: "",
       hideSearch: true,
       isLoading: true,
+      syncing: false,
 
       //return tasks modal
       modalGraderShow: false,
@@ -89,6 +90,22 @@ class GraderManagement extends Component {
     // })
   }
 
+  syncHandler = () => {
+    this.setState({
+      syncing: true
+    })
+
+    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/syncCanvas`)
+      .then(response => {
+        if (response.status === 200) {
+          this.projectManagementHandler()
+        }
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
+  }
+
   hasTasks = (graderId) => {
     let i;
     for(i = 0; i < this.state.graders.length; i++) {
@@ -110,7 +127,8 @@ class GraderManagement extends Component {
         this.setState({
           graders: data.graders,
           notAssigned: data.notAssigned,
-          isLoading: false
+          isLoading: false,
+          syncing: false,
         })
       })
       .catch(error => {
@@ -186,7 +204,7 @@ class GraderManagement extends Component {
   }
 
   handleReturnTask = (grader, task) => {
-    request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management/assign/${task.id}/${task.isGroup}/notAssigned`)
+    request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management/assign/${task.id}/notAssigned`)
       .then(response => {
         return response.json();
       })
@@ -203,7 +221,7 @@ class GraderManagement extends Component {
   }
 
   handleAssignTask = (fromGrader, isFromNotAssigned,toGrader, task) => {
-    request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management/assign/${task.id}/${task.isGroup}/${toGrader.id}`)
+    request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management/assign/${task.id}/${toGrader.id}`)
       .then(response => {
         return response.json();
       })
@@ -463,25 +481,25 @@ class GraderManagement extends Component {
           <span className="sr-only">Loading...</span>
         </Spinner>
         :
-      <div className={styles.graderManagement}>
-        {(!this.state.alertShow)? null :
-          <Alert variant="success" onClose={() => {this.setState({alertShow:false})}} dismissible>
-            <p>
-              {this.state.alertBody}
-            </p>
-          </Alert>}
-        <Breadcrumb>
-          <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumb.Item>
-          <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id ))}>
-            {this.state.course.name}
-          </Breadcrumb.Item>
-          <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id + "/projects/"+this.state.project.id))}>
-            {this.state.project.name}
-          </Breadcrumb.Item>
-          <Breadcrumb.Item active>
+        <div className={styles.graderManagement}>
+          {(!this.state.alertShow)? null :
+            <Alert variant="success" onClose={() => {this.setState({alertShow:false})}} dismissible>
+              <p>
+                {this.state.alertBody}
+              </p>
+            </Alert>}
+          <Breadcrumb>
+            <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumb.Item>
+            <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id ))}>
+              {this.state.course.name}
+            </Breadcrumb.Item>
+            <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id + "/projects/"+this.state.project.id))}>
+              {this.state.project.name}
+            </Breadcrumb.Item>
+            <Breadcrumb.Item active>
             Manage Graders
-          </Breadcrumb.Item>
-        </Breadcrumb>
+            </Breadcrumb.Item>
+          </Breadcrumb>
 
           <Card border="secondary" className={styles.gradersCardContainer}>
             <div className={styles.manageTaToolbar}>
@@ -500,6 +518,18 @@ class GraderManagement extends Component {
                 variant="primary"
                 onClick={null}>
               sort
+              </Button>
+              <Button className={styles.manageTaToolbarButton}
+                      variant="primary"
+                      onClick={this.syncHandler}>
+                {(!this.state.syncing)? "Sync with Canvas":
+                  <Spinner
+                    as="span"
+                    animation="grow"
+                    size="sm"
+                    role="status"
+                    aria-hidden="true"/>
+                }
               </Button>
             </div>
 

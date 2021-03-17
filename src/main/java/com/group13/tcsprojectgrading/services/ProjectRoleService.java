@@ -12,11 +12,13 @@ import java.util.List;
 public class ProjectRoleService {
     private final ProjectRoleRepository repository;
     private final PrivilegeService privilegeService;
+    private final RoleService roleService;
 
     @Autowired
-    public ProjectRoleService(ProjectRoleRepository repository, PrivilegeService privilegeService) {
+    public ProjectRoleService(ProjectRoleRepository repository, PrivilegeService privilegeService, RoleService roleService) {
         this.repository = repository;
         this.privilegeService = privilegeService;
+        this.roleService = roleService;
     }
 
     public ProjectRole addNewRoleToProject(Project project, Role role) {
@@ -33,5 +35,16 @@ public class ProjectRoleService {
 
     public ProjectRole findByProjectAndRole(Project project, Role role) {
         return repository.findById(new ProjectRoleId(role.getId(), project.getProjectCompositeKey())).orElse(null);
+    }
+
+    public List<Privilege> findPrivilegesByProjectAndRoleEnum(Project project, RoleEnum roleName) {
+
+        Role role = roleService.findRoleByName(roleName.getName());
+        if (role == null) return new ArrayList<>();
+        ProjectRole projectRole = repository.findById(new ProjectRoleId(role.getId(), project.getProjectCompositeKey())).orElse(null);
+        if (projectRole != null) {
+            return (List<Privilege>) projectRole.getPrivileges();
+        }
+        return new ArrayList<>();
     }
 }

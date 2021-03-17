@@ -10,38 +10,29 @@ import {Spinner} from "react-bootstrap";
 
 import globalStyles from '../helpers/global.module.css';
 import {createAssessment} from "../../redux/rubric/functions";
-import {saveTempAssessment} from "../../redux/grading/actions";
+import {saveAssessment, saveTempAssessment} from "../../redux/grading/actions";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
+import {ability, updateAbility} from "../permissions/ProjectAbility";
+import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
+import {setCurrentLocation} from "../../redux/navigation/actions";
 
 
 class Grading extends Component {
   constructor (props) {
     super(props)
 
-    this.rubric = rubric;
-
     this.state = {
+      data: this.props.location.data,
       isLoaded: false,
     }
 
     // TODO: if submission is undefined, reload it from the server
-    console.log(this.props.location.submission);
+    // console.log(this.props.location.data);
   }
 
   componentDidMount() {
-    this.props.setSelectedElement(this.rubric.id);
-    this.props.saveRubric(this.rubric);
-
-    // this.getCurrentAssessment();
-
-    this.createGradingSheet();
-
-    this.setState({
-      isLoaded: true
-    });
-
-
+    this.fetchGradingData();
   }
 
   getCurrentAssessment = () => {
@@ -50,7 +41,28 @@ class Grading extends Component {
 
         if (response.status !== 404) {
           let assessment = await response.json();
-          console.log(assessment);
+          // initialise (empty) state for input fields
+          this.createGradingSheet();
+
+          // load grading data
+          this.props.saveAssessment(assessment);
+
+          // if submission is missing, fetch it
+          if (!this.props.location.data) {
+            request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}`)
+              .then(async(response) => {
+                let submission = await response.json();
+
+                this.setState({
+                  data: submission,
+                  isLoaded: true
+                });
+              })
+          } else {
+            this.setState({
+              isLoaded: true
+            });
+          }
         }
       })
       .catch(error => {
@@ -58,10 +70,49 @@ class Grading extends Component {
       });
   }
 
-  createGradingSheet = () => {
-    let assessment = createAssessment(this.rubric);
-    this.props.saveTempAssessment(assessment);
+  fetchGradingData = () => {
+    this.props.setCurrentLocation(LOCATIONS.grading);
+
+    // TODO, ignores passed data
+    Promise.all([
+      request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/grading`),
+      request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}`),
+      request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/rubric`)
+    ])
+      .then(async([res1, res2, res3]) => {
+        const assessment = await res1.json();
+        const submission = await res2.json();
+        const rubric = await res3.json();
+
+        // console.log(assessment);
+        // console.log(submission);
+        // console.log(rubric);
+
+        // initialise (empty) state for input fields
+        this.props.saveTempAssessment(createAssessment(rubric));
+
+        // load grading data
+        this.props.saveAssessment(assessment);
+
+        // load rubric
+        this.props.setSelectedElement(rubric.id);
+        this.props.saveRubric(rubric);
+
+        // load submission
+        this.setState({
+          data: submission,
+          isLoaded: true,
+        });
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
   }
+
+  // createGradingSheet = () => {
+  //   let assessment = createAssessment(this.rubric);
+  //   this.props.saveTempAssessment(assessment);
+  // }
 
   render () {
     if (!this.state.isLoaded) {
@@ -76,10 +127,10 @@ class Grading extends Component {
 
     return (
       <>
-        <ControlBar/>
+        <ControlBar data={this.state.data}/>
         <div className={styles.container}>
           <FileViewer/>
-          <SideBar/>
+          <SideBar match={this.props.match}/>
         </div>
       </>
     )
@@ -95,7 +146,9 @@ const mapStateToProps = state => {
 const actionCreators = {
   setSelectedElement,
   saveRubric,
-  saveTempAssessment
+  saveTempAssessment,
+  saveAssessment,
+  setCurrentLocation
 }
 
 export default connect(mapStateToProps, actionCreators)(Grading)

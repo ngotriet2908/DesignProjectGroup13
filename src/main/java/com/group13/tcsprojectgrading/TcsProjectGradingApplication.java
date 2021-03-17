@@ -44,22 +44,46 @@ public class TcsProjectGradingApplication {
     public CommandLineRunner demoData(RoleService roleService, PrivilegeService privilegeService) {
         return args -> {
             Privilege mangeGradersOpen = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.MANAGE_GRADERS_OPEN.toString());
+
             Privilege rubricRead = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.RUBRIC_READ.toString());
             Privilege rubricWrite = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.RUBRIC_WRITE.toString());
 
+            Privilege statsRead = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.STATISTIC_READ.toString());
+            Privilege statsWrite = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.STATISTIC_WRITE.toString());
+
+            Privilege studentView = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.STUDENT_PERSONAL_VIEW.toString());
+
+            Privilege adminToolBarView = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.ADMIN_TOOLBAR_VIEW.toString());
+            Privilege todoListView = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.TODO_LIST_VIEW.toString());
+
             Role teacherRole = roleService.addRoleIfNotExist(
                     RoleEnum.TEACHER.toString(),
-                    List.of(mangeGradersOpen,
+                    List.of(
+//                            studentView
+                            mangeGradersOpen,
                             rubricRead,
-                            rubricWrite
+                            rubricWrite,
+                            statsRead,
+                            adminToolBarView,
+                            todoListView,
+                            statsWrite
                             )
             );
 
             Role taRole = roleService.addRoleIfNotExist(
                     RoleEnum.TA.toString(),
                     List.of(mangeGradersOpen,
-                            rubricRead
+                            rubricRead,
+                            statsRead,
+                            adminToolBarView,
+                            todoListView
                             )
+            );
+
+            Role studentRole = roleService.addRoleIfNotExist(
+                    RoleEnum.STUDENT.toString(),
+                    List.of(studentView
+                    )
             );
         };
     }

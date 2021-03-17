@@ -95,6 +95,10 @@
     margin: 1rem 0;
 }
 
+.sidebarBodyItemHidden {
+    visibility: hidden;
+}
+
 .sidebarBody .sidebarBodyItem:hover {
     background-color: primaryShade;
     color: white;
@@ -128,6 +132,9 @@
 .sidebarBodyItemRight {
     margin-left: 1rem;
     font-weight: bold;
+
+    white-space: nowrap;
+    flex-wrap: nowrap;
 }
 
 .sidebarHidden .sidebarBodyItem {

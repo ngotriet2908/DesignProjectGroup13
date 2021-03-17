@@ -16,8 +16,12 @@ public class RubricService {
         this.repository = repository;
     }
 
-    public Rubric getRubricByProjectId(String projectId) {
-        return repository.getByProjectId(projectId);
+//    public Rubric getRubricByProjectId(String projectId) {
+//        return repository.getById(projectId);
+//    }
+
+    public Rubric getRubricById(String id) {
+        return repository.getById(id);
     }
 
     public Rubric addNewRubric(Rubric rubric) {
@@ -29,6 +33,7 @@ public class RubricService {
     }
 
     public void deleteRubric(String projectId) {
-        repository.deleteByProjectId(projectId);
+//        repository.deleteByProjectId(projectId);
+        repository.deleteById(projectId);
     }
 }

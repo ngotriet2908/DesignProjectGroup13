@@ -22,6 +22,10 @@ class RubricViewerElement extends Component {
     this.props.setEditingRubric(true);
   }
 
+  downloadRubric = () => {
+    alert("Handle download.")
+  }
+
   render () {
     // rubric's header
     if (!this.props.data.hasOwnProperty("content")) {
@@ -32,6 +36,7 @@ class RubricViewerElement extends Component {
             <Can I="write" a="Rubric">
               <Button variant="secondary" onClick={this.onClickEdit}>Edit</Button>
             </Can>
+            <Button variant="secondary" onClick={this.downloadRubric}>Download</Button>
           </div>
           <RubricViewerElementChildren data={this.props.data}/>
         </div>

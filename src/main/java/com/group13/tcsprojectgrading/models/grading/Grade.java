@@ -3,31 +3,42 @@ package com.group13.tcsprojectgrading.models.grading;
 public class Grade {
     private int grade;
     private String comment;
-    private String criterionId;
     private String userId;
+//    private boolean isActive;
+    private long created;
 
-    public Grade(int grade, String comment, String criterionId, String userId) {
-        this.grade = grade;
-        this.comment = comment;
-        this.criterionId = criterionId;
-        this.userId = userId;
-    }
+//    public Grade(int grade, String comment, String userId, boolean isActive, long created) {
+//        this.grade = grade;
+//        this.comment = comment;
+//        this.userId = userId;
+//        this.isActive = isActive;
+//        this.created = created;
+//    }
 
-    public Grade(int grade, String criterionId, String userId) {
-        this.grade = grade;
-        this.criterionId = criterionId;
-        this.userId = userId;
-    }
+//    public Grade(int grade, String userId, boolean isActive, long created) {
+//        this.grade = grade;
+//        this.userId = userId;
+//        this.isActive = isActive;
+//        this.created = created;
+//    }
 
     public Grade() {
     }
 
-    public String getCriterionId() {
-        return criterionId;
+//    public boolean getIsActive() {
+//        return isActive;
+//    }
+//
+//    public void setIsActive(boolean isActive) {
+//        this.isActive = isActive;
+//    }
+
+    public long getCreated() {
+        return created;
     }
 
-    public void setCriterionId(String criterionId) {
-        this.criterionId = criterionId;
+    public void setCreated(long created) {
+        this.created = created;
     }
 
     public int getGrade() {
@@ -52,5 +63,16 @@ public class Grade {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    @Override
+    public String toString() {
+        return "Grade{" +
+                "grade=" + grade +
+                ", comment='" + comment + '\'' +
+                ", userId='" + userId + '\'' +
+//                ", isActive=" + isActive +
+                ", created=" + created +
+                '}';
     }
 }

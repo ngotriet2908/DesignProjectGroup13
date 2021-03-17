@@ -8,23 +8,25 @@ import {isCriterion} from "../rubric/helpers";
 import Button from "react-bootstrap/Button";
 import {alterGrade, alterTempAssessmentGrade} from "../../redux/grading/actions";
 import {findCriterion} from "../../redux/grading/functions";
+import {request} from "../../services/request";
+import {BASE} from "../../services/endpoints";
+import {IoChevronDownSharp, IoPencilOutline, IoCloseOutline, IoCheckboxOutline} from "react-icons/io5";
+import classnames from 'classnames';
 
 
 class GradeEditor extends Component {
   constructor (props) {
     super(props)
 
-    // this.state = {
-    //   comment: "",
-    //   grade: 0,
-    // }
+    this.state = {
+      open: false
+    }
   }
 
   onChangeComment = (event) => {
     let criterion = findCriterion(this.props.tempAssessment, this.props.selectedElement);
 
     let newGrade = {
-      // criterionId: this.props.selectedElement,
       grade: criterion.grade,
       comment: event.target.value
     }
@@ -36,7 +38,6 @@ class GradeEditor extends Component {
     let criterion = findCriterion(this.props.tempAssessment, this.props.selectedElement);
 
     let newGrade = {
-      // criterionId: this.props.selectedElement,
       grade: event.target.value,
       comment: criterion.comment
     }
@@ -45,21 +46,48 @@ class GradeEditor extends Component {
   }
 
   saveGrade = () => {
-    console.log("Saving grade");
     let criterion = findCriterion(this.props.tempAssessment, this.props.selectedElement);
 
     let newGrade = {
-      user: this.props.user.id,
-      grade: criterion.grade,
-      comment: criterion.comment
+      userId: this.props.user.id,
+      grade: criterion.grade === "" ? 0 : criterion.grade,
+      comment: criterion.comment === "" ? null : criterion.comment,
+      // isActive: true,
+      created: Date.now()
+    }
+
+    let empty = {
+      grade: 0,
+      comment: ""
     }
 
     // send request
-
-
-    this.props.alterGrade(this.props.selectedElement, newGrade);
+    request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/grading/${this.props.selectedElement}`, "PUT",
+      newGrade
+    )
+      .then(() => {
+        this.props.alterTempAssessmentGrade(this.props.selectedElement, empty);
+        this.props.alterGrade(this.props.selectedElement, newGrade);
+      })
+      .catch(error => {
+        console.error(error.message)
+      });
   }
 
+  resetGrade = () => {
+    let empty = {
+      grade: 0,
+      comment: ""
+    }
+
+    this.props.alterTempAssessmentGrade(this.props.selectedElement, empty);
+  }
+
+  toggleGradeEditor = () => {
+    this.setState(prevState => ({
+      open: !prevState.open
+    }))
+  }
 
   render () {
     let element = findById(this.props.rubric, this.props.selectedElement)
@@ -67,28 +95,47 @@ class GradeEditor extends Component {
 
     return (
       <div className={styles.gradeEditorContainer}>
-        {(element.content && isCriterion(element.content.type)) &&
+        {(element.content && criterion && isCriterion(element.content.type)) &&
         <Card className={styles.gradeEditorCard}>
           <Card.Body>
-            {/*{(element.content && isCriterion(element.content.type)) ?*/}
-            <div>
+            {(!this.props.assessment.grades[this.props.selectedElement]) || this.state.open ?
               <div>
-                Grade:
-                <input type="number" value={criterion.grade} onChange={this.onChangeGrade}/>
+                {this.props.assessment.grades[this.props.selectedElement] &&
+                this.props.assessment.grades[this.props.selectedElement].history.length > 0 &&
+                this.state.open &&
+                  <div className={classnames(styles.gradeEditorGradedClose, this.state.open && styles.gradeEditorGradedExpandOpened)} onClick={this.toggleGradeEditor}>
+                    <IoCloseOutline size={24}/>
+                  </div>
+                }
+                <div className={styles.gradeEditorCardItem}>
+                  Grade
+                  <input type="number" value={criterion.grade} onChange={this.onChangeGrade}/>
+                </div>
+                <div className={styles.gradeEditorCardItem}>
+                  Notes (optional)
+                  <input type="text" value={criterion.comment} onChange={this.onChangeComment}/>
+                </div>
+                <div className={styles.gradeEditorCardFooter}>
+                  <Button className={styles.gradeEditorCardButton} variant="linkLightGray"
+                    onClick={this.resetGrade}>Reset</Button>
+                  <Button className={styles.gradeEditorCardButton} variant="lightGreen" onClick={this.saveGrade}>Save
+                    grade</Button>
+                </div>
               </div>
-              <div>
-                Comment:
-                <input type="text" value={criterion.comment} onChange={this.onChangeComment}/>
+              :
+              <div className={styles.gradeEditorGradedContainer}>
+                <div className={styles.gradeEditorGradedIcon}>
+                  <IoCheckboxOutline size={36}/>
+                </div>
+                <div>
+                  Graded! Click on the pencil to show the grading panel if you want to regrade
+                  this part.<IoPencilOutline className={classnames(styles.gradeEditorGradedExpand)} onClick={this.toggleGradeEditor} size={20}/>
+                </div>
+                {/*<div className={classnames(styles.gradeEditorGradedExpand)} onClick={this.toggleGradeEditor}>*/}
+                {/*  <IoChevronDownSharp size={24}/>*/}
+                {/*</div>*/}
               </div>
-              <div>
-                <Button variant="lightGreen" onClick={this.saveGrade}>Save</Button>
-              </div>
-            </div>
-            {/*  :*/}
-            {/*  <div>*/}
-            {/*    select criterion*/}
-            {/*  </div>*/}
-            {/*}*/}
+            }
           </Card.Body>
         </Card>
         }
@@ -102,13 +149,12 @@ const mapStateToProps = state => {
     user: state.user.user,
     selectedElement: state.rubric.selectedElement,
     rubric: state.rubric.rubric,
-    tempAssessment: state.grading.tempAssessment
+    tempAssessment: state.grading.tempAssessment,
+    assessment: state.grading.assessment
   };
 };
 
 const actionCreators = {
-  // setSelectedElement,
-  // saveRubric
   alterGrade,
   alterTempAssessmentGrade
 }

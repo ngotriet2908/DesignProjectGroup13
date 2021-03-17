@@ -15,7 +15,7 @@ class HomeTaskCard extends Component {
   }
 
   onClickSeeMore = () => {
-    store.dispatch(push(`${URL_PREFIX}/${COURSES}/${this.props.data.course.id}/projects/${this.props.data.project.id}/tasks`));
+    store.dispatch(push(`${URL_PREFIX}/${COURSES}/${this.props.data.course.id}/projects/${this.props.data.project.id}/submissions`));
   }
 
   render() {
@@ -25,7 +25,7 @@ class HomeTaskCard extends Component {
           <div className={styles.cardContentContainer}>
             <h5>{this.props.data.project.name}</h5>
             <div>Course: {this.props.data.course.name}</div>
-            <div>Number of tasks: {this.props.data.tasks}</div>
+            <div>Number of tasks: {this.props.data.submissions}</div>
           </div>
           <div className={styles.cardButtonContainer}>
             <div onClick={this.onClickSeeMore}>

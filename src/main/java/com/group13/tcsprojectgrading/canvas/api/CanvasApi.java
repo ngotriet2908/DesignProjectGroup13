@@ -68,13 +68,15 @@ public class CanvasApi {
 //                .bodyToMono(String.class)
 //                .block();
         // TODO: catch errors here and in other request functions (!important)
-            return bodySpec
-                    .retrieve()
+        String result = bodySpec
+                .retrieve()
 //                    .onStatus(status -> status == HttpStatus.UNAUTHORIZED,
 //                            clientResponse -> Mono.error(new CanvasAuthorisationException("Unauthorised 401."))
 //                    )
-                    .bodyToMono(String.class)
-                    .block();
+                .bodyToMono(String.class)
+                .block();
+        System.out.println(result);
+            return result;
     }
 
 
@@ -100,10 +102,10 @@ public class CanvasApi {
                         }
                     }
                     if (next == null) {
-                        System.out.println("next == null");
+//                        System.out.println("next == null");
                         return Mono.empty();
                     }
-                    System.out.println(next);
+//                    System.out.println(next);
                     URI uri = null;
                     try {
                         uri = new URI(next);
@@ -114,7 +116,7 @@ public class CanvasApi {
                 }).flatMap(clientResponse -> Mono.just(clientResponse.getBody())).collectList();
 
         List<String> res = entityMono.block();
-        System.out.println(Arrays.toString(res.toArray()));
+//        System.out.println(Arrays.toString(res.toArray()));
         return res;
     }
 }

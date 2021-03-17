@@ -18,7 +18,7 @@ public class HomeController {
         // check if session is there? (make /app authenticated)
         // check if token is valid?
         // replace call to session in Main.js with redirect to login
-        System.out.println("Call to home.");
+//        System.out.println("Call to home.");
         return "home";
     }
 

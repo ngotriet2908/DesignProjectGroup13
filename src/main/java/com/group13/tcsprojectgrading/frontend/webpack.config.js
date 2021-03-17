@@ -9,9 +9,6 @@ module.exports = {
   output: {
     // where compiled files go
     path: path.resolve(__dirname, '../../../../../resources/static/built'),
-
-    // 127.0.0.1/static/frontend/public/ where files are served from
-    // publicPath: '/static/frontend/',
     filename: 'bundle.js' // the same one we import in home.html
   },
   mode: 'development',
@@ -24,12 +21,10 @@ module.exports = {
         use: ['source-map-loader']
       },
       {
-        // regex test for js and jsx files
         test: /\.(js|jsx|mjs)?$/,
-        // don't look in any node_modules/ or bower_components/ folders
+        // enforce: 'pre',
         exclude: /(node_modules|bower_components)/,
-        // for matching files, use the babel-loader
-        use: {
+        use: [{
           loader: 'babel-loader',
           options: {
             presets: ['@babel/preset-env',
@@ -39,12 +34,10 @@ module.exports = {
               }
             ]
           }
-        }
+        },
+          // 'source-map-loader'
+        ]
       },
-      // {
-      //   test: /plugin\.css$/,
-      //   use: ['style-loader', 'css-loader'],
-      // },
       {
         test: /\.(sass|css|scss)$/,
         // exclude: /node_modules/,

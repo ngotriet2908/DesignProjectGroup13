@@ -1,5 +1,11 @@
-import {ALTER_GRADE, ALTER_TEMP_ASSESSMENT_GRADE, SAVE_TEMP_ASSESSMENT} from "../actionTypes";
-import {alterGrade, alterTempGrade} from "../functions";
+import {
+  ALTER_GRADE,
+  ALTER_TEMP_ASSESSMENT_GRADE,
+  SAVE_ASSESSMENT,
+  SAVE_TEMP_ASSESSMENT,
+  SET_ACTIVE
+} from "../actionTypes";
+import {alterGrade, alterTempGrade, setActive} from "../functions";
 
 const initialState = {
   assessment: {},
@@ -22,14 +28,32 @@ export default function(state = initialState, action) {
       tempAssessment: grades
     };
   }
+  case SAVE_ASSESSMENT: {
+    return {
+      ...state,
+      assessment: action.payload
+    };
+  }
   case ALTER_GRADE: {
-    console.log(state.assessment)
-    const grades = alterGrade(state.assessment, action.payload.criterionId, action.payload.newGrade)
-    console.log(grades)
+    const grades = alterGrade(state.assessment.grades, action.payload.criterionId, action.payload.newGrade)
 
     return {
       ...state,
-      assessment: grades
+      assessment: {
+        ...state.assessment,
+        grades: grades
+      }
+    };
+  }
+  case SET_ACTIVE: {
+    const grades = setActive(state.assessment.grades, action.payload.criterionId, action.payload.key)
+
+    return {
+      ...state,
+      assessment: {
+        ...state.assessment,
+        grades: grades
+      }
     };
   }
   default:
