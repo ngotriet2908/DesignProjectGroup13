@@ -47,7 +47,7 @@ class Rubric extends Component {
         })
         .then(data => {
           if (data.grader !== null && data.grader.privileges !== null) {
-            updateAbility(ability, data.grader.privileges)
+            updateAbility(ability, data.grader.privileges, data.grader)
             this.setState({
               project: data
             })

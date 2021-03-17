@@ -62,7 +62,7 @@ class Project extends Component {
         this.props.saveRubric(project.rubric);
 
         if (project.grader !== null && project.grader.privileges !== null) {
-          updateAbility(ability, project.grader.privileges)
+          updateAbility(ability, project.grader.privileges, project.grader)
         } else {
           console.log("no grader or privileges found")
         }
@@ -249,6 +249,7 @@ class Project extends Component {
             </Can>
           </div>
         </div>
+      </div>
       </div>
     )
   }
