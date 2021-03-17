@@ -8,6 +8,7 @@ import {saveRubric, saveRubricTemp, setEditingRubric} from "../../redux/rubric/a
 import RubricViewerElementGrade from "./RubricViewerElementGrade";
 import RubricViewerElementChildren from "./RubricViewerElementChildren";
 import {Can, ability, updateAbility} from "../permissions/ProjectAbility";
+import {IoPencil, IoCloudDownloadOutline} from "react-icons/io5";
 
 
 class RubricViewerElement extends Component {
@@ -34,9 +35,14 @@ class RubricViewerElement extends Component {
           <div className={styles.viewerHeader}>
             <h2>Rubric</h2>
             <Can I="write" a="Rubric">
-              <Button variant="secondary" onClick={this.onClickEdit}>Edit</Button>
+              <div className={styles.viewerHeaderIcon}>
+                <IoPencil size={28} className={styles.viewerHeaderIconGreen} onClick={this.onClickEdit}/>
+              </div>
             </Can>
-            <Button variant="secondary" onClick={this.downloadRubric}>Download</Button>
+            <div className={styles.viewerHeaderIcon}>
+              <IoCloudDownloadOutline className={styles.viewerHeaderIconOrange} size={28} onClick={this.downloadRubric}/>
+            </div>
+            {/*<Button variant="secondary" onClick={this.downloadRubric}>Download</Button>*/}
           </div>
           <RubricViewerElementChildren data={this.props.data}/>
         </div>

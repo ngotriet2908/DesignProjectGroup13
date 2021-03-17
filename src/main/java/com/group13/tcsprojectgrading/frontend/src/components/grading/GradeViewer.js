@@ -63,8 +63,8 @@ class GradeViewer extends Component {
                       <div>
                         Grade {grade.grade}
                         {grade.comment != null &&
-                          <span> with a note:
-                            <div className={styles.gradeViewerRowExplanation}>{grade.comment}</div>
+                          <span> with a note: {grade.comment}
+                            {/*<div className={styles.gradeViewerRowExplanation}>{grade.comment}</div>*/}
                           </span>
                         }
                       </div>

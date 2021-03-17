@@ -18,6 +18,7 @@ import Button from "react-bootstrap/Button";
 import RubricEditorElementGrade from "./RubricEditorElementGrade";
 import RubricViewerElementChildren from "./RubricViewerElementChildren";
 import RubricViewerElementGrade from "./RubricViewerElementGrade";
+import {IoTrashBinOutline} from "react-icons/io5";
 
 class RubricEditorElement extends Component {
   constructor (props) {
@@ -45,7 +46,10 @@ class RubricEditorElement extends Component {
         <div>
           <div className={styles.viewerHeader}>
             <h2>Rubric</h2>
-            <Button variant="danger" onClick={this.onClickDeleteAll}>Clear</Button>
+            <div className={styles.viewerHeaderIcon}>
+              <IoTrashBinOutline size={28} className={styles.viewerHeaderIconRed} onClick={this.onClickDeleteAll}/>
+            </div>
+            {/*<Button variant="danger" onClick={this.onClickDeleteAll}>Clear</Button>*/}
           </div>
           <RubricEditorElementChildren data={this.props.data}/>
         </div>
@@ -63,7 +67,10 @@ class RubricEditorElement extends Component {
             :
             <h2>Section</h2>
           }
-          <Button variant="danger" onClick={this.onClickDelete}>Delete</Button>
+          <div className={styles.viewerHeaderIcon}>
+            <IoTrashBinOutline size={28} className={styles.viewerHeaderIconRed} onClick={this.onClickDelete}/>
+          </div>
+          {/*<Button variant="danger" onClick={this.onClickDelete}>Delete</Button>*/}
         </div>
 
         <div className={styles.viewerSectionContainer}>

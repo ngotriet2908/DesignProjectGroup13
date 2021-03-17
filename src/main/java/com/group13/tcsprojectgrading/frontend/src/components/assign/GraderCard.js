@@ -60,7 +60,7 @@ class GraderCard extends Component {
 
   render() {
     return (
-      <Card border="secondary" className={styles.graderCard}>
+      <Card className={styles.graderCard}>
         <div className={styles.graderToolBar}>
           <h4 className={styles.graderToolBarText}> {this.props.grader.name} </h4>
           <Button className={styles.graderToolBarButton}

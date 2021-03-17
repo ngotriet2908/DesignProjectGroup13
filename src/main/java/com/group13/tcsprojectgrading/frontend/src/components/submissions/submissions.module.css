@@ -1,13 +1,32 @@
+@value primary, secondary, ternary, quaternary, quinary, ultraLightGray, primaryShade, lightGray, senary, darkishGray, moderateGray from '../helpers/colors.css';
+
 .container {
     padding: 2rem;
     width: 100%;
 }
 
-.spinner{
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    color: dodgerblue;
+.titleContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.titleContainer svg {
+    cursor: pointer;
+}
+
+@-webkit-keyframes rotating {
+    from{
+        -webkit-transform: rotate(0deg);
+    }
+    to{
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+.titleContainerIconActive svg {
+    color: primary;
+    -webkit-animation: rotating 1s linear infinite;
 }
 
 .tasksList {
@@ -16,15 +35,18 @@
 
 .toolbar {
     display: flex;
+    padding-top: 1rem;
     padding-bottom: 1rem;
     margin-bottom: 1rem;
-    border-bottom:1px solid gray;
+    border-bottom: 1px solid lightGray;
+}
 
+.toolbar > *:last-child {
+    margin-left: 0.5rem;
 }
 
 .groupsSearchBar {
-    display: flex;
-    margin-right: 1rem;
+    margin-right: 0.5rem;
     width: 100%;
 }
 
@@ -33,44 +55,84 @@
     display: flex;
 }
 
-
-.header {
-
+:global(.dropdown-item.active) {
+    background-color: primary;
 }
 
-.overview {
+:global(.dropdown-item:active) {
+    background-color: primary;
+}
 
+/* list */
+
+.submissionCard {
+    width: 100%;
+}
+
+.submissionCard:not(:last-child) {
+    margin-bottom: 0.5rem;
+}
+
+.submissionCardTitle {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.submissionCardTitle h5 {
+    margin: 0;
+}
+
+.submissionCardHeaderButtonContainer {
+    flex: 1;
+}
+
+.submissionCardHeaderButtonContainer div {
+    cursor: pointer;
+    float: right;
+    color: primary;
+    transition: color 0.1s ease-in, margin 0.1s ease-in;
+}
+
+.submissionCardHeaderButtonContainer div:hover {
+    color: secondary;
+    margin-right: -0.5rem;
 }
 
 .badge {
     margin-left: 0.5rem;
 }
 
-.taskInfo {
-    width: 100%;
-    display: inline-grid;
-    grid-template-columns: 20% 20% 25% 20% auto;
+:global(.badge-green) {
+    color: white;
+    background-color: primary;
 }
 
-.ul {
-    margin-top: 1rem;
-    padding-inline-start: 0;
-    display: block;
+:global(.badge-orange) {
+    color: white;
+    background-color: quaternary;
 }
 
-.tasksContainer {
-    display: block;
-    list-style-type: none;
-    padding-right: 1rem;
+:global(.badge-yellow) {
+    color: white;
+    background-color: secondary;
+}
+
+:global(.badge-tomato) {
+    color: white;
+    background-color: quinary;
+}
+
+:global(.badge-red) {
+    color: white;
+    background-color: senary;
+}
+
+.submissionCardBody {
+
 }
 
 .goTaskButton {
-    width: 5rem;
-    position: absolute;
-    right: 10px;
-}
 
-.plainLink, .plainLink:hover {
-    text-decoration: none;
-    color: white;
 }

@@ -15,7 +15,8 @@ import {
   IoBookOutline,
   IoCreateOutline,
   IoReturnDownBackOutline,
-  IoPencilSharp
+  IoPencilSharp,
+  IoListOutline
 } from "react-icons/io5";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 import classnames from 'classnames';
@@ -171,6 +172,21 @@ class Sidebar extends React.Component {
             <span className={styles.sidebarBodyItemRight}>
                     Grading
             </span>
+          }
+        </div>)
+      )
+    } else if (this.props.location === LOCATIONS.submissions) {
+      // submissions
+      result.push(
+        (<div key="submissions" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
+        }}>
+          <div className={styles.sidebarBodyItemLeft}>
+            <IoListOutline className={styles.sidebarIcon} size={26}/>
+          </div>
+          {!this.state.isHidden &&
+          <span className={styles.sidebarBodyItemRight}>
+                    Submissions
+          </span>
           }
         </div>)
       )
