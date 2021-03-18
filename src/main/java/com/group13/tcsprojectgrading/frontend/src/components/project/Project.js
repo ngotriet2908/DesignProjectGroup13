@@ -116,13 +116,13 @@ class Project extends Component {
 
   render () {
     if (!this.state.isLoaded) {
-      return(
+      return (
         <div className={globalStyles.container}>
           <Spinner className={globalStyles.spinner} animation="border" role="status">
             <span className="sr-only">Loading...</span>
           </Spinner>
         </div>
-      )
+      );
     }
 
     return (
@@ -152,42 +152,42 @@ class Project extends Component {
                   </h3>
                 </div>
 
-              <div className={globalStyles.sectionFlexContainer}>
-                <Card className={styles.card}>
-                  <Card.Body className={[styles.cardBody, styles.administrationSectionContainerBody].join(" ")}>
-                    <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/groups"))}>
-                      Groups
-                    </Button>
+                <div className={globalStyles.sectionFlexContainer}>
+                  <Card className={styles.card}>
+                    <Card.Body className={[styles.cardBody, styles.administrationSectionContainerBody].join(" ")}>
+                      <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/groups"))}>
+                        Groups
+                      </Button>
 
-                    <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/submissions"))}>
-                      {/*<Link className={globalStyles.plainLink} to={this.props.match.url + "/submissions"}>*/}
-                      Submissions
-                      {/*</Link>*/}
-                    </Button>
-
-                    <Can I="open" a={"ManageGraders"}>
-                      <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/graders"))}>
-                        {/*<Link className={globalStyles.plainLink} to={this.props.match.url + "/graders"}>*/}
-                      Graders
+                      <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/submissions"))}>
+                        {/*<Link className={globalStyles.plainLink} to={this.props.match.url + "/submissions"}>*/}
+                        Submissions
                         {/*</Link>*/}
                       </Button>
-                    </Can>
 
-                    {/*<Button variant="lightGreen">*/}
-                    {/*  <Link className={globalStyles.plainLink} to={this.props.match.url + "/submissions/156/grading"}>*/}
-                    {/*  Grading Interface*/}
-                    {/*  </Link>*/}
-                    {/*</Button>*/}
+                      <Can I="open" a={"ManageGraders"}>
+                        <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/graders"))}>
+                          {/*<Link className={globalStyles.plainLink} to={this.props.match.url + "/graders"}>*/}
+                        Graders
+                          {/*</Link>*/}
+                        </Button>
+                      </Can>
 
-                    <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/feedback"))}>
-                      {/*<Link className={globalStyles.plainLink} to={this.props.match.url + "/feedback"}>*/}
-                        Feedback
-                      {/*</Link>*/}
-                    </Button>
-                  </Card.Body>
-                </Card>
+                      {/*<Button variant="lightGreen">*/}
+                      {/*  <Link className={globalStyles.plainLink} to={this.props.match.url + "/submissions/156/grading"}>*/}
+                      {/*  Grading Interface*/}
+                      {/*  </Link>*/}
+                      {/*</Button>*/}
+
+                      <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/feedback"))}>
+                        {/*<Link className={globalStyles.plainLink} to={this.props.match.url + "/feedback"}>*/}
+                          Feedback
+                        {/*</Link>*/}
+                      </Button>
+                    </Card.Body>
+                  </Card>
+                </div>
               </div>
-            </div>
             </Can>
 
             <div I="read" a="Rubric">
@@ -198,18 +198,19 @@ class Project extends Component {
                   </h3>
                 </div>
 
-              <div className={globalStyles.sectionFlexContainer}>
-                <Card>
-                  <Card.Body>
-                    <div>
-                      <Can I="read" a="Rubric">
-                        <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/rubric"))}>
-                          Open rubric
-                        </Button>
-                      </Can>
-                    </div>
-                  </Card.Body>
-                </Card>
+                <div className={globalStyles.sectionFlexContainer}>
+                  <Card>
+                    <Card.Body>
+                      <div>
+                        <Can I="read" a="Rubric">
+                          <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/rubric"))}>
+                            Open rubric
+                          </Button>
+                        </Can>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                </div>
               </div>
             </div>
 
@@ -245,7 +246,7 @@ class Project extends Component {
                 </Card>
               </div>
             </Can>
-            </div>
+          </div>
 
           <Can I="view" a="TodoList">
             <SectionContainer
@@ -258,7 +259,6 @@ class Project extends Component {
               EmptyIcon={IoCheckboxOutline}
             />
           </Can>
-
         </div>
       </div>
     )
