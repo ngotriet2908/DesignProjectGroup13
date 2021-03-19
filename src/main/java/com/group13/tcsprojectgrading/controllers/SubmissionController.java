@@ -9,9 +9,11 @@ import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.Grader;
 import com.group13.tcsprojectgrading.models.Project;
 import com.group13.tcsprojectgrading.models.Submission;
+import com.group13.tcsprojectgrading.models.grading.SubmissionAssessment;
 import com.group13.tcsprojectgrading.services.GraderService;
 import com.group13.tcsprojectgrading.services.ProjectService;
 import com.group13.tcsprojectgrading.services.SubmissionService;
+import com.group13.tcsprojectgrading.services.grading.GradingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -30,13 +32,16 @@ public class SubmissionController {
     private final ProjectService projectService;
     private final SubmissionService submissionService;
     private final GraderService graderService;
+    private final GradingService gradingService;
 
     @Autowired
-    public SubmissionController(CanvasApi canvasApi, ProjectService projectService, SubmissionService submissionService, GraderService graderService) {
+    public SubmissionController(CanvasApi canvasApi, ProjectService projectService, SubmissionService submissionService,
+                                GraderService graderService, GradingService gradingService) {
         this.canvasApi = canvasApi;
         this.projectService = projectService;
         this.submissionService = submissionService;
         this.graderService = graderService;
+        this.gradingService = gradingService;
     }
 
     @GetMapping(value = "/syncCanvas")
@@ -161,6 +166,7 @@ public class SubmissionController {
 
             String submissionResponse = this.canvasApi.getCanvasCoursesApi().getSubmission(courseId, projectId, submission.getId());
             JsonNode submissionNode = objectMapper.readTree(submissionResponse);
+            SubmissionAssessment assessment = gradingService.getAssessmentByProjectIdAndUserId(projectId, submission.getId());
 
             node.put("stringId", String.format("%s/%s", (submission.getGroupId() != null)? submission.getGroupId():"individual", submission.getId()));
             node.put("id", submission.getId());
@@ -171,15 +177,15 @@ public class SubmissionController {
             String stupidName = (random.nextInt(3) == 2)? "Ömer Şakar " + submission.getName(): submission.getName();
             node.put("name", stupidName);
             // TODO delete this shit
-
-            node.put("progress", (int) (Math.random() * 100));
+            if (assessment != null) node.put("progress", assessment.getProgress());
+            else node.put("progress", 0);
             node.put("submittedAt", submissionNode.get("submitted_at").asText());
             node.put("attempt", submissionNode.get("attempt").asText());
 
             if (submission.getGrader() != null) {
-                JsonNode graderNode = objectMapper.createObjectNode();
-                ((ObjectNode) graderNode).put("id", submission.getGrader().getUserId());
-                ((ObjectNode) graderNode).put("name", submission.getGrader().getName());
+                ObjectNode graderNode = objectMapper.createObjectNode();
+                graderNode.put("id", submission.getGrader().getUserId());
+                graderNode.put("name", submission.getGrader().getName());
                 node.set("grader", graderNode);
             }
             arrayNode.add(node);
@@ -223,6 +229,7 @@ public class SubmissionController {
         String submissionResponse = this.canvasApi.getCanvasCoursesApi().getSubmission(courseId, projectId, submission.getId());
         JsonNode submissionCanvas = objectMapper.readTree(submissionResponse);
 
+        SubmissionAssessment assessment = gradingService.getAssessmentByProjectIdAndUserId(projectId, submission.getId());
         ObjectNode node = objectMapper.createObjectNode();
         node.put("stringId", String.format("%s/%s", (submission.getGroupId() != null)? submission.getGroupId():"individual", submission.getId()));
         node.put("id", submission.getId());
@@ -234,7 +241,8 @@ public class SubmissionController {
         node.set("submission_comments", submissionCanvas.get("submission_comments"));
         node.put("name", submission.getName());
 
-        node.put("progress", (int) (Math.random() * 100));
+        if (assessment != null) node.put("progress", assessment.getProgress());
+        else node.put("progress", 0);
 
         if (submission.getGrader() != null) {
             ObjectNode graderNode = objectMapper.createObjectNode();

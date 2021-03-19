@@ -10,6 +10,8 @@ import java.util.Map;
 public class SubmissionAssessment {
     private Map<String, CriterionGrade> grades;
 
+    private double progress;
+
     @Id
     private SubmissionAssessmentKey id;
 
@@ -70,6 +72,7 @@ public class SubmissionAssessment {
     public SubmissionAssessment(SubmissionAssessmentKey id) {
         this.grades = new HashMap<>();
         this.id = id;
+        this.progress = 0;
     }
 
     public SubmissionAssessment() {
@@ -91,4 +94,13 @@ public class SubmissionAssessment {
     public void setGrades(Map<String, CriterionGrade> gradeDetails) {
         this.grades = gradeDetails;
     }
+
+    public double getProgress() {
+        return progress;
+    }
+
+    public void setProgress(double progress) {
+        this.progress = progress;
+    }
+
 }

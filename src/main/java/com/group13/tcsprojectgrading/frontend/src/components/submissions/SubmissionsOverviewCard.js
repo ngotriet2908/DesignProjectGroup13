@@ -42,7 +42,7 @@ class SubmissionsOverviewCard extends Component {
           </Card.Title>
           <div>
             <div className={styles.taskInfo}>
-              <h6>Progress: {this.props.submission.progress}%</h6>
+              <h6>Progress: {Math.round(100 * this.props.submission.progress)}%</h6>
               <h6>Submitted At: {this.props.submission.submittedAt}</h6>
               <h6>Attempt: {this.props.submission.attempt}</h6>
 

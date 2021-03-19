@@ -74,7 +74,7 @@ class SubmissionInfo extends Component {
                 className={styles.plainLink}
                 to={
                   {
-                    pathname: URL_PREFIX + `/courses/${this.state.course.id}/projects/${this.state.project.id}/submissions/${this.state.task.id}/grading`,
+                    pathname: URL_PREFIX + `/courses/${this.state.course.id}/projects/${this.state.project.id}/submissions/${this.state.submission.id}/grading`,
                     data: {
                       "submission": this.state.task,
                       "submissionCanvas": this.state.submission
@@ -98,7 +98,7 @@ class SubmissionInfo extends Component {
                       <h6>Status: {this.state.submission.workflow_state}</h6>
                       <h6>Attempts: {this.state.submission.attempt}</h6>
                       <h6>Submitted at: {this.state.submission.submitted_at}</h6>
-                      <h6>Progress: {this.state.submission.progress}</h6>
+                      <h6>Progress: {Math.round(100 * this.state.submission.progress)}%</h6>
                       {(this.state.submission.grader == null)? null : <h6>Assigned to: {this.state.submission.grader.name}</h6>}
                     </Card.Body>
                   </Card>

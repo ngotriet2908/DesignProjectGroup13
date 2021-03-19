@@ -37,4 +37,17 @@ public class Element {
     public void setChildren(List<Element> children) {
         this.children = children;
     }
+
+    public int getCriterionCount() {
+        int total = 0;
+        if (children != null) {
+            for (Element child : children) {
+                total += child.getCriterionCount();
+            }
+        }
+        if (content.getGrade() != null) { //Only criteria have grades
+            total++;
+        }
+        return total;
+    }
 }

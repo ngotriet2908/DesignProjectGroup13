@@ -322,5 +322,22 @@ public class CanvasCoursesApi {
         }
     }
 
+    public String getAssignmentGroups(String courseId, Long assignmentId) {
+        OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
+
+        if (authorizedClient == null) {
+            return null;
+        } else {
+            URI uri = UriComponentsBuilder.newInstance()
+                    .scheme(CanvasEndpoints.SCHEME)
+                    .host(CanvasEndpoints.HOST)
+                    .path(CanvasEndpoints.COURSE_ASSIGNMENT_GROUPS_PATH)
+                    .queryParam("include[]", "assignments")
+                    .queryParam("assignment_ids[]", assignmentId)
+                    .build(courseId);
+
+            return this.canvasApi.sendRequest(uri, HttpMethod.GET, authorizedClient);
+        }
+    }
 
 }

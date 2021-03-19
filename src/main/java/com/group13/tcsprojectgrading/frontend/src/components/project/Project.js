@@ -50,14 +50,16 @@ class Project extends Component {
     Promise.all([
       request(BASE + "courses/" + courseId + "/projects/" + projectId),
       request(`${BASE}courses/${courseId}/projects/${projectId}/stats/submissions`),
-      request(`${BASE}courses/${courseId}/projects/${projectId}/stats/grades`)
+      request(`${BASE}courses/${courseId}/projects/${projectId}/stats/grades`),
+      // request(`${BASE}courses/${courseId}/projects/${projectId}/stats/groups`),
     ])
-      .then(async([res1, res2, res3]) => {
+      .then(async([res1, res2, res3, res4]) => {
         const project = await res1.json();
         const statsSubmissions = await res2.json();
         const statsGrades = await res3.json();
+        // const statsGroups = await res4.json();
 
-        const stats = [statsSubmissions].concat(statsGrades);
+        const stats = [statsSubmissions].concat(statsGrades)//.concat(statsGroups);
 
         this.props.saveRubric(project.rubric);
 
@@ -223,7 +225,7 @@ class Project extends Component {
                 </div>
                 <Card>
                   <Card.Body>
-                    Here comes the Sun
+                    Test
                     {/*<CardColumns className={styles.stats}>*/}
                     {/*  {testStats.map(stat => {*/}
                     {/*    return (*/}

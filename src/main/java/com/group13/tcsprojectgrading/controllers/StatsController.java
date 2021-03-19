@@ -57,6 +57,18 @@ public class StatsController {
     @GetMapping(value="/{courseId}/projects/{projectId}/stats/groups", produces = "application/json")
     @ResponseBody
     protected ResponseEntity<ObjectNode> getGroupStats(@PathVariable String courseId, @PathVariable String projectId) throws JsonProcessingException {
+//        String groupsString = this.canvasApi.getCanvasCoursesApi().getAssignmentGroups(courseId, Long.parseLong(projectId));
+//        ArrayNode groups = mapper.readValue(groupsString, ArrayNode.class);
+//        int groupCount = groups.size();
+//
+//        ObjectNode resultNode = mapper.createObjectNode();
+//        resultNode.put("title", "Amount of groups");
+//        resultNode.put("type", "number");
+//        resultNode.put("data", groupCount);
+//        resultNode.put("category", "Member");
+//        resultNode.put("unit", "Groups");
+//
+//        return new ResponseEntity<>(resultNode, HttpStatus.OK);
         return null;
     }
 
