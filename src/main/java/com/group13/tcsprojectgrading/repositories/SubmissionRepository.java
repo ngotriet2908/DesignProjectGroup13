@@ -1,5 +1,6 @@
 package com.group13.tcsprojectgrading.repositories;
 
+import com.group13.tcsprojectgrading.models.Flag;
 import com.group13.tcsprojectgrading.models.Project;
 import com.group13.tcsprojectgrading.models.Submission;
 import com.group13.tcsprojectgrading.models.SubmissionId;
@@ -11,4 +12,5 @@ public interface SubmissionRepository extends JpaRepository<Submission, Submissi
     public List<Submission> findSubmissionsByProject(Project project);
     public List<Submission> findSubmissionsByGrader_UserId(String userId);
     public List<Submission> findSubmissionsByProjectAndGrader_UserId(Project project, String userId);
+    public List<Submission> findSubmissionsByFlags(Flag flag);
 }

@@ -1,9 +1,7 @@
 package com.group13.tcsprojectgrading.models;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
+import java.util.Collection;
 
 @Entity
 @IdClass(SubmissionId.class)
@@ -22,6 +20,9 @@ public class Submission {
 
     @ManyToOne
     private Grader grader;
+
+    @ManyToMany
+    private Collection<Flag> flags;
 
     public Submission(String id, Project project, String name, String groupId) {
         this.id = id;
@@ -71,6 +72,14 @@ public class Submission {
 
     public void setGroupId(String groupId) {
         this.groupId = groupId;
+    }
+
+    public Collection<Flag> getFlags() {
+        return flags;
+    }
+
+    public void setFlags(Collection<Flag> flags) {
+        this.flags = flags;
     }
 
     @Override

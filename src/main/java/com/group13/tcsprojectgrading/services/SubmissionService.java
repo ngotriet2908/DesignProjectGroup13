@@ -1,5 +1,6 @@
 package com.group13.tcsprojectgrading.services;
 
+import com.group13.tcsprojectgrading.models.Flag;
 import com.group13.tcsprojectgrading.models.Project;
 import com.group13.tcsprojectgrading.models.Submission;
 import com.group13.tcsprojectgrading.models.SubmissionId;
@@ -32,6 +33,7 @@ public class SubmissionService {
 
         if (currentSubmission != null) {
             submission.setGrader(currentSubmission.getGrader());
+            submission.setFlags(currentSubmission.getFlags());
         } else {
             gradingService.saveAssessment(submission.getProject().getProjectId(), submission.getId());
         }
@@ -53,6 +55,10 @@ public class SubmissionService {
 
     public List<Submission> findSubmissionsForGrader(Project project, String graderId) {
         return repository.findSubmissionsByProjectAndGrader_UserId(project, graderId);
+    }
+
+    public List<Submission> findSubmissionsByFlags(Flag flag) {
+        return repository.findSubmissionsByFlags(flag);
     }
 
     public List<Submission> findSubmissionsForGraderAll(String graderId) {

@@ -9,7 +9,6 @@ public interface GradingRepository extends MongoRepository<SubmissionAssessment,
     SubmissionAssessment getById(SubmissionAssessment.SubmissionAssessmentKey id);
 
     List<SubmissionAssessment> findAll();
-
     void deleteById(SubmissionAssessment.SubmissionAssessmentKey id);
 }
 

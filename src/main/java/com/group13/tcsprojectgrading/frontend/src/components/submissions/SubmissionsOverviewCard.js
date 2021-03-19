@@ -35,6 +35,15 @@ class SubmissionsOverviewCard extends Component {
                 <Badge className={styles.badge} variant="green">Assigned to you</Badge> :
                 <Badge className={styles.badge} variant="red">Not assigned to you</Badge>
             }
+            {
+              <div style={{marginLeft: "1rem"}}>
+                {
+                  (this.props.submission.flags.map((flag) => {
+                    return (<Badge variant={flag.variant} key={flag.id}>{flag.name}</Badge>)
+                  }))
+                }
+              </div>
+            }
 
             <div className={styles.submissionCardHeaderButtonContainer}>
               <div onClick={() => store.dispatch(push(this.props.route.url + "/" + this.props.submission.id + "/grading"))}>
@@ -44,8 +53,8 @@ class SubmissionsOverviewCard extends Component {
 
           </div>
           <div className={styles.submissionCardBody}>
-            {/*<h6>Progress: {this.props.submission.progress}%</h6>*/}
             <div>Submitted on {(new Date(this.props.submission.submittedAt)).toDateString()}</div>
+            <div>Progress: {this.props.submission.progress}%</div>
             <div>Attempts: {this.props.submission.attempt}</div>
 
             {/*<Button variant="primary" className={styles.goTaskButton}>*/}

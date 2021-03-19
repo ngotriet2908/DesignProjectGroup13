@@ -4,8 +4,10 @@ import org.springframework.data.annotation.Id;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 public class Rubric {
+
     @Id
     public String id;
 
@@ -34,6 +36,22 @@ public class Rubric {
 
     public List<Element> getChildren() {
         return children;
+    }
+
+    public List<Element> fetchAllCriteria() {
+        Stack<Element> stack = new Stack<>();
+        stack.addAll(this.children);
+        List<Element> criteria = new ArrayList<>();
+
+        while(stack.size() > 0) {
+            Element element = stack.pop();
+            if (element.content.type.equals(RubricContent.CRITERION_TYPE)) {
+                criteria.add(element);
+            } else if (element.content.type.equals(RubricContent.BLOCK_TYPE)) {
+                stack.addAll(element.children);
+            }
+        }
+        return criteria;
     }
 
     public void setChildren(List<Element> children) {

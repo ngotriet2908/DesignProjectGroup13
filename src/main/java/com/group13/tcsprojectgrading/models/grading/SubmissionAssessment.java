@@ -1,10 +1,11 @@
 package com.group13.tcsprojectgrading.models.grading;
 
+import com.group13.tcsprojectgrading.models.rubric.Element;
+import com.group13.tcsprojectgrading.models.rubric.RubricContent;
+
 import javax.persistence.Id;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class SubmissionAssessment {
@@ -90,5 +91,19 @@ public class SubmissionAssessment {
 
     public void setGrades(Map<String, CriterionGrade> gradeDetails) {
         this.grades = gradeDetails;
+    }
+
+    public Map<Element, Grade> getGradedCriteria(List<Element> criteria) {
+        Map<Element, Grade> map = new HashMap<>();
+        for(Element criterion: criteria) {
+            if (grades.containsKey(criterion.getContent().getId())) {
+                CriterionGrade criterionGrade = grades.get(criterion.getContent().getId());
+                if (criterionGrade.getActive() < criterionGrade.getHistory().size()) {
+                    map.put(criterion, criterionGrade.getHistory().get(criterionGrade.getActive()));
+                }
+            }
+        }
+
+        return map;
     }
 }

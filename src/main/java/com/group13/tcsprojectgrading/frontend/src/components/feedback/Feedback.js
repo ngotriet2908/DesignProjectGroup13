@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import StudentList from "./StudentList";
-import {Breadcrumb, Button, Spinner, InputGroup, Form, Card} from "react-bootstrap";
+import {Breadcrumb, Button, Spinner, InputGroup, Form, Card, Modal} from "react-bootstrap";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
 import styles from "./feedback.module.css";
@@ -20,12 +20,14 @@ class Feedback extends Component {
       receiver: {},
       isLoading: true,
       isSendingFeedback: false,
-      isSendingPdf: false
+      isSendingPdf: false,
+      gmailModalShow: false,
     }
 
   }
 
   componentDidMount() {
+    console.log(this.props.location)
     this.setState({
       isLoading: true
     })
@@ -121,6 +123,35 @@ class Feedback extends Component {
       });
   }
 
+  sendEmailHandler = () => {
+    let object = {
+      "id": this.state.receiver,
+      "isGroup": false,
+      "subject": this.state.subject,
+      "body": this.state.body,
+    }
+
+    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/feedbackEmail`, "POST", object, undefined, false)
+      .then((response) => {
+        if (response.status === 401) {
+          this.setState({
+            gmailModalShow: true
+          })
+          return null
+        } else {
+          return response.text();
+        }
+      })
+      .then((result) => {
+        if (result !== null) {
+          console.log(result)
+        }
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
+  }
+
   handleSubjectChange = (event) => {
       this.setState({
         subject: event.target.value
@@ -137,6 +168,12 @@ class Feedback extends Component {
   handleBodyChange = (event) => {
     this.setState({
       body: event.target.value
+    })
+  }
+
+  handleGmailModalClose = () => {
+    this.setState({
+      gmailModalShow: false,
     })
   }
 
@@ -167,6 +204,9 @@ class Feedback extends Component {
 
           <div className={styles.header}>
             <h2>Feedback Form</h2>
+            {/*<Button href={"/api/gmail"}>*/}
+            {/*  activate gmail*/}
+            {/*</Button>*/}
           </div>
 
           <Card className={styles.feedbackCard}>
@@ -203,6 +243,11 @@ class Feedback extends Component {
                 {this.state.isSendingPdf ? 'Sending...' : 'Click to download Pdf'}
               </Button>
 
+              <Button
+                onClick={this.sendEmailHandler} variant="primary">
+                Click to send email
+              </Button>
+
               {/*<Button*/}
               {/*  disabled={this.state.isSendingPdf}*/}
               {/*  onClick={() => this.handleGetPdf(false)} variant="primary">*/}
@@ -211,6 +256,22 @@ class Feedback extends Component {
 
             </Form>
           </Card>
+
+          <Modal show={this.state.gmailModalShow} onHide={this.handleGmailModalClose}>
+            <Modal.Header closeButton>
+              <Modal.Title>Gmail authentication needed</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>This step requires Gmail authentication, Do you want to continue?</Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={this.handleGmailModalClose}>
+                Close
+              </Button>
+              <Button href={"/api/gmail/auth"}>
+                Continue
+              </Button>
+            </Modal.Footer>
+          </Modal>
+
         </div>
 
     )

@@ -280,3 +280,18 @@
     margin-top: 0.5rem;
     margin-left: 1rem;
 }
+
+.flagModalFlagView {
+    display: inline;
+}
+
+.flagModalFlagViewH6 {
+    display: inline;
+}
+
+.flagModalFlagViewButtonGroup {
+    float: right;
+}
+.flagModalFlagViewButton {
+    margin-left: 0.5rem;
+}

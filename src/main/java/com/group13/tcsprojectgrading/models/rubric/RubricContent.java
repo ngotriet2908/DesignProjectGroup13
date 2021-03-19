@@ -5,6 +5,9 @@ import org.springframework.data.annotation.Id;
 import java.util.List;
 
 public class RubricContent {
+    public static final String CRITERION_TYPE = "1";
+    public static final String BLOCK_TYPE = "0";
+
     @Id
     public String id;
     public String type;
