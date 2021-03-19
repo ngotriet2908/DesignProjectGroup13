@@ -116,13 +116,13 @@ class Project extends Component {
 
   render () {
     if (!this.state.isLoaded) {
-      return(
+      return (
         <div className={globalStyles.container}>
           <Spinner className={globalStyles.spinner} animation="border" role="status">
             <span className="sr-only">Loading...</span>
           </Spinner>
         </div>
-      )
+      );
     }
 
     return (
