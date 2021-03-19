@@ -151,20 +151,20 @@ class Course extends Component {
                 <h3 className={globalStyles.sectionTitleH}>Course statistics</h3>
               </div>
 
-              <ul className={styles.ul}>
-                {/*{this.state.stats.map(stat => {*/}
-                {/*  return (*/}
-                {/*    <li className={styles.li} key={stat.title}>*/}
-                {/*      <Statistic title ={stat.title}*/}
-                {/*        type={stat.type}*/}
-                {/*        data={stat.data}*/}
-                {/*        unit={stat.unit}/>*/}
-                {/*    </li>*/}
-                {/*  );*/}
-                {/*})}*/}
+              {/*<ul className={styles.ul}>*/}
+              {/*{this.state.stats.map(stat => {*/}
+              {/*  return (*/}
+              {/*    <li className={styles.li} key={stat.title}>*/}
+              {/*      <Statistic title ={stat.title}*/}
+              {/*        type={stat.type}*/}
+              {/*        data={stat.data}*/}
+              {/*        unit={stat.unit}/>*/}
+              {/*    </li>*/}
+              {/*  );*/}
+              {/*})}*/}
 
-                <StatsCard data={this.state.stats}/>
-              </ul>
+              <StatsCard data={this.state.stats}/>
+              {/*</ul>*/}
             </div>
           </Can>
 

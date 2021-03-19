@@ -280,3 +280,15 @@
     margin-top: 0.5rem;
     margin-left: 1rem;
 }
+
+.gradeViewerNotGraded {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin: 2rem 0;
+}
+
+.gradeViewerNotGraded h6 {
+    margin: 0 0 0 0.5rem;
+}

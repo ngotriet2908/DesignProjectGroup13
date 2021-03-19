@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import styles from "./submissionInfo.module.css";
+import styles from "./submissionDetails.module.css";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
 import {Card, Breadcrumb, Button, ListGroup, ListGroupItem, Spinner, ButtonGroup, DropdownButton, Dropdown, FormControl} from "react-bootstrap";
@@ -9,7 +9,7 @@ import {push} from "connected-react-router";
 import {Link} from "react-router-dom";
 
 
-class SubmissionInfo extends Component {
+class SubmissionDetails extends Component {
   constructor(props) {
     super(props);
 
@@ -192,4 +192,4 @@ class SubmissionInfo extends Component {
   }
 }
 
-export default SubmissionInfo
+export default SubmissionDetails

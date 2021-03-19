@@ -177,7 +177,7 @@ class Project extends Component {
               </div>
             </Can>
 
-            <div I="read" a="Rubric">
+            <Can I="read" a="Rubric">
               <div className={[globalStyles.sectionContainer, styles.rubricSectionContainer].join(" ")}>
                 <div className={[globalStyles.sectionTitle, globalStyles.sectionTitleWithButton].join(" ")}>
                   <h3 className={globalStyles.sectionTitleH}>
@@ -232,7 +232,7 @@ class Project extends Component {
                   </Card>
                 </div>
               </Can>
-            </div>
+            </Can>
           </div>
 
           <div>

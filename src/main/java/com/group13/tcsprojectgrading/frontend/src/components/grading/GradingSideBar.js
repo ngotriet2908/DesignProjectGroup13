@@ -15,19 +15,20 @@ class GradingSideBar extends Component {
   }
 
   componentDidMount() {
-    // console.log(subject("Grading", this.props.data.submission))
-    // console.log(ability.can("write", subject("Grading", this.props.data.submission)))
-    // console.log(ability.can("write", this.props.data.submission))
-    // console.log(ability.can("write", "Rubric"))
+    console.log(subject("Grading", this.props.data.submission))
+    console.log(ability.can("write", subject("Grading", this.props.data.submission)))
+    console.log(ability.can("write", this.props.data.submission))
+    console.log(ability.can("write", "Rubric"))
   }
 
   render () {
     return (
       <div className={styles.gradingContainer}>
         <RubricViewer/>
-        <Can do="write" on={subject("Grading", this.props.data.submission.grader)}>
-          <GradeEditor match={this.props.match}/>
-        </Can>
+        {/*// TODO*/}
+        {/*<Can do="write" on={subject("Grading", this.props.data.submission.grader)}>*/}
+        <GradeEditor match={this.props.match}/>
+        {/*</Can>*/}
         <Can I="read" a="Grading">
           <GradeViewer match={this.props.match}/>
         </Can>
