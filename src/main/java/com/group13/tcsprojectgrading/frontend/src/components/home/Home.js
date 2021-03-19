@@ -6,7 +6,7 @@ import {request} from "../../services/request";
 import {BASE, USER_COURSES, USER_INFO, USER_TASKS} from "../../services/endpoints";
 import {USER_RECENT} from "../../services/endpoints";
 import {connect} from "react-redux";
-import {saveUser} from "../../redux/user/actions";
+import {saveUserSelf} from "../../redux/user/actions";
 import {Spinner} from "react-bootstrap";
 import Breadcrumbs from "../helpers/Breadcrumbs";
 import {setCurrentLocation} from "../../redux/navigation/actions";
@@ -47,7 +47,7 @@ class Home extends Component {
         const recent = await res3.json();
         const tasks = await res4.json();
 
-        this.props.saveUser(user);
+        this.props.saveUserSelf(user);
 
         this.setState({
           recentProjects: recent,
@@ -127,13 +127,13 @@ class Home extends Component {
 }
 
 const actionCreators = {
-  saveUser,
+  saveUserSelf,
   setCurrentLocation
 }
 
 const mapStateToProps = state => {
   return {
-    user: state.user.user
+    user: state.users.self
   };
 };
 

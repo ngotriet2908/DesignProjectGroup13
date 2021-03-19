@@ -1,5 +1,5 @@
 import { combineReducers } from "redux";
-import user from "./user/reducers/user";
+import users from "./user/reducers/users";
 import navigation from "./navigation/reducers/navigation";
 import rubric from "./rubric/reducers/rubric";
 import courses from "./courses/reducers/courses";
@@ -12,7 +12,7 @@ import { connectRouter } from 'connected-react-router'
 
 const createRootReducer = (history) => combineReducers({
   router: connectRouter(history),
-  user,
+  users,
   rubric,
   navigation,
   courses,

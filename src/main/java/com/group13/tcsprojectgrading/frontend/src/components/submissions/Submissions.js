@@ -19,7 +19,6 @@ import {IoSyncOutline} from "react-icons/io5";
 
 import classnames from 'classnames';
 import Card from "react-bootstrap/Card";
-import {saveUser} from "../../redux/user/actions";
 import {setCurrentLocation} from "../../redux/navigation/actions";
 import {connect} from "react-redux";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
@@ -46,7 +45,6 @@ class Submissions extends Component {
   }
   
   filterGroupSearchChange = (group) => {
-    
     let criteria = this.normalizeLowercase(group.name).includes(this.normalizeLowercase(this.state.searchString))
     if (criteria) return true
 
@@ -114,16 +112,14 @@ class Submissions extends Component {
 
   componentDidMount() {
     this.props.setCurrentLocation(LOCATIONS.submissions);
-    this.startThePage();
+    this.loadData();
   }
 
-  startThePage() {
+  loadData() {
     request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions`)
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        console.log(data);
+      .then(async response => {
+        let data = await response.json();
+
         this.setState({
           submissions: data.submissions,
           project: data.project,
@@ -137,6 +133,9 @@ class Submissions extends Component {
       })
       .catch(error => {
         console.error(error.message);
+        this.setState({
+          isLoaded: true,
+        })
       });
   }
 
@@ -152,7 +151,7 @@ class Submissions extends Component {
     request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/syncCanvas`)
       .then(response => {
         if (response.status === 200) {
-          this.startThePage()
+          this.loadData()
         }
       })
       .catch(error => {

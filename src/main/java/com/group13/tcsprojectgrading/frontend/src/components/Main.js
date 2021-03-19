@@ -69,7 +69,7 @@ class Main extends React.Component {
                   <Home/>
                 </Route>
                 <Route>
-                  <Redirect to={URL_PREFIX + "/notfound/"}/>
+                  <Redirect to={URL_PREFIX + "/404/"}/>
                   <NotFound/>
                 </Route>
               </Switch>

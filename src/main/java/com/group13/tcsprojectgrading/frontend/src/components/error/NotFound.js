@@ -3,6 +3,9 @@ import styles from './notFound.module.css'
 import Button from "react-bootstrap/Button";
 import {Link} from "react-router-dom";
 import {URL_PREFIX} from "../../services/config";
+import {IoSadOutline} from "react-icons/io5";
+import store from "../../redux/store";
+import {push} from "connected-react-router";
 
 
 class NotFound extends Component {
@@ -13,8 +16,15 @@ class NotFound extends Component {
   render () {
     return (
       <div className={styles.container}>
-        <h1>Page does not exist :(</h1>
-        <Button variant="primary"><Link className={styles.plainLink} to={URL_PREFIX + "/"}>Home</Link></Button>
+        {/*<div>*/}
+        {/*  <IoSadOutline size={60}/>*/}
+        {/*</div>*/}
+        <h1 className={styles.title}>Oops... <IoSadOutline size={60}/></h1>
+        <h2 className={styles.text}>It seems that we can't find the page you were looking for.</h2>
+        <Button variant="lightGreen" onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>
+          {/*<Link className={styles.plainLink} to={URL_PREFIX + "/"}>Home</Link>*/}
+          Return to home
+        </Button>
       </div>
     )
   }

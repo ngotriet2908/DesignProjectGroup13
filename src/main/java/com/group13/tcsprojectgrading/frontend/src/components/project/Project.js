@@ -116,13 +116,13 @@ class Project extends Component {
 
   render () {
     if (!this.state.isLoaded) {
-      return(
+      return (
         <div className={globalStyles.container}>
           <Spinner className={globalStyles.spinner} animation="border" role="status">
             <span className="sr-only">Loading...</span>
           </Spinner>
         </div>
-      )
+      );
     }
 
     return (
@@ -177,7 +177,7 @@ class Project extends Component {
               </div>
             </Can>
 
-            <div I="read" a="Rubric">
+            <Can I="read" a="Rubric">
               <div className={[globalStyles.sectionContainer, styles.rubricSectionContainer].join(" ")}>
                 <div className={[globalStyles.sectionTitle, globalStyles.sectionTitleWithButton].join(" ")}>
                   <h3 className={globalStyles.sectionTitleH}>
@@ -232,7 +232,7 @@ class Project extends Component {
                   </Card>
                 </div>
               </Can>
-            </div>
+            </Can>
           </div>
 
           <div>

@@ -1,18 +1,12 @@
-/*.projectContainer {*/
-/*    padding: 2rem;*/
-/*    width: 100%;*/
-/*    height: 100vh;*/
-/*}*/
+@value primary, secondary, ternary, quaternary, quinary, ultraLightGray, primaryShade, lightGray, darkishGray, moderateGray from '../helpers/colors.css';
 
 .titleContainer {
     margin-bottom: 2rem;
 }
 
-
 .gradersCardContainer {
     padding: 0.5rem 0.5rem;
     margin-bottom: 1.2rem;
-    /*height: 57vh;*/
 }
 
 .manageTaToolbar {
@@ -45,10 +39,10 @@
     padding: 1rem 1rem;
 }
 
-.notAssignedContainer {
-    padding: 0.5rem 0.5rem;
-    margin-bottom: 2rem;
-}
+/*.notAssignedContainer {*/
+/*    padding: 0.5rem 0.5rem;*/
+/*    margin-bottom: 2rem;*/
+/*}*/
 
 .notAssignedGroupList {
     max-height: 20vh;
@@ -131,10 +125,10 @@
     right: 10px;
 }
 
-.gradersContainer {
-    width: 100%;
-    height: 60%;
-}
+/*.gradersContainer {*/
+/*    width: 100%;*/
+/*    height: 60%;*/
+/*}*/
 
 .graderCard {
     width: 100%;
@@ -229,6 +223,190 @@
 }
 
 
-/*::-webkit-scrollbar {*/
-/*    display: none;*/
-/*}*/
+
+
+
+
+
+
+
+
+
+/* modal */
+.modalContainer {
+    padding: 2rem 2rem 1rem 2rem;
+    max-height: calc(100vh - 3.5rem);
+}
+
+.modalHeaderContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.modalHeaderContainer h2 {
+    margin: 0;
+}
+
+.modalHeaderContainerButton {
+    cursor: pointer;
+    color: darkishGray
+}
+
+.modalDescriptionContainer {
+    margin: 1rem 0;
+}
+
+.modalBodyContainer {
+    overflow: scroll;
+    max-height: 30rem;
+}
+
+.modalBodyContainerRow {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 0.5rem 0;
+
+    border: 1px solid moderateGray;
+
+    cursor: pointer;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.modalBodyContainerRow span {
+    margin-left: 0.5rem;
+}
+
+.modalBodyContainerRowActive {
+    /*background-color: primary;*/
+    /*color: white;*/
+    border: 1px solid primary;
+}
+
+.modalBodyContainerRowActive > *:first-child {
+    color: primary;
+}
+
+.modalFooterContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+
+    padding-top: 1rem;
+    margin-top: 1rem;
+
+    border-top: 1px solid lightGray;
+}
+
+.modalFooterContainerButtonGroup {
+
+}
+
+.modalFooterContainerButtonGroup > *:first-child {
+    margin-right: 0.5rem;
+}
+
+
+
+
+/* graders */
+.gradersContainer {
+
+}
+
+.notAssignedContainer {
+
+}
+
+
+
+
+/* grader card */
+.graderContainer {
+    margin-bottom: 1rem;
+}
+
+.graderBodyContainer {
+
+}
+
+.graderHeader {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    /*margin-bottom: 1rem;*/
+}
+
+.graderHeader h4 {
+    margin: 0;
+}
+
+.graderHeaderButtonContainer {
+
+}
+
+.graderContent {
+    margin-top: 1rem;
+}
+
+.graderBodyContainerCollapsed .graderContent {
+    display: none;
+}
+
+.collapseButton {
+    transform: rotate(180deg);
+    transition: transform .1s ease-in-out;
+}
+
+.graderBodyContainerCollapsed .collapseButton {
+    transform: rotate(0deg);
+}
+
+.graderSubmissionContainer {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 0.5rem 0;
+
+    border: 1px solid moderateGray;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.outlineButton {
+    padding: 0.5rem;
+    font-size: 1.3rem;
+    border-radius: 5px;
+
+    cursor: pointer;
+    transition: all .1s ease-out;
+
+    /*margin: 1rem 0;*/
+}
+
+.outlineButton:hover {
+    background-color: ultraLightGray;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

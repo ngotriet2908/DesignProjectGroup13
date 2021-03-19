@@ -146,7 +146,7 @@ class GradeEditor extends Component {
 
 const mapStateToProps = state => {
   return {
-    user: state.user.user,
+    user: state.users.self,
     selectedElement: state.rubric.selectedElement,
     rubric: state.rubric.rubric,
     tempAssessment: state.grading.tempAssessment,
