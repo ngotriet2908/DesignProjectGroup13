@@ -13,9 +13,9 @@ import {createAssessment} from "../../redux/rubric/functions";
 import {saveAssessment, saveTempAssessment} from "../../redux/grading/actions";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
-import {ability, updateAbility} from "../permissions/ProjectAbility";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 import {setCurrentLocation} from "../../redux/navigation/actions";
+import {Can, ability, updateAbility} from "../permissions/ProjectAbility";
 
 
 class Grading extends Component {
@@ -84,6 +84,14 @@ class Grading extends Component {
         const submission = await res2.json();
         const rubric = await res3.json();
 
+        let user = submission.user
+        if (user !== null && user.privileges !== null) {
+          updateAbility(ability, user.privileges, user)
+        } else {
+          console.log("no grader or privileges found")
+        }
+        console.log(ability.rules)
+
         // console.log(assessment);
         // console.log(submission);
         // console.log(rubric);
@@ -130,7 +138,7 @@ class Grading extends Component {
         <ControlBar data={this.state.data}/>
         <div className={styles.container}>
           <FileViewer/>
-          <SideBar match={this.props.match}/>
+          <SideBar data={this.state.data} match={this.props.match}/>
         </div>
       </>
     )

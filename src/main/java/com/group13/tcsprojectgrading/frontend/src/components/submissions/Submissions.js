@@ -1,7 +1,7 @@
 import React, {Component} from "react";
 import store from "../../redux/store";
 import {URL_PREFIX} from "../../services/config";
-import {Breadcrumb, Button, ListGroup, ListGroupItem, Spinner, ButtonGroup, DropdownButton, Dropdown, FormControl} from "react-bootstrap";
+import {Button, ListGroup, ListGroupItem, Spinner, ButtonGroup, DropdownButton, Dropdown, FormControl} from "react-bootstrap";
 import {push} from "connected-react-router";
 import styles from "./submissions.module.css"
 import GroupCard from "../groups/GroupCard";
@@ -11,16 +11,27 @@ import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
 import SubmissionsOverviewCard from "./SubmissionsOverviewCard";
 import {Link} from "react-router-dom";
-import globalStyles from "../helpers/global.module.css";
+import Breadcrumbs from "../helpers/Breadcrumbs";
+
+import globalStyles from '../helpers/global.module.css';
+import {IoFileTrayOutline} from "react-icons/io5";
+import {IoSyncOutline} from "react-icons/io5";
+
+import classnames from 'classnames';
+import Card from "react-bootstrap/Card";
+import {setCurrentLocation} from "../../redux/navigation/actions";
+import {connect} from "react-redux";
+import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 
 class Submissions extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      isLoaded: false,
+
       course: {},
       project: {},
       user: {},
-      isLoading: true,
       submissions: [],
       searchString: "",
       filterGroupChoice: "",
@@ -34,7 +45,6 @@ class Submissions extends Component {
   }
   
   filterGroupSearchChange = (group) => {
-    
     let criteria = this.normalizeLowercase(group.name).includes(this.normalizeLowercase(this.state.searchString))
     if (criteria) return true
 
@@ -73,8 +83,6 @@ class Submissions extends Component {
     return false
   }
 
-
-
   handleSearchChange = (event) => {
     this.setState({
       searchString: event.target.value
@@ -103,24 +111,20 @@ class Submissions extends Component {
   }
 
   componentDidMount() {
-    this.setState({
-      isLoading: true
-    })
-    this.startThePage();
+    this.props.setCurrentLocation(LOCATIONS.submissions);
+    this.loadData();
   }
 
-  startThePage() {
+  loadData() {
     request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions`)
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        console.log(data);
+      .then(async response => {
+        let data = await response.json();
+
         this.setState({
           submissions: data.submissions,
           project: data.project,
           course: data.course,
-          isLoading: false,
+          isLoaded: true,
           user: data.user,
           filterGroupChoice: "all",
           filterAssignedChoice: "all",
@@ -129,10 +133,17 @@ class Submissions extends Component {
       })
       .catch(error => {
         console.error(error.message);
+        this.setState({
+          isLoaded: true,
+        })
       });
   }
 
   syncHandler = () => {
+    if (this.state.syncing) {
+      return;
+    }
+
     this.setState({
       syncing: true
     })
@@ -140,7 +151,7 @@ class Submissions extends Component {
     request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/syncCanvas`)
       .then(response => {
         if (response.status === 200) {
-          this.startThePage()
+          this.loadData()
         }
       })
       .catch(error => {
@@ -149,124 +160,141 @@ class Submissions extends Component {
   }
 
   render() {
+    if (!this.state.isLoaded) {
+      return(
+        <div className={globalStyles.container}>
+          <Spinner className={globalStyles.spinner} animation="border" role="status">
+            <span className="sr-only">Loading...</span>
+          </Spinner>
+        </div>
+      )
+    }
+
     return(
-      (this.state.isLoading)?
-        <Spinner className={styles.spinner} animation="border" role="status">
-          <span className="sr-only">Loading...</span>
-        </Spinner>
-        :
-        <div className={styles.container}>
-          <Breadcrumb>
-            <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumb.Item>
-            <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id ))}>
-              {this.state.course.name}
-            </Breadcrumb.Item>
-            <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id + "/projects/"+this.state.project.id))}>
-              {this.state.project.name}
-            </Breadcrumb.Item>
-            <Breadcrumb.Item active>
-              Submissions
-            </Breadcrumb.Item>
-          </Breadcrumb>
+      <div className={globalStyles.container}>
+        <Breadcrumbs>
+          <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumbs.Item>
+          <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id ))}>{this.state.course.name}</Breadcrumbs.Item>
+          <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id + "/projects/"+this.state.project.id))}>{this.state.project.name}</Breadcrumbs.Item>
+          <Breadcrumbs.Item active>Submissions</Breadcrumbs.Item>
+        </Breadcrumbs>
 
-          <div className={styles.header}>
-            {/*<h2>{this.state.project.name} tasks</h2>*/}
-          </div>
+        <div className={classnames(globalStyles.titleContainer, styles.titleContainer, this.state.syncing && styles.titleContainerIconActive)}>
+          <h1>Submissions</h1>
+          <span>
+            <IoSyncOutline onClick={this.syncHandler}/>
+          </span>
+        </div>
 
-          <div className={styles.overview}>
-            <h3>Submissions overview</h3>
-            <h6>Assigned submissions count: {this.state.submissions.length}</h6>
-            <h6>All submissions count: {this.state.submissions.length}</h6>
-            <h6>Deadline: ???</h6>
-            <h6>Overall progress: {this.calculateOverallProgress()}%</h6>
-            <Button variant="lightGreen" onClick={this.syncHandler}>
-              {(!this.state.syncing)? "Sync with Canvas":
-                <Spinner
-                  as="span"
-                  animation="grow"
-                  size="sm"
-                  role="status"
-                  aria-hidden="true"/>
-              }
-            </Button>
-          </div>
+        {/*<div className={styles.overview}>*/}
+        {/*  <h3>Submissions overview</h3>*/}
+        {/*  <h6>Assigned submissions count: {this.state.submissions.length}</h6>*/}
+        {/*  <h6>All submissions count: {this.state.submissions.length}</h6>*/}
+        {/*  <h6>Deadline: ???</h6>*/}
+        {/*  <h6>Overall progress: {this.calculateOverallProgress()}%</h6>*/}
+        {/*  <Button variant="lightGreen" onClick={this.syncHandler}>*/}
+        {/*    {(!this.state.syncing)? "Sync with Canvas":*/}
+        {/*      <Spinner*/}
+        {/*        as="span"*/}
+        {/*        animation="grow"*/}
+        {/*        size="sm"*/}
+        {/*        role="status"*/}
+        {/*        aria-hidden="true"/>*/}
+        {/*    }*/}
+        {/*  </Button>*/}
+        {/*</div>*/}
 
-          <div className={styles.tasksList}>
-            <h3>Submissions List</h3>
-            <div className={styles.toolbar}>
-              <FormControl className={styles.groupsSearchBar}
-                           type="text"
-                           placeholder="Search with group name"
-                           onChange={this.handleSearchChange}/>
+        <div className={styles.tasksList}>
+          <Card>
+            <Card.Body>
+              <h3>Submissions List</h3>
 
-              <DropdownButton
-                as={ButtonGroup}
-                key={"primary"}
-                id={`dropdown-Primary`}
-                variant={"primary"}
-                title={"Group Filter"}
-                onSelect={this.onFilterGroupSelectHandler}
-              >
+              <div className={styles.toolbar}>
+                <FormControl className={styles.groupsSearchBar}
+                  type="text"
+                  placeholder="Search with a group name"
+                  onChange={this.handleSearchChange}/>
 
-                {["all", "divider", "group", "individual"].map((filterS) => {
-                  if (filterS === "divider") {
-                    return <Dropdown.Divider key={filterS}/>
-                  } else if (filterS === this.state.filterGroupChoice) {
-                    return <Dropdown.Item key={filterS} eventKey={filterS} active>{filterS}</Dropdown.Item>
-                  } else {
-                    return <Dropdown.Item key={filterS} eventKey={filterS}>{filterS}</Dropdown.Item>
-                  }
-                })}
-              </DropdownButton>
+                <DropdownButton
+                  as={ButtonGroup}
+                  key={"primary"}
+                  id={`dropdown-Primary`}
+                  variant={"lightGreen"}
+                  title={"Group Filter"}
+                  onSelect={this.onFilterGroupSelectHandler}
+                >
 
-              <DropdownButton
-                as={ButtonGroup}
-                key={"assigned-primary"}
-                id={`assigned-dropdown-Primary`}
-                variant={"primary"}
-                title={"Assigned Filter"}
-                onSelect={this.onFilterAssignedSelectHandler}
-              >
+                  {["all", "divider", "group", "individual"].map((filterS) => {
+                    if (filterS === "divider") {
+                      return <Dropdown.Divider key={filterS}/>
+                    } else if (filterS === this.state.filterGroupChoice) {
+                      return <Dropdown.Item variant="lightGreen" key={filterS} eventKey={filterS} active>{filterS}</Dropdown.Item>
+                    } else {
+                      return <Dropdown.Item key={filterS} eventKey={filterS}>{filterS}</Dropdown.Item>
+                    }
+                  })}
+                </DropdownButton>
 
-                {["all", "divider", "yours", "not yours"].map((filterS) => {
-                  if (filterS === "divider") {
-                    return <Dropdown.Divider key={filterS}/>
-                  } else if (filterS === this.state.filterAssignedChoice) {
-                    return <Dropdown.Item key={filterS} eventKey={filterS} active>{filterS}</Dropdown.Item>
-                  } else {
-                    return <Dropdown.Item key={filterS} eventKey={filterS}>{filterS}</Dropdown.Item>
-                  }
-                })}
-              </DropdownButton>
-            </div>
+                <DropdownButton
+                  as={ButtonGroup}
+                  key={"assigned-primary"}
+                  id={`assigned-dropdown-Primary`}
+                  variant={"lightGreen"}
+                  title={"Assigned Filter"}
+                  onSelect={this.onFilterAssignedSelectHandler}
+                >
 
-            <li className={styles.tasksContainer}>
-              {
-                this.state.submissions
-                  .filter((group) => {
-                    return this.filterGroupDropDown(group) &&
+                  {["all", "divider", "yours", "not yours"].map((filterS) => {
+                    if (filterS === "divider") {
+                      return <Dropdown.Divider key={filterS}/>
+                    } else if (filterS === this.state.filterAssignedChoice) {
+                      return <Dropdown.Item key={filterS} eventKey={filterS} active>{filterS}</Dropdown.Item>
+                    } else {
+                      return <Dropdown.Item key={filterS} eventKey={filterS}>{filterS}</Dropdown.Item>
+                    }
+                  })}
+                </DropdownButton>
+              </div>
+
+              <div className={styles.tasksContainer}>
+                {
+                  this.state.submissions
+                    .filter((group) => {
+                      return this.filterGroupDropDown(group) &&
                       this.filterAssignedDropDown(group) &&
                       this.filterGroupSearchChange(group);
-                  })
+                    })
                   // .sort((group1, group2) => {
                   //   // console.log(this.compareFunction(group1, group2, ["name"]))
                   //   return this.compareFunction(group1, group2,
                   //     [{criterion: "isGroup", order: false}, {criterion: "name", order: true}])
                   // })
-                  .map((submission) => {
-                    return (
-                      <ul key={submission.stringId} className={styles.ul}>
-                        {<SubmissionsOverviewCard user={this.state.user} submission={submission} route={this.props.match}/>}
-                      </ul>
-                    )
-                  })}
-            </li>
-          </div>
-
+                    .map((submission) => {
+                      return (
+                        // <div key={submission.stringId} className={styles.ul}>
+                        //   {
+                        <SubmissionsOverviewCard
+                          key={submission.stringId}
+                          user={this.state.user}
+                          submission={submission}
+                          route={this.props.match}/>
+                      // }
+                        // </div>
+                      )
+                    })}
+              </div>
+            </Card.Body>
+          </Card>
         </div>
+
+      </div>
     )
   }
 
 }
 
-export default Submissions;
+const actionCreators = {
+  setCurrentLocation
+}
+
+export default connect(null, actionCreators)(Submissions)

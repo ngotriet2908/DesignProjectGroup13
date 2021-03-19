@@ -32,9 +32,9 @@ public class SubmissionService {
 
         if (currentSubmission != null) {
             submission.setGrader(currentSubmission.getGrader());
+        } else {
+            gradingService.saveAssessment(submission.getProject().getProjectId(), submission.getId());
         }
-
-        gradingService.saveAssessment(submission.getProject().getProjectId(), submission.getId());
         return repository.save(submission);
     }
 

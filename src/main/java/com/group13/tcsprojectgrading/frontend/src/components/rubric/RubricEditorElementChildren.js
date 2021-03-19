@@ -12,6 +12,7 @@ import { findBlocks, findCriteria, isBlock, isCriterion} from "./helpers";
 import {v4 as uuidv4} from "uuid";
 import Button from "react-bootstrap/Button";
 import {FaPlus} from "react-icons/fa";
+import {IoAdd} from "react-icons/io5";
 
 class RubricEditorElementChildren extends Component {
   constructor (props) {
@@ -67,7 +68,10 @@ class RubricEditorElementChildren extends Component {
         <div className={styles.viewerSectionContainer}>
           <div className={styles.viewerSectionTitle}>
             <h4>Subsections</h4>
-            <Button className={styles.viewerSectionContainerButton} variant="primary" onClick={this.onClickNewBlock}><FaPlus/></Button>
+            {/*<Button className={styles.viewerSectionContainerButton} variant="primary" onClick={this.onClickNewBlock}><FaPlus/></Button>*/}
+            <div className={styles.viewerSectionContainerIcon}>
+              <IoAdd size={28} onClick={this.onClickNewBlock}/>
+            </div>
           </div>
           {findBlocks(this.props.data.children) ?
             this.props.data.children.map((child => {
@@ -91,7 +95,10 @@ class RubricEditorElementChildren extends Component {
         <div className={styles.viewerSectionContainer}>
           <div className={styles.viewerSectionTitle}>
             <h4>Criteria</h4>
-            <Button className={styles.viewerSectionContainerButton} variant="primary" onClick={this.onClickNewCriterion}><FaPlus/></Button>
+            <div className={styles.viewerSectionContainerIcon}>
+              <IoAdd size={28} onClick={this.onClickNewCriterion}/>
+            </div>
+            {/*<Button className={styles.viewerSectionContainerButton} variant="primary" onClick={this.onClickNewCriterion}><FaPlus/></Button>*/}
           </div>
           {findCriteria(this.props.data.children) ?
             this.props.data.children.map((child => {

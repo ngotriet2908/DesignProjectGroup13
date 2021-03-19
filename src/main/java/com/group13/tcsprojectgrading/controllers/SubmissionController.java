@@ -199,7 +199,8 @@ public class SubmissionController {
     @GetMapping(value = "/{id}")
     protected JsonNode getSubmissionInfo(@PathVariable String courseId,
                                    @PathVariable String projectId,
-                                   @PathVariable String id
+                                   @PathVariable String id,
+                                    Principal principal
 //                                   @RequestParam Map<String, String> queryParameters
     ) throws JsonProcessingException {
         String projectResponse = this.canvasApi.getCanvasCoursesApi().getCourseProject(courseId, projectId);
@@ -257,7 +258,10 @@ public class SubmissionController {
             node.set("members", memberships);
         }
         resultNode.set("submission", node);
-
+        Grader grader = graderService.getGraderFromGraderId(principal.getName(), project);
+        if (grader != null) {
+            resultNode.set("user", grader.getGraderJson());
+        }
         return resultNode;
     }
 }

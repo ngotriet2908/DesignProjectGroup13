@@ -1,7 +1,9 @@
 import React, {Component} from "react";
-import {Route, Switch} from "react-router-dom";
+import {Redirect, Route, Switch} from "react-router-dom";
 import Course from "./Course";
 import ProjectRoutes from "../project/ProjectRoutes";
+import {URL_PREFIX} from "../../services/config";
+import NotFound from "../error/NotFound";
 
 
 class CourseRoutes extends Component {
@@ -11,12 +13,14 @@ class CourseRoutes extends Component {
 
   render () {
     return (
-      // <div>
       <Switch>
         <Route exact path={this.props.match.path + ""} component={Course}/>
         <Route path={this.props.match.path + "/projects/:projectId"} component={ProjectRoutes}/>
+        <Route>
+          <Redirect to={URL_PREFIX + "/404/"}/>
+          <NotFound/>
+        </Route>
       </Switch>
-      // </div>
     )
   }
 }

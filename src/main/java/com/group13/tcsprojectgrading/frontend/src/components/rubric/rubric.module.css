@@ -1,4 +1,4 @@
-@value primary, secondary, ternary, quaternary, quinary, ultraLightGray, primaryShade, lightGray, darkishGray, moderateGray from '../helpers/colors.css';
+@value primary, secondary, ternary, quaternary, quinary, senary, ultraLightGray, primaryShade, lightGray, darkishGray, moderateGray from '../helpers/colors.css';
 
 .container {
     width: 100%;
@@ -177,8 +177,21 @@
     margin: 0;
 }
 
-.viewerHeader button {
+.viewerHeaderIcon {
     margin-left: 0.5rem;
+    cursor: pointer;
+}
+
+.viewerHeaderIconGreen {
+    color: primary;
+}
+
+.viewerHeaderIconOrange {
+    color: quaternary;
+}
+
+.viewerHeaderIconRed {
+    color: senary;
 }
 
 .viewerSectionContainer {
@@ -190,8 +203,10 @@
     padding: 0.4rem 0;
 }
 
-.viewerSectionContainerButton {
+.viewerSectionContainerIcon {
     margin-left: 0.5rem;
+    color: primary;
+    cursor: pointer;
 }
 
 .viewerSectionTitle {

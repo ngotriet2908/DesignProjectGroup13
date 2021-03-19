@@ -4,6 +4,7 @@ import {createBrowserHistory} from 'history'
 import {routerMiddleware} from 'connected-react-router'
 import { persistStore, persistReducer } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
+// import thunk from 'redux-thunk';
 
 const persistConfig = {
   key: 'root',
@@ -20,6 +21,7 @@ export const store = createStore(
   compose(
     applyMiddleware(
       routerMiddleware(history), // allows dispatching of history actions
+      // thunk
     ),
     window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
   ),

@@ -56,6 +56,11 @@ public class TcsProjectGradingApplication {
             Privilege adminToolBarView = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.ADMIN_TOOLBAR_VIEW.toString());
             Privilege todoListView = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.TODO_LIST_VIEW.toString());
 
+            Privilege gradingWriteSingle = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.GRADING_WRITE_SINGLE.toString());
+            Privilege gradingWriteAll = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.GRADING_WRITE_ALL.toString());
+            Privilege gradingRead = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.GRADING_READ.toString());
+
+
             Role teacherRole = roleService.addRoleIfNotExist(
                     RoleEnum.TEACHER.toString(),
                     List.of(
@@ -66,7 +71,9 @@ public class TcsProjectGradingApplication {
                             statsRead,
                             adminToolBarView,
                             todoListView,
-                            statsWrite
+                            statsWrite,
+                            gradingRead,
+                            gradingWriteSingle
                             )
             );
 

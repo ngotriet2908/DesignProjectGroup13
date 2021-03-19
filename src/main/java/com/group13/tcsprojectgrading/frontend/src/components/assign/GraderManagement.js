@@ -1,19 +1,23 @@
 import styles from "./assign.module.css";
 import React, {Component} from "react";
-import GraderCard from "./GraderCard";
 import {ListGroup, ListGroupItem} from "react-bootstrap";
 import TaskCard from "./TaskCard";
 import {notAssignedGroupsData, gradersData} from './GradersData'
 import {Button, Card, FormControl, Modal, Alert, Spinner, Breadcrumb} from 'react-bootstrap'
 import {request} from "../../services/request";
 import {BASE, COURSES, PROJECT, USER_COURSES} from "../../services/endpoints";
-import AssigningModal from "./AssigningModal";
 import { withRouter } from 'react-router-dom'
 import EditGradersModal from "./EditGradersModal";
 import store from "../../redux/store";
 import {URL_PREFIX} from "../../services/config";
 import {push} from "connected-react-router";
 import BulkAssignModal from "./BulkAssignModal";
+import globalStyles from "../helpers/global.module.css";
+import Breadcrumbs from "../helpers/Breadcrumbs";
+import classnames from "classnames";
+import {IoSyncOutline} from "react-icons/io5";
+import Grader from "./Grader";
+import AssignSubmissionModal from "./AssignSubmissionModal";
 
 
 class GraderManagement extends Component {
@@ -27,7 +31,7 @@ class GraderManagement extends Component {
       groupsFilterString: "",
       gradersFilterString: "",
       hideSearch: true,
-      isLoading: true,
+      isLoaded: false,
       syncing: false,
 
       //return tasks modal
@@ -42,7 +46,6 @@ class GraderManagement extends Component {
       modalAssignShow: false,
       modalAssignGrader: null,
       modalAssignTask: null,
-      modalAssignIsFromNotAssigned: false,
       modalAssignGraderChoice: null,
 
       //edit tasks modal
@@ -59,12 +62,6 @@ class GraderManagement extends Component {
   }
 
   componentDidMount () {
-    console.log("Grader Management mounted.")
-    console.log(this.props)
-    this.setState({
-      isLoading: true
-    })
-
     request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId)
       .then(response => {
         return response.json();
@@ -75,19 +72,12 @@ class GraderManagement extends Component {
           project: data.project,
           course: data.course,
         })
-
-        this.props.saveRubric(data.rubric);
       })
       .catch(error => {
         console.error(error.message);
       });
 
     this.projectManagementHandler()
-
-    // this.setState({
-    //   graders : gradersData,
-    //   notAssigned: notAssignedGroupsData,
-    // })
   }
 
   syncHandler = () => {
@@ -127,7 +117,7 @@ class GraderManagement extends Component {
         this.setState({
           graders: data.graders,
           notAssigned: data.notAssigned,
-          isLoading: false,
+          isLoaded: true,
           syncing: false,
         })
       })
@@ -153,66 +143,45 @@ class GraderManagement extends Component {
     })
   }
 
-  modalAssignHandleClose = (event) => {
+  modalAssignHandleClose = () => {
     this.setState({
       modalAssignShow: false,
       modalAssignGrader: null,
       modalAssignTask: null,
-      modalAssignIsFromNotAssigned: false
     })
   }
 
-  modalAssignHandleShow = (grader, group, isFromNotAssigned) => {
+  modalAssignHandleShow = (grader, group) => {
+    // console.log(grader);
+    // console.log(group);
+
     this.setState({
       modalAssignShow: true,
       modalAssignGrader: grader,
       modalAssignTask: group,
-      modalAssignIsFromNotAssigned: isFromNotAssigned
+      modalAssignGraderChoice: grader,
     })
   }
 
-  modalAssignHandleAccept = (choice) => {
-    // alert("assign to: " + choice.name)
-
-    this.handleAssignTask(
-      this.state.modalAssignGrader,
-      this.state.modalAssignIsFromNotAssigned,
-      choice,
-      this.state.modalAssignTask)
-
-    this.setState({
-      modalAssignShow: false,
-      modalAssignGrader: null,
-      modalAssignTask: null,
-      modalAssignIsFromNotAssigned: false
-    })
-  }
-
-  modalAssignHandleReturnTask = () => {
-    this.showAlertOnScreen(`Return ${this.state.modalAssignTask.name} from ${this.state.modalAssignGrader.name} to Not Assigned`)
-
-    this.handleReturnTask(
-      this.state.modalAssignGrader,
-      this.state.modalAssignTask)
-
-    this.setState({
-      modalAssignShow: false,
-      modalAssignGrader: null,
-      modalAssignTask: null,
-      modalAssignIsFromNotAssigned: false
-    })
-  }
-
-  handleReturnTask = (grader, task) => {
-    request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management/assign/${task.id}/notAssigned`)
+  modalAssignHandleAccept = (submission, grader) => {
+    request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management/assign/${submission.id}/${grader.id}`)
       .then(response => {
         return response.json();
       })
       .then(data => {
-        this.showAlertOnScreen(`Return ${task.name} to not assigned from ${grader.name}`)
+
+        // if (isFromNotAssigned) {
+        //   this.showAlertOnScreen(`Assigned ${task.name} to ${toGrader.name} from Not Assigned`)
+        // } else {
+        //   this.showAlertOnScreen(`Assigned ${task.name} to ${toGrader.name} from ${fromGrader.name}`)
+        // }
+
         this.setState({
           graders: data.graders,
-          notAssigned: data.notAssigned
+          notAssigned: data.notAssigned,
+          modalAssignShow: false,
+          modalAssignGrader: null,
+          modalAssignTask: null,
         })
       })
       .catch(error => {
@@ -220,21 +189,21 @@ class GraderManagement extends Component {
       });
   }
 
-  handleAssignTask = (fromGrader, isFromNotAssigned,toGrader, task) => {
-    request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management/assign/${task.id}/${toGrader.id}`)
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        console.log(data);
-        if (isFromNotAssigned) {
-          this.showAlertOnScreen(`Assigned ${task.name} to ${toGrader.name} from Not Assigned`)
-        } else {
-          this.showAlertOnScreen(`Assigned ${task.name} to ${toGrader.name} from ${fromGrader.name}`)
-        }
+  modalAssignHandleReturnTask = (submission) => {
+    // this.showAlertOnScreen(`Return ${this.state.modalAssignTask.name} from ${this.state.modalAssignGrader.name} to Not Assigned`)
+
+    request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management/assign/${submission.id}/notAssigned`)
+      .then(async response => {
+        let data = await response.json();
+
         this.setState({
           graders: data.graders,
-          notAssigned: data.notAssigned
+          notAssigned: data.notAssigned,
+
+          modalAssignShow: false,
+          modalAssignGrader: null,
+          modalAssignTask: null,
+          modalAssignGraderChoice: null,
         })
       })
       .catch(error => {
@@ -277,10 +246,6 @@ class GraderManagement extends Component {
     this.setState({
       groupsFilterString : event.target.value
     })
-  }
-
-  onGroupClicked = (group, grader, isFromNotAssigned) => {
-    this.modalAssignHandleShow(grader, group, isFromNotAssigned)
   }
 
   containsObject(obj, list) {
@@ -474,183 +439,206 @@ class GraderManagement extends Component {
       });
   }
 
+  setModalAssignChoice = (grade) => {
+    this.setState({
+      modalAssignGraderChoice: grade
+    })
+  }
+
   render () {
-    return (
-      (this.state.isLoading)?
-        <Spinner className={styles.spinner} animation="border" role="status">
-          <span className="sr-only">Loading...</span>
-        </Spinner>
-        :
-        <div className={styles.graderManagement}>
-          {(!this.state.alertShow)? null :
-            <Alert variant="success" onClose={() => {this.setState({alertShow:false})}} dismissible>
-              <p>
-                {this.state.alertBody}
-              </p>
-            </Alert>}
-          <Breadcrumb>
-            <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumb.Item>
-            <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id ))}>
-              {this.state.course.name}
-            </Breadcrumb.Item>
-            <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id + "/projects/"+this.state.project.id))}>
-              {this.state.project.name}
-            </Breadcrumb.Item>
-            <Breadcrumb.Item active>
-            Manage Graders
-            </Breadcrumb.Item>
-          </Breadcrumb>
-
-          <Card border="secondary" className={styles.gradersCardContainer}>
-            <div className={styles.manageTaToolbar}>
-              <h3 className={styles.subtitle} >Manage Graders</h3>
-              <FormControl className={styles.manageTaSearch}
-                type="text"
-                placeholder="Search for grader or group name"
-                onChange={this.handleGraderSearchChange}/>
-
-              <Button className={styles.manageTaToolbarButton}
-                variant="primary"
-                onClick={this.modalEditGradersHandleShow}>
-              edit graders
-              </Button>
-              <Button className={styles.manageTaToolbarButton}
-                variant="primary"
-                onClick={null}>
-              sort
-              </Button>
-              <Button className={styles.manageTaToolbarButton}
-                      variant="primary"
-                      onClick={this.syncHandler}>
-                {(!this.state.syncing)? "Sync with Canvas":
-                  <Spinner
-                    as="span"
-                    animation="grow"
-                    size="sm"
-                    role="status"
-                    aria-hidden="true"/>
-                }
-              </Button>
-            </div>
-
-            <div className={styles.gradersContainer}>
-              {/*<h3>Assigned to Graders</h3>*/}
-              <Card border="secondary" className={styles.gradersListContainer}>
-                <ul className={styles.grader_ul}>
-                  {this.state.graders
-                    .filter((grader) => {
-                      let filterStringTmp = this.state.gradersFilterString.toLowerCase()
-                      return (grader.name.toLowerCase().includes(filterStringTmp)
-                      || grader.groups.reduce(((result, group) => result || group.name.toLowerCase().includes(filterStringTmp)),false))
-                    })
-                    .map(grader => {
-                      return (
-                        <li className={styles.grader_li} key={grader.id}>
-                          <GraderCard grader={grader}
-                            onReturnClicked={() => this.modalGraderHandleShow(grader)}
-                            onClickFunc={this.onGroupClicked}
-                          />
-                        </li>
-                      )
-                    })}
-                </ul>
-              </Card>
-            </div>
-          </Card>
-
-
-          <Card border="secondary" className={styles.notAssignedContainer}>
-            <div className={styles.notAssignedToolbar}>
-              <h4 className={styles.notAssignedText}>Not assigned </h4>
-              <Button className={styles.notAssignedButton}
-                variant="primary"
-                onClick={this.handleHideSearch}>
-                search
-              </Button>
-              {(this.state.hideSearch) ? null :
-                <FormControl className={styles.notAssignedToolBarSearch}
-                  type="text"
-                  placeholder="Normal text"
-                  onChange={this.handleSearchChange}/>
-              }
-              <Button className={styles.notAssignedButton}
-                variant="primary"
-                onClick={this.modalBulkAssignHandleShow}>
-                bulk assign
-              </Button>
-              <h5 className={styles.notAssignedCount}> Submissions: {this.state.notAssigned.length}</h5>
-            </div>
-
-            <ListGroup className={styles.notAssignedGroupList}>
-              {this.state.notAssigned
-                .filter((group) => {
-                  return group.name.toLowerCase().includes(this.state.groupsFilterString.toLowerCase())
-                })
-                .map(group => {
-                  return (
-                    <ListGroupItem
-                      key={group.id}
-                      className={styles.listGroupItemCustom}
-                      action onClick={() => this.onGroupClicked(group, null, true)} >
-                      {<TaskCard data={group}/>}
-                    </ListGroupItem>
-                  )
-                })}
-            </ListGroup>
-          </Card>
-
-          {/*Are you sure return tasks Modal*/}
-          <Modal show={this.state.modalGraderShow} onHide={this.modalGraderHandleClose}>
-            <Modal.Header closeButton>
-              <Modal.Title>Are you sure?</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>You are returning {(this.state.modalGraderObj != null)? this.state.modalGraderObj.name : null}'s tasks. This action can't be undone</Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={this.modalGraderHandleClose}>
-              Close
-              </Button>
-              <Button variant="primary" onClick={this.modalGraderHandleAccept}>
-              Return tasks
-              </Button>
-            </Modal.Footer>
-          </Modal>
-
-          <AssigningModal
-            show={this.state.modalAssignShow}
-            graders={this.state.graders}
-            notAssigned={this.state.notAssigned}
-            onClose={this.modalAssignHandleClose}
-            onAccept={this.modalAssignHandleAccept}
-            currentGrader={this.state.modalAssignGrader}
-            taskGroup={this.state.modalAssignTask}
-            isFromNotAssigned={this.state.modalAssignIsFromNotAssigned}
-            onReturnTask={this.modalAssignHandleReturnTask}
-          />
-
-          <EditGradersModal
-            show={this.state.modalEditGradersShow}
-            activeGraders={this.state.modalEditGradersActiveGraders}
-            availableGraders={this.state.modalEditGradersAvailableGraders}
-            onClickDeactive={this.modalEditGradersHandleDeactive}
-            onClickActive={this.modalEditGradersHandleActive}
-            onClose={this.modalEditGradersHandleClose}
-            onAccept={this.modalEditGradersHandleAccept}
-            hasTask={this.hasTasks}
-
-            showAlert={this.state.modalEditShowAlert}
-            alertBody={this.state.modalEditAlertBody}
-            closeAlertHandle={this.modalEditGradersHandleCloseAlert}
-          />
-
-          <BulkAssignModal
-            show={this.state.modalBulkAssignShow}
-            graders={this.state.graders}
-            notAssigned={this.state.notAssigned}
-            onClose={this.modalBulkAssignHandleClose}
-            onAccept={this.modalBulkAssignHandleAccept}
-          />
-
+    if (!this.state.isLoaded) {
+      return(
+        <div className={globalStyles.container}>
+          <Spinner className={globalStyles.spinner} animation="border" role="status">
+            <span className="sr-only">Loading...</span>
+          </Spinner>
         </div>
+      )
+    }
+
+    return (
+      <div className={globalStyles.container}>
+        <Breadcrumbs>
+          <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumbs.Item>
+          <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id ))}>{this.state.course.name}</Breadcrumbs.Item>
+          <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id + "/projects/"+this.state.project.id))}>{this.state.project.name}</Breadcrumbs.Item>
+          <Breadcrumbs.Item active>Graders</Breadcrumbs.Item>
+        </Breadcrumbs>
+
+        {/*{(!this.state.alertShow)? null :*/}
+        {/*  <Alert variant="success" onClose={() => {this.setState({alertShow:false})}} dismissible>*/}
+        {/*    <p>*/}
+        {/*      {this.state.alertBody}*/}
+        {/*    </p>*/}
+        {/*  </Alert>*/}
+        {/*}*/}
+
+        <div className={classnames(globalStyles.titleContainer, styles.titleContainer)}>
+          <h1>Graders</h1>
+        </div>
+
+        {/*<Card className={styles.gradersCardContainer}>*/}
+        {/*<div className={styles.manageTaToolbar}>*/}
+        {/*  <h3 className={styles.subtitle} >Manage Graders</h3>*/}
+        {/*  <FormControl className={styles.manageTaSearch}*/}
+        {/*    type="text"*/}
+        {/*    placeholder="Search for grader or group name"*/}
+        {/*    onChange={this.handleGraderSearchChange}/>*/}
+
+        {/*  <Button className={styles.manageTaToolbarButton}*/}
+        {/*    variant="primary"*/}
+        {/*    onClick={null}>*/}
+        {/*    sort*/}
+        {/*  </Button>*/}
+
+        {/*</div>*/}
+        {/*</Card>*/}
+
+        {/* assigned */}
+        <div className={styles.gradersContainer}>
+          {
+            this.state.graders
+            // .filter((grader) => {
+            //   let filterStringTmp = this.state.gradersFilterString.toLowerCase()
+            //   return (grader.name.toLowerCase().includes(filterStringTmp)
+            //     || grader.groups.reduce(((result, group) => result || group.name.toLowerCase().includes(filterStringTmp)),false))
+            // })
+              .map(grader => {
+                return (
+                  <Grader
+                    key={grader.id}
+                    name={grader.name}
+                    grader={grader}
+                    submissions={grader.groups}
+                    openAssignModal={this.modalAssignHandleShow}
+                    // onReturnClicked={() => this.modalGraderHandleShow(grader)}
+                  />
+                )
+              })}
+        </div>
+
+        {/* not assigned */}
+        <div className={styles.notAssignedContainer}>
+          <Grader
+            name={"Not assigned"}
+            submissions={this.state.notAssigned}
+            openAssignModal={this.modalAssignHandleShow}
+            grader={null}
+          />
+        </div>
+
+        <Button className={styles.manageTaToolbarButton}
+          variant="primary"
+          onClick={this.modalEditGradersHandleShow}>
+          edit graders
+        </Button>
+
+        <Button className={styles.manageTaToolbarButton}
+          variant="primary"
+          onClick={this.syncHandler}>
+          {(!this.state.syncing)? "Sync with Canvas":
+            <Spinner
+              as="span"
+              animation="grow"
+              size="sm"
+              role="status"
+              aria-hidden="true"/>
+          }
+        </Button>
+
+
+        {/*<Card className={styles.notAssignedContainer}>*/}
+        {/*<div className={styles.notAssignedToolbar}>*/}
+        {/*  <h4 className={styles.notAssignedText}>Not assigned </h4>*/}
+        {/*  <Button className={styles.notAssignedButton}*/}
+        {/*    variant="primary"*/}
+        {/*    onClick={this.handleHideSearch}>*/}
+        {/*      search*/}
+        {/*  </Button>*/}
+        {/*  {(this.state.hideSearch) ? null :*/}
+        {/*    <FormControl className={styles.notAssignedToolBarSearch}*/}
+        {/*      type="text"*/}
+        {/*      placeholder="Normal text"*/}
+        {/*      onChange={this.handleSearchChange}/>*/}
+        {/*  }*/}
+        {/*  <Button className={styles.notAssignedButton}*/}
+        {/*    variant="primary"*/}
+        {/*    onClick={this.modalBulkAssignHandleShow}>*/}
+        {/*      bulk assign*/}
+        {/*  </Button>*/}
+        {/*  <h5 className={styles.notAssignedCount}> Submissions: {this.state.notAssigned.length}</h5>*/}
+        {/*</div>*/}
+
+        {/*<ListGroup className={styles.notAssignedGroupList}>*/}
+        {/*  {this.state.notAssigned*/}
+        {/*    .filter((group) => {*/}
+        {/*      return group.name.toLowerCase().includes(this.state.groupsFilterString.toLowerCase())*/}
+        {/*    })*/}
+        {/*    .map(group => {*/}
+        {/*      return (*/}
+        {/*        <ListGroupItem*/}
+        {/*          key={group.id}*/}
+        {/*          className={styles.listGroupItemCustom}*/}
+        {/*          action onClick={() => this.onGroupClicked(group, null, true)} >*/}
+        {/*          {<TaskCard data={group}/>}*/}
+        {/*        </ListGroupItem>*/}
+        {/*      )*/}
+        {/*    })}*/}
+        {/*</ListGroup>*/}
+        {/*</Card>*/}
+
+        <Modal show={this.state.modalGraderShow} onHide={this.modalGraderHandleClose}>
+          <Modal.Header closeButton>
+            <Modal.Title>Are you sure?</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>You are returning {(this.state.modalGraderObj != null)? this.state.modalGraderObj.name : null}'s tasks. This action can't be undone</Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={this.modalGraderHandleClose}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={this.modalGraderHandleAccept}>
+              Return tasks
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        {/* assign submissions modal */}
+        <AssignSubmissionModal
+          show={this.state.modalAssignShow}
+          graders={this.state.graders}
+          notAssigned={this.state.notAssigned}
+          onClose={this.modalAssignHandleClose}
+          onAccept={this.modalAssignHandleAccept}
+          currentGrader={this.state.modalAssignGrader}
+          taskGroup={this.state.modalAssignTask}
+          onReturnTask={this.modalAssignHandleReturnTask}
+          choice={this.state.modalAssignGraderChoice}
+          setModalAssignChoice={this.setModalAssignChoice}
+        />
+
+        <EditGradersModal
+          show={this.state.modalEditGradersShow}
+          activeGraders={this.state.modalEditGradersActiveGraders}
+          availableGraders={this.state.modalEditGradersAvailableGraders}
+          onClickDeactive={this.modalEditGradersHandleDeactive}
+          onClickActive={this.modalEditGradersHandleActive}
+          onClose={this.modalEditGradersHandleClose}
+          onAccept={this.modalEditGradersHandleAccept}
+          hasTask={this.hasTasks}
+          showAlert={this.state.modalEditShowAlert}
+          alertBody={this.state.modalEditAlertBody}
+          closeAlertHandle={this.modalEditGradersHandleCloseAlert}
+        />
+
+        {/*<BulkAssignModal*/}
+        {/*  show={this.state.modalBulkAssignShow}*/}
+        {/*  graders={this.state.graders}*/}
+        {/*  notAssigned={this.state.notAssigned}*/}
+        {/*  onClose={this.modalBulkAssignHandleClose}*/}
+        {/*  onAccept={this.modalBulkAssignHandleAccept}*/}
+        {/*/>*/}
+
+      </div>
     )
   }
 }

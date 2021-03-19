@@ -1,14 +1,5 @@
 @value primary, secondary, ternary, quaternary, quinary, ultraLightGray, primaryShade, lightGray, darkishGray, moderateGray from '../helpers/colors.css';
 
-
-
-
-
-
-
-
-
-
 .container {
     display: grid;
     grid-template-columns: 47% 47%;
@@ -52,19 +43,6 @@
 
 .sectionTitle {
     margin-bottom: 0.8rem;
-}
-
-.ul {
-    margin-top: 1rem;
-    padding-inline-start: 0;
-    display: flex;
-}
-
-.li {
-    display: inline;
-    list-style-type: none;
-    padding-right: 1rem;
-    float: left;
 }
 
 .card {

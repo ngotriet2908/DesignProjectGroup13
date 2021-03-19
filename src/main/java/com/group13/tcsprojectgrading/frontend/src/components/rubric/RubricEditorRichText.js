@@ -56,11 +56,11 @@ class RubricEditorRichText extends Component {
   }
 
   onTextEditorChange = (editorState) => {
-
     this.setState({
       editorState: editorState
     })
 
+    // TODO initial change
     this.props.alterCriterionText(this.props.element.content.id, stateToHTML(editorState.getCurrentContent()));
   }
 

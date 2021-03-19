@@ -6,7 +6,7 @@ import {goBack, push} from "connected-react-router";
 import {URL_PREFIX} from "../../services/config";
 import {request} from "../../services/request";
 import {connect} from "react-redux";
-import {removeUser} from "../../redux/user/actions";
+import {removeUserSelf} from "../../redux/user/actions";
 import {
   IoHomeOutline,
   IoGrid,
@@ -15,7 +15,8 @@ import {
   IoBookOutline,
   IoCreateOutline,
   IoReturnDownBackOutline,
-  IoPencilSharp
+  IoPencilSharp,
+  IoListOutline
 } from "react-icons/io5";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 import classnames from 'classnames';
@@ -91,7 +92,7 @@ class Sidebar extends React.Component {
     if  (this.props.location === LOCATIONS.home) {
       // home
       result.push(
-        <div className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={this.onClickLogo}>
+        <div key="home" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={this.onClickLogo}>
           <div className={styles.sidebarBodyItemLeft}>
             <IoHomeOutline className={styles.sidebarIcon} size={26}/>
           </div>
@@ -174,6 +175,21 @@ class Sidebar extends React.Component {
           }
         </div>)
       )
+    } else if (this.props.location === LOCATIONS.submissions) {
+      // submissions
+      result.push(
+        (<div key="submissions" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
+        }}>
+          <div className={styles.sidebarBodyItemLeft}>
+            <IoListOutline className={styles.sidebarIcon} size={26}/>
+          </div>
+          {!this.state.isHidden &&
+          <span className={styles.sidebarBodyItemRight}>
+                    Submissions
+          </span>
+          }
+        </div>)
+      )
     }
     // }
 
@@ -241,9 +257,9 @@ class Sidebar extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    user: state.user.user,
+    user: state.users.self,
     location: state.navigation.location
   };
 };
 
-export default connect(mapStateToProps, {removeUser})(Sidebar)
+export default connect(mapStateToProps, {removeUser: removeUserSelf})(Sidebar)
