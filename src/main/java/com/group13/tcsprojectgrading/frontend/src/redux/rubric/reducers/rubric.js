@@ -14,6 +14,7 @@ import {
   deleteAllElements,
   deleteElement
 } from "../functions";
+import {isSimilarUpdate, OPERATION, TYPE} from "../updates";
 
 const initialState = {
   selectedElement: null,
@@ -21,6 +22,7 @@ const initialState = {
   rubricTemp: null,
   rubricPath: [],
   isEditing: false,
+  updates: []
 };
 
 export default function(state = initialState, action) {
@@ -98,14 +100,56 @@ export default function(state = initialState, action) {
   }
   case ALTER_CRITERION_TEXT: {
     const newRubric = changeText(state.rubric, action.payload.id, action.payload.newText)
+    const updates = [...state.updates]
+
+    const newUpdate = {
+      op: OPERATION.replace,
+      type: TYPE.criterionText,
+      id: action.payload.id,
+      value: action.payload.newText
+    }
+
+    if (updates.length > 0) {
+      const lastUpdate = updates[updates.length - 1]
+
+      if (isSimilarUpdate(lastUpdate, newUpdate)) {
+        updates[updates.length - 1] = newUpdate
+      } else {
+        updates.push(newUpdate)
+      }
+    } else {
+      updates.push(newUpdate)
+    }
 
     return {
       ...state,
-      rubric: newRubric
+      rubric: newRubric,
+      updates: updates
     };
   }
   case ALTER_CRITERION_GRADE: {
     const newRubric = changeGrade(state.rubric, action.payload.id, action.payload.newGrade)
+
+    const updates = [...state.updates]
+
+    const newUpdate = {
+      op: OPERATION.replace,
+      type: TYPE.criterionGrade,
+      id: action.payload.id,
+      value: action.payload.newGrade
+    }
+
+    if (updates.length > 0) {
+      const lastUpdate = updates[updates.length - 1]
+
+      if (isSimilarUpdate(lastUpdate, newUpdate)) {
+        updates[updates.length - 1] = newUpdate
+      } else {
+        updates.push(newUpdate)
+      }
+    } else {
+      updates.push(newUpdate)
+    }
 
     return {
       ...state,

@@ -487,26 +487,10 @@ class GraderManagement extends Component {
 
         {/*  <Button className={styles.manageTaToolbarButton}*/}
         {/*    variant="primary"*/}
-        {/*    onClick={this.modalEditGradersHandleShow}>*/}
-        {/*    edit graders*/}
-        {/*  </Button>*/}
-        {/*  <Button className={styles.manageTaToolbarButton}*/}
-        {/*    variant="primary"*/}
         {/*    onClick={null}>*/}
         {/*    sort*/}
         {/*  </Button>*/}
-        {/*  <Button className={styles.manageTaToolbarButton}*/}
-        {/*    variant="primary"*/}
-        {/*    onClick={this.syncHandler}>*/}
-        {/*    {(!this.state.syncing)? "Sync with Canvas":*/}
-        {/*      <Spinner*/}
-        {/*        as="span"*/}
-        {/*        animation="grow"*/}
-        {/*        size="sm"*/}
-        {/*        role="status"*/}
-        {/*        aria-hidden="true"/>*/}
-        {/*    }*/}
-        {/*  </Button>*/}
+
         {/*</div>*/}
         {/*</Card>*/}
 
@@ -542,6 +526,25 @@ class GraderManagement extends Component {
             grader={null}
           />
         </div>
+
+        <Button className={styles.manageTaToolbarButton}
+          variant="primary"
+          onClick={this.modalEditGradersHandleShow}>
+          edit graders
+        </Button>
+
+        <Button className={styles.manageTaToolbarButton}
+          variant="primary"
+          onClick={this.syncHandler}>
+          {(!this.state.syncing)? "Sync with Canvas":
+            <Spinner
+              as="span"
+              animation="grow"
+              size="sm"
+              role="status"
+              aria-hidden="true"/>
+          }
+        </Button>
 
 
         {/*<Card className={styles.notAssignedContainer}>*/}
@@ -584,20 +587,20 @@ class GraderManagement extends Component {
         {/*</ListGroup>*/}
         {/*</Card>*/}
 
-        {/*<Modal show={this.state.modalGraderShow} onHide={this.modalGraderHandleClose}>*/}
-        {/*  <Modal.Header closeButton>*/}
-        {/*    <Modal.Title>Are you sure?</Modal.Title>*/}
-        {/*  </Modal.Header>*/}
-        {/*  <Modal.Body>You are returning {(this.state.modalGraderObj != null)? this.state.modalGraderObj.name : null}'s tasks. This action can't be undone</Modal.Body>*/}
-        {/*  <Modal.Footer>*/}
-        {/*    <Button variant="secondary" onClick={this.modalGraderHandleClose}>*/}
-        {/*      Close*/}
-        {/*    </Button>*/}
-        {/*    <Button variant="primary" onClick={this.modalGraderHandleAccept}>*/}
-        {/*      Return tasks*/}
-        {/*    </Button>*/}
-        {/*  </Modal.Footer>*/}
-        {/*</Modal>*/}
+        <Modal show={this.state.modalGraderShow} onHide={this.modalGraderHandleClose}>
+          <Modal.Header closeButton>
+            <Modal.Title>Are you sure?</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>You are returning {(this.state.modalGraderObj != null)? this.state.modalGraderObj.name : null}'s tasks. This action can't be undone</Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={this.modalGraderHandleClose}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={this.modalGraderHandleAccept}>
+              Return tasks
+            </Button>
+          </Modal.Footer>
+        </Modal>
 
         {/* assign submissions modal */}
         <AssignSubmissionModal
@@ -613,20 +616,19 @@ class GraderManagement extends Component {
           setModalAssignChoice={this.setModalAssignChoice}
         />
 
-        {/*<EditGradersModal*/}
-        {/*  show={this.state.modalEditGradersShow}*/}
-        {/*  activeGraders={this.state.modalEditGradersActiveGraders}*/}
-        {/*  availableGraders={this.state.modalEditGradersAvailableGraders}*/}
-        {/*  onClickDeactive={this.modalEditGradersHandleDeactive}*/}
-        {/*  onClickActive={this.modalEditGradersHandleActive}*/}
-        {/*  onClose={this.modalEditGradersHandleClose}*/}
-        {/*  onAccept={this.modalEditGradersHandleAccept}*/}
-        {/*  hasTask={this.hasTasks}*/}
-
-        {/*  showAlert={this.state.modalEditShowAlert}*/}
-        {/*  alertBody={this.state.modalEditAlertBody}*/}
-        {/*  closeAlertHandle={this.modalEditGradersHandleCloseAlert}*/}
-        {/*/>*/}
+        <EditGradersModal
+          show={this.state.modalEditGradersShow}
+          activeGraders={this.state.modalEditGradersActiveGraders}
+          availableGraders={this.state.modalEditGradersAvailableGraders}
+          onClickDeactive={this.modalEditGradersHandleDeactive}
+          onClickActive={this.modalEditGradersHandleActive}
+          onClose={this.modalEditGradersHandleClose}
+          onAccept={this.modalEditGradersHandleAccept}
+          hasTask={this.hasTasks}
+          showAlert={this.state.modalEditShowAlert}
+          alertBody={this.state.modalEditAlertBody}
+          closeAlertHandle={this.modalEditGradersHandleCloseAlert}
+        />
 
         {/*<BulkAssignModal*/}
         {/*  show={this.state.modalBulkAssignShow}*/}
