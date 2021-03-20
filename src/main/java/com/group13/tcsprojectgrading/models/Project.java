@@ -1,5 +1,9 @@
 package com.group13.tcsprojectgrading.models;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
@@ -24,11 +28,23 @@ public class Project {
     private List<Grader> graders;
 
     @OneToMany(mappedBy = "project")
+    private List<Participant> participants;
+
+    @OneToMany(mappedBy = "project")
     private List<Submission> submissions;
 
-    public Project(String courseId, String projectId) {
+    private String name;
+
+    private String description;
+
+    private String createAt;
+
+    public Project(String courseId, String projectId, String name, String description, String createAt) {
         this.courseId = courseId;
         this.projectId = projectId;
+        this.name = name;
+        this.description = description;
+        this.createAt = createAt;
     }
 
     public Project() {
@@ -70,12 +86,55 @@ public class Project {
         this.graders = graders;
     }
 
+    public List<Participant> getParticipants() {
+        return participants;
+    }
+
+    public void setParticipants(List<Participant> participants) {
+        this.participants = participants;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getCreateAt() {
+        return createAt;
+    }
+
+    public void setCreateAt(String createAt) {
+        this.createAt = createAt;
+    }
+
     public List<Submission> getSubmissions() {
         return submissions;
     }
 
     public void setSubmissions(List<Submission> submissions) {
         this.submissions = submissions;
+    }
+
+    public JsonNode convertToJson() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("courseId", courseId);
+        objectNode.put("id", projectId);
+        objectNode.put("name", name);
+        objectNode.put("createAt", createAt);
+        objectNode.put("description", description);
+        return objectNode;
     }
 
     @Override

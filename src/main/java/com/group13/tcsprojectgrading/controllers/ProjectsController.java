@@ -7,19 +7,13 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.Message;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.*;
-import com.group13.tcsprojectgrading.models.grading.SubmissionAssessment;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.services.*;
-import com.group13.tcsprojectgrading.services.grading.GradingService;
+import com.group13.tcsprojectgrading.services.grading.AssessmentService;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
 //import com.itextpdf.text.*;
 //import com.itextpdf.text.pdf.PdfWriter;
@@ -77,10 +71,12 @@ public class ProjectsController {
     private final FlagService flagService;
     private final GoogleAuthorizationCodeFlow flow;
     private final SubmissionService submissionService;
-    private final GradingService gradingService;
+    private final ParticipantService participantService;
+    private final AssessmentLinkerService assessmentLinkerService;
+    private final AssessmentService assessmentService;
 
     @Autowired
-    public ProjectsController(CanvasApi canvasApi, ActivityService activityService, RubricService rubricService, ProjectService projectService, RoleService roleService, GraderService graderService, ProjectRoleService projectRoleService, FlagService flagService, GoogleAuthorizationCodeFlow flow, SubmissionService submissionService, GradingService gradingService) {
+    public ProjectsController(CanvasApi canvasApi, ActivityService activityService, RubricService rubricService, ProjectService projectService, RoleService roleService, GraderService graderService, ProjectRoleService projectRoleService, FlagService flagService, GoogleAuthorizationCodeFlow flow, SubmissionService submissionService, ParticipantService participantService, AssessmentLinkerService assessmentLinkerService, AssessmentService assessmentService) {
         this.canvasApi = canvasApi;
         this.activityService = activityService;
         this.rubricService = rubricService;
@@ -91,7 +87,9 @@ public class ProjectsController {
         this.flagService = flagService;
         this.flow = flow;
         this.submissionService = submissionService;
-        this.gradingService = gradingService;
+        this.participantService = participantService;
+        this.assessmentLinkerService = assessmentLinkerService;
+        this.assessmentService = assessmentService;
     }
 
     @RequestMapping(value = "/{projectId}", method = RequestMethod.GET, produces = "application/json")
@@ -104,11 +102,9 @@ public class ProjectsController {
             );
         }
 
-        String projectResponse = this.canvasApi.getCanvasCoursesApi().getCourseProject(courseId, projectId);
         String courseResponse = this.canvasApi.getCanvasCoursesApi().getUserCourse(courseId);
 
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode projectJson = objectMapper.readTree(projectResponse);
         JsonNode courseJson = objectMapper.readTree(courseResponse);
 
         projectService.addProjectRoles(project);
@@ -164,13 +160,10 @@ public class ProjectsController {
 
             ObjectNode resultJson = objectMapper.createObjectNode();
             resultJson.set("course", courseJson);
-            resultJson.set("project", projectJson);
+            resultJson.set("project", project.convertToJson());
             resultJson.set("grader", graderNode);
-            if (projectResponse == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            } else {
-                return new ResponseEntity<>(resultJson, HttpStatus.OK);
-            }
+
+            return new ResponseEntity<>(resultJson, HttpStatus.OK);
         }
 
         JsonNode graderNode = grader.getGraderJson();
@@ -187,7 +180,7 @@ public class ProjectsController {
 
         ObjectNode resultJson = objectMapper.createObjectNode();
         resultJson.set("course", courseJson);
-        resultJson.set("project", projectJson);
+        resultJson.set("project", project.convertToJson());
         resultJson.set("rubric", rubricJson);
         resultJson.set("grader", graderNode);
 
@@ -196,23 +189,136 @@ public class ProjectsController {
         SimpleDateFormat format = new SimpleDateFormat(
                 "yyyy-MM-dd'T'HH:mm:ss'Z'");
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
-        Timestamp createdAt = new Timestamp(format.parse(projectJson.get("created_at").asText()).getTime());
+        Timestamp createdAt = new Timestamp(format.parse(project.getCreateAt()).getTime());
 
         Activity activity = new Activity(
                 project,
                 principal.getName(),
                 timestamp,
-                projectJson.get("name").asText(),
+                project.getName(),
                 createdAt
         );
 
         activityService.addOrUpdateActivity(activity);
 
-        if (projectResponse == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        } else {
-            return new ResponseEntity<>(resultJson, HttpStatus.OK);
+        return new ResponseEntity<>(resultJson, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/{projectId}/syncCanvas")
+    protected void syncWithCanvas(@PathVariable String courseId,
+                                  @PathVariable String projectId,
+                                  Principal principal) throws JsonProcessingException {
+
+        Project project = projectService.getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "project not found"
+            );
         }
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<Grader> graders = graderService.getGraderFromProject(project);
+        List<String> submissionsString = this.canvasApi.getCanvasCoursesApi().getSubmissionsInfo(courseId, Long.parseLong(projectId));
+        List<String> studentsString = this.canvasApi.getCanvasCoursesApi().getCourseStudents(courseId);
+
+        ArrayNode studentArray = groupPages(objectMapper, studentsString);
+        for (Iterator<JsonNode> it = studentArray.elements(); it.hasNext(); ) {
+            JsonNode jsonNode = it.next();
+
+            participantService.addNewParticipant(new Participant(
+                    jsonNode.get("id").asText(),
+                    project,
+                    jsonNode.get("name").asText(),
+                    jsonNode.get("email").asText(),
+                    jsonNode.get("login_id").asText()
+                    )
+            );
+        }
+
+        ArrayNode submissionArray = groupPages(objectMapper, submissionsString);
+        Map<String, List<Participant>> groupToParticipant = new HashMap<>();
+        Map<String, Submission> groupToSubmissionMap = new HashMap<>();
+
+        for (Iterator<JsonNode> it = submissionArray.elements(); it.hasNext(); ) {
+            JsonNode jsonNode = it.next();
+
+            if (jsonNode.get("workflow_state").asText().equals("unsubmitted")) continue;
+            Participant participant = participantService.findParticipantWithId(jsonNode.get("user_id").asText(), project);
+            if (participant == null) continue;
+
+            System.out.println(jsonNode.get("submission_comments").toString());
+            System.out.println(jsonNode.get("attachments").toString());
+
+            if (jsonNode.get("group").get("id") == null || jsonNode.get("group").get("id").asText().equals("null")) {
+                Submission submission = submissionService.addNewSubmission(
+                        project,
+                        participant.getName(),
+                        Submission.NULL,
+                        jsonNode.get("submitted_at").asText(),
+                        participant.getName() + " on " + jsonNode.get("submitted_at").asText(),
+                        jsonNode.get("submission_comments").toString(),
+                        jsonNode.get("attachments").toString()
+                );
+
+                if (submission == null) continue;
+
+                UUID assessmentId = UUID.randomUUID();
+                AssessmentLinker assessmentLinker = assessmentLinkerService.addNewAssessment(
+                        new AssessmentLinker(
+                                submission,
+                                participant,
+                                assessmentId
+                        )
+                );
+                assessmentService.saveAssessment(assessmentLinker);
+            } else {
+                if (!groupToSubmissionMap.containsKey(jsonNode.get("group").get("id").asText())) {
+                    Submission submission = new Submission(
+                            jsonNode.get("submitted_at").asText(),
+                            Submission.NULL,
+                            jsonNode.get("group").get("id").asText(),
+                            project,
+                            jsonNode.get("group").get("name").asText() + " on " + jsonNode.get("submitted_at").asText(),
+                            jsonNode.get("submission_comments").toString(),
+                            jsonNode.get("attachments").toString()
+                    );
+                    groupToSubmissionMap.put(jsonNode.get("group").get("id").asText(), submission);
+                    List<Participant> participants = new ArrayList<>();
+                    participants.add(participant);
+                    groupToParticipant.put(jsonNode.get("group").get("id").asText(), participants);
+                } else {
+                    groupToParticipant.get(jsonNode.get("group").get("id").asText()).add(participant);
+                }
+            }
+        }
+
+        for(Map.Entry<String, Submission> entry: groupToSubmissionMap.entrySet()) {
+
+            Submission submission = submissionService.addNewSubmission(
+                    entry.getValue().getProject(),
+                    entry.getValue().getUserId(),
+                    entry.getValue().getGroupId(),
+                    entry.getValue().getDate(),
+                    entry.getValue().getName(),
+                    entry.getValue().getComments(),
+                    entry.getValue().getAttachments()
+            );
+
+            if (submission == null) continue;
+
+            UUID assessmentId = UUID.randomUUID();
+            System.out.println("size: " + groupToParticipant.get(entry.getValue().getGroupId()).size());
+            for(Participant participant: groupToParticipant.get(entry.getValue().getGroupId())) {
+                AssessmentLinker assessmentLinker = assessmentLinkerService.addNewAssessment(new AssessmentLinker(
+                        submission,
+                        participant,
+                        assessmentId
+                ));
+
+                assessmentService.saveAssessment(assessmentLinker);
+            }
+        }
+
     }
 
     @PostMapping(value = "/{projectId}/feedback")
@@ -274,7 +380,10 @@ public class ProjectsController {
 
         document.getPdfDocument();
 
-        SubmissionAssessment submissionAssessment = gradingService.getAssessmentByProjectIdAndUserId(project.getProjectId(), body);
+        Participant participant = participantService.findParticipantWithId(id, project);
+        Submission submission = submissionService.findSubmissionById(body);
+
+        Assessment submissionAssessment = assessmentService.getAssessmentBySubmissionAndParticipant(submission, participant);
         PdfUtils pdfUtils = new PdfUtils(document, rubricService.getRubricById(projectId), submissionAssessment
                 );
         pdfUtils.generatePdfOfFeedback();
@@ -332,29 +441,15 @@ public class ProjectsController {
         Document document = new Document(pdfDocument, PageSize.A4);
 
         document.getPdfDocument();
-        PdfFont fontSubject = PdfFontFactory.createFont(FontConstants.COURIER);
 
-        PdfFont fontBody = PdfFontFactory.createFont(FontConstants.COURIER);
-        Paragraph preface = new Paragraph();
-        addEmptyLine(preface, 1);
+        Participant participant = participantService.findParticipantWithId(id, project);
+        Submission submission = submissionService.findSubmissionById(body);
 
-        Paragraph paragraph = new Paragraph(subject).setFont(fontSubject).setFontSize(22);
-        preface.add(paragraph);
-        addEmptyLine(preface, 2);
-
-        paragraph = new Paragraph(subject).setFont(fontSubject).setFontSize(13);
-        preface.add(paragraph);
-
-        document.add(preface);
+        Assessment submissionAssessment = assessmentService.getAssessmentBySubmissionAndParticipant(submission, participant);
+        PdfUtils pdfUtils = new PdfUtils(document, rubricService.getRubricById(projectId), submissionAssessment
+        );
+        pdfUtils.generatePdfOfFeedback();
         document.close();
-//        sendMessage(service, "me", createEmail(
-//                "ngotriet2908@gmail.com",
-////                "o.khavrona@student.utwente.nl",
-//                "me",
-//                subject,
-//                body
-//
-//        ));
 
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(this.canvasApi.getCanvasUsersApi().getAccountWithId(id));

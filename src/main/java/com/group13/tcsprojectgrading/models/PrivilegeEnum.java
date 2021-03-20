@@ -17,7 +17,7 @@ public enum PrivilegeEnum {
     GRADING_WRITE_ALL("Grading_write_all"),
     GRADING_WRITE_SINGLE("Grading_write_assigned"),
     GRADING_READ("Grading_read")
-
+    
     ;
 
     private final String name;

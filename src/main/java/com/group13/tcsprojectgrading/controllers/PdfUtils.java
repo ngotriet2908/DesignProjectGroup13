@@ -1,8 +1,8 @@
 package com.group13.tcsprojectgrading.controllers;
 
+import com.group13.tcsprojectgrading.models.Assessment;
 import com.group13.tcsprojectgrading.models.grading.CriterionGrade;
 import com.group13.tcsprojectgrading.models.grading.Grade;
-import com.group13.tcsprojectgrading.models.grading.SubmissionAssessment;
 import com.group13.tcsprojectgrading.models.rubric.Element;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.models.rubric.RubricContent;
@@ -22,11 +22,11 @@ import static com.group13.tcsprojectgrading.controllers.ProjectsController.addEm
 public class PdfUtils {
     private Document document;
     private Rubric rubric;
-    private SubmissionAssessment assessment;
+    private Assessment assessment;
     private Map<String, NodeInfo> nodeInfoMap;
     private int maxLevel;
 
-    public PdfUtils(Document document, Rubric rubric, SubmissionAssessment assessment) {
+    public PdfUtils(Document document, Rubric rubric, Assessment assessment) {
         this.document = document;
         this.rubric = rubric;
         this.assessment = assessment;

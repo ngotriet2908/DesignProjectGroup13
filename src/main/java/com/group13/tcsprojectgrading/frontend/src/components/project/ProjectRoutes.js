@@ -25,7 +25,7 @@ class ProjectRoutes extends Component {
         <Route exact path={this.props.match.path + "/graders"} component={GraderManagement}/>
         {/*<Route path={this.props.match.path + "/grading"} component={Grading}/>*/}
         {/*<Route path={this.props.match.path + "/tasks/:taskId/grading"} component={Grading}/>*/}
-        <Route exact path={this.props.match.path + "/submissions/:submissionId/grading"} component={Grading}/>
+        <Route exact path={this.props.match.path + "/submissions/:submissionId/:assessmentId/grading"} component={Grading}/>
         <Route exact path={this.props.match.path + "/submissions/:submissionId"} component={SubmissionDetails}/>
         <Route exact path={this.props.match.path + "/submissions"} component={Submissions}/>
         <Route exact path={this.props.match.path + "/feedback"} component={Feedback}/>

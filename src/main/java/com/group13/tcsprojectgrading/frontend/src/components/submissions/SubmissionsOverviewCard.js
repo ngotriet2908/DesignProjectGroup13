@@ -46,7 +46,7 @@ class SubmissionsOverviewCard extends Component {
             }
 
             <div className={styles.submissionCardHeaderButtonContainer}>
-              <div onClick={() => store.dispatch(push(this.props.route.url + "/" + this.props.submission.id + "/grading"))}>
+              <div onClick={() => store.dispatch(push(this.props.route.url + "/" + this.props.submission.id))}>
                 <IoArrowForward size={26}/>
               </div>
             </div>

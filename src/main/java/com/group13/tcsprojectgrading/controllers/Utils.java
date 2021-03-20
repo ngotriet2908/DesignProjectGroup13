@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.group13.tcsprojectgrading.models.grading.SubmissionAssessment;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
 
 import javax.swing.text.Document;
@@ -22,6 +21,7 @@ public class Utils {
                 arrayNode.add(node);
             }
         }
+        System.out.println(arrayNode.toString());
         return arrayNode;
     }
 

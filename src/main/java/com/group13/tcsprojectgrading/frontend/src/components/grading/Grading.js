@@ -37,7 +37,7 @@ class Grading extends Component {
   }
 
   getCurrentAssessment = () => {
-    request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/grading`)
+    request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/${this.props.match.params.assessmentId}/grading`)
       .then(async(response) => {
 
         if (response.status !== 404) {
@@ -76,7 +76,7 @@ class Grading extends Component {
 
     // TODO, ignores passed data
     Promise.all([
-      request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/grading`),
+      request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/${this.props.match.params.assessmentId}/grading`),
       request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}`),
       request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/rubric`)
     ])

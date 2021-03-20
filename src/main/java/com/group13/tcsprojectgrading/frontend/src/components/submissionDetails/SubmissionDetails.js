@@ -69,20 +69,6 @@ class SubmissionDetails extends Component {
 
           <div className={styles.header}>
             <h2>{this.state.submission.name}</h2>
-            <Button variant="primary" className={styles.gradingButton}>
-              <Link
-                className={styles.plainLink}
-                to={
-                  {
-                    pathname: URL_PREFIX + `/courses/${this.state.course.id}/projects/${this.state.project.id}/submissions/${this.state.submission.id}/grading`,
-                    data: {
-                      "submission": this.state.submission,
-                      "submissionCanvas": this.state.submission
-                    }
-                  }}>
-                Grade
-              </Link>
-            </Button>
           </div>
 
           <div className={styles.bodyContainer}>
@@ -94,10 +80,9 @@ class SubmissionDetails extends Component {
                   </Card.Title>
                   <Card>
                     <Card.Body>
-                      <h6>Id: {this.state.submission.stringId}</h6>
-                      <h6>Status: {this.state.submission.workflow_state}</h6>
-                      <h6>Attempts: {this.state.submission.attempt}</h6>
-                      <h6>Submitted at: {this.state.submission.submitted_at}</h6>
+                      <h6>Id: {this.state.submission.id}</h6>
+                      <h6>name: {this.state.submission.name}</h6>
+                      <h6>Submitted at: {this.state.submission.submittedAt}</h6>
                       <h6>Progress: {this.state.submission.progress}</h6>
                       {(this.state.submission.grader == null)? null : <h6>Assigned to: {this.state.submission.grader.name}</h6>}
                     </Card.Body>
@@ -162,7 +147,7 @@ class SubmissionDetails extends Component {
                 </Card.Body>
               </Card>
             </div>
-            {(this.state.submission.members == null) ? null :
+            {(this.state.submission.participants == null) ? null :
               <div className={styles.memberContainer}>
                 <Card>
                   <Card.Body>
@@ -170,13 +155,58 @@ class SubmissionDetails extends Component {
                       Members
                     </Card.Title>
                     <ListGroup>
-                      {this.state.submission.members.map((member) => {
+                      {this.state.submission.participants.map((member) => {
                         return (
                           <ListGroupItem>
                             <div className={styles.memberItem}>
                               <h6>name: {member.name}</h6>
-                              <h6>sid: {member.login_id}</h6>
-                              {/*<h6>email: {member.email}</h6>*/}
+                              <h6>sid: {member.sid}</h6>
+                              <h6>email: {member.email}</h6>
+                            </div>
+                          </ListGroupItem>)
+                      })}
+                    </ListGroup>
+                  </Card.Body>
+                </Card>
+              </div>
+            }
+
+            {(this.state.submission.assessments == null) ? null :
+              <div className={styles.memberContainer}>
+                <Card>
+                  <Card.Body>
+                    <Card.Title>
+                      Assessments
+                    </Card.Title>
+                    <ListGroup>
+                      {this.state.submission.assessments.map((assessment) => {
+                        return (
+                          <ListGroupItem>
+                            <div className={styles.memberItem}>
+                              <h6>id: {assessment.id}</h6>
+                              <Button variant="primary" className={styles.gradingButton}>
+                                <Link
+                                  className={styles.plainLink}
+                                  to={
+                                    {
+                                      pathname: URL_PREFIX + `/courses/${this.state.course.id}/projects/${this.state.project.id}/submissions/${this.state.submission.id}/${assessment.id}/grading`,
+                                      data: {
+                                        "submission": this.state.submission,
+                                      }
+                                    }}>
+                                  Grade
+                                </Link>
+                              </Button>
+                              <ListGroup>
+                                {assessment.participants.map((participant) => {
+                                  return (
+                                    <ListGroupItem>
+                                      <div className={styles.memberItem}>
+                                        <h6>name: {participant.name}</h6>
+                                      </div>
+                                    </ListGroupItem>)
+                                })}
+                              </ListGroup>
                             </div>
                           </ListGroupItem>)
                       })}
