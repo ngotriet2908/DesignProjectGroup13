@@ -29,12 +29,27 @@ public class Grader {
     @ManyToMany
     private Collection<ProjectRole> projectRoles;
 
+    @OneToMany(mappedBy = "grader")
+    private Collection<Flag> flags = new ArrayList<>();
+
     public Grader(Project project, String userId, String name, ProjectRole role) {
         this.project = project;
         this.userId = userId;
         this.name = name;
         List<ProjectRole> roles = new ArrayList<>();
         roles.add(role);
+        this.projectRoles = roles;
+    }
+
+    public Grader(Project project, String userId, String name, ProjectRole role, Flag flag) {
+        this.project = project;
+        this.userId = userId;
+        this.name = name;
+        List<ProjectRole> roles = new ArrayList<>();
+        roles.add(role);
+        List<Flag> flags = new ArrayList<>();
+        flags.add(flag);
+        this.flags = flags;
         this.projectRoles = roles;
     }
 
@@ -86,6 +101,14 @@ public class Grader {
 
     public void setProjectRoles(Collection<ProjectRole> projectRoles) {
         this.projectRoles = projectRoles;
+    }
+
+    public Collection<Flag> getFlags() {
+        return flags;
+    }
+
+    public void setFlags(Collection<Flag> flags) {
+        this.flags = flags;
     }
 
     public ArrayNode getRolesArrayNode() {

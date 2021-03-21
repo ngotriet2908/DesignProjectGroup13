@@ -4,14 +4,11 @@ package com.group13.tcsprojectgrading.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
+import com.group13.tcsprojectgrading.models.*;
 import com.group13.tcsprojectgrading.models.grading.CriterionGrade;
 import com.group13.tcsprojectgrading.models.grading.Grade;
-import com.group13.tcsprojectgrading.models.grading.SubmissionAssessment;
-import com.group13.tcsprojectgrading.services.ActivityService;
-import com.group13.tcsprojectgrading.services.GraderService;
-import com.group13.tcsprojectgrading.services.ProjectService;
-import com.group13.tcsprojectgrading.services.SubmissionService;
-import com.group13.tcsprojectgrading.services.grading.GradingService;
+import com.group13.tcsprojectgrading.services.*;
+import com.group13.tcsprojectgrading.services.grading.AssessmentService;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/courses/{courseId}/projects/{projectId}/submissions/{userId}/grading")
+@RequestMapping("/api/courses/{courseId}/projects/{projectId}/submissions/{submissionId}/{assessmentId}/grading")
 public class GradingController {
     private final CanvasApi canvasApi;
 
@@ -31,28 +28,40 @@ public class GradingController {
     private final RubricService rubricService;
     private final GraderService graderService;
     private final ProjectService projectService;
-    private final GradingService gradingService;
     private final SubmissionService submissionService;
+    private final AssessmentService assessmentService;
+    private final AssessmentLinkerService assessmentLinkerService;
+    private final ParticipantService participantService;
 
     @Autowired
-    public GradingController(CanvasApi canvasApi, ActivityService activityService, RubricService rubricService,
-                             GraderService graderService , ProjectService projectService, GradingService gradingService,
-                             SubmissionService submissionService) {
+    public GradingController(CanvasApi canvasApi, ActivityService activityService, RubricService rubricService, GraderService graderService, ProjectService projectService, SubmissionService submissionService, AssessmentService assessmentService, AssessmentLinkerService assessmentLinkerService, ParticipantService participantService) {
         this.canvasApi = canvasApi;
         this.activityService = activityService;
         this.rubricService = rubricService;
         this.graderService = graderService;
         this.projectService = projectService;
-        this.gradingService = gradingService;
         this.submissionService = submissionService;
+        this.assessmentService = assessmentService;
+        this.assessmentLinkerService = assessmentLinkerService;
+        this.participantService = participantService;
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
-    protected ResponseEntity<String> getAssessment(@PathVariable String courseId, @PathVariable String projectId, @PathVariable String userId)
+    protected ResponseEntity<String> getAssessment(@PathVariable String courseId,
+                                                   @PathVariable String projectId,
+                                                   @PathVariable String submissionId,
+                                                   @PathVariable String assessmentId)
             throws JsonProcessingException {
-//        Project project = projectService.getProjectById(courseId, projectId);
-//        Submission submission = submissionService.findSubmissionById(userId);
-        SubmissionAssessment submissionAssessment = gradingService.getAssessmentByProjectIdAndUserId(projectId, userId);
+        Project project = projectService.getProjectById(courseId, projectId);
+        Submission submission = submissionService.findSubmissionById(submissionId);
+        List<Assessment> assessmentList = assessmentService.getAssessmentBySubmission(submission);
+
+        Assessment submissionAssessment = assessmentService.getAssessmentById(assessmentId);
+
+        if (!assessmentList.contains(submissionAssessment)) {
+            System.out.println("here");
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
 
         if (submissionAssessment == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -65,11 +74,23 @@ public class GradingController {
 
     @RequestMapping(value = "/{criterionId}", method = RequestMethod.PUT)
     protected ResponseEntity<String> alterCriterionAssessment(
-            @PathVariable String courseId, @PathVariable String projectId,
-            @PathVariable String userId, @PathVariable String criterionId,
+            @PathVariable String courseId,
+            @PathVariable String projectId,
+            @PathVariable String submissionId,
+            @PathVariable String assessmentId,
+            @PathVariable String criterionId,
             @RequestBody Grade newGrade
             ) {
-        SubmissionAssessment submissionAssessment = gradingService.getAssessmentByProjectIdAndUserId(projectId, userId);
+        Project project = projectService.getProjectById(courseId, projectId);
+        Submission submission = submissionService.findSubmissionById(submissionId);
+        List<Assessment> assessmentList = assessmentService.getAssessmentBySubmission(submission);
+
+        Assessment submissionAssessment = assessmentService.getAssessmentById(assessmentId);
+
+        if (!assessmentList.contains(submissionAssessment)) {
+            System.out.println("sub");
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
 
         if (submissionAssessment == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -87,18 +108,30 @@ public class GradingController {
                         ));
             }
 
-            this.gradingService.saveAssessment(submissionAssessment);
+            this.assessmentService.saveAssessment(submissionAssessment);
             return new ResponseEntity<>(HttpStatus.OK);
         }
     }
 
     @RequestMapping(value = "/{criterionId}/active/{id}", method = RequestMethod.PUT)
     protected ResponseEntity<String> updateActiveGrading(
-            @PathVariable String courseId, @PathVariable String projectId,
-            @PathVariable String userId, @PathVariable String criterionId,
+            @PathVariable String courseId,
+            @PathVariable String projectId,
+            @PathVariable String submissionId,
+            @PathVariable String assessmentId,
+            @PathVariable String criterionId,
             @PathVariable int id
     ) {
-        SubmissionAssessment submissionAssessment = gradingService.getAssessmentByProjectIdAndUserId(projectId, userId);
+        Project project = projectService.getProjectById(courseId, projectId);
+        Submission submission = submissionService.findSubmissionById(submissionId);
+        List<Assessment> assessmentList = assessmentService.getAssessmentBySubmission(submission);
+
+        Assessment submissionAssessment = assessmentService.getAssessmentById(assessmentId);
+
+        if (!assessmentList.contains(submissionAssessment)) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+
 
         if (submissionAssessment == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -111,7 +144,7 @@ public class GradingController {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
 
-            this.gradingService.saveAssessment(submissionAssessment);
+            this.assessmentService.saveAssessment(submissionAssessment);
             return new ResponseEntity<>(HttpStatus.OK);
         }
     }

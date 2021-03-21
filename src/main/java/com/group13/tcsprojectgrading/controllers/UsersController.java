@@ -9,16 +9,13 @@ import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.Activity;
 import com.group13.tcsprojectgrading.models.Project;
 import com.group13.tcsprojectgrading.models.Submission;
-import com.group13.tcsprojectgrading.services.ActivityService;
-import com.group13.tcsprojectgrading.services.GraderService;
-import com.group13.tcsprojectgrading.services.SubmissionService;
+import com.group13.tcsprojectgrading.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.websocket.server.PathParam;
 import java.security.Principal;
 import java.util.*;
 
@@ -33,12 +30,18 @@ class UsersController {
 
     private final SubmissionService submissionService;
 
+    private final ParticipantService participantService;
+
+    private final AssessmentLinkerService assessmentLinkerService;
+
     @Autowired
-    public UsersController(CanvasApi canvasApi, ActivityService activityService, GraderService graderService, SubmissionService submissionService) {
+    public UsersController(CanvasApi canvasApi, ActivityService activityService, GraderService graderService, SubmissionService submissionService, ParticipantService participantService, AssessmentLinkerService assessmentLinkerService) {
         this.canvasApi = canvasApi;
         this.activityService = activityService;
         this.graderService = graderService;
         this.submissionService = submissionService;
+        this.participantService = participantService;
+        this.assessmentLinkerService = assessmentLinkerService;
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

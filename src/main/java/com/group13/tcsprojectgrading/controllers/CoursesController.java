@@ -200,7 +200,10 @@ class CoursesController {
             JsonNode node = it.next();
             availableProjects.put(node.get("id").asText(), new Project(
                     course_id,
-                    node.get("id").asText()
+                    node.get("id").asText(),
+                    node.get("name").asText(),
+                    node.get("description").asText(),
+                    node.get("created_at").asText()
             ));
         }
 

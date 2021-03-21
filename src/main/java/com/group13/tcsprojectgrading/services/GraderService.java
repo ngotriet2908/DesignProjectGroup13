@@ -1,5 +1,6 @@
 package com.group13.tcsprojectgrading.services;
 
+import com.group13.tcsprojectgrading.models.Flag;
 import com.group13.tcsprojectgrading.models.Grader;
 import com.group13.tcsprojectgrading.models.GraderId;
 import com.group13.tcsprojectgrading.models.Project;
@@ -12,16 +13,20 @@ import java.util.List;
 @Service
 public class GraderService {
     private GraderRepository repository;
+    private FlagService flagService;
 
     @Autowired
-    public GraderService(GraderRepository repository) {
+    public GraderService(GraderRepository repository, FlagService flagService) {
         this.repository = repository;
+        this.flagService = flagService;
     }
 
     public Grader addNewGrader(Grader grader) {
         Grader grader1 = repository.findById(new GraderId(grader.getUserId(), grader.getProject().getProjectCompositeKey())).orElse(null);
         if (grader1 == null) {
-            return repository.save(grader);
+            Grader grader2 = repository.save(grader);
+            Flag flag = flagService.saveNewFlag(new Flag("Required attention", "This is a default flag", "primary", grader2));
+            return grader2;
         }
         return grader1;
     }
