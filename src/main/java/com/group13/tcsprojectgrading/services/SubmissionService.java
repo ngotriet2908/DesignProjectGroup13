@@ -1,8 +1,6 @@
 package com.group13.tcsprojectgrading.services;
 
-import com.group13.tcsprojectgrading.models.Flag;
-import com.group13.tcsprojectgrading.models.Project;
-import com.group13.tcsprojectgrading.models.Submission;
+import com.group13.tcsprojectgrading.models.*;
 import com.group13.tcsprojectgrading.repositories.SubmissionRepository;
 import com.group13.tcsprojectgrading.services.grading.AssessmentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,14 +22,14 @@ public class SubmissionService {
     }
 
     public Submission addNewSubmission(Project project, String userId, String groupId,
-                                       String date, String name, String comments, String attachments) {
+                                       String date, String name) {
         Submission currentSubmission = repository.findSubmissionByProjectAndUserIdAndGroupIdAndDate(
                 project, userId, groupId, date);
 
         if (currentSubmission != null) {
             return null;
         } else {
-            return repository.save(new Submission(date, userId, groupId, project, name, comments, attachments));
+            return repository.save(new Submission(date, userId, groupId, project, name));
         }
     }
 

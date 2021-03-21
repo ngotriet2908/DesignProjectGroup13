@@ -37,13 +37,19 @@ public class Submission {
 
     private String name;
 
-//    @Lob
-    @Column(columnDefinition="TEXT")
-    private String comments;
+////    @Lob
+//    @Column(length=8192)
+//    private String comments;
+//
+////    @Lob
+//    @Column(length=8192)
+//    private String attachments;
 
-    @Lob
-    @Column(columnDefinition="TEXT")
-    private String attachments;
+    @OneToMany(mappedBy = "submission")
+    private List<SubmissionAttachment> attachments;
+
+    @OneToMany(mappedBy = "submission")
+    private List<SubmissionComment> comments;
 
     @ManyToOne
     private Grader grader;
@@ -51,14 +57,12 @@ public class Submission {
     @ManyToMany
     private Collection<Flag> flags = new ArrayList<>();
 
-    public Submission(String date, String userId, String groupId, Project project, String name, String comments, String attachments) {
+    public Submission(String date, String userId, String groupId, Project project, String name) {
         this.date = date;
         this.userId = userId;
         this.groupId = groupId;
         this.project = project;
         this.name = name;
-        this.comments = comments;
-        this.attachments = attachments;
     }
 
     public Submission() {
@@ -136,19 +140,19 @@ public class Submission {
         this.flags = flags;
     }
 
-    public String getAttachments() {
+    public List<SubmissionAttachment> getAttachments() {
         return attachments;
     }
 
-    public void setAttachments(String attachments) {
+    public void setAttachments(List<SubmissionAttachment> attachments) {
         this.attachments = attachments;
     }
 
-    public String getComments() {
+    public List<SubmissionComment> getComments() {
         return comments;
     }
 
-    public void setComments(String comments) {
+    public void setComments(List<SubmissionComment> comments) {
         this.comments = comments;
     }
 
@@ -224,7 +228,9 @@ public class Submission {
         return node;
     }
 
-    public JsonNode convertToJsonWithDetails(List<AssessmentLinker> assessmentLinkers) throws JsonProcessingException {
+    public JsonNode convertToJsonWithDetails(List<AssessmentLinker> assessmentLinkers,
+                                             List<SubmissionAttachment> submissionAttachments,
+                                             List<SubmissionComment> submissionComments) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode node = mapper.createObjectNode();
 
@@ -249,8 +255,18 @@ public class Submission {
         node.put("progress", progress);
 //        progresses.add(progress);
         node.put("submittedAt", date);
-        node.set("submission_comments", mapper.readTree(comments));
-        node.set("attachments", mapper.readTree(attachments));
+
+        ArrayNode commentsNode = mapper.createArrayNode();
+        ArrayNode attachmentsNode = mapper.createArrayNode();
+        for(SubmissionComment comment: submissionComments) {
+            commentsNode.add(mapper.readTree(comment.getComment()));
+        }
+        for(SubmissionAttachment attachment: submissionAttachments) {
+            attachmentsNode.add(mapper.readTree(attachment.getAttachment()));
+        }
+
+        node.set("submission_comments", commentsNode);
+        node.set("attachments", attachmentsNode);
 
         List<Flag> flags = (List<Flag>) getFlags();
         ArrayNode submissionFlags = createFlagsArrayNode(flags);

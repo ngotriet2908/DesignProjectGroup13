@@ -6,8 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.flipkart.zjsonpatch.JsonPatchApplicationException;
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.Message;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
@@ -48,10 +46,6 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.GeneralSecurityException;
 import java.security.Principal;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -77,6 +71,7 @@ public class ProjectsController {
     private final ParticipantService participantService;
     private final AssessmentLinkerService assessmentLinkerService;
     private final AssessmentService assessmentService;
+    private final SubmissionDetailsService submissionDetailsService;
 
     @Autowired
     public ProjectsController(CanvasApi canvasApi, ActivityService activityService,
@@ -86,7 +81,7 @@ public class ProjectsController {
                               FlagService flagService,
 //                              GoogleAuthorizationCodeFlow flow,
                               SubmissionService submissionService, ParticipantService participantService,
-                              AssessmentLinkerService assessmentLinkerService, AssessmentService assessmentService) {
+                              AssessmentLinkerService assessmentLinkerService, AssessmentService assessmentService, SubmissionDetailsService submissionDetailsService) {
         this.canvasApi = canvasApi;
         this.activityService = activityService;
         this.rubricService = rubricService;
@@ -100,6 +95,7 @@ public class ProjectsController {
         this.participantService = participantService;
         this.assessmentLinkerService = assessmentLinkerService;
         this.assessmentService = assessmentService;
+        this.submissionDetailsService = submissionDetailsService;
     }
 
     @RequestMapping(value = "/{projectId}", method = RequestMethod.GET, produces = "application/json")
@@ -248,6 +244,8 @@ public class ProjectsController {
         ArrayNode submissionArray = groupPages(objectMapper, submissionsString);
         Map<String, List<Participant>> groupToParticipant = new HashMap<>();
         Map<String, Submission> groupToSubmissionMap = new HashMap<>();
+        Map<String, List<SubmissionComment>> groupToComments = new HashMap<>();
+        Map<String, List<SubmissionAttachment>> groupToAttachments = new HashMap<>();
 
         for (Iterator<JsonNode> it = submissionArray.elements(); it.hasNext(); ) {
             JsonNode jsonNode = it.next();
@@ -256,8 +254,19 @@ public class ProjectsController {
             Participant participant = participantService.findParticipantWithId(jsonNode.get("user_id").asText(), project);
             if (participant == null) continue;
 
-            System.out.println(jsonNode.get("submission_comments").toString());
-            System.out.println(jsonNode.get("attachments").toString());
+//            System.out.println(jsonNode.get("submission_comments").toString());
+//            System.out.println(jsonNode.get("attachments").toString());
+            List<SubmissionComment> submissionComments = new ArrayList<>();
+            for (Iterator<JsonNode> iter = jsonNode.get("submission_comments").elements(); iter.hasNext(); ) {
+                JsonNode node = iter.next();
+                submissionComments.add(new SubmissionComment(node.toString()));
+            }
+            List<SubmissionAttachment> submissionAttachments = new ArrayList<>();
+            for (Iterator<JsonNode> iter = jsonNode.get("attachments").elements(); iter.hasNext(); ) {
+                JsonNode node = iter.next();
+                submissionAttachments.add(new SubmissionAttachment(node.toString()));
+            }
+
 
             if (jsonNode.get("group").get("id") == null || jsonNode.get("group").get("id").asText().equals("null")) {
                 Submission submission = submissionService.addNewSubmission(
@@ -265,10 +274,17 @@ public class ProjectsController {
                         participant.getName(),
                         Submission.NULL,
                         jsonNode.get("submitted_at").asText(),
-                        participant.getName() + " on " + jsonNode.get("submitted_at").asText(),
-                        jsonNode.get("submission_comments").toString(),
-                        jsonNode.get("attachments").toString()
+                        participant.getName() + " on " + jsonNode.get("submitted_at").asText()
                 );
+
+                for(SubmissionComment comment: submissionComments) {
+                    comment.setSubmission(submission);
+                    submissionDetailsService.saveComment(comment);
+                }
+                for(SubmissionAttachment attachment: submissionAttachments) {
+                    attachment.setSubmission(submission);
+                    submissionDetailsService.saveAttachment(attachment);
+                }
 
                 if (submission == null) continue;
 
@@ -288,14 +304,14 @@ public class ProjectsController {
                             Submission.NULL,
                             jsonNode.get("group").get("id").asText(),
                             project,
-                            jsonNode.get("group").get("name").asText() + " on " + jsonNode.get("submitted_at").asText(),
-                            jsonNode.get("submission_comments").toString(),
-                            jsonNode.get("attachments").toString()
+                            jsonNode.get("group").get("name").asText() + " on " + jsonNode.get("submitted_at").asText()
                     );
                     groupToSubmissionMap.put(jsonNode.get("group").get("id").asText(), submission);
                     List<Participant> participants = new ArrayList<>();
                     participants.add(participant);
                     groupToParticipant.put(jsonNode.get("group").get("id").asText(), participants);
+                    groupToComments.put(jsonNode.get("group").get("id").asText(), submissionComments);
+                    groupToAttachments.put(jsonNode.get("group").get("id").asText(), submissionAttachments);
                 } else {
                     groupToParticipant.get(jsonNode.get("group").get("id").asText()).add(participant);
                 }
@@ -309,12 +325,19 @@ public class ProjectsController {
                     entry.getValue().getUserId(),
                     entry.getValue().getGroupId(),
                     entry.getValue().getDate(),
-                    entry.getValue().getName(),
-                    entry.getValue().getComments(),
-                    entry.getValue().getAttachments()
+                    entry.getValue().getName()
             );
 
             if (submission == null) continue;
+
+            for(SubmissionComment comment: groupToComments.get(entry.getKey())) {
+                comment.setSubmission(submission);
+                submissionDetailsService.saveComment(comment);
+            }
+            for(SubmissionAttachment attachment: groupToAttachments.get(entry.getKey())) {
+                attachment.setSubmission(submission);
+                submissionDetailsService.saveAttachment(attachment);
+            }
 
             UUID assessmentId = UUID.randomUUID();
             System.out.println("size: " + groupToParticipant.get(entry.getValue().getGroupId()).size());

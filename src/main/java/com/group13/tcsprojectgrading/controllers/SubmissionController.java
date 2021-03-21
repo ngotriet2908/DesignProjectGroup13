@@ -7,20 +7,17 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.*;
-import com.group13.tcsprojectgrading.models.rubric.Element;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.services.*;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
 import java.util.*;
 
-import static com.group13.tcsprojectgrading.controllers.Utils.groupPages;
 import static com.group13.tcsprojectgrading.models.Submission.createFlagsArrayNode;
 
 @RestController
@@ -34,9 +31,10 @@ public class SubmissionController {
     private final FlagService flagService;
     private final RubricService rubricService;
     private final AssessmentLinkerService assessmentLinkerService;
+    private final SubmissionDetailsService submissionDetailsService;
 
     @Autowired
-    public SubmissionController(CanvasApi canvasApi, ProjectService projectService, SubmissionService submissionService, GraderService graderService, FlagService flagService, RubricService rubricService, AssessmentLinkerService assessmentLinkerService) {
+    public SubmissionController(CanvasApi canvasApi, ProjectService projectService, SubmissionService submissionService, GraderService graderService, FlagService flagService, RubricService rubricService, AssessmentLinkerService assessmentLinkerService, SubmissionDetailsService submissionDetailsService) {
         this.canvasApi = canvasApi;
         this.projectService = projectService;
         this.submissionService = submissionService;
@@ -44,6 +42,7 @@ public class SubmissionController {
         this.flagService = flagService;
         this.rubricService = rubricService;
         this.assessmentLinkerService = assessmentLinkerService;
+        this.submissionDetailsService = submissionDetailsService;
     }
 
     @GetMapping(value = "")
@@ -140,8 +139,9 @@ public class SubmissionController {
         }
 
         List<AssessmentLinker> linkers = assessmentLinkerService.findAssessmentLinkersForSubmission(submission);
-
-        ObjectNode node = (ObjectNode) submission.convertToJsonWithDetails(linkers);
+        List<SubmissionComment> comments = submissionDetailsService.getComments(submission);
+        List<SubmissionAttachment> attachments = submissionDetailsService.getAttachments(submission);
+        ObjectNode node = (ObjectNode) submission.convertToJsonWithDetails(linkers, attachments, comments);
 //        node.put("stringId", String.format("%s/%s", (submission.getGroupId() != null)? submission.getGroupId():"individual", submission.getId()));
 //        node.put("id", submission.getId().toString());
 //        node.put("isGroup", (submission.getGroupId() != null));
