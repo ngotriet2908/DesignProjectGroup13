@@ -41,7 +41,7 @@ public class SubmissionService {
                 submission.getUserId(),
                 submission.getGroupId(),
                 submission.getDate()
-                );
+        );
         currentSubmission.setFlags(submission.getFlags());
         return repository.save(currentSubmission);
     }

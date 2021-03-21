@@ -6,14 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
-import com.group13.tcsprojectgrading.models.Grader;
-import com.group13.tcsprojectgrading.models.Project;
-import com.group13.tcsprojectgrading.models.Submission;
-import com.group13.tcsprojectgrading.models.grading.SubmissionAssessment;
-import com.group13.tcsprojectgrading.services.GraderService;
-import com.group13.tcsprojectgrading.services.ProjectService;
-import com.group13.tcsprojectgrading.services.SubmissionService;
-import com.group13.tcsprojectgrading.services.grading.GradingService;
 import com.group13.tcsprojectgrading.models.*;
 import com.group13.tcsprojectgrading.models.rubric.Element;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
@@ -42,12 +34,9 @@ public class SubmissionController {
     private final FlagService flagService;
     private final RubricService rubricService;
     private final AssessmentLinkerService assessmentLinkerService;
-    private final GradingService gradingService;
 
     @Autowired
     public SubmissionController(CanvasApi canvasApi, ProjectService projectService, SubmissionService submissionService, GraderService graderService, FlagService flagService, RubricService rubricService, AssessmentLinkerService assessmentLinkerService) {
-    public SubmissionController(CanvasApi canvasApi, ProjectService projectService, SubmissionService submissionService,
-                                GraderService graderService, GradingService gradingService) {
         this.canvasApi = canvasApi;
         this.projectService = projectService;
         this.submissionService = submissionService;
@@ -55,90 +44,6 @@ public class SubmissionController {
         this.flagService = flagService;
         this.rubricService = rubricService;
         this.assessmentLinkerService = assessmentLinkerService;
-        this.gradingService = gradingService;
-    }
-
-    @GetMapping(value = "/syncCanvas")
-    protected void syncWithCanvas(@PathVariable String courseId,
-                                      @PathVariable String projectId,
-                                      Principal principal) throws JsonProcessingException {
-
-        Project project = projectService.getProjectById(courseId, projectId);
-        if (project == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "project not found"
-            );
-        }
-
-        String projectResponse = this.canvasApi.getCanvasCoursesApi().getCourseProject(courseId, projectId);
-        ObjectMapper objectMapper = new ObjectMapper();
-        List<Grader> graders = graderService.getGraderFromProject(project);
-        List<String> submissionsString = this.canvasApi.getCanvasCoursesApi().getSubmissionsInfo(courseId, Long.parseLong(projectId));
-        List<String> studentsString = this.canvasApi.getCanvasCoursesApi().getCourseStudents(courseId);
-        JsonNode projectJson = objectMapper.readTree(projectResponse);
-        String projectCatId = projectJson.get("group_category_id").asText();
-        Map<String, String> groupIdToNameMap = new HashMap<>();
-        Map<String, String> userIdToGroupIdMap = new HashMap<>();
-
-        if (!projectCatId.equals("null")) {
-            ArrayNode groupsString = groupPages(objectMapper, canvasApi.getCanvasCoursesApi().getCourseGroupCategoryGroup(projectCatId));
-//            ArrayNode groupsString1 = groupPages(objectMapper, canvasApi.getCanvasCoursesApi().getCourseGroups(courseId));
-
-            for (Iterator<JsonNode> it = groupsString.elements(); it.hasNext(); ) {
-                JsonNode group = it.next();
-                if (group.get("members_count").asInt(0) <= 0) continue;
-                ArrayNode memberships = groupPages(objectMapper, this.canvasApi.getCanvasCoursesApi().getGroupMemberships(group.get("id").asText()));
-                groupIdToNameMap.put(group.get("id").asText(), group.get("name").asText());
-
-                for (Iterator<JsonNode> iter = memberships.elements(); iter.hasNext(); ) {
-                    JsonNode membership = iter.next();
-                    userIdToGroupIdMap.put(membership.get("user_id").asText(), membership.get("group_id").asText());
-                }
-            }
-        }
-        ArrayNode studentArray = groupPages(objectMapper, studentsString);
-        Map<String, JsonNode> studentMap = new HashMap<>();
-        for (Iterator<JsonNode> it = studentArray.elements(); it.hasNext(); ) {
-            JsonNode jsonNode = it.next();
-            studentMap.put(jsonNode.get("id").asText(), jsonNode);
-        }
-
-        ArrayNode submissionArray = groupPages(objectMapper, submissionsString);
-        List<String> validSubmissionId = new ArrayList<>();
-        List<Submission> validSubmissions = new ArrayList<>();
-
-        for (Iterator<JsonNode> it = submissionArray.elements(); it.hasNext(); ) {
-            JsonNode jsonNode = it.next();
-
-            if (jsonNode.get("workflow_state").asText().equals("unsubmitted")) continue;
-            if (!studentMap.containsKey(jsonNode.get("user_id").asText())) continue;
-
-            boolean isGroup = userIdToGroupIdMap.containsKey(jsonNode.get("user_id").asText());
-            String user_id = jsonNode.get("user_id").asText();
-            String group_id = (isGroup)? userIdToGroupIdMap.get(jsonNode.get("user_id").asText()): null;
-            String name = (isGroup)? groupIdToNameMap.get(userIdToGroupIdMap.get(jsonNode.get("user_id").asText())): studentMap.get(user_id).get("name").asText();
-            Submission submission = new Submission(
-                    user_id,
-                    project,
-                    name,
-                    group_id
-            );
-
-            validSubmissionId.add(submission.getId());
-            validSubmissions.add(submission);
-        }
-
-        List<Submission> submissions = submissionService.findSubmissionWithProject(project);
-        for(Submission submission: submissions) {
-            if (!validSubmissionId.contains(submission.getId())) {
-                submissionService.deleteSubmission(submission);
-            }
-        }
-
-        for(Submission submission: validSubmissions) {
-            submissionService.addNewSubmission(submission);
-        }
-
     }
 
     @GetMapping(value = "")
@@ -163,8 +68,6 @@ public class SubmissionController {
             );
         }
 
-
-        //sync submissions <-> canvas submissions
 
         //sync submissions <-> canvas submissions
 
@@ -203,9 +106,9 @@ public class SubmissionController {
 
     @GetMapping(value = "/{id}")
     protected JsonNode getSubmissionInfo(@PathVariable String courseId,
-                                   @PathVariable String projectId,
-                                   @PathVariable String id,
-                                    Principal principal
+                                         @PathVariable String projectId,
+                                         @PathVariable String id,
+                                         Principal principal
 //                                   @RequestParam Map<String, String> queryParameters
     ) throws JsonProcessingException {
         String courseString = this.canvasApi.getCanvasCoursesApi().getUserCourse(courseId);

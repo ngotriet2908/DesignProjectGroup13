@@ -1,6 +1,5 @@
 package com.group13.tcsprojectgrading.config;
 
-//import com.group13.tcsprojectgrading.canvas.oauth.CanvasOAuth2LoginSuccessHandler;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.group13.tcsprojectgrading.canvas.oauth.CanvasOAuth2LoginSuccessHandler;
@@ -18,11 +17,11 @@ import javax.servlet.http.HttpServletResponse;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    @Autowired
-    private CanvasOAuth2LoginSuccessHandler canvasOAuth2LoginSuccessHandler;
+//    @Autowired
+//    private CanvasOAuth2LoginSuccessHandler canvasOAuth2LoginSuccessHandler;
 
-    @Autowired
-    private GoogleAuthorizationCodeFlow flow;
+//    @Autowired
+//    private GoogleAuthorizationCodeFlow flow;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -40,22 +39,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 )
                 .logout(logout -> logout
                         .permitAll()
-                        .logoutSuccessHandler((request, response, authentication) -> {
-                            if (flow.getCredentialDataStore().containsKey(authentication.getName()))
-                                flow.getCredentialDataStore().delete(authentication.getName());
-                            response.setStatus(HttpServletResponse.SC_OK);
-                        }
-                        )
+//                        .logoutSuccessHandler((request, response, authentication) -> {
+//                            if (flow.getCredentialDataStore().containsKey(authentication.getName()))
+//                                flow.getCredentialDataStore().delete(authentication.getName());
+//                            response.setStatus(HttpServletResponse.SC_OK);
+//                        }
+//                        )
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                 )
                 .oauth2Login();
-
-
-//                .successHandler(this.canvasOAuth2LoginSuccessHandler);
-//                .logoutSuccessUrl("/")
-//            .userInfoEndpoint()
-//                .userService(this.oauth2UserService())
-//                .and()
     }
 }

@@ -22,7 +22,6 @@ public class AuthController {
      */
     @RequestMapping(value = "api/auth/session", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     protected String verifySession() {
-//        System.out.println(SecurityContextHolder.getContext().getAuthentication());
         return "";
     }
 }

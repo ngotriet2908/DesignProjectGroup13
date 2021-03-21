@@ -117,14 +117,9 @@ class Grading extends Component {
       });
   }
 
-  // createGradingSheet = () => {
-  //   let assessment = createAssessment(this.rubric);
-  //   this.props.saveTempAssessment(assessment);
-  // }
-
   handleAddFlag = (flag) => {
     request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/flag`
-    , "POST", flag)
+      , "POST", flag)
       .then((response) => {
         return response.json()
       })
@@ -217,15 +212,17 @@ class Grading extends Component {
     return (
       <>
         <ControlBar data={this.state.data}
-                    flagSubmission={null}
-                    addFlag={this.handleAddFlag}
-                    removeFlag={this.handleRemoveFlag}
-                    createFlagHandler={this.createFlagHandler}
-                    removeFlagHandler={this.removeFlagHandler}/>
+          flagSubmission={null}
+          addFlag={this.handleAddFlag}
+          removeFlag={this.handleRemoveFlag}
+          createFlagHandler={this.createFlagHandler}
+          removeFlagHandler={this.removeFlagHandler}/>
+
         <div className={styles.container}>
           <FileViewer/>
           <SideBar data={this.state.data} match={this.props.match}/>
         </div>
+
       </>
     )
   }

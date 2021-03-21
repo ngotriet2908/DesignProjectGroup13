@@ -80,7 +80,7 @@ public class GradingController {
             @PathVariable String assessmentId,
             @PathVariable String criterionId,
             @RequestBody Grade newGrade
-            ) {
+    ) {
         Project project = projectService.getProjectById(courseId, projectId);
         Submission submission = submissionService.findSubmissionById(submissionId);
         List<Assessment> assessmentList = assessmentService.getAssessmentBySubmission(submission);
@@ -103,9 +103,9 @@ public class GradingController {
             } else {
                 grades.put(criterionId, new CriterionGrade(
                         0, new ArrayList<>() {{
-                            add(newGrade);
-                        }}
-                        ));
+                    add(newGrade);
+                }}
+                ));
             }
 
             this.assessmentService.saveAssessment(submissionAssessment);

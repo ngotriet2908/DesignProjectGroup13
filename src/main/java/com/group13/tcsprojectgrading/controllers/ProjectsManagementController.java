@@ -220,11 +220,11 @@ public class ProjectsManagementController {
     @GetMapping(value = "/assign/{id}/{toUserId}")
     @ResponseBody
     protected JsonNode assignSubmission(@PathVariable String courseId,
-                                  @PathVariable String projectId,
-                                  @PathVariable String id,
+                                        @PathVariable String projectId,
+                                        @PathVariable String id,
 //                                  @PathVariable String fromUserId,
-                                  @PathVariable String toUserId,
-                                  Principal principal) throws JsonProcessingException, ParseException {
+                                        @PathVariable String toUserId,
+                                        Principal principal) throws JsonProcessingException, ParseException {
         Project project = projectService.getProjectById(courseId, projectId);
         if (project == null) {
             throw new ResponseStatusException(
@@ -273,9 +273,9 @@ public class ProjectsManagementController {
 
     @PostMapping(value = "/bulkAssign")
     protected JsonNode bulkAssign(@PathVariable String courseId,
-                                   @PathVariable String projectId,
-                                   @RequestBody ObjectNode object,
-                                   Principal principal) throws JsonProcessingException, ParseException {
+                                  @PathVariable String projectId,
+                                  @RequestBody ObjectNode object,
+                                  Principal principal) throws JsonProcessingException, ParseException {
         Project project = projectService.getProjectById(courseId, projectId);
         if (project == null) {
             throw new ResponseStatusException(
