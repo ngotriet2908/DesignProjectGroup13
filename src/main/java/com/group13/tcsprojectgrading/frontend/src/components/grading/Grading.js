@@ -17,6 +17,9 @@ import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 import {setCurrentLocation} from "../../redux/navigation/actions";
 import {Can, ability, updateAbility} from "../permissions/ProjectAbility";
 import FlagModal from "./FlagModal";
+import RubricPanel from "./rubricPanel/RubricPanel";
+import GradingPanel from "./gradingPanel/GradingPanel";
+import IssuesPanel from "./issuesPanel/IssuesPanel";
 
 
 class Grading extends Component {
@@ -90,11 +93,7 @@ class Grading extends Component {
         } else {
           console.log("no grader or privileges found")
         }
-        console.log(ability.rules)
-
-        // console.log(assessment);
-        // console.log(submission);
-        // console.log(rubric);
+        // console.log(ability.rules)
 
         // initialise (empty) state for input fields
         this.props.saveTempAssessment(createAssessment(rubric));
@@ -219,8 +218,9 @@ class Grading extends Component {
           removeFlagHandler={this.removeFlagHandler}/>
 
         <div className={styles.container}>
-          <FileViewer/>
-          <SideBar data={this.state.data} match={this.props.match}/>
+          <RubricPanel/>
+          <GradingPanel/>
+          <IssuesPanel/>
         </div>
 
       </>

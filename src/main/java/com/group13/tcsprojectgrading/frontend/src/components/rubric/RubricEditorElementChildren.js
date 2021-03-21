@@ -16,59 +16,59 @@ class RubricEditorElementChildren extends Component {
     super(props);
   }
 
-  onClickNewBlock = () => {
-    // create new section
-    let newBlock = {
-      content: {
-        id: uuidv4(),
-        type: "0",
-        title: "Default section's title",
-      },
-      children: []
-    }
-
-    // check if the new section is not in the root section
-    if (this.props.data.hasOwnProperty("content")) {
-      this.props.addBlock(this.props.data.content.id, newBlock, this.props.currentPath + "/children/" + this.props.data.children.length);
-    } else {
-      this.props.addBlock(this.props.data.id, newBlock, this.props.currentPath + "/children/" + this.props.data.children.length);
-    }
-
-    // open the new section
-    this.props.setSelectedElement(newBlock.content.id);
-    // set current path to the new section's path
-    this.props.setCurrentPath(this.props.currentPath + "/children/" + this.props.data.children.length);
-  }
-
-  onClickNewCriterion = () => {
-    // create new criterion
-    let newCriterion = {
-      content: {
-        id: uuidv4(),
-        type: "1",
-        title: "Default criterion's title",
-        text: "You can edit this text in the edit mode.",
-        grade: {
-          min: 0,
-          max: 10,
-          step: 1,
-          weight: 1.0
-        },
-      }
-    }
-
-    // check if the new criterion is not in the root section
-    if (this.props.data.hasOwnProperty("content")) {
-      this.props.addCriterion(this.props.data.content.id, newCriterion, this.props.currentPath + "/children/" + this.props.data.children.length);
-    } else {
-      this.props.addCriterion(this.props.data.id, newCriterion, this.props.currentPath + "/children/" + this.props.data.children.length);
-    }
-
-    // open the new criterion
-    this.props.setSelectedElement(newCriterion.content.id);
-    // set current path to the new section's path
-    this.props.setCurrentPath(this.props.currentPath + "/children/" + this.props.data.children.length);
-  }
+  // onClickNewBlock = () => {
+  //   // create new section
+  //   let newBlock = {
+  //     content: {
+  //       id: uuidv4(),
+  //       type: "0",
+  //       title: "Default section's title",
+  //     },
+  //     children: []
+  //   }
+  //
+  //   // check if the new section is not in the root section
+  //   if (this.props.data.hasOwnProperty("content")) {
+  //     this.props.addBlock(this.props.data.content.id, newBlock, this.props.currentPath + "/children/" + this.props.data.children.length);
+  //   } else {
+  //     this.props.addBlock(this.props.data.id, newBlock, this.props.currentPath + "/children/" + this.props.data.children.length);
+  //   }
+  //
+  //   // open the new section
+  //   this.props.setSelectedElement(newBlock.content.id);
+  //   // set current path to the new section's path
+  //   this.props.setCurrentPath(this.props.currentPath + "/children/" + this.props.data.children.length);
+  // }
+  //
+  // onClickNewCriterion = () => {
+  //   // create new criterion
+  //   let newCriterion = {
+  //     content: {
+  //       id: uuidv4(),
+  //       type: "1",
+  //       title: "Default criterion's title",
+  //       text: "You can edit this text in the edit mode.",
+  //       grade: {
+  //         min: 0,
+  //         max: 10,
+  //         step: 1,
+  //         weight: 1.0
+  //       },
+  //     }
+  //   }
+  //
+  //   // check if the new criterion is not in the root section
+  //   if (this.props.data.hasOwnProperty("content")) {
+  //     this.props.addCriterion(this.props.data.content.id, newCriterion, this.props.currentPath + "/children/" + this.props.data.children.length);
+  //   } else {
+  //     this.props.addCriterion(this.props.data.id, newCriterion, this.props.currentPath + "/children/" + this.props.data.children.length);
+  //   }
+  //
+  //   // open the new criterion
+  //   this.props.setSelectedElement(newCriterion.content.id);
+  //   // set current path to the new section's path
+  //   this.props.setCurrentPath(this.props.currentPath + "/children/" + this.props.data.children.length);
+  // }
 
   render () {
     return (

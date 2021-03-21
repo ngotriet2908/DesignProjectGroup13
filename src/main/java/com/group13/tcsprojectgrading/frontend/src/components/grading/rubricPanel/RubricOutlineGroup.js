@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 
-import styles from './rubric.module.css'
+import styles from '../grading.module.css'
 import {connect} from "react-redux";
 import RubricOutlineElement from "./RubricOutlineElement";
 

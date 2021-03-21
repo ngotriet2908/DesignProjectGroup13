@@ -28,18 +28,18 @@ class RubricEditorElement extends Component {
     this.props.alterTitle(this.props.data.content.id, event.target.value, this.props.currentPath + "/content/title");
   }
 
-  onClickDelete = () => {
-    this.props.deleteElement(this.props.data.content.id, this.props.currentPath);
-    // TODO go to parent
-    this.props.setCurrentPath("");
-    this.props.setSelectedElement(this.props.rubric.id);
-  }
+  // onClickDelete = () => {
+  //   this.props.deleteElement(this.props.data.content.id, this.props.currentPath);
+  //   // TODO go to parent
+  //   this.props.setCurrentPath("");
+  //   this.props.setSelectedElement(this.props.rubric.id);
+  // }
 
-  onClickDeleteAll = () => {
-    this.props.deleteAllElements();
-    this.props.setCurrentPath("");
-    this.props.setSelectedElement(this.props.rubric.id);
-  }
+  // onClickDeleteAll = () => {
+  //   this.props.deleteAllElements();
+  //   this.props.setCurrentPath("");
+  //   this.props.setSelectedElement(this.props.rubric.id);
+  // }
 
   render () {
     // rubric's header
@@ -48,11 +48,11 @@ class RubricEditorElement extends Component {
         <div>
           <div className={styles.viewerHeader}>
             <h2>Rubric</h2>
-            <div className={styles.viewerHeaderIcon}>
-              <IoTrashBinOutline size={28} className={styles.viewerHeaderIconRed} onClick={this.onClickDeleteAll}/>
-            </div>
+            {/*<div className={styles.viewerHeaderIcon}>*/}
+            {/*  <IoTrashBinOutline size={28} className={styles.viewerHeaderIconRed} onClick={this.onClickDeleteAll}/>*/}
+            {/*</div>*/}
           </div>
-          <RubricEditorElementChildren data={this.props.data}/>
+          {/*<RubricEditorElementChildren data={this.props.data}/>*/}
         </div>
       )
     }
@@ -66,9 +66,9 @@ class RubricEditorElement extends Component {
             :
             <h2>Section</h2>
           }
-          <div className={styles.viewerHeaderIcon}>
-            <IoTrashBinOutline size={28} className={styles.viewerHeaderIconRed} onClick={this.onClickDelete}/>
-          </div>
+          {/*<div className={styles.viewerHeaderIcon}>*/}
+          {/*  <IoTrashBinOutline size={28} className={styles.viewerHeaderIconRed} onClick={this.onClickDelete}/>*/}
+          {/*</div>*/}
         </div>
 
         <div className={styles.viewerSectionContainer}>
@@ -94,9 +94,9 @@ class RubricEditorElement extends Component {
         <RubricEditorElementGrade id={this.props.data.content.id} data={this.props.data.content.grade}/>
         }
 
-        {isBlock(this.props.data.content.type) &&
-        <RubricEditorElementChildren data={this.props.data}/>
-        }
+        {/*{isBlock(this.props.data.content.type) &&*/}
+        {/*<RubricEditorElementChildren data={this.props.data}/>*/}
+        {/*}*/}
       </div>
     )
   }

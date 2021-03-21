@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
-import styles from './grading.module.css'
+import styles from '../grading.module.css'
 import {connect} from "react-redux";
+import RubricOutline from "./RubricOutline";
 
 
 class RubricPanel extends Component {
@@ -11,8 +12,8 @@ class RubricPanel extends Component {
 
   render () {
     return (
-      <div>
-        Hey
+      <div className={styles.rubricPanelContainer}>
+        <RubricOutline/>
       </div>
     )
   }

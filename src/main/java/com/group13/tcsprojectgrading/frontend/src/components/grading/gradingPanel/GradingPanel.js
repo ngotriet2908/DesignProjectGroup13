@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
-import styles from './grading.module.css'
+import styles from '../grading.module.css'
 import {connect} from "react-redux";
 
 
-class IssuesPanel extends Component {
+class GradingPanel extends Component {
   constructor (props) {
     super(props);
   }
@@ -11,8 +11,8 @@ class IssuesPanel extends Component {
 
   render () {
     return (
-      <div>
-        Hai
+      <div className={styles.gradingPanelContainer}>
+        Hoi
       </div>
     )
   }
@@ -28,4 +28,4 @@ const actionCreators = {
 
 }
 
-export default connect(mapStateToProps, actionCreators)(IssuesPanel)
+export default connect(mapStateToProps, actionCreators)(GradingPanel)

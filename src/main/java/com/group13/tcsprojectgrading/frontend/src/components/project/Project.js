@@ -53,11 +53,10 @@ class Project extends Component {
       request(`${BASE}courses/${courseId}/projects/${projectId}/stats/grades`),
       // request(`${BASE}courses/${courseId}/projects/${projectId}/stats/groups`),
     ])
-      .then(async([res1, res2, res3, res4]) => {
+      .then(async([res1, res2, res3]) => {
         const project = await res1.json();
         const statsSubmissions = await res2.json();
         const statsGrades = await res3.json();
-        // const statsGroups = await res4.json();
 
         const stats = [statsSubmissions].concat(statsGrades)//.concat(statsGroups);
 
@@ -66,9 +65,9 @@ class Project extends Component {
         if (project.grader !== null && project.grader.privileges !== null) {
           updateAbility(ability, project.grader.privileges, project.grader)
         } else {
-          console.log("no grader or privileges found")
+          console.log("No grader or privileges found.")
         }
-        console.log(ability.rules)
+        // console.log(ability.rules)
 
         this.setState({
           project: project.project,

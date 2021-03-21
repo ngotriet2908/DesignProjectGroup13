@@ -1,14 +1,14 @@
 import React, { Component } from 'react'
 
-import styles from './rubric.module.css'
+import styles from '../grading.module.css'
 import {connect} from "react-redux";
-import {addBlock, addCriterion, deleteElement, setCurrentPath, setSelectedElement} from "../../redux/rubric/actions";
+import {addBlock, addCriterion, deleteElement, setCurrentPath, setSelectedElement} from "../../../redux/rubric/actions";
 import {FaChevronDown, FaChevronRight, FaHandPointRight} from "react-icons/fa";
 import {IoCheckmarkOutline, IoEllipsisVerticalOutline} from "react-icons/io5";
-import {createNewBlock, createNewCriterion, isBlock, isCriterion, removeElement} from "./helpers";
-import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
+import {createNewBlock, createNewCriterion, isBlock, isCriterion, removeElement} from "../../rubric/helpers";
+import {LOCATIONS} from "../../../redux/navigation/reducers/navigation";
 import classnames from "classnames";
-import globalStyles from "../helpers/global.module.css";
+import globalStyles from "../../helpers/global.module.css";
 import Dropdown from "react-bootstrap/Dropdown";
 import {CustomToggle} from "./RubricOutline";
 
@@ -49,36 +49,6 @@ class RubricOutlineElement extends Component {
               {this.props.data.content.title}
             </div>
           </div>
-          {this.props.isEditing &&
-              <div className={styles.outlineElementRight}>
-                <Dropdown onClick={(event) => {event.stopPropagation();}}>
-                  <Dropdown.Toggle as={CustomToggle}>
-                    <IoEllipsisVerticalOutline size={26}/>
-                  </Dropdown.Toggle>
-
-                  <Dropdown.Menu>
-                    <Dropdown.Item onClick={() => createNewCriterion(
-                      this.props,
-                      this.props.path,
-                      this.props.data.content.id,
-                      this.props.data.children.length
-                    )}>
-                      Add criterion
-                    </Dropdown.Item>
-                    <Dropdown.Item onClick={() => createNewBlock(
-                      this.props,
-                      this.props.path,
-                      this.props.data.content.id,
-                      this.props.data.children.length)}>
-                      Add section
-                    </Dropdown.Item>
-                    <Dropdown.Item onClick={() => removeElement(this.props)}>
-                      Delete
-                    </Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown>
-              </div>
-          }
         </div>
       </div>
     )

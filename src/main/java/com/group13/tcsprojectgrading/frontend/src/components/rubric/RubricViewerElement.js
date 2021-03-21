@@ -16,16 +16,16 @@ class RubricViewerElement extends Component {
     super(props);
   }
 
-  onClickEdit = () => {
-    // get rubric backup
-    let rubricBackup = this.props.rubric;
-    this.props.saveRubricTemp(rubricBackup);
-    this.props.setEditingRubric(true);
-  }
-
-  downloadRubric = () => {
-    alert("Handle download.")
-  }
+  // onClickEdit = () => {
+  //   // get rubric backup
+  //   let rubricBackup = this.props.rubric;
+  //   this.props.saveRubricTemp(rubricBackup);
+  //   this.props.setEditingRubric(true);
+  // }
+  //
+  // downloadRubric = () => {
+  //   alert("Handle download.")
+  // }
 
   render () {
     // rubric's header
@@ -34,17 +34,17 @@ class RubricViewerElement extends Component {
         <div>
           <div className={styles.viewerHeader}>
             <h2>Rubric</h2>
-            <Can I="write" a="Rubric">
-              <div className={styles.viewerHeaderIcon}>
-                <IoPencil size={28} className={styles.viewerHeaderIconGreen} onClick={this.onClickEdit}/>
-              </div>
-            </Can>
-            <div className={styles.viewerHeaderIcon}>
-              <IoCloudDownloadOutline className={styles.viewerHeaderIconOrange} size={28} onClick={this.downloadRubric}/>
-            </div>
+            {/*<Can I="write" a="Rubric">*/}
+            {/*  <div className={styles.viewerHeaderIcon}>*/}
+            {/*    <IoPencil size={28} className={styles.viewerHeaderIconGreen} onClick={this.onClickEdit}/>*/}
+            {/*  </div>*/}
+            {/*</Can>*/}
+            {/*<div className={styles.viewerHeaderIcon}>*/}
+            {/*  <IoCloudDownloadOutline className={styles.viewerHeaderIconOrange} size={28} onClick={this.downloadRubric}/>*/}
+            {/*</div>*/}
             {/*<Button variant="secondary" onClick={this.downloadRubric}>Download</Button>*/}
           </div>
-          <RubricViewerElementChildren data={this.props.data}/>
+          {/*<RubricViewerElementChildren data={this.props.data}/>*/}
         </div>
       )
     }
@@ -80,9 +80,9 @@ class RubricViewerElement extends Component {
           <RubricViewerElementGrade id={this.props.data.content.id} data={this.props.data.content.grade}/>
         }
 
-        {isBlock(this.props.data.content.type) &&
-        <RubricViewerElementChildren data={this.props.data}/>
-        }
+        {/*{isBlock(this.props.data.content.type) &&*/}
+        {/*<RubricViewerElementChildren data={this.props.data}/>*/}
+        {/*}*/}
       </div>
     )
   }

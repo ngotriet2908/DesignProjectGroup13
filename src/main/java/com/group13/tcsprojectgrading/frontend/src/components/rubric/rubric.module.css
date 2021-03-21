@@ -3,7 +3,7 @@
 .container {
     width: 100%;
     display: grid;
-    grid-template-columns: 40% auto;
+    grid-template-columns: 45% auto;
     position: relative;
 }
 
@@ -18,11 +18,7 @@
     overflow: scroll;
     white-space: nowrap;
     text-overflow: ellipsis;
-}
-
-.outlineContainer > div {
-    display: flex;
-    flex-direction: row;
+    position: relative;
 }
 
 .outlineContainer ul {
@@ -31,35 +27,57 @@
     flex: 1;
 }
 
+.outlineHeaderContainer {
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    padding: 0.5rem 0.5rem 0.5rem 0;
+    border-left: 4px solid transparent;
+
+    /*box-sizing: border-box;*/
+}
+
+.outlineHeaderContainer > div {
+    flex: 1;
+}
+
+.outlineHeaderContainerSelected {
+    border-left: 4px solid primary;
+}
+
+.outlineHeaderContainer h3, .outlineHeaderContainer h5 {
+    /*padding: 0.5rem 0.5rem 0.5rem 0;*/
+    margin: 0;
+}
+
 .outlineHeader {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    cursor: pointer;
-}
-
-.outlineHeader h4 {
-    padding: 0.5rem 0.5rem 0.5rem 0;
     margin: 0 0 0 0.5rem;
+    min-height: 65px;
 }
 
-.outlineHeader div {
+.outlineHeaderButtonContainer {
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: flex-start;
 }
 
-.outlineHeader div div {
-    color: lightgray;
-    font-size: 1rem;
+.outlineHeaderButtonContainer > * {
+    margin-left: 0.5rem;
 }
 
-.outlineHeader span {
-    font-size: 1.5rem;
+.outlineHeaderContainerBottom {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 0 0 0.5rem;
 }
 
+/* blocks of elements */
 .outlineGroup {
     transition: all 1s ease-out;
 }
@@ -68,33 +86,33 @@
     display: none;
 }
 
+/* elements */
 .outlineElementContainer {
+    height: 65px;
     border-left: 4px solid transparent;
 }
 
 .outlineElementContainerSelected {
-    /*color: orange;*/
     border-left: 4px solid primary;
 }
 
 .outlineElement {
+    height: 100%;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
 
-    /*color: red;*/
     cursor: pointer;
-    /*background-color: green;*/
     border-top: 1px solid #dfdfdf;
     padding: 0.5rem 0.5rem 0.5rem 0;
 
     position: relative;
 }
 
-.outlineContainer > div > ul > div:last-child .outlineElement {
-    /*border-bottom: 1px solid #dfdfdf;*/
-}
+/*.outlineContainer > div > ul > div:last-child .outlineElement {*/
+/*    !*border-bottom: 1px solid #dfdfdf;*!*/
+/*}*/
 
 .outlineElementLeft {
     display: flex;
@@ -102,13 +120,17 @@
     align-items: flex-end;
 }
 
+.outlineElementLeftBlock {
+    /*font-size: 1.1rem;*/
+}
+
 .outlineElementRight {
-    visibility: hidden;
+    /*visibility: hidden;*/
     margin-left: 0.5rem;
 }
 
 .outlineElement:hover .outlineElementRight {
-    visibility: visible;
+    /*visibility: visible;*/
 }
 
 .outlineElementText {
@@ -188,6 +210,19 @@
 
 .viewerHeaderIconOrange {
     color: quaternary;
+}
+
+.viewerHeaderIconOrange:hover {
+    color: white;
+}
+
+.viewerHeaderIconGray {
+    color: darkishGray;
+    /*font-size: 1.5rem;*/
+}
+
+.viewerHeaderIconGray:hover {
+    color: white;
 }
 
 .viewerHeaderIconRed {

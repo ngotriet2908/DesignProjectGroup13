@@ -19,60 +19,6 @@ class RubricBottomBar extends Component {
     super(props);
   }
 
-  onClickCancelButton = () => {
-    console.log("Cancel save.")
-
-    // get rubric backup
-    let rubricBackup = this.props.rubricTemp;
-
-    this.props.setSelectedElement(rubricBackup.id);
-    this.props.saveRubricTemp(null);
-    this.props.saveRubric(rubricBackup);
-    this.props.setEditingRubric(false);
-  }
-
-  onClickSaveButton = () => {
-    console.log("Save rubric.");
-    console.log(this.props.updates);
-
-    if (this.props.updates.length === 0) {
-      this.props.saveRubricTemp(null);
-      this.props.setEditingRubric(false);
-      this.props.resetUpdates();
-    } else {
-      request(BASE + "courses/" + this.props.courseId + "/projects/" + this.props.projectId + "/rubric", "PATCH", this.props.updates)
-        .then(data => {
-          console.log(data);
-
-          if (data.status === 200) {
-            this.props.setEditingRubric(false);
-            this.props.saveRubricTemp(null);
-            this.props.resetUpdates();
-          } else {
-            console.log("Error updating rubric.")
-          }
-        })
-        .catch(error => {
-          console.error(error.message);
-        });
-
-      // request(BASE + "courses/" + this.props.courseId + "/projects/" + this.props.projectId + "/rubric", "POST", this.props.rubric)
-      //   .then(data => {
-      //     console.log(data);
-      //
-      //     if (data.status === 200) {
-      //       this.props.setEditingRubric(false);
-      //       this.props.saveRubricTemp(null);
-      //       this.props.resetUpdates();
-      //     } else {
-      //       console.log("Error updating rubric.")
-      //     }
-      //   })
-      //   .catch(error => {
-      //     console.error(error.message);
-      //   });
-    }
-  }
 
   render () {
     return (
