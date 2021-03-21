@@ -13,10 +13,6 @@ import {URL_PREFIX} from "../../services/config";
 
 
 class ProjectRoutes extends Component {
-  componentDidMount() {
-    console.log(this.props.match.path);
-  }
-
   render () {
     return (
       <Switch>

@@ -5,9 +5,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.flipkart.zjsonpatch.JsonPatchApplicationException;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.*;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
+import com.group13.tcsprojectgrading.models.rubric.RubricHistory;
+import com.group13.tcsprojectgrading.models.rubric.RubricUpdate;
 import com.group13.tcsprojectgrading.services.*;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
 import com.itextpdf.text.*;
@@ -21,9 +24,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.Principal;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -426,31 +426,72 @@ public class ProjectsController {
         } else {
             ObjectMapper objectMapper = new ObjectMapper();
             String rubricString = objectMapper.writeValueAsString(rubric);
-//            String response = "{\"rubric\":" + rubricString + "}";
-//            System.out.println(rubricString);
             return new ResponseEntity<>(rubricString, HttpStatus.OK);
         }
     }
 
-    // TODO: submit only 'children'
-    @PostMapping("/{projectId}/rubric")
-    public Rubric newRubric(@RequestBody Rubric newRubric) {
-//        System.out.println("Creating a rubric...");
-        return rubricService.addNewRubric(newRubric);
-    }
+//    @PostMapping("/{projectId}/rubric")
+//    public ResponseEntity<?> postRubric(
+//            @RequestBody JsonNode newRubric,
+//            @PathVariable String projectId) throws JsonPatchApplicationException, JsonProcessingException {
+//
+//        System.out.println("Updating the rubric of project " + projectId + ".");
+//        Rubric rubric = this.rubricService.getRubricById(projectId);
+//
+//        // test diff
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        JsonNode diffPatch = JsonDiff.asJson(
+//                objectMapper.convertValue(rubric, JsonNode.class),
+//                objectMapper.convertValue(newRubric, JsonNode.class));
+//
+//        System.out.println(diffPatch);
+//
+//        // apply update
+//        Rubric rubricPatched = this.rubricService.applyPatchToRubric(diffPatch, rubric);
+//        this.rubricService.saveRubric(rubricPatched);
+//
+////        RubricHistory history = this.rubricService.getHistory(projectId);
+////        if (history == null) {
+////            history = new RubricHistory(projectId);
+////        }
+////
+////        // store update
+////        history.getHistory().add(new RubricUpdate(patch));
+////        this.rubricService.storeHistory(history);
+////
+////        // mark affected submissions
+//////        this.rubricService.processUpdate(patch, rubric);
+//
+//        System.out.println("Updating the rubric of project " + projectId + " finished successfully.");
+//        return ResponseEntity.ok("Rubric updated");
+//    }
 
-    // TODO temporary unsafe method
-    @GetMapping("/{projectId}/submissions/sample")
-    public ResponseEntity<byte[]> getSamplePdf() throws IOException {
-        Path pdfPath = Paths.get("src","main", "resources","static", "testPdf.pdf");
-        byte[] contents = Files.readAllBytes(pdfPath);
+    /*
+    Updates the rubric with update patches. Patches are applied in order they come and are stored in the database to
+    retrieve rubric history.
+     */
+    @PatchMapping("/{projectId}/rubric")
+    public ResponseEntity<?> updateRubric(
+            @RequestBody JsonNode patch,
+            @PathVariable String projectId) throws JsonPatchApplicationException, JsonProcessingException {
+        System.out.println("Updating the rubric of project " + projectId + ".");
+        Rubric rubric = this.rubricService.getRubricById(projectId);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_PDF);
-        String filename = "output.pdf";
-        headers.setContentDispositionFormData(filename, filename);
-        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-        return new ResponseEntity<>(contents, headers, HttpStatus.OK);
+        // apply update and mark affected submissions
+        Rubric rubricPatched = this.rubricService.applyUpdate(patch, rubric);
+        this.rubricService.saveRubric(rubricPatched);
+
+        // store update
+        RubricHistory history = this.rubricService.getHistory(projectId);
+        if (history == null) {
+            history = new RubricHistory(projectId);
+        }
+
+        history.getHistory().add(new RubricUpdate(patch));
+        this.rubricService.storeHistory(history);
+
+        System.out.println("Updating the rubric of project " + projectId + " finished successfully.");
+        return ResponseEntity.ok("Rubric updated");
     }
 }
 

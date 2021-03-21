@@ -4,11 +4,13 @@ public class RubricGrade {
     public int min;
     public int max;
     public int step;
+    public double weight;
 
-    public RubricGrade(int min, int max, int step) {
+    public RubricGrade(int min, int max, int step, double weight) {
         this.min = min;
         this.max = max;
         this.step = step;
+        this.weight = weight;
     }
 
     public RubricGrade() {
@@ -36,5 +38,13 @@ public class RubricGrade {
 
     public void setStep(int step) {
         this.step = step;
+    }
+
+    public double getWeight() {
+        return weight;
+    }
+
+    public void setWeight(double weight) {
+        this.weight = weight;
     }
 }

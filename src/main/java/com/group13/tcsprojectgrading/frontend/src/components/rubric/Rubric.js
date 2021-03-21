@@ -10,7 +10,7 @@ import RubricBottomBar from "./RubricBottomBar";
 import {request} from "../../services/request";
 import {BASE } from "../../services/endpoints";
 
-import {saveRubric, saveRubricTemp, setSelectedElement} from "../../redux/rubric/actions";
+import {resetUpdates, saveRubric, saveRubricTemp, setCurrentPath, setSelectedElement} from "../../redux/rubric/actions";
 import {Spinner} from "react-bootstrap";
 import RubricViewer from "./RubricViewer";
 
@@ -19,11 +19,6 @@ import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 import {setCurrentLocation} from "../../redux/navigation/actions";
 
 import {Can, ability, updateAbility} from "../permissions/ProjectAbility";
-import Breadcrumbs from "../helpers/Breadcrumbs";
-import store from "../../redux/store";
-import {push} from "connected-react-router";
-import {URL_PREFIX} from "../../services/config";
-import {IoReturnDownBackOutline} from "react-icons/io5";
 
 
 class Rubric extends Component {
@@ -38,14 +33,14 @@ class Rubric extends Component {
 
   componentDidMount() {
     this.props.setCurrentLocation(LOCATIONS.rubric);
+    this.props.resetUpdates();
+    this.props.setCurrentPath("");
 
     //TODO in case of directly load this page or refresh page <=> no ability is found
     if (ability.rules.length === 0) {
       request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId)
-        .then(response => {
-          return response.json()
-        })
-        .then(data => {
+        .then(async response => {
+          let data = await response.json()
           if (data.grader !== null && data.grader.privileges !== null) {
             updateAbility(ability, data.grader.privileges, data.grader)
             this.setState({
@@ -54,7 +49,7 @@ class Rubric extends Component {
           } else {
             console.log("no grader or privileges found")
           }
-          console.log(ability.rules)
+          // console.log(ability.rules)
         })
     }
 
@@ -63,8 +58,6 @@ class Rubric extends Component {
         return response.json();
       })
       .then(data => {
-        console.log(data);
-
         this.props.saveRubric(data);
         this.props.setSelectedElement(data.id);
 
@@ -125,7 +118,9 @@ const actionCreators = {
   saveRubric,
   saveRubricTemp,
   setSelectedElement,
-  setCurrentLocation
+  setCurrentLocation,
+  resetUpdates,
+  setCurrentPath
 }
 
 export default connect(mapStateToProps, actionCreators)(Rubric)

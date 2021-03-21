@@ -32,6 +32,7 @@ class Grading extends Component {
   }
 
   componentDidMount() {
+    this.props.setCurrentLocation(LOCATIONS.grading);
     this.fetchGradingData();
   }
 
@@ -71,8 +72,6 @@ class Grading extends Component {
   }
 
   fetchGradingData = () => {
-    this.props.setCurrentLocation(LOCATIONS.grading);
-
     // TODO, ignores passed data
     Promise.all([
       request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/grading`),

@@ -5,7 +5,13 @@ import {connect} from "react-redux";
 import Button from "react-bootstrap/Button";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
-import {saveRubric, saveRubricTemp, setEditingRubric, setSelectedElement} from "../../redux/rubric/actions";
+import {
+  resetUpdates,
+  saveRubric,
+  saveRubricTemp,
+  setEditingRubric,
+  setSelectedElement
+} from "../../redux/rubric/actions";
 
 
 class RubricBottomBar extends Component {
@@ -26,18 +32,46 @@ class RubricBottomBar extends Component {
   }
 
   onClickSaveButton = () => {
-    console.log("Save rubric.")
+    console.log("Save rubric.");
+    console.log(this.props.updates);
 
-    // send request
-    request(BASE + "courses/" + this.props.courseId + "/projects/" + this.props.projectId + "/rubric", "POST", this.props.rubric)
-      .then(data => {
-        console.log(data);
-        this.props.saveRubricTemp(null);
-        this.props.setEditingRubric(false);
-      })
-      .catch(error => {
-        console.error(error.message);
-      });
+    if (this.props.updates.length === 0) {
+      this.props.saveRubricTemp(null);
+      this.props.setEditingRubric(false);
+      this.props.resetUpdates();
+    } else {
+      request(BASE + "courses/" + this.props.courseId + "/projects/" + this.props.projectId + "/rubric", "PATCH", this.props.updates)
+        .then(data => {
+          console.log(data);
+
+          if (data.status === 200) {
+            this.props.setEditingRubric(false);
+            this.props.saveRubricTemp(null);
+            this.props.resetUpdates();
+          } else {
+            console.log("Error updating rubric.")
+          }
+        })
+        .catch(error => {
+          console.error(error.message);
+        });
+
+      // request(BASE + "courses/" + this.props.courseId + "/projects/" + this.props.projectId + "/rubric", "POST", this.props.rubric)
+      //   .then(data => {
+      //     console.log(data);
+      //
+      //     if (data.status === 200) {
+      //       this.props.setEditingRubric(false);
+      //       this.props.saveRubricTemp(null);
+      //       this.props.resetUpdates();
+      //     } else {
+      //       console.log("Error updating rubric.")
+      //     }
+      //   })
+      //   .catch(error => {
+      //     console.error(error.message);
+      //   });
+    }
   }
 
   render () {
@@ -56,6 +90,7 @@ const mapStateToProps = state => {
   return {
     rubricTemp: state.rubric.rubricTemp,
     rubric: state.rubric.rubric,
+    updates: state.rubric.updates
   };
 };
 
@@ -64,6 +99,7 @@ const actionCreators = {
   saveRubricTemp,
   setEditingRubric,
   setSelectedElement,
+  resetUpdates
 }
 
 export default connect(mapStateToProps, actionCreators)(RubricBottomBar)

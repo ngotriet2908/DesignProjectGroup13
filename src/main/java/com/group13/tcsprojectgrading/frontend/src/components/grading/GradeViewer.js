@@ -157,7 +157,7 @@ class GradeViewer extends Component {
 
 const mapStateToProps = state => {
   return {
-    // selectedElement: state.rubric.selectedElement,
+    selectedElement: state.rubric.selectedElement,
     // rubric: state.rubric.rubric,
     // assessment: state.grading.assessment,
     users: state.users.users,

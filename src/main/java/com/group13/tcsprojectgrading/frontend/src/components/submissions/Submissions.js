@@ -192,16 +192,6 @@ class Submissions extends Component {
         {/*  <h6>All submissions count: {this.state.submissions.length}</h6>*/}
         {/*  <h6>Deadline: ???</h6>*/}
         {/*  <h6>Overall progress: {this.calculateOverallProgress()}%</h6>*/}
-        {/*  <Button variant="lightGreen" onClick={this.syncHandler}>*/}
-        {/*    {(!this.state.syncing)? "Sync with Canvas":*/}
-        {/*      <Spinner*/}
-        {/*        as="span"*/}
-        {/*        animation="grow"*/}
-        {/*        size="sm"*/}
-        {/*        role="status"*/}
-        {/*        aria-hidden="true"/>*/}
-        {/*    }*/}
-        {/*  </Button>*/}
         {/*</div>*/}
 
         <div className={styles.tasksList}>
@@ -212,7 +202,7 @@ class Submissions extends Component {
               <div className={styles.toolbar}>
                 <FormControl className={styles.groupsSearchBar}
                   type="text"
-                  placeholder="Search with a group name"
+                  placeholder="Search by a group name"
                   onChange={this.handleSearchChange}/>
 
                 <DropdownButton

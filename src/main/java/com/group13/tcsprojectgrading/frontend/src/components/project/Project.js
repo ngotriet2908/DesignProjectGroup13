@@ -190,6 +190,9 @@ class Project extends Component {
                 <div className={globalStyles.sectionFlexContainer}>
                   <Card>
                     <Card.Body>
+                      {/*<div>*/}
+                      {/*  Last modified at {this.state.project}*/}
+                      {/*</div>*/}
                       <div>
                         <Can I="read" a="Rubric">
                           <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/rubric"))}>

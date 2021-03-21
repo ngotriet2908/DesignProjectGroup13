@@ -15,7 +15,7 @@ class RubricViewerElementGrade extends Component {
           <h4>Grade</h4>
         </div>
         <div>
-          {this.props.data.min} - {this.props.data.max} with {this.props.data.step}-point increments
+          {this.props.data.min} - {this.props.data.max} with {this.props.data.step}-point increments and weight (coefficient) {this.props.data.weight}
         </div>
       </div>
     )

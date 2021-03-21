@@ -4,7 +4,9 @@ import styles from './rubric.module.css'
 import {connect} from "react-redux";
 import {addBlock, addCriterion, setSelectedElement} from "../../redux/rubric/actions";
 import {FaChevronDown, FaChevronRight, FaHandPointRight} from "react-icons/fa";
-import {isBlock} from "./helpers";
+import {IoCheckmarkOutline} from "react-icons/io5";
+import {isBlock, isCriterion} from "./helpers";
+import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 
 class RubricOutlineElement extends Component {
   constructor (props) {
@@ -13,6 +15,19 @@ class RubricOutlineElement extends Component {
     this.state = {
       showMenu: false,
     }
+  }
+
+  getIcon = () => {
+    // if (this.props.isInGrading && this.props.isGraded) {
+    //   return <IoCheckmarkOutline/>
+    // } else {
+    return <FaHandPointRight/>
+    // }
+  }
+
+  onClick = () => {
+    console.log(this.props.path);
+    this.props.onClickElement(this.props.data.id, this.props.path);
   }
 
   render () {
@@ -24,7 +39,7 @@ class RubricOutlineElement extends Component {
 
     return (
       <div>
-        <div onClick={() => this.props.onClickElement(this.props.data.id)}>
+        <div onClick={this.onClick}>
           <div className={classNames}>
             <div className={styles.outlineElement} style={{paddingLeft: `${this.props.padding}rem`}}>
               <div className={styles.outlineElementLeft}>
@@ -32,7 +47,7 @@ class RubricOutlineElement extends Component {
                   {isBlock(this.props.data.type) ?
                     <FaChevronRight onClick={this.props.onClickBlockCollapse}/>
                     :
-                    <FaHandPointRight/>
+                    this.getIcon()
                   }
                 </div>
                 <div>
@@ -49,9 +64,23 @@ class RubricOutlineElement extends Component {
 
 
 const mapStateToProps = state => {
-  return {
-    selectedElement: state.rubric.selectedElement
-  };
+  let isInGrading = state.navigation.location === LOCATIONS.grading;
+
+  let isGraded = isInGrading && state.grading.assessment.grades[state.rubric.selectedElement] &&
+    state.grading.assessment.grades[state.rubric.selectedElement].history.length > 0
+
+  if (isInGrading) {
+    return {
+      isInGrading: isInGrading,
+      selectedElement: state.rubric.selectedElement,
+      isGraded: isGraded
+    };
+  } else {
+    return {
+      isInGrading: false,
+      selectedElement: state.rubric.selectedElement,
+    };
+  }
 };
 
 const actionCreators = {

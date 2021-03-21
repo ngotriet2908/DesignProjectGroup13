@@ -15,10 +15,10 @@ class GradingSideBar extends Component {
   }
 
   componentDidMount() {
-    console.log(subject("Grading", this.props.data.submission))
-    console.log(ability.can("write", subject("Grading", this.props.data.submission)))
-    console.log(ability.can("write", this.props.data.submission))
-    console.log(ability.can("write", "Rubric"))
+    // console.log(subject("Grading", this.props.data.submission))
+    // console.log(ability.can("write", subject("Grading", this.props.data.submission)))
+    // console.log(ability.can("write", this.props.data.submission))
+    // console.log(ability.can("write", "Rubric"))
   }
 
   render () {

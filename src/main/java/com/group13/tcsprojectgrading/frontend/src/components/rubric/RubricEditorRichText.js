@@ -55,13 +55,20 @@ class RubricEditorRichText extends Component {
     }
   }
 
-  onTextEditorChange = (editorState) => {
-    this.setState({
-      editorState: editorState
-    })
+  onTextEditorChange = (newEditorState) => {
+    const currentContentState = this.state.editorState.getCurrentContent()
+    const newContentState = newEditorState.getCurrentContent()
 
-    // TODO initial change
-    this.props.alterCriterionText(this.props.element.content.id, stateToHTML(editorState.getCurrentContent()));
+    if (currentContentState !== newContentState) {
+      // change in content
+      this.setState({
+        editorState: newEditorState
+      })
+
+      this.props.alterCriterionText(this.props.element.content.id, stateToHTML(newEditorState.getCurrentContent()), this.props.currentPath + "/content/text");
+    } else {
+      //  change in focus or selection
+    }
   }
 
   setEditor = (editor) => {
@@ -98,11 +105,12 @@ const mapStateToProps = state => {
 
   return {
     element: element,
+    currentPath: state.rubric.currentPath
   };
 };
 
 const actionCreators = {
-  alterCriterionText
+  alterCriterionText,
 }
 
 export default connect(mapStateToProps, actionCreators)(RubricEditorRichText)

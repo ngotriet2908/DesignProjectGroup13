@@ -17,7 +17,7 @@ export function request(url, method = "GET", data = {}, accept = 'application/js
         'Accept': accept,
       },
     }
-  } else if (method === "POST" || method === "PUT") {
+  } else if (method === "POST" || method === "PUT" || method === "PATCH") {
     init = {
       method: method,
       headers: {
@@ -33,7 +33,7 @@ export function request(url, method = "GET", data = {}, accept = 'application/js
     }
   }
 
-  if (method === 'POST' || method === 'PUT' || method === 'DELETE') {
+  if (method === 'POST' || method === 'PUT' || method === 'PATCH' || method === 'DELETE') {
     // TODO don't send the token to external urls
     init.headers["X-XSRF-TOKEN"] = getCookie('XSRF-TOKEN');
   }

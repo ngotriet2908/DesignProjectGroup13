@@ -6,9 +6,11 @@ import Card from 'react-bootstrap/Card'
 import styles from './home.module.css'
 import {URL_PREFIX} from "../../services/config";
 import {COURSES} from "../../services/endpoints";
-import {IoArrowForward} from "react-icons/io5";
+import {IoArrowForward, IoFlagOutline} from "react-icons/io5";
 import store from "../../redux/store";
 import {push} from "connected-react-router";
+import globalStyles from '../helpers/global.module.css';
+import classnames from 'classnames';
 
 class ProjectCard extends Component {
   constructor (props) {
@@ -25,14 +27,17 @@ class ProjectCard extends Component {
         <Card.Body className={styles.cardBodyContainer}>
           <div className={styles.cardBodyTitle}>
             <h5>{this.props.data.name}</h5>
+            <div className={classnames(globalStyles.iconButton, styles.cardButtonContainer)} onClick={this.onClickSeeMore}>
+              <IoArrowForward size={26}/>
+            </div>
           </div>
           <div className={styles.cardBodyContent}>
             <div>Created on {(new Date(this.props.data.created_at)).toDateString()}</div>
-            <div className={styles.cardButtonContainer}>
-              <div onClick={this.onClickSeeMore}>
-                <IoArrowForward size={26}/>
-              </div>
-            </div>
+            {/*<div className={styles.cardButtonContainer}>*/}
+            {/*<div onClick={this.onClickSeeMore}>*/}
+            {/*  <IoArrowForward size={26}/>*/}
+            {/*</div>*/}
+            {/*</div>*/}
           </div>
         </Card.Body>
       </Card>

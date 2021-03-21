@@ -17,3 +17,39 @@ export const findBlocks = (children) => {
     return isBlock(child.content.type);
   });
 }
+
+
+// json patch
+export const OPERATION = {
+  add: "add",
+  remove: "remove",
+  replace: "replace",
+  move: "move",
+  copy: "copy",
+  test: "test"
+}
+
+export function isSimilarUpdate(a, b) {
+  return a.op === b.op && a.path === b.path;
+}
+
+
+export function createPatch(operation, path, value) {
+  if (operation === OPERATION.remove) {
+    return {
+      op: operation,
+      path: path,
+    }
+  } else {
+    return {
+      op: operation,
+      path: path,
+      value: value,
+    }
+  }
+}
+
+
+
+
+

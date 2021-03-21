@@ -38,11 +38,11 @@ public class Element {
         this.children = children;
     }
 
-    public int getCriterionCount() {
+    public int countCriteria() {
         int total = 0;
         if (children != null) {
             for (Element child : children) {
-                total += child.getCriterionCount();
+                total += child.countCriteria();
             }
         }
         if (content.getGrade() != null) { //Only criteria have grades

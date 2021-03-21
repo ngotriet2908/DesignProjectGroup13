@@ -219,7 +219,7 @@ class CoursesController {
 
         for(String activeProjectId: editedActiveProject) {
             projectService.addNewProject(availableProjects.get(activeProjectId));
-            rubricService.addNewRubric(new Rubric(activeProjectId))
+            rubricService.saveRubric(new Rubric(activeProjectId))
 ;       }
     }
 }

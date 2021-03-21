@@ -7,18 +7,16 @@ import {
   addBlock,
   addCriterion,
   alterCriterionText,
-  alterTitle, deleteAllElements, deleteElement,
+  alterTitle, deleteAllElements, deleteElement, setCurrentPath,
   setSelectedElement
 } from "../../redux/rubric/actions";
 
 import PropTypes from 'prop-types';
 import {isBlock, isCriterion} from "./helpers";
 import RubricEditorElementChildren from "./RubricEditorElementChildren";
-import Button from "react-bootstrap/Button";
 import RubricEditorElementGrade from "./RubricEditorElementGrade";
-import RubricViewerElementChildren from "./RubricViewerElementChildren";
-import RubricViewerElementGrade from "./RubricViewerElementGrade";
 import {IoTrashBinOutline} from "react-icons/io5";
+import debounce from "lodash/debounce"
 
 class RubricEditorElement extends Component {
   constructor (props) {
@@ -26,17 +24,21 @@ class RubricEditorElement extends Component {
   }
 
   onChangeTitle = (event) => {
-    this.props.alterTitle(this.props.data.content.id, event.target.value);
+    // debounce(this.props.alterTitle(this.props.data.content.id, event.target.value, path), 200);
+    this.props.alterTitle(this.props.data.content.id, event.target.value, this.props.currentPath + "/content/title");
   }
 
   onClickDelete = () => {
+    this.props.deleteElement(this.props.data.content.id, this.props.currentPath);
+    // TODO go to parent
+    this.props.setCurrentPath("");
     this.props.setSelectedElement(this.props.rubric.id);
-    this.props.deleteElement(this.props.data.content.id);
   }
 
   onClickDeleteAll = () => {
-    this.props.setSelectedElement(this.props.rubric.id);
     this.props.deleteAllElements();
+    this.props.setCurrentPath("");
+    this.props.setSelectedElement(this.props.rubric.id);
   }
 
   render () {
@@ -49,7 +51,6 @@ class RubricEditorElement extends Component {
             <div className={styles.viewerHeaderIcon}>
               <IoTrashBinOutline size={28} className={styles.viewerHeaderIconRed} onClick={this.onClickDeleteAll}/>
             </div>
-            {/*<Button variant="danger" onClick={this.onClickDeleteAll}>Clear</Button>*/}
           </div>
           <RubricEditorElementChildren data={this.props.data}/>
         </div>
@@ -59,8 +60,6 @@ class RubricEditorElement extends Component {
     // rubric's elements
     return (
       <div>
-        {/* TODO rubric breadcrumbs */}
-
         <div className={styles.viewerHeader}>
           {isCriterion(this.props.data.content.type) ?
             <h2>Criterion</h2>
@@ -70,7 +69,6 @@ class RubricEditorElement extends Component {
           <div className={styles.viewerHeaderIcon}>
             <IoTrashBinOutline size={28} className={styles.viewerHeaderIconRed} onClick={this.onClickDelete}/>
           </div>
-          {/*<Button variant="danger" onClick={this.onClickDelete}>Delete</Button>*/}
         </div>
 
         <div className={styles.viewerSectionContainer}>
@@ -112,7 +110,8 @@ RubricEditorElement.propTypes = {
 
 const mapStateToProps = state => {
   return {
-    rubric: state.rubric.rubric
+    rubric: state.rubric.rubric,
+    currentPath: state.rubric.currentPath
   };
 };
 
@@ -123,7 +122,8 @@ const actionCreators = {
   addCriterion,
   setSelectedElement,
   deleteElement,
-  deleteAllElements
+  deleteAllElements,
+  setCurrentPath
 }
 
 export default connect(mapStateToProps, actionCreators)(RubricEditorElement)

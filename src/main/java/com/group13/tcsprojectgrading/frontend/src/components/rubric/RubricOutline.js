@@ -4,7 +4,7 @@ import styles from './rubric.module.css'
 import {connect} from "react-redux";
 import RubricOutlineGroup from "./RubricOutlineGroup";
 import {FaMinus, FaPlus} from "react-icons/fa";
-import {setSelectedElement} from "../../redux/rubric/actions";
+import {setCurrentPath, setSelectedElement} from "../../redux/rubric/actions";
 
 
 class RubricOutline extends Component {
@@ -12,10 +12,13 @@ class RubricOutline extends Component {
     super(props);
 
     this.padding = 0;
+
+    this.path = "";
   }
 
-  onClickElement = (id) => {
+  onClickElement = (id, path) => {
     this.props.setSelectedElement(id);
+    this.props.setCurrentPath(path);
   }
 
   render () {
@@ -27,7 +30,7 @@ class RubricOutline extends Component {
 
     return (
       <div className={styles.outlineContainer}>
-        <div className={styles.outlineHeader} onClick={() => this.onClickElement(this.props.rubric.id)}>
+        <div className={styles.outlineHeader} onClick={() => this.onClickElement(this.props.rubric.id, "")}>
           <div className={classNames}>
             <h4>Rubric</h4>
             <div>{this.props.isEditing && (<span>Editing</span>)}</div>
@@ -36,7 +39,7 @@ class RubricOutline extends Component {
 
         {this.props.rubric != null ?
           <div>
-            <RubricOutlineGroup onClickElement={this.onClickElement} padding={this.padding} data={this.props.rubric.children}/>
+            <RubricOutlineGroup path={this.path + "/children"} onClickElement={this.onClickElement} padding={this.padding} data={this.props.rubric.children}/>
           </div>
           :
           <div>
@@ -57,7 +60,8 @@ const mapStateToProps = state => {
 };
 
 const actionCreators = {
-  setSelectedElement
+  setSelectedElement,
+  setCurrentPath
 }
 
 export default connect(mapStateToProps, actionCreators)(RubricOutline)
