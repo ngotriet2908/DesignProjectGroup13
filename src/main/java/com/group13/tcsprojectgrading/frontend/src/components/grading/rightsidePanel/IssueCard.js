@@ -1,8 +1,10 @@
 import React, { Component } from 'react'
 import styles from '../grading.module.css'
-import {connect} from "react-redux";
 import {request} from "../../../services/request";
-import {Breadcrumb, Button, Spinner, InputGroup, Form, Card, Modal, Badge} from "react-bootstrap";
+import {Button, Form, Card, Badge} from "react-bootstrap";
+import classnames from "classnames";
+import globalStyles from "../../helpers/global.module.css";
+import {IoCheckmarkDone, IoChevronDownOutline} from "react-icons/io5";
 
 
 class IssueCard extends Component {
@@ -24,16 +26,14 @@ class IssueCard extends Component {
   }
 
   submitSolution = () => {
-    console.log(this.formRef.current.solutionInput.value)
     let obj = {
       id: this.props.issue.id,
       solution: this.formRef.current.solutionInput.value
     }
-    request(`/api/courses/${this.props.params.courseId}/projects/${this.props.params.projectId}/submissions/${this.props.params.submissionId}/${this.props.params.assessmentId}/issues/resolve`, "POST", obj)
-      .then((response) => {
-        return response.json()
-      })
-      .then((data) => {
+
+    request(`/api/courses/${this.props.routeParams.courseId}/projects/${this.props.routeParams.projectId}/submissions/${this.props.routeParams.submissionId}/${this.props.routeParams.assessmentId}/issues/resolve`, "POST", obj)
+      .then(async (response) => {
+        let data = await response.json();
         this.props.updateIssues(data)
         this.setState({
           isSolving: false
@@ -55,73 +55,80 @@ class IssueCard extends Component {
 
   render() {
     return (
-      <Card>
-        <Card.Body>
-          <Card.Title>
-
-            <h5>
-              {this.props.issue.subject}
-              {(this.props.issue.status === "resolved")?
-                <Badge className={styles.badge} variant="success">resolved</Badge> :
-                <Badge className={styles.badge} variant="danger">unresolved</Badge>
-              }
-            </h5>
-          </Card.Title>
-          {(this.state.isExpanded)?
-            (
-              <div>
-                <h6>target: {this.props.issue.targetName}</h6>
-                <h6>created by: {this.props.issue.creator.name}</h6>
-                {(this.props.issue.hasOwnProperty("reference"))? <h6>reference issue: {this.props.issue.reference.subject}</h6> :null}
-                <h6>subject: {this.props.issue.subject}</h6>
-                <h6>description: {this.props.issue.description}</h6>
-                {(this.props.issue.hasOwnProperty("addressee"))? <h6>addressee: {this.props.issue.addressee.name}</h6> :null}
-                {(this.props.issue.hasOwnProperty("solution"))? <h6>solution: {this.props.issue.solution}</h6> :null}
-              </div>
-            ):
-            (
-              <div>
-                <h6>target: {this.props.issue.targetName}</h6>
-                <h6>created by: {this.props.issue.creator.name}</h6>
-              </div>
-            )
-          }
-
-
-          {(!this.state.isSolving)?
-            <div>
-              <Button onClick={this.expandHandler}>
-                {(this.state.isExpanded)? "collapse":"expand"}
-              </Button>
-              {(this.props.issue.status === "unresolved")?
-                <Button onClick={this.startResolve}>Resolve</Button> : null
-              }
-            </div> :
-            <div>
-              <Button onClick={this.expandHandler}>
-                {(this.state.isExpanded)? "collapse":"expand"}
-              </Button>
-
-              <Card>
-                <Card.Body>
-                  <Form ref={this.formRef}>
-                    <Form.Group controlId="solutionInput">
-                      <Form.Label>Description</Form.Label>
-                      <Form.Control as="textarea" rows={3} placeholder="Enter your solution"/>
-                    </Form.Group>
-                    <Button onClick={this.submitSolution}>
-                      Submit Solution
-                    </Button>
-                    <Button variant="danger" onClick={this.cancelResolve}>
-                      Cancel
-                    </Button>
-                  </Form>
-                </Card.Body>
-              </Card>
+      <Card className={classnames(styles.issueCard, this.state.isExpanded && styles.issuesCardExpanded)}>
+        <div className={styles.issueCardTitle}>
+          <h5>
+            {this.props.issue.subject}
+          </h5>
+          <div className={styles.gradeEditorCardFooter}>
+            <div className={classnames(globalStyles.iconButtonSmall, styles.gradingCardTitleButton, styles.issuesCardExpandButton)}
+              onClick={this.expandHandler}>
+              <IoChevronDownOutline size={26}/>
             </div>
-          }
+            {!(this.props.issue.status === "resolved") &&
+            <div className={classnames(globalStyles.iconButtonSmall, styles.gradingCardTitleButton)}
+              onClick={this.startResolve}>
+              <IoCheckmarkDone size={26}/>
+            </div>
+            }
+          </div>
+        </div>
 
-        </Card.Body>
+        <div className={styles.issueCardBadges}>
+          {(this.props.issue.status === "resolved")?
+            <Badge className={styles.badge} variant="success">resolved</Badge> :
+            <Badge className={styles.badge} variant="danger">unresolved</Badge>
+          }
+        </div>
+          
+        {(this.state.isExpanded)?
+          (
+            <div>
+              <div>
+                Opened by <b>{this.props.issue.creator.name}</b> about <b>{this.props.issue.targetName}</b>.
+              </div>
+
+              <div>Subject: {this.props.issue.subject}</div>
+              <div>Description: {this.props.issue.description}</div>
+
+              {(this.props.issue.hasOwnProperty("reference")) &&
+                  <div>Refers to <b>{this.props.issue.reference.subject}</b></div>
+              }
+
+              {(this.props.issue.hasOwnProperty("addressee")) &&
+                  <div>Addressee: {this.props.issue.addressee.name}</div>
+              }
+
+              {(this.props.issue.hasOwnProperty("solution")) &&
+                  <div>Solution: {this.props.issue.solution}</div>
+              }
+            </div>
+          ):
+          (
+            <div>
+              <div>
+                Opened by <b>{this.props.issue.creator.name}</b> about <b>{this.props.issue.targetName}</b>.
+              </div>
+            </div>
+          )
+        }
+
+        {(this.state.isSolving) &&
+          <div className={styles.issueCardSolution}>
+            <h5>Solution</h5>
+            <Form ref={this.formRef}>
+              <Form.Group controlId="solutionInput" className={styles.gradeEditorCardItem}>
+                <Form.Control as="textarea" rows={3} placeholder="Enter your response to the issue"/>
+              </Form.Group>
+
+              <div className={styles.gradeEditorCardFooter}>
+                <Button className={styles.gradeEditorCardButton} variant="linkLightGray"
+                  onClick={this.cancelResolve}>Cancel</Button>
+                <Button className={styles.gradeEditorCardButton} variant="lightGreen" onClick={this.submitSolution}>Save</Button>
+              </div>
+            </Form>
+          </div>
+        }
       </Card>
     );
   }

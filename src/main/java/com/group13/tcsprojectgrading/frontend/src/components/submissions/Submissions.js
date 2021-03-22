@@ -249,7 +249,7 @@ class Submissions extends Component {
                         // <div key={submission.stringId} className={styles.ul}>
                         //   {
                         <SubmissionsOverviewCard
-                          key={submission.stringId}
+                          key={submission.id}
                           user={this.state.user}
                           submission={submission}
                           route={this.props.match}/>

@@ -145,3 +145,19 @@
     background-color: primaryShade;
     color: white;
 }
+
+.iconButtonSmall {
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.iconButtonSmall:hover {
+    background-color: primaryShade;
+    color: white;
+}

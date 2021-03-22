@@ -8,7 +8,7 @@ import {saveRubric, saveRubricTemp, setEditingRubric} from "../../redux/rubric/a
 import RubricViewerElementGrade from "./RubricViewerElementGrade";
 import RubricViewerElementChildren from "./RubricViewerElementChildren";
 import {Can, ability, updateAbility} from "../permissions/ProjectAbility";
-import {IoPencil, IoCloudDownloadOutline} from "react-icons/io5";
+import {IoPencil, IoCloudDownloadOutline, IoListOutline} from "react-icons/io5";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
 import { saveAs } from 'file-saver';
@@ -30,27 +30,23 @@ class RubricViewerElement extends Component {
     // rubric's header
     if (!this.props.data.hasOwnProperty("content")) {
       return(
-        <div>
+        <div className={styles.viewerContainer}>
           <div className={styles.viewerHeader}>
             <h2>Rubric</h2>
-            <Can I="write" a="Rubric">
-              <div className={styles.viewerHeaderIcon}>
-                <IoPencil size={28} className={styles.viewerHeaderIconGreen} onClick={this.onClickEdit}/>
-              </div>
-            </Can>
-            <div className={styles.viewerHeaderIcon}>
-              <IoCloudDownloadOutline className={styles.viewerHeaderIconOrange} size={28} onClick={this.props.downloadRubric}/>
-            </div>
-            {/*<Button variant="secondary" onClick={this.downloadRubric}>Download</Button>*/}
           </div>
-          <RubricViewerElementChildren data={this.props.data}/>
+
+          <div className={styles.viewerBodyEmpty}>
+            <IoListOutline size={40}/>
+            <h6>Choose a criterion</h6>
+          </div>
+          {/*<RubricViewerElementChildren data={this.props.data}/>*/}
         </div>
       )
     }
 
     // rubric's element
     return (
-      <div>
+      <div className={styles.viewerContainer}>
         <div className={styles.viewerHeader}>
           {isCriterion(this.props.data.content.type) ?
             <h2>Criterion</h2>

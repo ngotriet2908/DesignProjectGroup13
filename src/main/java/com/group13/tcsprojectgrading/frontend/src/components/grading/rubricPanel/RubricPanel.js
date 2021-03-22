@@ -15,10 +15,10 @@ class RubricPanel extends Component {
     }
   }
 
-  toggleOutline = (isOutlineHidden) => {
-    this.setState({
-      isOutlineHidden: isOutlineHidden
-    })
+  toggleOutlineHidden = () => {
+    this.setState(prevState => ({
+      isOutlineHidden: !prevState.isOutlineHidden
+    }))
   }
 
   render () {
@@ -29,11 +29,13 @@ class RubricPanel extends Component {
             <div className={styles.gradingCardTitle}>
               <h4>Rubric</h4>
             </div>
-            {!this.state.isOutlineHidden ?
-              <RubricOutline/>
-              :
-              <RubricViewer/>
-            }
+            <div className={styles.rubricPanelInnerContainer}>
+              {/*{!this.state.isOutlineHidden ?*/}
+              <RubricOutline outlineHidden={this.state.isOutlineHidden} toggleOutlineHidden={this.toggleOutlineHidden}/>
+              {/*:*/}
+              <RubricViewer outlineHidden={this.state.isOutlineHidden} toggleOutlineHidden={this.toggleOutlineHidden}/>
+              {/*}*/}
+            </div>
           </Card.Body>
         </Card>
       </div>

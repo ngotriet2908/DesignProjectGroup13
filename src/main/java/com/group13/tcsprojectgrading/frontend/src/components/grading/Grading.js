@@ -26,8 +26,6 @@ class Grading extends Component {
     this.state = {
       data: this.props.location.data,
       isLoaded: false,
-      issues: [],
-      graders: []
     }
 
     // TODO: if submission is undefined, reload it from the server
@@ -75,26 +73,25 @@ class Grading extends Component {
   }
 
   fetchGradingData = () => {
-    // TODO, ignores passed data
     Promise.all([
       request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/${this.props.match.params.assessmentId}/grading`),
       request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}`),
       request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/rubric`),
-      request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/${this.props.match.params.assessmentId}/issues`),
-      request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/graders`)
+      // request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/${this.props.match.params.assessmentId}/issues`),
+      // request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/graders`)
     ])
       .then(async([res1, res2, res3, res4, res5]) => {
         const assessment = await res1.json();
         const submission = await res2.json();
         const rubric = await res3.json();
-        const issues = await res4.json();
-        const graders = await res5.json();
+        // const issues = await res4.json();
+        // const graders = await res5.json();
 
         let user = submission.user
         if (user !== null && user.privileges !== null) {
           updateAbility(ability, user.privileges, user)
         } else {
-          console.log("no grader or privileges found")
+          console.log("No grader or privileges found.")
         }
         // console.log(ability.rules)
 
@@ -112,100 +109,13 @@ class Grading extends Component {
         this.setState({
           data: submission,
           isLoaded: true,
-          issues: issues,
-          graders: graders
+          // issues: issues,
+          // graders: graders
         });
       })
       .catch(error => {
         console.error(error.message);
       });
-  }
-
-  handleAddFlag = (flag) => {
-    request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/flag`
-      , "POST", flag)
-      .then((response) => {
-        return response.json()
-      })
-      .then((flags) => {
-        let tmp = {...this.state.data}
-        tmp.submission.flags = flags
-        this.setState({
-          data : tmp
-        })
-      })
-  }
-
-  handleRemoveFlag = (flag) => {
-    request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/flag/${flag.id}`
-      , "DELETE")
-      .then((response) => {
-        return response.json()
-      })
-      .then((data) => {
-        let tmp = {...this.state.data}
-        tmp.submission.flags = data
-        this.setState({
-          data : tmp
-        })
-      })
-  }
-
-  updateIssues = (obj) => {
-    this.setState({
-      issues: obj
-    })
-  }
-
-  createFlagHandler = async (name, description, variant) => {
-    let object = {
-      "name": name,
-      "description": description,
-      "variant": variant,
-    }
-    let data = await request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/flag/create`
-      , "POST", object)
-      .then((response) => {
-        return response.json()
-      })
-      .then((data) => {
-        return data
-      })
-
-    console.log(data)
-    if (data.error !== undefined) {
-      return "error: " + data.error
-    } else {
-      let tmp = {...this.state.data}
-      tmp.user.flags = data.data
-      this.setState({
-        data : tmp
-      })
-      return "ok";
-    }
-  }
-
-  removeFlagHandler = async (id) => {
-    let data = await request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/flag/${id}`
-      , "DELETE")
-      .then((response) => {
-        return response.json()
-      })
-      .then((data) => {
-        return data
-      })
-
-    console.log(data)
-    if (data.error !== undefined) {
-      return "error: " + data.error
-    } else {
-      let tmp = {...this.state.data}
-      tmp.user.flags = data.data
-      this.setState({
-        data : tmp
-      })
-      return "ok";
-    }
   }
 
   render () {
@@ -231,7 +141,7 @@ class Grading extends Component {
         <div className={styles.container}>
           <RubricPanel match={this.props.match}/>
           <GradingPanel match={this.props.match}/>
-          <RightsidePanel match={this.props.match}/>
+          <RightsidePanel routeParams={this.props.match.params}/>
           {/*<IssuesPanel graders={this.state.graders} updateIssues={this.updateIssues} issues={this.state.issues} params={this.props.match.params} createIssue={this.createIssue}/>*/}
         </div>
 

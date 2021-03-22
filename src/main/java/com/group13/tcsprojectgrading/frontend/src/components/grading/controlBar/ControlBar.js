@@ -4,6 +4,7 @@ import {connect} from "react-redux";
 import {IoFlagOutline} from "react-icons/io5";
 import FlagModal from "./FlagModal";
 import {Badge} from 'react-bootstrap'
+import {request} from "../../../services/request";
 
 
 class ControlBar extends Component {
@@ -19,6 +20,87 @@ class ControlBar extends Component {
       flagModalShow: false
     })
   }
+
+  // handleAddFlag = (flag) => {
+  //   request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/flag`
+  //     , "POST", flag)
+  //     .then((response) => {
+  //       return response.json()
+  //     })
+  //     .then((flags) => {
+  //       let tmp = {...this.state.data}
+  //       tmp.submission.flags = flags
+  //       this.setState({
+  //         data : tmp
+  //       })
+  //     })
+  // }
+  //
+  // handleRemoveFlag = (flag) => {
+  //   request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/flag/${flag.id}`
+  //     , "DELETE")
+  //     .then((response) => {
+  //       return response.json()
+  //     })
+  //     .then((data) => {
+  //       let tmp = {...this.state.data}
+  //       tmp.submission.flags = data
+  //       this.setState({
+  //         data : tmp
+  //       })
+  //     })
+  // }
+
+  // createFlagHandler = async (name, description, variant) => {
+  //   let object = {
+  //     "name": name,
+  //     "description": description,
+  //     "variant": variant,
+  //   }
+  //   let data = await request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/flag/create`
+  //     , "POST", object)
+  //     .then((response) => {
+  //       return response.json()
+  //     })
+  //     .then((data) => {
+  //       return data
+  //     })
+  //
+  //   console.log(data)
+  //   if (data.error !== undefined) {
+  //     return "error: " + data.error
+  //   } else {
+  //     let tmp = {...this.state.data}
+  //     tmp.user.flags = data.data
+  //     this.setState({
+  //       data : tmp
+  //     })
+  //     return "ok";
+  //   }
+  // }
+  //
+  // removeFlagHandler = async (id) => {
+  //   let data = await request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/flag/${id}`
+  //     , "DELETE")
+  //     .then((response) => {
+  //       return response.json()
+  //     })
+  //     .then((data) => {
+  //       return data
+  //     })
+  //
+  //   console.log(data)
+  //   if (data.error !== undefined) {
+  //     return "error: " + data.error
+  //   } else {
+  //     let tmp = {...this.state.data}
+  //     tmp.user.flags = data.data
+  //     this.setState({
+  //       data : tmp
+  //     })
+  //     return "ok";
+  //   }
+  // }
 
   onFlagModalClose = () => {
     this.setState({
