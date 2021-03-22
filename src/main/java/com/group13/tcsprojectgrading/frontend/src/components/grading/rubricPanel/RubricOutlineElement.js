@@ -3,14 +3,11 @@ import React, { Component } from 'react'
 import styles from '../grading.module.css'
 import {connect} from "react-redux";
 import {addBlock, addCriterion, deleteElement, setCurrentPath, setSelectedElement} from "../../../redux/rubric/actions";
-import {FaChevronDown, FaChevronRight, FaHandPointRight} from "react-icons/fa";
-import {IoCheckmarkOutline, IoEllipsisVerticalOutline} from "react-icons/io5";
-import {createNewBlock, createNewCriterion, isBlock, isCriterion, removeElement} from "../../rubric/helpers";
-import {LOCATIONS} from "../../../redux/navigation/reducers/navigation";
+import { isBlock} from "../../rubric/helpers";
 import classnames from "classnames";
 import globalStyles from "../../helpers/global.module.css";
-import Dropdown from "react-bootstrap/Dropdown";
-import {CustomToggle} from "./RubricOutline";
+import {IoChevronForwardOutline, IoCheckmarkSharp, IoPricetagOutline} from "react-icons/io5";
+import {isGraded} from "./helpers";
 
 class RubricOutlineElement extends Component {
   constructor (props) {
@@ -22,11 +19,12 @@ class RubricOutlineElement extends Component {
   }
 
   onClick = () => {
-    console.log(this.props.path);
     this.props.onClickElement(this.props.data.content.id, this.props.path);
   }
 
   render () {
+    const graded = isGraded(this.props.assessment.grades, this.props.data.content.id);
+
     return (
       <div className={classnames(
         styles.outlineElementContainer,
@@ -35,16 +33,24 @@ class RubricOutlineElement extends Component {
       )} onClick={this.onClick}>
         <div className={styles.outlineElement} style={{paddingLeft: `${this.props.padding}rem`}}>
           <div className={classnames(styles.outlineElementLeft, isBlock(this.props.data.content.type) && styles.outlineElementLeftBlock)}>
+
             {isBlock(this.props.data.content.type) ?
               <div className={classnames(styles.outlineElementIcon,
                 !this.props.collapsed && styles.outlineElementIconRotated)}>
-                <FaChevronRight onClick={this.props.onClickBlockCollapse}/>
+                <IoChevronForwardOutline size={22} onClick={this.props.onClickBlockCollapse}/>
               </div>
               :
-              <div className={classnames(styles.outlineElementIcon)}>
-                <FaHandPointRight/>
-              </div>
+              (graded ?
+                <div className={classnames(styles.outlineElementIcon, styles.outlineElementIconGraded)}>
+                  <IoCheckmarkSharp size={22}/>
+                </div>
+                :
+                <div className={classnames(styles.outlineElementIcon)}>
+                  <IoPricetagOutline size={22}/>
+                </div>
+              )
             }
+
             <div>
               {this.props.data.content.title}
             </div>
@@ -58,9 +64,9 @@ class RubricOutlineElement extends Component {
 
 const mapStateToProps = state => {
   return {
-    isEditing: state.rubric.isEditing,
-    selectedElement: state.rubric.selectedElement,
     rubric: state.rubric.rubric,
+    selectedElement: state.rubric.selectedElement,
+    assessment: state.grading.assessment,
   };
 };
 

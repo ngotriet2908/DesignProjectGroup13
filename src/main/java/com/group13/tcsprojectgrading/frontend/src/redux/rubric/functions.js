@@ -103,14 +103,14 @@ export function deleteElement(rubric, id, path) {
   return copy;
 }
 
-export function findByPath(rubric, path, returnParend=false) {
+export function findByPath(rubric, path, returnParent=false) {
   let parts = path.split("/");
 
   if (path === "") {
     return rubric;
   } else {
     let currentElement = rubric;
-    let stop = returnParend ? parts.length - 1 : parts.length;
+    let stop = returnParent ? parts.length - 1 : parts.length;
 
     for (let i = 1; i < stop; i++) {
       console.log("Part:");
@@ -186,32 +186,6 @@ export function _flattenCriteria(where, results) {
     }
   }
 }
-
-// export function flattenCriteria(rubric, resultsList) {
-//   return _flattenCriteria(rubric.children, resultsList)
-// }
-//
-// export function _flattenCriteria(where, resultsList) {
-//   if(where instanceof Array) {
-//     for(let i = 0; i < where.length; i++) {
-//       _flattenCriteria(where[i], resultsList);
-//     }
-//   }
-//   else {
-//     if (isCriterion(where.content.type)) {
-//       let grade = {
-//         criterionId: where.content.id,
-//         grade: 0,
-//         comment: ""
-//       }
-//       resultsList.push(grade);
-//     }
-//
-//     if (where.hasOwnProperty('children')) {
-//       _flattenCriteria(where.children, resultsList);
-//     }
-//   }
-// }
 
 
 

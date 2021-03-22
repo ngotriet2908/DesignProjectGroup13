@@ -48,10 +48,11 @@
     align-items: flex-end;
 }
 
-.titleContainer span {
+.titleContainer div {
     margin-left: 1rem;
     font-size: 1.6rem;
-    color: #a2a1a1;
+    color: primary;
+    /*color: #a2a1a1;*/
 }
 
 .sectionTitleWithButton {

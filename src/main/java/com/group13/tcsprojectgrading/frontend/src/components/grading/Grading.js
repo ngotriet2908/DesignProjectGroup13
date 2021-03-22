@@ -1,9 +1,6 @@
 import React, { Component } from 'react'
 import styles from './grading.module.css'
-import FileViewer from "./FileViewer";
-import SideBar from "./GradingSideBar";
-import ControlBar from "./ControlBar";
-import {rubric} from "../rubric/rubricSample";
+import ControlBar from "./controlBar/ControlBar";
 import {saveRubric, setSelectedElement} from "../../redux/rubric/actions";
 import {connect} from "react-redux";
 import {Spinner} from "react-bootstrap";
@@ -16,10 +13,10 @@ import {BASE} from "../../services/endpoints";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 import {setCurrentLocation} from "../../redux/navigation/actions";
 import {Can, ability, updateAbility} from "../permissions/ProjectAbility";
-import FlagModal from "./FlagModal";
+import FlagModal from "./controlBar/FlagModal";
 import RubricPanel from "./rubricPanel/RubricPanel";
 import GradingPanel from "./gradingPanel/GradingPanel";
-import IssuesPanel from "./issuesPanel/IssuesPanel";
+import RightsidePanel from "./rightsidePanel/RightsidePanel";
 
 
 class Grading extends Component {
@@ -218,9 +215,9 @@ class Grading extends Component {
           removeFlagHandler={this.removeFlagHandler}/>
 
         <div className={styles.container}>
-          <RubricPanel/>
-          <GradingPanel/>
-          <IssuesPanel/>
+          <RubricPanel match={this.props.match}/>
+          <GradingPanel match={this.props.match}/>
+          <RightsidePanel match={this.props.match}/>
         </div>
 
       </>

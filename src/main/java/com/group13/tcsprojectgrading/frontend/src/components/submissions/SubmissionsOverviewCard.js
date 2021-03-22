@@ -3,9 +3,11 @@ import {Badge, Card, Button} from "react-bootstrap";
 import {push} from "connected-react-router";
 import styles from "./submissions.module.css"
 import {Link} from "react-router-dom";
-import {IoArrowForward} from "react-icons/io5";
+import {IoArrowForward, IoSyncOutline} from "react-icons/io5";
 import store from "../../redux/store";
 import {URL_PREFIX} from "../../services/config";
+import classnames from "classnames";
+import globalStyles from "../helpers/global.module.css";
 
 class SubmissionsOverviewCard extends Component {
   render() {
@@ -46,7 +48,7 @@ class SubmissionsOverviewCard extends Component {
             }
 
             <div className={styles.submissionCardHeaderButtonContainer}>
-              <div onClick={() => store.dispatch(push(this.props.route.url + "/" + this.props.submission.id))}>
+              <div className={classnames(globalStyles.iconButton)} onClick={() => store.dispatch(push(this.props.route.url + "/" + this.props.submission.id))}>
                 <IoArrowForward size={26}/>
               </div>
             </div>

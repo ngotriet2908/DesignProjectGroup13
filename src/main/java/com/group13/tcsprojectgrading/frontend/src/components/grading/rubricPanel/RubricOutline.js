@@ -15,6 +15,7 @@ import {
 } from "../../../redux/rubric/actions";
 import globalStyles from "../../helpers/global.module.css";
 import classnames from "classnames";
+import {IoLogoTux} from "react-icons/io5";
 
 
 class RubricOutline extends Component {
@@ -23,39 +24,30 @@ class RubricOutline extends Component {
 
     this.padding = 0;
     this.path = "";
+  }
 
-    this.data = {
-      content: {
-        id: this.props.rubric.id,
-      },
-      children: this.props.rubric.children
-    }
+  componentDidMount = () => {
+    this.props.setSelectedElement(this.props.rubric.id)
   }
 
   onClickElement = (id, path) => {
     this.props.setSelectedElement(id);
-    this.props.setCurrentPath(path);
+
+    // open grading for the selected criterion
+    // this.props.setCurrentPath(path);
   }
 
   render () {
     return (
       <div className={styles.outlineContainer}>
-        <div className={classnames(styles.outlineHeaderContainer,
-          (this.props.selectedElement != null && this.props.rubric.id === this.props.selectedElement) &&
-          styles.outlineHeaderContainerSelected
-        )}
-        onClick={() => this.onClickElement(this.props.rubric.id, "")}>
-          <div className={classnames(styles.outlineHeader)}>
-            <h3>Rubric</h3>
+        {this.props.rubric.children.length === 0 ?
+          <div className={styles.gradeViewerNotGraded}>
+            <IoLogoTux size={40}/>
+            <h6>Rubric is empty</h6>
           </div>
-        </div>
-
-        {this.props.rubric != null ?
-          <RubricOutlineGroup path={this.path + "/children"} onClickElement={this.onClickElement} padding={this.padding} data={this.props.rubric.children}/>
           :
-          <div>
-            Empty
-          </div>
+          <RubricOutlineGroup path={this.path + "/children"} onClickElement={this.onClickElement} padding={this.padding}
+            data={this.props.rubric.children}/>
         }
       </div>
     )
@@ -66,9 +58,6 @@ const mapStateToProps = state => {
   return {
     rubric: state.rubric.rubric,
     selectedElement: state.rubric.selectedElement,
-    isEditing: state.rubric.isEditing,
-    rubricTemp: state.rubric.rubricTemp,
-    updates: state.rubric.updates
   };
 };
 

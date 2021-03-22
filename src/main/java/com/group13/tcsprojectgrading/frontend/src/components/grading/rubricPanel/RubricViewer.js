@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
-import styles from './grading.module.css'
+import styles from '../grading.module.css'
 import Card from "react-bootstrap/Card";
-import {saveRubric, setSelectedElement} from "../../redux/rubric/actions";
+import {saveRubric, setSelectedElement} from "../../../redux/rubric/actions";
 import {connect} from "react-redux";
 
 import RubricViewerOutline from "./RubricViewerOutline";

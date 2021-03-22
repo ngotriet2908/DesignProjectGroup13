@@ -7,6 +7,7 @@ import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.*;
 import com.group13.tcsprojectgrading.models.grading.CriterionGrade;
 import com.group13.tcsprojectgrading.models.grading.Grade;
+import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.services.*;
 import com.group13.tcsprojectgrading.services.grading.AssessmentService;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
@@ -59,7 +60,6 @@ public class GradingController {
         Assessment submissionAssessment = assessmentService.getAssessmentById(assessmentId);
 
         if (!assessmentList.contains(submissionAssessment)) {
-            System.out.println("here");
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
 
@@ -81,14 +81,12 @@ public class GradingController {
             @PathVariable String criterionId,
             @RequestBody Grade newGrade
     ) {
-        Project project = projectService.getProjectById(courseId, projectId);
         Submission submission = submissionService.findSubmissionById(submissionId);
         List<Assessment> assessmentList = assessmentService.getAssessmentBySubmission(submission);
 
         Assessment submissionAssessment = assessmentService.getAssessmentById(assessmentId);
 
         if (!assessmentList.contains(submissionAssessment)) {
-            System.out.println("sub");
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
 
@@ -97,6 +95,7 @@ public class GradingController {
         } else {
             Map<String, CriterionGrade> grades = submissionAssessment.getGrades();
 
+            // add the grade to history
             if (grades.containsKey(criterionId)) {
                 grades.get(criterionId).getHistory().add(newGrade);
                 grades.get(criterionId).setActive(grades.get(criterionId).getActive() + 1);
@@ -108,11 +107,25 @@ public class GradingController {
                 ));
             }
 
+            // update graded count of assessment
+            submissionAssessment.increaseGradedCount(1);
+
+            // update graded count of project
+            // -
+
+            // check if fully graded (should be possible to replace with a manually typed value)
+            Rubric rubric = this.rubricService.getRubricById(projectId);
+            if (rubric.getCriterionCount() == submissionAssessment.getGradedCount()) {
+                int total = this.assessmentService.calculateFinalGrade(rubric, submissionAssessment);
+                submissionAssessment.setFinalGrade(total);
+            }
+
             this.assessmentService.saveAssessment(submissionAssessment);
             return new ResponseEntity<>(HttpStatus.OK);
         }
     }
 
+    // TODO doesn't work for now
     @RequestMapping(value = "/{criterionId}/active/{id}", method = RequestMethod.PUT)
     protected ResponseEntity<String> updateActiveGrading(
             @PathVariable String courseId,
@@ -122,7 +135,6 @@ public class GradingController {
             @PathVariable String criterionId,
             @PathVariable int id
     ) {
-        Project project = projectService.getProjectById(courseId, projectId);
         Submission submission = submissionService.findSubmissionById(submissionId);
         List<Assessment> assessmentList = assessmentService.getAssessmentBySubmission(submission);
 
@@ -132,8 +144,8 @@ public class GradingController {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
 
-
         if (submissionAssessment == null) {
+            System.out.println("Something is wrong...");
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
             Map<String, CriterionGrade> grades = submissionAssessment.getGrades();

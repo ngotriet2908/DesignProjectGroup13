@@ -154,18 +154,6 @@
     /*transition: transform .1s ease-in-out;*/
 }
 
-.addElementMenu {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0.2rem;
-}
-
-.addElementMenu button {
-    margin: 0.2rem;
-}
-
-
 
 
 /* editor/viewer */

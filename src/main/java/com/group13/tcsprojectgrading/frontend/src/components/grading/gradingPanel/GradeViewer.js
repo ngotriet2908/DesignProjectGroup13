@@ -1,19 +1,19 @@
 import React, { Component } from 'react'
-import styles from './grading.module.css'
+import styles from '../grading.module.css'
 import {connect} from "react-redux";
 
-import globalStyles from '../helpers/global.module.css';
+import globalStyles from '../../helpers/global.module.css';
 import Card from "react-bootstrap/Card";
-import {isCriterion} from "../rubric/helpers";
+import {isCriterion as isCriterionChecker} from "../../rubric/helpers";
 import Button from "react-bootstrap/Button";
-import {findById} from "../../redux/rubric/functions";
-import {findCriterion} from "../../redux/grading/functions";
-import {setActive} from "../../redux/grading/actions";
-import {request} from "../../services/request";
+import {findById} from "../../../redux/rubric/functions";
+import {findCriterion} from "../../../redux/grading/functions";
+import {setActive} from "../../../redux/grading/actions";
+import {request} from "../../../services/request";
 
 import classnames from 'classnames';
-import {IoCheckboxOutline, IoFileTrayOutline, IoSearchOutline, IoSquareOutline} from "react-icons/io5";
-import {findUserById} from "../../redux/user/functions";
+import {IoCheckboxOutline, IoListOutline, IoFileTrayOutline, IoSquareOutline} from "react-icons/io5";
+import {findUserById} from "../../../redux/user/functions";
 
 
 class GradeViewer extends Component {
@@ -40,48 +40,6 @@ class GradeViewer extends Component {
       });
   }
 
-  // getUserData = (userId ) => {
-  //   if (this.props.self.id === userId) {
-  //     return this.props.self;
-  //   } else {
-  //     let user = findUserById(this.props.users, userId);
-  //
-  //     if (user) {
-  //       return user;
-  //     } else {
-  //       // fetch user's data
-  //       request(`/api/users/${userId}`, "GET")
-  //         .then((response) => {
-  //           console.log(response);
-  //         })
-  //         .catch(error => {
-  //           console.error(error.message)
-  //         });
-  //     }
-  //   }
-  // }
-
-  fetchUserData = (userIds) => {
-    if (this.props.self.id === userId) {
-      return this.props.self;
-    } else {
-      let user = findUserById(this.props.users, userId);
-
-      if (user) {
-        return user;
-      } else {
-        // fetch user's data
-        request(`/api/users/${userId}`, "GET")
-          .then((response) => {
-            console.log(response);
-          })
-          .catch(error => {
-            console.error(error.message)
-          });
-      }
-    }
-  }
-
   getUnknownUsers = (userIds) =>  {
     let unknownUsers = []
 
@@ -95,24 +53,20 @@ class GradeViewer extends Component {
   }
 
 
-
-
   render () {
-    // if (!this.state.isLoaded) {
-    //   return(
-    //     <div>
-    //       NO!
-    //     </div>
-    //   )
-    // }
+    let isCriterion = this.props.element.hasOwnProperty("content") && isCriterionChecker(this.props.element.content.type);
+    let isGraded = this.props.grades;
 
     return (
       <div className={styles.gradeViewerContainer}>
-        {this.props.element.content && isCriterion(this.props.element.content.type) &&
-          (<Card className={styles.gradeViewerCard}>
-            <Card.Body>
+        <Card className={styles.panelCard}>
+          <Card.Body className={styles.gradeViewerBody}>
+            <div className={styles.gradingCardTitle}>
               <h4>Grading history</h4>
-              {this.props.grades ?
+            </div>
+
+            {isCriterion ?
+              (isGraded ?
                 this.props.grades.history.map((grade, index) => {
                   return (
                     <div key={index} onClick={() => this.makeActive(index)}
@@ -126,14 +80,13 @@ class GradeViewer extends Component {
                       </div>
                       <div className={styles.gradeViewerRowContent}>
                         <div>
-                        Graded by {grade.userId} on {new Date(grade.created).toDateString()}
+                            Graded by {grade.userId} on {new Date(grade.created).toDateString()}
                         </div>
                         <div>
-                        Grade {grade.grade}
+                            Grade {grade.grade}
                           {grade.comment != null &&
-                        <span> with a note: {grade.comment}
-                          {/*<div className={styles.gradeViewerRowExplanation}>{grade.comment}</div>*/}
-                        </span>
+                            <span> with a note: {grade.comment}
+                            </span>
                           }
                         </div>
                       </div>
@@ -142,14 +95,18 @@ class GradeViewer extends Component {
                 })
                 :
                 <div className={styles.gradeViewerNotGraded}>
-                  <IoFileTrayOutline size={26}/>
+                  <IoFileTrayOutline size={40}/>
                   <h6>Not graded yet.</h6>
                 </div>
-              }
-            </Card.Body>
-          </Card>
-          )
-        }
+              )
+              :
+              <div className={styles.gradeViewerNotGraded}>
+                <IoListOutline size={40}/>
+                <h6>Choose a criterion</h6>
+              </div>
+            }
+          </Card.Body>
+        </Card>
       </div>
     )
   }
@@ -158,8 +115,7 @@ class GradeViewer extends Component {
 const mapStateToProps = state => {
   return {
     selectedElement: state.rubric.selectedElement,
-    // rubric: state.rubric.rubric,
-    // assessment: state.grading.assessment,
+    rubric: state.rubric.rubric,
     users: state.users.users,
     self: state.users.self,
 

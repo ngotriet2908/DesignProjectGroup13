@@ -3,6 +3,7 @@ import React, { Component } from 'react'
 import styles from '../grading.module.css'
 import {connect} from "react-redux";
 import RubricOutlineElement from "./RubricOutlineElement";
+import classnames from "classnames";
 
 class RubricOutlineGroup extends Component {
   constructor (props) {
@@ -35,7 +36,6 @@ class RubricOutlineInnerGroup extends Component {
     super(props);
 
     this.state = {
-      // collapsed: !this.props.data.children,
       collapsed: false,
     }
   }
@@ -49,11 +49,6 @@ class RubricOutlineInnerGroup extends Component {
   }
 
   render() {
-    let className = `${styles.outlineGroup}`;
-    if (this.state.collapsed) {
-      className += " " + `${styles.outlineGroupCollapsed}`
-    }
-
     return (
       <>
         <RubricOutlineElement
@@ -65,7 +60,7 @@ class RubricOutlineInnerGroup extends Component {
           path={this.props.path}
         />
 
-        <div className={className}>
+        <div className={classnames(styles.outlineGroup, this.state.collapsed && styles.outlineGroupCollapsed)}>
           {this.props.data.children && <RubricOutlineGroup path={this.props.path + "/children"} onClickElement={this.props.onClickElement} padding={this.props.padding} data={this.props.data.children}/>}
         </div>
       </>
