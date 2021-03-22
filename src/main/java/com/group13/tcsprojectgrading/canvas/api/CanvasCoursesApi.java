@@ -265,8 +265,8 @@ public class CanvasCoursesApi {
                     .scheme(CanvasEndpoints.SCHEME)
                     .host(CanvasEndpoints.HOST)
                     .path(CanvasEndpoints.SUBMISSIONS_PATH)
-                    .queryParam("include[]", "group")
-                    .queryParam("grouped", true)
+                    .queryParam("include[]", "group", "submission_history","user","submission_comments")
+//                    .queryParam("grouped", true)
                     .build(courseId, assignmentId);
 
             return this.canvasApi.sendRequestWithPagination(uri, HttpMethod.GET, authorizedClient);

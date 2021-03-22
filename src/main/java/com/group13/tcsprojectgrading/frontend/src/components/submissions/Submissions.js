@@ -14,7 +14,7 @@ import {Link} from "react-router-dom";
 import Breadcrumbs from "../helpers/Breadcrumbs";
 
 import globalStyles from '../helpers/global.module.css';
-import {IoFileTrayOutline} from "react-icons/io5";
+import {IoFileTrayOutline, IoPencil} from "react-icons/io5";
 import {IoSyncOutline} from "react-icons/io5";
 
 import classnames from 'classnames';
@@ -47,21 +47,6 @@ class Submissions extends Component {
   filterGroupSearchChange = (group) => {
     let criteria = this.normalizeLowercase(group.name).includes(this.normalizeLowercase(this.state.searchString))
     if (criteria) return true
-
-    // if (group.hasOwnProperty("sid")) {
-    //   criteria = group.sid.normalizeLowercase().includes(this.state.searchString.normalizeLowercase())
-    //   if (criteria) return true
-    // }
-    // if (group.hasOwnProperty("members")) {
-    //   let i;
-    //   for(i = 0; i < group.members.length; i++) {
-    //     criteria = group.members[i].name.normalizeLowercase().includes(this.state.searchString.normalizeLowercase())
-    //     if (criteria) return true
-    //
-    //     criteria = group.members[i].sid.normalizeLowercase().includes(this.state.searchString.normalizeLowercase())
-    //     if (criteria) return true
-    //   }
-    // }
     return false
   }
 
@@ -148,7 +133,7 @@ class Submissions extends Component {
       syncing: true
     })
 
-    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/syncCanvas`)
+    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/syncCanvas`)
       .then(response => {
         if (response.status === 200) {
           this.loadData()
@@ -181,9 +166,9 @@ class Submissions extends Component {
 
         <div className={classnames(globalStyles.titleContainer, styles.titleContainer, this.state.syncing && styles.titleContainerIconActive)}>
           <h1>Submissions</h1>
-          <span>
-            <IoSyncOutline onClick={this.syncHandler}/>
-          </span>
+          <div className={classnames(globalStyles.iconButton)} onClick={this.syncHandler}>
+            <IoSyncOutline size={26}/>
+          </div>
         </div>
 
         {/*<div className={styles.overview}>*/}
@@ -192,16 +177,6 @@ class Submissions extends Component {
         {/*  <h6>All submissions count: {this.state.submissions.length}</h6>*/}
         {/*  <h6>Deadline: ???</h6>*/}
         {/*  <h6>Overall progress: {this.calculateOverallProgress()}%</h6>*/}
-        {/*  <Button variant="lightGreen" onClick={this.syncHandler}>*/}
-        {/*    {(!this.state.syncing)? "Sync with Canvas":*/}
-        {/*      <Spinner*/}
-        {/*        as="span"*/}
-        {/*        animation="grow"*/}
-        {/*        size="sm"*/}
-        {/*        role="status"*/}
-        {/*        aria-hidden="true"/>*/}
-        {/*    }*/}
-        {/*  </Button>*/}
         {/*</div>*/}
 
         <div className={styles.tasksList}>
@@ -212,7 +187,7 @@ class Submissions extends Component {
               <div className={styles.toolbar}>
                 <FormControl className={styles.groupsSearchBar}
                   type="text"
-                  placeholder="Search with a group name"
+                  placeholder="Search by a group name"
                   onChange={this.handleSearchChange}/>
 
                 <DropdownButton

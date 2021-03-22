@@ -11,15 +11,14 @@ import com.group13.tcsprojectgrading.models.Grader;
 import com.group13.tcsprojectgrading.models.Project;
 import com.group13.tcsprojectgrading.models.RoleEnum;
 import com.group13.tcsprojectgrading.models.Submission;
-import com.group13.tcsprojectgrading.models.grading.SubmissionAssessment;
 import com.group13.tcsprojectgrading.services.*;
-import com.group13.tcsprojectgrading.services.grading.GradingService;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.transaction.Transactional;
 import java.security.Principal;
 import java.text.ParseException;
 import java.util.*;
@@ -35,14 +34,13 @@ public class ProjectsManagementController {
     private final RoleService roleService;
     private final ProjectRoleService projectRoleService;
     private final SubmissionService submissionService;
-    private final GradingService gradingService;
     private final RubricService rubricService;
 
 
     @Autowired
     public ProjectsManagementController(CanvasApi canvasApi, GraderService graderService, ProjectService projectService,
                                         RoleService roleService, ProjectRoleService projectRoleService,
-                                        SubmissionService submissionService, GradingService gradingService,
+                                        SubmissionService submissionService,
                                         RubricService rubricService) {
         this.canvasApi = canvasApi;
         this.graderService = graderService;
@@ -50,14 +48,12 @@ public class ProjectsManagementController {
         this.roleService = roleService;
         this.projectRoleService = projectRoleService;
         this.submissionService = submissionService;
-        this.gradingService = gradingService;
         this.rubricService = rubricService;
     }
 
     @GetMapping(value = "")
     @ResponseBody
     protected JsonNode getManagementInfo(@PathVariable String courseId, @PathVariable String projectId, Principal principal) throws JsonProcessingException, ParseException {
-        String projectResponse = this.canvasApi.getCanvasCoursesApi().getCourseProject(courseId, projectId);
 
         Project project = projectService.getProjectById(courseId, projectId);
         if (project == null) {
@@ -95,7 +91,7 @@ public class ProjectsManagementController {
         for(Submission submission: submissions) {
 
             JsonNode taskNode = objectMapper.createObjectNode();
-            ((ObjectNode) taskNode).put("id", submission.getId());
+            ((ObjectNode) taskNode).put("id", submission.getId().toString());
 //            ((ObjectNode) taskNode).put("submission_id", submission.getId());
             ((ObjectNode) taskNode).put("isGroup", submission.getGroupId() != null);
             ((ObjectNode) taskNode).put("name", submission.getName());
@@ -185,7 +181,7 @@ public class ProjectsManagementController {
         for(Submission submission: submissions) {
 
             ObjectNode taskNode = objectMapper.createObjectNode();
-            taskNode.put("id", submission.getId());
+            taskNode.put("id", submission.getId().toString());
 //            ((ObjectNode) taskNode).put("submission_id", submission.getId());
             taskNode.put("isGroup", submission.getGroupId() != null);
             taskNode.put("name", submission.getName());
@@ -224,18 +220,18 @@ public class ProjectsManagementController {
     @GetMapping(value = "/assign/{id}/{toUserId}")
     @ResponseBody
     protected JsonNode assignSubmission(@PathVariable String courseId,
-                                  @PathVariable String projectId,
-                                  @PathVariable String id,
+                                        @PathVariable String projectId,
+                                        @PathVariable String id,
 //                                  @PathVariable String fromUserId,
-                                  @PathVariable String toUserId,
-                                  Principal principal) throws JsonProcessingException, ParseException {
+                                        @PathVariable String toUserId,
+                                        Principal principal) throws JsonProcessingException, ParseException {
         Project project = projectService.getProjectById(courseId, projectId);
         if (project == null) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "entity not found"
             );
         }
-        Submission submission = submissionService.findSubmissionById(id, project);
+        Submission submission = submissionService.findSubmissionById(id);
         Grader grader = graderService.getGraderFromGraderId(toUserId, project);
         if (submission == null) return null;
         if (!toUserId.equals("notAssigned")) {
@@ -245,7 +241,7 @@ public class ProjectsManagementController {
 //            System.out.println("notAssigned");
             submission.setGrader(null);
         }
-        submissionService.addNewSubmission(submission);
+        submissionService.saveGrader(submission);
 
         //remake notAssigned & graders
         return remakeNotAssignedAndGraders(project);
@@ -268,7 +264,7 @@ public class ProjectsManagementController {
             if (submission.getGrader() == null) continue;
             if (submission.getGrader().getUserId().equals(userId)) {
                 submission.setGrader(null);
-                submissionService.addNewSubmission(submission);
+                submissionService.saveGrader(submission);
             }
         }
 
@@ -277,9 +273,9 @@ public class ProjectsManagementController {
 
     @PostMapping(value = "/bulkAssign")
     protected JsonNode bulkAssign(@PathVariable String courseId,
-                                   @PathVariable String projectId,
-                                   @RequestBody ObjectNode object,
-                                   Principal principal) throws JsonProcessingException, ParseException {
+                                  @PathVariable String projectId,
+                                  @RequestBody ObjectNode object,
+                                  Principal principal) throws JsonProcessingException, ParseException {
         Project project = projectService.getProjectById(courseId, projectId);
         if (project == null) {
             throw new ResponseStatusException(
@@ -336,7 +332,7 @@ public class ProjectsManagementController {
                     return null;
                 }
                 submission.setGrader(grader1);
-                submissionService.addNewSubmission(submission);
+                submissionService.saveGrader(submission);
             }
         }
 

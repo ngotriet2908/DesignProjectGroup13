@@ -85,7 +85,7 @@ class GraderManagement extends Component {
       syncing: true
     })
 
-    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/syncCanvas`)
+    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/syncCanvas`)
       .then(response => {
         if (response.status === 200) {
           this.projectManagementHandler()

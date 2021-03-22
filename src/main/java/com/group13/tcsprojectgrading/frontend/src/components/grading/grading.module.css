@@ -1,18 +1,20 @@
 @value primary, secondary, ternary, quaternary, quinary, senary, senaryShade, pinkishGray, ultraLightGray, primaryShade, lightGray, darkishGray, moderateGray from '../helpers/colors.css';
 
 .container {
-    padding: 1rem 1rem 1rem 1rem;
     width: 100%;
-
-    /*display: grid;*/
-    /*grid-template-columns: auto 35%;*/
-    /*grid-template-rows: auto;*/
-
-    /*column-gap: 0.5rem;*/
-
     position: relative;
+    margin-top: 5rem;
+    min-height: calc(100% - 5rem);
     background-color: ultraLightGray;
-    overflow: auto;
+
+    display: flex;
+    flex-direction: row;
+
+    box-sizing: border-box;
+}
+
+.container > * {
+    box-sizing: border-box;
 }
 
 .controlBarContainer {
@@ -29,28 +31,6 @@
     border-bottom: 1px solid #dfdfdf;
 }
 
-.fileViewerContainer {
-    /*grid-column: 1 / 2;*/
-    min-height: 100%;
-
-    /* todo */
-    height: 200%;
-
-    /*margin-top: 5rem;*/
-    padding-top: 5rem;
-    box-sizing: border-box;
-
-    margin-right: 28rem;
-
-    /*background-color: blue;*/
-
-    /*overflow: auto;*/
-}
-
-
-.fileViewerCard {
-    height: 100%;
-}
 
 /* control bar */
 .controlBarBody {
@@ -63,7 +43,6 @@
 }
 
 .controlBarButton {
-    /*font-size: 1.3rem;*/
     padding: 0.8rem;
     border-radius: 5px;
     cursor: pointer;
@@ -77,118 +56,195 @@
 }
 
 
-/* grading panel */
-.gradingContainer {
-    /*grid-column: 2 / 3;*/
-    margin-top: 5rem;
 
-    width: 28rem;
 
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    /*background-color: red;*/
-    padding: 1rem 1rem 1rem 0;
-
-    z-index: 45;
-
-    overflow: auto;
-
-    height: 100%;
-
-    /*height: 5rem;*/
-    /*border-bottom: 1px solid #dfdfdf;*/
-    /*min-height: 100%;*/
+/* rubric panel */
+.rubricPanelContainer {
+    width: 100%;
+    /*border-right: 1px solid #dfdfdf;*/
+    /*margin: 0.5rem 0.25rem 0.5rem 0.5rem;*/
+    padding: 0.5rem;
 }
 
-
-/* rubric */
-.rubricViewerContainer {
-    /*grid-column: 2 / 3;*/
-    /*grid-row: 2 / 3;*/
-    /*min-height: 100%;*/
-    /*max-height: 10rem;*/
-
-    margin-bottom: 1rem;
-    /*min-height: 10rem;*/
-    position: relative;
-    min-height: 20rem;
-    /*height: 100%*/
+.panelCard {
+    min-height: 100%;
 }
 
-.rubricViewerCard {
-    box-sizing: border-box;
-    margin-left: 0.5rem;
-    /*height: 100%;*/
-    overflow-y: scroll;
-    overflow-x: hidden;
-    position: relative;
-    min-height: 20rem;
-}
-
-.rubricViewerCardInner {
+.gradingCardTitle {
+    margin-bottom: 0.5rem;
+    height: 48px;
     display: flex;
     flex-direction: row;
-    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+}
 
-    /*width: 200%;*/
-    width: 100%;
-    padding: 20px;
+.gradingCardTitle h4 {
+    margin: 0;
+}
+
+.gradingCardTitleWithButton {
+    /*display: flex;*/
+    /*flex-direction: row;*/
+    /*justify-content: space-between;*/
+    /*align-items: center;*/
+}
+
+.gradingCardTitleButton {
+    color: primary;
+}
+
+.outlineContainer {
     height: 100%;
+    overflow: scroll;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    position: relative;
+    /*margin-top: 1rem;*/
+
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.outlineContainer ul {
+    padding: 0;
+    list-style-type: none;
+    flex: 1;
+}
+
+/* blocks of elements */
+.outlineGroup {
+    transition: all 1s ease-out;
+}
+
+.outlineGroupCollapsed {
+    display: none;
+}
+
+/* elements */
+.outlineElementContainer {
+    height: 50px;
+    border-left: 4px solid transparent;
+}
+
+.outlineElementContainerSelected {
+    border-left: 4px solid primary;
+}
+
+.outlineElement {
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    cursor: pointer;
+    border-top: 1px solid #dfdfdf;
+    padding: 0.5rem 0.5rem 0.5rem 0;
 
     position: relative;
-    /*min-height: 100%;*/
 }
 
-.rubricViewerOutline {
-    width: 95%;
-    transition: margin-left 0.2s;
+.outlineElementLeft {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
 }
 
-.rubricViewerOutlineHidden {
-    margin-left: -100%;
+.outlineElementLeftBlock {
+    /*font-size: 1.1rem;*/
 }
 
-.rubricViewerElement {
-    width: 95%;
-    position: absolute;
-    transition: margin-left 0.2s;
+.outlineElementRight {
+    /*visibility: hidden;*/
+    margin-left: 0.5rem;
 }
 
-.rubricViewerElementHidden {
-    margin-left: 90%;
-    pointer-events: none;
+.outlineElement:hover .outlineElementRight {
+    /*visibility: visible;*/
 }
 
-.rubricViewerElementHidden .rubricViewerElementBackButton {
-    pointer-events: none;
+.outlineElementText {
+
 }
 
-.rubricViewerElementBackButton {
-    cursor: pointer;
+.outlineElementIcon {
+    margin-right: 0.3rem;
+
+    transform: rotate(0deg);
+    transition: transform .1s ease-in-out;
+}
+
+.outlineElementIconGraded {
+    color: primary;
+}
+
+.outlineElementIconRotated {
+    transform: rotate(90deg);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* grading panel */
+.gradingPanelContainer {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem;
 }
 
 /* grade editor */
 .gradeEditorContainer {
-    /*grid-column: 2 / 3;*/
-    /*grid-row: 3 / 4;*/
-    /*min-height: 100%;*/
-    margin-bottom: 1rem;
+    flex: 1;
 }
 
+.gradingEditorCard {
+    height: 100%;
+}
+
+.gradeEditorHeader h3 {
+    margin: 0;
+}
 
 .gradeEditorCard {
     margin-left: 0.5rem;
-    /*margin-top: 0.5rem;*/
     min-height: 100%;
+}
+
+.gradeEditorContentContainer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .gradeEditorCardItem {
     margin-bottom: 1rem;
 }
 
-.gradeEditorCardItem input {
+.gradeEditorCardItem input, .gradeEditorCardItem textarea {
     box-sizing: border-box;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -201,8 +257,19 @@
     margin-top: 0.3rem;
 }
 
+.gradeEditorCardItem:nth-child(2) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.gradeEditorCardItem:nth-child(2) textarea {
+    /*height: 100%;*/
+    /*box-sizing: border-box;*/
+    flex: 1;
+}
+
 .gradeEditorCardFooter {
-    /*float: right;*/
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
@@ -210,6 +277,22 @@
 
 .gradeEditorGradedContainer {
     text-align: center;
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+}
+
+.gradeEditorGradedContainer > * {
+    width: 70%;
+}
+
+.gradeEditorGradedContainer h6 {
+    margin: 1rem 0 0 0;
 }
 
 .gradeEditorGradedContainer > div:not(:last-child) {
@@ -237,13 +320,16 @@
     cursor: pointer;
 }
 
+
 /* grade viewer */
 .gradeViewerContainer {
-
+    flex: 1;
+    margin-top: 0.5rem;
 }
 
-.gradeViewerCard {
-    margin-left: 0.5rem;
+.gradeViewerBody {
+    display: flex;
+    flex-direction: column;
 }
 
 .gradeViewerRow {
@@ -282,13 +368,78 @@
 }
 
 .gradeViewerNotGraded {
+    flex: 1;
+    width: 100%;
+    height: 100%;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     margin: 2rem 0;
 }
 
 .gradeViewerNotGraded h6 {
-    margin: 0 0 0 0.5rem;
+    margin: 1rem 0 0 0 ;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* panel on the right */
+.rightsidePanel {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem;
+}
+
+/* issues */
+.issuesContainer {
+    flex: 3;
+}
+
+/* final grade */
+.finalGradeContainer {
+    margin-top: 0.5rem;
+    flex: 1;
+}
+
+
+
+
+
+
+
+
+/* flags */
+
+.flagModalFlagView {
+    display: inline;
+}
+
+.flagModalFlagViewH6 {
+    display: inline;
+}
+
+.flagModalFlagViewButtonGroup {
+    float: right;
+}
+.flagModalFlagViewButton {
+    margin-left: 0.5rem;
+}
+
+
+.badge {
+    margin-left: 0.5rem;
 }

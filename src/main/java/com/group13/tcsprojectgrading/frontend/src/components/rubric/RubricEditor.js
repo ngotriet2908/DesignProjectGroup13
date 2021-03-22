@@ -5,7 +5,6 @@ import {connect} from "react-redux";
 import Card from "react-bootstrap/Card";
 import {findById} from "../../redux/rubric/functions";
 import RubricEditorElement from "./RubricEditorElement";
-import RubricControlBar from "./RubricControlBar";
 
 
 class RubricEditor extends Component {
@@ -18,10 +17,6 @@ class RubricEditor extends Component {
 
     return (
       <div className={styles.editorContainer}>
-
-        {/* TODO */}
-        {/*<RubricControlBar/>*/}
-
         <Card className={styles.editorCard}>
           <Card.Body>
             {this.props.rubric != null && this.props.selectedElement != null ?

@@ -2,9 +2,13 @@ import React, { Component } from 'react'
 
 import styles from './rubric.module.css'
 import {connect} from "react-redux";
-import {addBlock, addCriterion, setSelectedElement} from "../../redux/rubric/actions";
-import {FaChevronDown, FaChevronRight, FaHandPointRight} from "react-icons/fa";
-import {isBlock} from "./helpers";
+import {addBlock, addCriterion, deleteElement, setCurrentPath, setSelectedElement} from "../../redux/rubric/actions";
+import {IoEllipsisVerticalOutline, IoChevronForwardOutline, IoPricetagOutline} from "react-icons/io5";
+import {createNewBlock, createNewCriterion, isBlock, removeElement} from "./helpers";
+import classnames from "classnames";
+import globalStyles from "../helpers/global.module.css";
+import Dropdown from "react-bootstrap/Dropdown";
+import {CustomToggle} from "./RubricOutline";
 
 class RubricOutlineElement extends Component {
   constructor (props) {
@@ -15,32 +19,69 @@ class RubricOutlineElement extends Component {
     }
   }
 
-  render () {
-    let classNames = `${styles.outlineElementContainer}`;
-    if (this.props.selectedElement != null) {
-      classNames += " " + (this.props.data.id === this.props.selectedElement &&
-        `${styles.outlineElementContainerSelected}`);
-    }
+  onClick = () => {
+    console.log(this.props.path);
+    this.props.onClickElement(this.props.data.content.id, this.props.path);
+  }
 
+  render () {
     return (
-      <div>
-        <div onClick={() => this.props.onClickElement(this.props.data.id)}>
-          <div className={classNames}>
-            <div className={styles.outlineElement} style={{paddingLeft: `${this.props.padding}rem`}}>
-              <div className={styles.outlineElementLeft}>
-                <div className={[styles.outlineElementIcon, !this.props.collapsed && styles.outlineElementIconRotated].join(" ")}>
-                  {isBlock(this.props.data.type) ?
-                    <FaChevronRight onClick={this.props.onClickBlockCollapse}/>
-                    :
-                    <FaHandPointRight/>
-                  }
-                </div>
-                <div>
-                  {this.props.data.title}
-                </div>
+      <div className={classnames(
+        styles.outlineElementContainer,
+        (this.props.selectedElement != null &&
+        this.props.data.content.id === this.props.selectedElement) && styles.outlineElementContainerSelected
+      )} onClick={this.onClick}>
+        <div className={styles.outlineElement} style={{paddingLeft: `${this.props.padding}rem`}}>
+          <div className={classnames(styles.outlineElementLeft, isBlock(this.props.data.content.type) && styles.outlineElementLeftBlock)}>
+            {isBlock(this.props.data.content.type) ?
+              <div className={classnames(styles.outlineElementIcon,
+                !this.props.collapsed && styles.outlineElementIconRotated)}>
+                <IoChevronForwardOutline onClick={this.props.onClickBlockCollapse}/>
               </div>
+              :
+              <div className={classnames(styles.outlineElementIcon)}>
+                <IoPricetagOutline/>
+              </div>
+            }
+            <div>
+              {this.props.data.content.title}
             </div>
           </div>
+          {this.props.isEditing &&
+              <div className={styles.outlineElementRight}>
+                <Dropdown onClick={(event) => {event.stopPropagation();}}>
+                  <Dropdown.Toggle as={CustomToggle}>
+                    <IoEllipsisVerticalOutline size={26}/>
+                  </Dropdown.Toggle>
+
+                  <Dropdown.Menu>
+                    {isBlock(this.props.data.content.type) &&
+                      <>
+                        <Dropdown.Item onClick={() => createNewCriterion(
+                          this.props,
+                          this.props.path,
+                          this.props.data.content.id,
+                          this.props.data.children.length
+                        )}>
+                        Add criterion
+                        </Dropdown.Item>
+                        <Dropdown.Item onClick={() => createNewBlock(
+                          this.props,
+                          this.props.path,
+                          this.props.data.content.id,
+                          this.props.data.children.length)}>
+                        Add section
+                        </Dropdown.Item>
+                      </>
+                    }
+
+                    <Dropdown.Item onClick={() => removeElement(this.props)}>
+                      Delete
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              </div>
+          }
         </div>
       </div>
     )
@@ -50,14 +91,18 @@ class RubricOutlineElement extends Component {
 
 const mapStateToProps = state => {
   return {
-    selectedElement: state.rubric.selectedElement
+    isEditing: state.rubric.isEditing,
+    selectedElement: state.rubric.selectedElement,
+    rubric: state.rubric.rubric,
   };
 };
 
 const actionCreators = {
   setSelectedElement,
   addBlock,
-  addCriterion
+  addCriterion,
+  setCurrentPath,
+  deleteElement,
 }
 
 export default connect(mapStateToProps, actionCreators)(RubricOutlineElement)

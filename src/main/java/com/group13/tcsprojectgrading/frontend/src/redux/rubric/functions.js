@@ -77,10 +77,51 @@ export function addCriterion(rubric, id, newCriterion) {
   return copy;
 }
 
-export function deleteElement(rubric, id) {
+export function deleteElement(rubric, id, path) {
   let copy = cloneDeep(rubric);
-  let isRemoved = removeById(copy, id);
+
+  let parent = findByPath(copy, path, true)
+  console.log(parent);
+
+  // parent.forEach(el => {
+  //   if (el.content.id !== id) {
+  //
+  //   }
+  // })
+
+  let index = parent.length - 1;
+  while (index >= 0) {
+    if (parent[index].content.id === id) {
+      parent.splice(index, 1);
+    }
+
+    index -= 1;
+  }
+
+  // let isRemoved = removeById(copy, id);
+
   return copy;
+}
+
+export function findByPath(rubric, path, returnParent=false) {
+  let parts = path.split("/");
+
+  if (path === "") {
+    return rubric;
+  } else {
+    let currentElement = rubric;
+    let stop = returnParent ? parts.length - 1 : parts.length;
+
+    for (let i = 1; i < stop; i++) {
+      console.log("Part:");
+      console.log(parts[i]);
+      console.log(currentElement);
+
+      currentElement = currentElement[parts[i]];
+    }
+
+    return currentElement;
+  }
 }
 
 export function deleteAllElements(rubric) {
@@ -145,32 +186,6 @@ export function _flattenCriteria(where, results) {
     }
   }
 }
-
-// export function flattenCriteria(rubric, resultsList) {
-//   return _flattenCriteria(rubric.children, resultsList)
-// }
-//
-// export function _flattenCriteria(where, resultsList) {
-//   if(where instanceof Array) {
-//     for(let i = 0; i < where.length; i++) {
-//       _flattenCriteria(where[i], resultsList);
-//     }
-//   }
-//   else {
-//     if (isCriterion(where.content.type)) {
-//       let grade = {
-//         criterionId: where.content.id,
-//         grade: 0,
-//         comment: ""
-//       }
-//       resultsList.push(grade);
-//     }
-//
-//     if (where.hasOwnProperty('children')) {
-//       _flattenCriteria(where.children, resultsList);
-//     }
-//   }
-// }
 
 
 

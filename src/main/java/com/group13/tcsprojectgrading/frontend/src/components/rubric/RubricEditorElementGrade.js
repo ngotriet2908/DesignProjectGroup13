@@ -6,42 +6,42 @@ import styles from "./rubric.module.css";
 class RubricEditorElementGrade extends Component {
   constructor (props) {
     super(props);
-
-    this.state = {
-      min: 0,
-      max: 10,
-      step: 1,
-    }
   }
 
   onChangeMinGrade = (event) => {
     let newGrade = {
+      ...this.props.data,
       min: event.target.value,
-      max: this.props.data.max,
-      step: this.props.data.step
     }
 
-    this.props.alterGrade(this.props.id, newGrade);
+    this.props.alterGrade(this.props.id, newGrade, this.props.currentPath + "/content/grade");
   }
 
   onChangeMaxGrade = (event) => {
     let newGrade = {
-      min: this.props.data.min,
+      ...this.props.data,
       max: event.target.value,
-      step: this.props.data.step
     }
 
-    this.props.alterGrade(this.props.id, newGrade);
+    this.props.alterGrade(this.props.id, newGrade, this.props.currentPath + "/content/grade");
   }
 
   onChangeStepGrade = (event) => {
     let newGrade = {
-      min: this.props.data.min,
-      max: this.props.data.max,
+      ...this.props.data,
       step: event.target.value,
     }
 
-    this.props.alterGrade(this.props.id, newGrade);
+    this.props.alterGrade(this.props.id, newGrade, this.props.currentPath + "/content/grade");
+  }
+
+  onChangeWeight = (event) => {
+    let newGrade = {
+      ...this.props.data,
+      weight: event.target.value
+    }
+
+    this.props.alterGrade(this.props.id, newGrade, this.props.currentPath + "/content/grade");
   }
 
   // onBlurDefault = () => {
@@ -77,6 +77,13 @@ class RubricEditorElementGrade extends Component {
             </label>
             <input type="number" id="gradeStep" value={this.props.data.step} onChange={this.onChangeStepGrade}/>
           </div>
+
+          <div>
+            <label htmlFor="gradeWeight">
+              Weight (coefficient):
+            </label>
+            <input type="number" id="gradeWeight" value={this.props.data.weight} onChange={this.onChangeWeight}/>
+          </div>
         </div>
       </div>
     )
@@ -85,7 +92,7 @@ class RubricEditorElementGrade extends Component {
 
 const mapStateToProps = state => {
   return {
-    
+    currentPath: state.rubric.currentPath
   };
 };
 

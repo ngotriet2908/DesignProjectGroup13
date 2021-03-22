@@ -3,9 +3,11 @@ import {Badge, Card, Button} from "react-bootstrap";
 import {push} from "connected-react-router";
 import styles from "./submissions.module.css"
 import {Link} from "react-router-dom";
-import {IoArrowForward} from "react-icons/io5";
+import {IoArrowForward, IoSyncOutline} from "react-icons/io5";
 import store from "../../redux/store";
 import {URL_PREFIX} from "../../services/config";
+import classnames from "classnames";
+import globalStyles from "../helpers/global.module.css";
 
 class SubmissionsOverviewCard extends Component {
   render() {
@@ -25,7 +27,7 @@ class SubmissionsOverviewCard extends Component {
             {
               (this.props.submission.progress <= 0)?
                 <Badge className={styles.badge} variant="red">Not started</Badge> :
-                (this.props.submission.progress < 1)?
+                (this.props.submission.progress < 100)?
                   <Badge className={styles.badge} variant="orange">In progress</Badge> :
                   <Badge className={styles.badge} variant="green">Graded</Badge>
             }
@@ -35,17 +37,26 @@ class SubmissionsOverviewCard extends Component {
                 <Badge className={styles.badge} variant="green">Assigned to you</Badge> :
                 <Badge className={styles.badge} variant="red">Not assigned to you</Badge>
             }
+            {
+              <div style={{marginLeft: "1rem"}}>
+                {
+                  (this.props.submission.flags.map((flag) => {
+                    return (<Badge variant={flag.variant} key={flag.id}>{flag.name}</Badge>)
+                  }))
+                }
+              </div>
+            }
 
             <div className={styles.submissionCardHeaderButtonContainer}>
-              <div onClick={() => store.dispatch(push(this.props.route.url + "/" + this.props.submission.id + "/grading"))}>
+              <div className={classnames(globalStyles.iconButton)} onClick={() => store.dispatch(push(this.props.route.url + "/" + this.props.submission.id))}>
                 <IoArrowForward size={26}/>
               </div>
             </div>
 
           </div>
           <div className={styles.submissionCardBody}>
-            <div>Progress: {Math.round(100 * this.props.submission.progress)}%</div>
             <div>Submitted on {(new Date(this.props.submission.submittedAt)).toDateString()}</div>
+            <div>Progress: {this.props.submission.progress}%</div>
             <div>Attempts: {this.props.submission.attempt}</div>
 
             {/*<Button variant="primary" className={styles.goTaskButton}>*/}

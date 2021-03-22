@@ -7,10 +7,6 @@ import NotFound from "../error/NotFound";
 
 
 class CourseRoutes extends Component {
-  componentDidMount() {
-    console.log(this.props.match.path);
-  }
-
   render () {
     return (
       <Switch>

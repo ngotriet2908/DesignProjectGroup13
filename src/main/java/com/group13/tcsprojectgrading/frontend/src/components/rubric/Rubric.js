@@ -10,7 +10,7 @@ import RubricBottomBar from "./RubricBottomBar";
 import {request} from "../../services/request";
 import {BASE } from "../../services/endpoints";
 
-import {saveRubric, saveRubricTemp, setSelectedElement} from "../../redux/rubric/actions";
+import {resetUpdates, saveRubric, saveRubricTemp, setCurrentPath, setSelectedElement} from "../../redux/rubric/actions";
 import {Spinner} from "react-bootstrap";
 import RubricViewer from "./RubricViewer";
 
@@ -19,11 +19,6 @@ import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 import {setCurrentLocation} from "../../redux/navigation/actions";
 
 import {Can, ability, updateAbility} from "../permissions/ProjectAbility";
-import Breadcrumbs from "../helpers/Breadcrumbs";
-import store from "../../redux/store";
-import {push} from "connected-react-router";
-import {URL_PREFIX} from "../../services/config";
-import {IoReturnDownBackOutline} from "react-icons/io5";
 
 
 class Rubric extends Component {
@@ -38,46 +33,83 @@ class Rubric extends Component {
 
   componentDidMount() {
     this.props.setCurrentLocation(LOCATIONS.rubric);
+    this.props.resetUpdates();
+    this.props.setCurrentPath("");
 
-    //TODO in case of directly load this page or refresh page <=> no ability is found
+    // if no ability is found
     if (ability.rules.length === 0) {
-      request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId)
-        .then(response => {
-          return response.json()
-        })
-        .then(data => {
-          if (data.grader !== null && data.grader.privileges !== null) {
-            updateAbility(ability, data.grader.privileges, data.grader)
+      Promise.all([
+        request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId),
+        request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/rubric")
+      ])
+        .then(async([res1, res2]) => {
+          const permissions = await res1.json();
+          const rubric = await res2.json();
+
+          // get permissions
+          if (permissions.grader !== null && permissions.grader.privileges !== null) {
+            updateAbility(ability, permissions.grader.privileges, permissions.grader)
             this.setState({
-              project: data
+              project: permissions
             })
           } else {
-            console.log("no grader or privileges found")
+            console.log("No grader or privileges found.")
           }
-          console.log(ability.rules)
+
+          // get rubric
+          this.props.saveRubric(rubric);
+          this.props.setSelectedElement(rubric.id);
+
+          this.setState({
+            isLoaded: true
+          });
         })
-    }
-
-    request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/rubric")
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        console.log(data);
-
-        this.props.saveRubric(data);
-        this.props.setSelectedElement(data.id);
-
-        this.setState({
-          isLoaded: true
+        .catch(error => {
+          console.error(error.message);
+          this.setState({
+            isLoaded: true
+          });
         });
+    } else {
+      request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/rubric")
+        .then(response => {
+          return response.json();
+        })
+        .then(data => {
+          this.props.saveRubric(data);
+          this.props.setSelectedElement(data.id);
+
+          this.setState({
+            isLoaded: true
+          });
+        })
+        .catch(error => {
+          console.error(error.message)
+
+          this.setState({
+            isLoaded: true
+          });
+        });
+    }
+  }
+
+  downloadRubric = () => {
+    console.log("download")
+    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/downloadRubric`, "GET", 'application/pdf')
+      .then(response => {
+        if (response.status === 200) {
+          return response.blob()
+        }
+      })
+      .then((blob) => {
+        console.log(blob)
+        const file = new Blob([blob], {
+          type: 'application/pdf',
+        });
+        saveAs(file, 'rubric.pdf');
       })
       .catch(error => {
-        console.error(error.message)
-
-        this.setState({
-          isLoaded: true
-        });
+        console.error(error.message);
       });
   }
 
@@ -95,20 +127,20 @@ class Rubric extends Component {
     return (
       <div className={styles.container}>
         <div className={styles.outline}>
-          <RubricOutline/>
+          <RubricOutline courseId={this.props.match.params.courseId} projectId={this.props.match.params.projectId}/>
         </div>
 
         <div className={styles.editor}>
           {this.props.isEditing ?
             <RubricEditor/>
             :
-            <RubricViewer/>
+            <RubricViewer downloadRubric={this.downloadRubric}/>
           }
         </div>
 
-        {this.props.isEditing &&
-          <RubricBottomBar courseId={this.props.match.params.courseId} projectId={this.props.match.params.projectId}/>
-        }
+        {/*{this.props.isEditing &&*/}
+        {/*  <RubricBottomBar courseId={this.props.match.params.courseId} projectId={this.props.match.params.projectId}/>*/}
+        {/*}*/}
       </div>
     )
   }
@@ -125,7 +157,9 @@ const actionCreators = {
   saveRubric,
   saveRubricTemp,
   setSelectedElement,
-  setCurrentLocation
+  setCurrentLocation,
+  resetUpdates,
+  setCurrentPath
 }
 
 export default connect(mapStateToProps, actionCreators)(Rubric)

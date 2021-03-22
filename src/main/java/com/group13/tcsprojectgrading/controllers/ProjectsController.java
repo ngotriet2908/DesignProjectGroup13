@@ -5,25 +5,47 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.flipkart.zjsonpatch.JsonPatchApplicationException;
+import com.google.api.services.gmail.Gmail;
+import com.google.api.services.gmail.model.Message;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.*;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
+import com.group13.tcsprojectgrading.models.rubric.RubricHistory;
+import com.group13.tcsprojectgrading.models.rubric.RubricUpdate;
 import com.group13.tcsprojectgrading.services.*;
+import com.group13.tcsprojectgrading.services.grading.AssessmentService;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
-import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.PdfWriter;
+//import com.itextpdf.text.*;
+//import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.io.font.FontConstants;
+import com.itextpdf.kernel.font.PdfFont;
+import com.itextpdf.kernel.font.PdfFontFactory;
+import com.itextpdf.kernel.geom.PageSize;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.apache.commons.codec.binary.Base64;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.Session;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import java.io.*;
 import java.security.Principal;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -43,8 +65,23 @@ public class ProjectsController {
     private final RoleService roleService;
     private final GraderService graderService;
     private final ProjectRoleService projectRoleService;
+    private final FlagService flagService;
+//    private final GoogleAuthorizationCodeFlow flow;
+    private final SubmissionService submissionService;
+    private final ParticipantService participantService;
+    private final AssessmentLinkerService assessmentLinkerService;
+    private final AssessmentService assessmentService;
+    private final SubmissionDetailsService submissionDetailsService;
 
-    public ProjectsController(CanvasApi canvasApi, ActivityService activityService, RubricService rubricService, ProjectService projectService, RoleService roleService, GraderService graderService, ProjectRoleService projectRoleService) {
+    @Autowired
+    public ProjectsController(CanvasApi canvasApi, ActivityService activityService,
+                              RubricService rubricService, ProjectService projectService,
+                              RoleService roleService, GraderService graderService,
+                              ProjectRoleService projectRoleService,
+                              FlagService flagService,
+//                              GoogleAuthorizationCodeFlow flow,
+                              SubmissionService submissionService, ParticipantService participantService,
+                              AssessmentLinkerService assessmentLinkerService, AssessmentService assessmentService, SubmissionDetailsService submissionDetailsService) {
         this.canvasApi = canvasApi;
         this.activityService = activityService;
         this.rubricService = rubricService;
@@ -52,6 +89,13 @@ public class ProjectsController {
         this.roleService = roleService;
         this.graderService = graderService;
         this.projectRoleService = projectRoleService;
+        this.flagService = flagService;
+//        this.flow = flow;
+        this.submissionService = submissionService;
+        this.participantService = participantService;
+        this.assessmentLinkerService = assessmentLinkerService;
+        this.assessmentService = assessmentService;
+        this.submissionDetailsService = submissionDetailsService;
     }
 
     @RequestMapping(value = "/{projectId}", method = RequestMethod.GET, produces = "application/json")
@@ -64,11 +108,9 @@ public class ProjectsController {
             );
         }
 
-        String projectResponse = this.canvasApi.getCanvasCoursesApi().getCourseProject(courseId, projectId);
         String courseResponse = this.canvasApi.getCanvasCoursesApi().getUserCourse(courseId);
 
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode projectJson = objectMapper.readTree(projectResponse);
         JsonNode courseJson = objectMapper.readTree(courseResponse);
 
         projectService.addProjectRoles(project);
@@ -124,13 +166,10 @@ public class ProjectsController {
 
             ObjectNode resultJson = objectMapper.createObjectNode();
             resultJson.set("course", courseJson);
-            resultJson.set("project", projectJson);
+            resultJson.set("project", project.convertToJson());
             resultJson.set("grader", graderNode);
-            if (projectResponse == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            } else {
-                return new ResponseEntity<>(resultJson, HttpStatus.OK);
-            }
+
+            return new ResponseEntity<>(resultJson, HttpStatus.OK);
         }
 
         JsonNode graderNode = grader.getGraderJson();
@@ -141,13 +180,13 @@ public class ProjectsController {
 //        if (rubric == null) {
 //            rubricJson = objectMapper.readTree("null");
 //        } else {
-            String rubricString = objectMapper.writeValueAsString(rubric);
-            rubricJson = objectMapper.readTree(rubricString);
+        String rubricString = objectMapper.writeValueAsString(rubric);
+        rubricJson = objectMapper.readTree(rubricString);
 //        }
 
         ObjectNode resultJson = objectMapper.createObjectNode();
         resultJson.set("course", courseJson);
-        resultJson.set("project", projectJson);
+        resultJson.set("project", project.convertToJson());
         resultJson.set("rubric", rubricJson);
         resultJson.set("grader", graderNode);
 
@@ -156,23 +195,182 @@ public class ProjectsController {
         SimpleDateFormat format = new SimpleDateFormat(
                 "yyyy-MM-dd'T'HH:mm:ss'Z'");
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
-        Timestamp createdAt = new Timestamp(format.parse(projectJson.get("created_at").asText()).getTime());
+        Timestamp createdAt = new Timestamp(format.parse(project.getCreateAt()).getTime());
 
         Activity activity = new Activity(
                 project,
                 principal.getName(),
                 timestamp,
-                projectJson.get("name").asText(),
+                project.getName(),
                 createdAt
         );
 
         activityService.addOrUpdateActivity(activity);
 
-        if (projectResponse == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        } else {
-            return new ResponseEntity<>(resultJson, HttpStatus.OK);
+        return new ResponseEntity<>(resultJson, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/{projectId}/graders", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    protected ArrayNode getProjectGraders(@PathVariable String courseId, @PathVariable String projectId, Principal principal) throws JsonProcessingException, ParseException {
+        Project project = projectService.getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "project not found"
+            );
         }
+
+        List<Grader> graders = graderService.getGraderFromProject(project);
+        ObjectMapper objectMapper = new ObjectMapper();
+        ArrayNode result = objectMapper.createArrayNode();
+        for(Grader grader: graders) {
+            result.add(grader.getGraderJson());
+        }
+        return result;
+    }
+
+    @GetMapping(value = "/{projectId}/syncCanvas")
+    protected void syncWithCanvas(@PathVariable String courseId,
+                                  @PathVariable String projectId,
+                                  Principal principal) throws JsonProcessingException {
+
+        Project project = projectService.getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "project not found"
+            );
+        }
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<Grader> graders = graderService.getGraderFromProject(project);
+        List<String> submissionsString = this.canvasApi.getCanvasCoursesApi().getSubmissionsInfo(courseId, Long.parseLong(projectId));
+        List<String> studentsString = this.canvasApi.getCanvasCoursesApi().getCourseStudents(courseId);
+
+        ArrayNode studentArray = groupPages(objectMapper, studentsString);
+        for (Iterator<JsonNode> it = studentArray.elements(); it.hasNext(); ) {
+            JsonNode jsonNode = it.next();
+
+            participantService.addNewParticipant(new Participant(
+                            jsonNode.get("id").asText(),
+                            project,
+                            jsonNode.get("name").asText(),
+                            jsonNode.get("email").asText(),
+                            jsonNode.get("login_id").asText()
+                    )
+            );
+        }
+
+        ArrayNode submissionArray = groupPages(objectMapper, submissionsString);
+        Map<String, List<Participant>> groupToParticipant = new HashMap<>();
+        Map<String, Submission> groupToSubmissionMap = new HashMap<>();
+        Map<String, List<SubmissionComment>> groupToComments = new HashMap<>();
+        Map<String, List<SubmissionAttachment>> groupToAttachments = new HashMap<>();
+
+        for (Iterator<JsonNode> it = submissionArray.elements(); it.hasNext(); ) {
+            JsonNode jsonNode = it.next();
+
+            if (jsonNode.get("workflow_state").asText().equals("unsubmitted")) continue;
+            Participant participant = participantService.findParticipantWithId(jsonNode.get("user_id").asText(), project);
+            if (participant == null) continue;
+
+//            System.out.println(jsonNode.get("submission_comments").toString());
+//            System.out.println(jsonNode.get("attachments").toString());
+            List<SubmissionComment> submissionComments = new ArrayList<>();
+            for (Iterator<JsonNode> iter = jsonNode.get("submission_comments").elements(); iter.hasNext(); ) {
+                JsonNode node = iter.next();
+                submissionComments.add(new SubmissionComment(node.toString()));
+            }
+            List<SubmissionAttachment> submissionAttachments = new ArrayList<>();
+            for (Iterator<JsonNode> iter = jsonNode.get("attachments").elements(); iter.hasNext(); ) {
+                JsonNode node = iter.next();
+                submissionAttachments.add(new SubmissionAttachment(node.toString()));
+            }
+
+
+            if (jsonNode.get("group").get("id") == null || jsonNode.get("group").get("id").asText().equals("null")) {
+                Submission submission = submissionService.addNewSubmission(
+                        project,
+                        participant.getName(),
+                        Submission.NULL,
+                        jsonNode.get("submitted_at").asText(),
+                        participant.getName() + " on " + jsonNode.get("submitted_at").asText()
+                );
+
+                for(SubmissionComment comment: submissionComments) {
+                    comment.setSubmission(submission);
+                    submissionDetailsService.saveComment(comment);
+                }
+                for(SubmissionAttachment attachment: submissionAttachments) {
+                    attachment.setSubmission(submission);
+                    submissionDetailsService.saveAttachment(attachment);
+                }
+
+                if (submission == null) continue;
+
+                UUID assessmentId = UUID.randomUUID();
+                AssessmentLinker assessmentLinker = assessmentLinkerService.addNewAssessment(
+                        new AssessmentLinker(
+                                submission,
+                                participant,
+                                assessmentId
+                        )
+                );
+                assessmentService.saveAssessment(assessmentLinker);
+            } else {
+                if (!groupToSubmissionMap.containsKey(jsonNode.get("group").get("id").asText())) {
+                    Submission submission = new Submission(
+                            jsonNode.get("submitted_at").asText(),
+                            Submission.NULL,
+                            jsonNode.get("group").get("id").asText(),
+                            project,
+                            jsonNode.get("group").get("name").asText() + " on " + jsonNode.get("submitted_at").asText()
+                    );
+                    groupToSubmissionMap.put(jsonNode.get("group").get("id").asText(), submission);
+                    List<Participant> participants = new ArrayList<>();
+                    participants.add(participant);
+                    groupToParticipant.put(jsonNode.get("group").get("id").asText(), participants);
+                    groupToComments.put(jsonNode.get("group").get("id").asText(), submissionComments);
+                    groupToAttachments.put(jsonNode.get("group").get("id").asText(), submissionAttachments);
+                } else {
+                    groupToParticipant.get(jsonNode.get("group").get("id").asText()).add(participant);
+                }
+            }
+        }
+
+        for(Map.Entry<String, Submission> entry: groupToSubmissionMap.entrySet()) {
+
+            Submission submission = submissionService.addNewSubmission(
+                    entry.getValue().getProject(),
+                    entry.getValue().getUserId(),
+                    entry.getValue().getGroupId(),
+                    entry.getValue().getDate(),
+                    entry.getValue().getName()
+            );
+
+            if (submission == null) continue;
+
+            for(SubmissionComment comment: groupToComments.get(entry.getKey())) {
+                comment.setSubmission(submission);
+                submissionDetailsService.saveComment(comment);
+            }
+            for(SubmissionAttachment attachment: groupToAttachments.get(entry.getKey())) {
+                attachment.setSubmission(submission);
+                submissionDetailsService.saveAttachment(attachment);
+            }
+
+            UUID assessmentId = UUID.randomUUID();
+            System.out.println("size: " + groupToParticipant.get(entry.getValue().getGroupId()).size());
+            for(Participant participant: groupToParticipant.get(entry.getValue().getGroupId())) {
+                AssessmentLinker assessmentLinker = assessmentLinkerService.addNewAssessment(new AssessmentLinker(
+                        submission,
+                        participant,
+                        assessmentId
+                ));
+
+                assessmentService.saveAssessment(assessmentLinker);
+            }
+        }
+
     }
 
     @PostMapping(value = "/{projectId}/feedback")
@@ -201,13 +399,13 @@ public class ProjectsController {
         );
     }
 
-//    @PostMapping(value = "/{projectId}/feedbackPdf", produces = "application/pdf")
+    //    @PostMapping(value = "/{projectId}/feedbackPdf", produces = "application/pdf")
     @PostMapping(value = "/{projectId}/feedbackPdf")
     @ResponseBody
     protected ResponseEntity<byte[]> sendFeedbackPdf(@PathVariable String courseId,
                                                      @PathVariable String projectId,
                                                      @RequestBody ObjectNode feedback,
-                                                     Principal principal) throws IOException, ParseException, DocumentException {
+                                                     Principal principal) throws IOException, ParseException {
         Project project = projectService.getProjectById(courseId, projectId);
         if (project == null) {
             throw new ResponseStatusException(
@@ -228,43 +426,31 @@ public class ProjectsController {
 //        response.setContentType("blob");
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-        Document document = new Document();
-        PdfWriter.getInstance(document, byteArrayOutputStream);
+        PdfWriter pdfWriter = new PdfWriter(byteArrayOutputStream);
+        PdfDocument pdfDocument = new PdfDocument(pdfWriter);
+        Document document = new Document(pdfDocument, PageSize.A4);
 
-        document.open();
-        Font fontSubject = FontFactory.getFont(FontFactory.COURIER, 22, BaseColor.BLACK);
+        document.getPdfDocument();
 
-        Font fontBody = FontFactory.getFont(FontFactory.COURIER, 13, BaseColor.BLACK);
-        Paragraph preface = new Paragraph();
-        addEmptyLine(preface, 1);
+        Participant participant = participantService.findParticipantWithId(id, project);
+        Submission submission = submissionService.findSubmissionById(body);
 
-        Paragraph paragraph = new Paragraph(subject, fontSubject);
-        preface.add(paragraph);
-        addEmptyLine(preface, 2);
-
-        paragraph = new Paragraph(body, fontBody);
-        preface.add(paragraph);
-
-        document.add(preface);
+        Assessment submissionAssessment = assessmentService.getAssessmentBySubmissionAndParticipant(submission, participant);
+        PdfUtils pdfUtils = new PdfUtils(document, rubricService.getRubricById(projectId), submissionAssessment
+        );
+        pdfUtils.generatePdfOfFeedback();
         document.close();
-
 
 //        System.out.println(Arrays.toString(byteArrayOutputStream.toByteArray()));
 
         return new ResponseEntity<byte[]>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.OK);
     }
 
-    private static void addEmptyLine(Paragraph paragraph, int number) {
-        for (int i = 0; i < number; i++) {
-            paragraph.add(new Paragraph(" "));
-        }
-    }
-
-    @GetMapping(value = "/{projectId}/feedbackPdf")
+    @GetMapping(value = "/{projectId}/downloadRubric")
     @ResponseBody
-    protected ResponseEntity<byte[]> sendFeedbackPdfTemplate(@PathVariable String courseId,
+    protected ResponseEntity<byte[]> sendFeedbackPdf(@PathVariable String courseId,
                                                      @PathVariable String projectId,
-                                                     Principal principal) throws IOException, ParseException, DocumentException {
+                                                     Principal principal) throws IOException, ParseException {
         Project project = projectService.getProjectById(courseId, projectId);
         if (project == null) {
             throw new ResponseStatusException(
@@ -272,7 +458,8 @@ public class ProjectsController {
             );
         }
 
-        String fileName = "hello.pdf";
+
+        String fileName = project.getName() + " rubric.pdf";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
         headers.setContentDispositionFormData(fileName, fileName);
@@ -280,29 +467,179 @@ public class ProjectsController {
 //        response.setContentType("blob");
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-        Document document = new Document();
-        PdfWriter.getInstance(document, byteArrayOutputStream);
+        PdfWriter pdfWriter = new PdfWriter(byteArrayOutputStream);
+        PdfDocument pdfDocument = new PdfDocument(pdfWriter);
+        Document document = new Document(pdfDocument, PageSize.A4);
 
-        document.open();
-        Font font = FontFactory.getFont(FontFactory.COURIER, 16, BaseColor.BLACK);
-        Chunk subjectChunk = new Chunk("subject", font);
-        Chunk bodyChunk = new Chunk("bodyyyyy", font);
+        document.getPdfDocument();
 
-        document.add(subjectChunk);
-        document.add(bodyChunk);
-        document.close();
-
-
+        PdfRubricUtils rubricUtils = new PdfRubricUtils(document, rubricService.getRubricById(projectId));
+        rubricUtils.generateRubrics();
 //        System.out.println(Arrays.toString(byteArrayOutputStream.toByteArray()));
 
         return new ResponseEntity<byte[]>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.OK);
     }
 
+//    @PostMapping(value = "/{projectId}/feedbackEmail")
+//    @ResponseBody
+//    protected String sendFeedbackEmail1(@PathVariable String courseId,
+//                                        @PathVariable String projectId,
+//                                        @RequestBody ObjectNode feedback,
+//                                        Principal principal) throws IOException, ParseException, GeneralSecurityException, MessagingException {
+//        Project project = projectService.getProjectById(courseId, projectId);
+//        if (project == null) {
+//            throw new ResponseStatusException(
+//                    HttpStatus.NOT_FOUND, "entity not found"
+//            );
+//        }
+//
+//        String id = feedback.get("id").asText();
+//        boolean isGroup = feedback.get("isGroup").asBoolean();
+//        String body = feedback.get("body").asText();
+//        String subject = feedback.get("subject").asText();
+//
+//        System.out.println("getting credential for " + principal.getName());
+//        Credential credential = flow.loadCredential(principal.getName());
+//        if (credential == null) {
+//            throw new ResponseStatusException(
+//                    HttpStatus.UNAUTHORIZED, "token not found"
+//            );
+//        }
+//
+//        System.out.println("Access token of " + principal.getName() + ": " + credential.getAccessToken());
+////        NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+////        JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+//
+//        Gmail service = new Gmail.Builder(flow.getTransport(), flow.getJsonFactory(), credential)
+//                .setApplicationName("Pro Grading")
+//                .build();
+//
+//        String FILE_NAME = "src/main/resources/fileToCreate.pdf";
+//        File targetFile = new File(FILE_NAME);
+//        targetFile.delete();
+//        Path newFilePath = Paths.get(FILE_NAME);
+//        Files.createFile(newFilePath);
+//
+//        OutputStream out = new FileOutputStream(FILE_NAME);
+//
+//        PdfWriter pdfWriter = new PdfWriter(out);
+//        PdfDocument pdfDocument = new PdfDocument(pdfWriter);
+//        Document document = new Document(pdfDocument, PageSize.A4);
+//
+//        document.getPdfDocument();
+//
+//        Participant participant = participantService.findParticipantWithId(id, project);
+//        Submission submission = submissionService.findSubmissionById(body);
+//
+//        Assessment submissionAssessment = assessmentService.getAssessmentBySubmissionAndParticipant(submission, participant);
+//        PdfUtils pdfUtils = new PdfUtils(document, rubricService.getRubricById(projectId), submissionAssessment
+//        );
+//        pdfUtils.generatePdfOfFeedback();
+//        document.close();
+//
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        JsonNode jsonNode = objectMapper.readTree(this.canvasApi.getCanvasUsersApi().getAccountWithId(id));
+//        if (jsonNode.get("primary_email") != null) {
+//            sendMessage(service, "me", createEmailWithAttachment(
+//                    jsonNode.get("primary_email").asText(),
+//                    "me",
+//                    subject,
+//                    body,
+//                    new File(FILE_NAME)
+//            ));
+//            return "ok";
+//        }
+////        System.out.println(Arrays.toString(byteArrayOutputStream.toByteArray()));
+//
+//        return "something is wrong";
+//    }
+
+    public static MimeMessage createEmailWithAttachment(String to,
+                                                        String from,
+                                                        String subject,
+                                                        String bodyText,
+                                                        File file)
+            throws MessagingException, IOException {
+        Properties props = new Properties();
+        Session session = Session.getDefaultInstance(props, null);
+
+        MimeMessage email = new MimeMessage(session);
+
+        email.setFrom(new InternetAddress(from));
+        email.addRecipient(javax.mail.Message.RecipientType.TO,
+                new InternetAddress(to));
+        email.setSubject(subject);
+
+        MimeBodyPart mimeBodyPart = new MimeBodyPart();
+        mimeBodyPart.setContent(bodyText, "text/plain");
+
+        Multipart multipart = new MimeMultipart();
+        multipart.addBodyPart(mimeBodyPart);
+
+        mimeBodyPart = new MimeBodyPart();
+        DataSource source = new FileDataSource(file);
+
+        mimeBodyPart.setDataHandler(new DataHandler(source));
+        mimeBodyPart.setFileName(file.getName());
+
+        multipart.addBodyPart(mimeBodyPart);
+        email.setContent(multipart);
+
+        return email;
+    }
+
+    public static Message sendMessage(Gmail service,
+                                      String userId,
+                                      MimeMessage emailContent)
+            throws MessagingException, IOException {
+        Message message = createMessageWithEmail(emailContent);
+        message = service.users().messages().send(userId, message).execute();
+
+        System.out.println("Message id: " + message.getId());
+        System.out.println(message.toPrettyString());
+        return message;
+    }
+
+    public static MimeMessage createEmail(String to,
+                                          String from,
+                                          String subject,
+                                          String bodyText)
+            throws MessagingException {
+        Properties props = new Properties();
+        Session session = Session.getDefaultInstance(props, null);
+
+        MimeMessage email = new MimeMessage(session);
+
+        email.setFrom(new InternetAddress(from));
+        email.addRecipient(javax.mail.Message.RecipientType.TO,
+                new InternetAddress(to));
+        email.setSubject(subject);
+        email.setText(bodyText);
+        return email;
+    }
+
+    public static Message createMessageWithEmail(MimeMessage emailContent)
+            throws MessagingException, IOException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        emailContent.writeTo(buffer);
+        byte[] bytes = buffer.toByteArray();
+        String encodedEmail = Base64.encodeBase64URLSafeString(bytes);
+        Message message = new Message();
+        message.setRaw(encodedEmail);
+        return message;
+    }
+
+    public static void addEmptyLine(Paragraph paragraph, int number) {
+        for (int i = 0; i < number; i++) {
+            paragraph.add(new Paragraph(" "));
+        }
+    }
+
     @GetMapping(value = "/{projectId}/feedback")
     @ResponseBody
     protected ObjectNode getFeedbackInfoPage(@PathVariable String courseId,
-                                       @PathVariable String projectId,
-                                       Principal principal) throws JsonProcessingException, ParseException {
+                                             @PathVariable String projectId,
+                                             Principal principal) throws JsonProcessingException, ParseException {
         Project project = projectService.getProjectById(courseId, projectId);
         if (project == null) {
             throw new ResponseStatusException(
@@ -426,31 +763,133 @@ public class ProjectsController {
         } else {
             ObjectMapper objectMapper = new ObjectMapper();
             String rubricString = objectMapper.writeValueAsString(rubric);
-//            String response = "{\"rubric\":" + rubricString + "}";
-//            System.out.println(rubricString);
             return new ResponseEntity<>(rubricString, HttpStatus.OK);
         }
     }
 
-    // TODO: submit only 'children'
-    @PostMapping("/{projectId}/rubric")
-    public Rubric newRubric(@RequestBody Rubric newRubric) {
-//        System.out.println("Creating a rubric...");
-        return rubricService.addNewRubric(newRubric);
+//    @PostMapping("/{projectId}/rubric")
+//    public ResponseEntity<?> postRubric(
+//            @RequestBody JsonNode newRubric,
+//            @PathVariable String projectId) throws JsonPatchApplicationException, JsonProcessingException {
+//
+//        System.out.println("Updating the rubric of project " + projectId + ".");
+//        Rubric rubric = this.rubricService.getRubricById(projectId);
+//
+//        // test diff
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        JsonNode diffPatch = JsonDiff.asJson(
+//                objectMapper.convertValue(rubric, JsonNode.class),
+//                objectMapper.convertValue(newRubric, JsonNode.class));
+//
+//        System.out.println(diffPatch);
+//
+//        // apply update
+//        Rubric rubricPatched = this.rubricService.applyPatchToRubric(diffPatch, rubric);
+//        this.rubricService.saveRubric(rubricPatched);
+//
+////        RubricHistory history = this.rubricService.getHistory(projectId);
+////        if (history == null) {
+////            history = new RubricHistory(projectId);
+////        }
+////
+////        // store update
+////        history.getHistory().add(new RubricUpdate(patch));
+////        this.rubricService.storeHistory(history);
+////
+////        // mark affected submissions
+//////        this.rubricService.processUpdate(patch, rubric);
+//
+//        System.out.println("Updating the rubric of project " + projectId + " finished successfully.");
+//        return ResponseEntity.ok("Rubric updated");
+//    }
+
+    /*
+    Updates the rubric with update patches. Patches are applied in order they come and are stored in the database to
+    retrieve rubric history.
+     */
+    @PatchMapping("/{projectId}/rubric")
+    public ResponseEntity<?> updateRubric(
+            @RequestBody JsonNode patch,
+            @PathVariable String projectId) throws JsonPatchApplicationException, JsonProcessingException {
+        System.out.println("Updating the rubric of project " + projectId + ".");
+        Rubric rubric = this.rubricService.getRubricById(projectId);
+
+        // apply update and mark affected submissions
+        Rubric rubricPatched = this.rubricService.applyUpdate(patch, rubric);
+        this.rubricService.saveRubric(rubricPatched);
+
+        // store update
+        RubricHistory history = this.rubricService.getHistory(projectId);
+        if (history == null) {
+            history = new RubricHistory(projectId);
+        }
+
+        history.getHistory().add(new RubricUpdate(patch));
+        this.rubricService.storeHistory(history);
+
+        System.out.println("Updating the rubric of project " + projectId + " finished successfully.");
+        return ResponseEntity.ok("Rubric updated");
     }
 
-    // TODO temporary unsafe method
-    @GetMapping("/{projectId}/submissions/sample")
-    public ResponseEntity<byte[]> getSamplePdf() throws IOException {
-        Path pdfPath = Paths.get("src","main", "resources","static", "testPdf.pdf");
-        byte[] contents = Files.readAllBytes(pdfPath);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_PDF);
-        String filename = "output.pdf";
-        headers.setContentDispositionFormData(filename, filename);
-        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-        return new ResponseEntity<>(contents, headers, HttpStatus.OK);
+    @DeleteMapping(value = "/{projectId}/flag/{flagId}")
+    protected JsonNode deleteFlagPermanently(@PathVariable String courseId,
+                                             @PathVariable String projectId,
+                                             @PathVariable String flagId,
+                                             Principal principal
+//                                   @RequestParam Map<String, String> queryParameters
+    ) throws JsonProcessingException {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        Project project = projectService.getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "project not found"
+            );
+        }
+
+        Grader grader = graderService.getGraderFromGraderId(principal.getName(), project);
+        if (grader == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "task not found"
+            );
+        }
+        //TODO change response to errors
+        Flag flag = flagService.findFlagWithId(Long.parseLong(flagId));
+        ObjectNode result = objectMapper.createObjectNode();
+        if (flag != null) {
+            List<Submission> submissions = submissionService.findSubmissionsByFlags(flag);
+            if (!flag.getGrader().getUserId().equals(principal.getName())) {
+                result.put("error", "This flag is not yours");
+                return result;
+            }
+            if (submissions.size() > 0) {
+                result.put("error", "Flag is current used by some submission");
+                return result;
+            } else {
+                flagService.deleteFlag(flag);
+                result.set("data", createFlagsArrayNode(flagService.findFlagsWithGrader(grader), principal.getName()));
+                return result;
+            }
+
+        }
+        result.put("error", "some weird error");
+        return result;
+    }
+
+    private ArrayNode createFlagsArrayNode(List<Flag> flags, String userId) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ArrayNode arrayNode = objectMapper.createArrayNode();
+        for(Flag flag2: flags) {
+            ObjectNode flagNode = objectMapper.createObjectNode();
+            flagNode.put("id", flag2.getId());
+            flagNode.put("name", flag2.getName());
+            flagNode.put("variant", flag2.getVariant());
+            flagNode.put("description", flag2.getDescription());
+            flagNode.put("changeable", flag2.getGrader().getUserId().equals(userId));
+            arrayNode.add(flagNode);
+        }
+        return arrayNode;
     }
 }
-

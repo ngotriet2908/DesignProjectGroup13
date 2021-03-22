@@ -9,6 +9,9 @@ import RubricViewerElementGrade from "./RubricViewerElementGrade";
 import RubricViewerElementChildren from "./RubricViewerElementChildren";
 import {Can, ability, updateAbility} from "../permissions/ProjectAbility";
 import {IoPencil, IoCloudDownloadOutline} from "react-icons/io5";
+import {request} from "../../services/request";
+import {BASE} from "../../services/endpoints";
+import { saveAs } from 'file-saver';
 
 
 class RubricViewerElement extends Component {
@@ -21,10 +24,6 @@ class RubricViewerElement extends Component {
     let rubricBackup = this.props.rubric;
     this.props.saveRubricTemp(rubricBackup);
     this.props.setEditingRubric(true);
-  }
-
-  downloadRubric = () => {
-    alert("Handle download.")
   }
 
   render () {
@@ -40,7 +39,7 @@ class RubricViewerElement extends Component {
               </div>
             </Can>
             <div className={styles.viewerHeaderIcon}>
-              <IoCloudDownloadOutline className={styles.viewerHeaderIconOrange} size={28} onClick={this.downloadRubric}/>
+              <IoCloudDownloadOutline className={styles.viewerHeaderIconOrange} size={28} onClick={this.props.downloadRubric}/>
             </div>
             {/*<Button variant="secondary" onClick={this.downloadRubric}>Download</Button>*/}
           </div>

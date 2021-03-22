@@ -15,6 +15,7 @@ import SectionContainer from "./SectionContainer";
 import CourseCard from "./CourseCard";
 import ProjectCard from "./ProjectCard";
 import HomeTaskCard from "./HomeTaskCard";
+import Button from 'react-bootstrap/Button'
 
 
 import globalStyles from '../helpers/global.module.css';
@@ -60,9 +61,21 @@ class Home extends Component {
       });
   }
 
+  // gmailHandler = () => {
+  //   request(`/weird_string/gmail`)
+  //     .then(response => {
+  //       console.log(response)
+  //       return response.json()
+  //     })
+  //     .then((url) => {
+  //       window.location.href = url;
+  //       }
+  //     )
+  // }
+
   render () {
     if (!this.state.isLoaded) {
-      return(
+      return (
         <div className={globalStyles.container}>
           <Spinner className={globalStyles.spinner} animation="border" role="status">
             <span className="sr-only">Loading...</span>

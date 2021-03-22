@@ -6,7 +6,7 @@ const ability = new Ability([])
 
 function updateAbility(ability, privileges, user) {
   const { can, rules } = new AbilityBuilder();
-  console.log("update ability")
+  // console.log("update ability")
   privileges.forEach((privilege) => {
     let privileges1 = privilege.name.split("_")
     let action = privileges1[1]
