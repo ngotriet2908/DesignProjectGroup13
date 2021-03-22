@@ -1,6 +1,6 @@
 import {Button, Modal, Form, InputGroup, FormControl, Card, Alert, ListGroup} from 'react-bootstrap'
 import React, {Component} from "react";
-import styles from "./grading.module.css"
+import styles from "../grading.module.css"
 
 class FlagModalFlagView extends Component {
   constructor(props) {

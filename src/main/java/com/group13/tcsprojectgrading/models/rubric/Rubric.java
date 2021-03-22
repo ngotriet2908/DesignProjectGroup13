@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Stack;
 
 public class Rubric {
-
     @Id
     private String id;
     private List<Element> children;

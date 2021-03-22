@@ -1,10 +1,10 @@
 import React, {Component} from 'react'
 
-import rubricStyles from '../rubric/rubric.module.css';
-import styles from './grading.module.css'
+import rubricStyles from '../../rubric/rubric.module.css';
+import styles from '../grading.module.css'
 import {connect} from "react-redux";
-import {setSelectedElement} from "../../redux/rubric/actions";
-import RubricOutlineGroup from "../rubric/RubricOutlineGroup";
+import {setSelectedElement} from "../../../redux/rubric/actions";
+import RubricOutlineGroup from "../../rubric/RubricOutlineGroup";
 
 
 class RubricViewerOutline extends Component {

@@ -68,46 +68,6 @@ public class RubricService {
         return this.historyRepository.getById(projectId);
     }
 
-//    public Rubric applyPatchToRubric(JsonNode patch, Rubric rubric) throws JsonPatchApplicationException, JsonProcessingException {
-//        ObjectMapper objectMapper = new ObjectMapper();
-////        JsonNode patched = patch.apply(objectMapper.convertValue(rubric, JsonNode.class));
-//        JsonNode patched = JsonPatch.apply(patch, objectMapper.convertValue(rubric, JsonNode.class));
-//        return objectMapper.treeToValue(patched, Rubric.class);
-//    }
-
-    private enum Operation {
-        REPLACE("replace"),
-        ADD("add"),
-        REMOVE("remove");
-
-        private final String operation;
-
-        Operation(final String operation) {
-            this.operation = operation;
-        }
-
-        @Override
-        public String toString() {
-            return this.operation;
-        }
-    }
-
-    private enum Type {
-        CRITERION("1"),
-        SECTION("0");
-
-        private final String type;
-
-        Type(final String type) {
-            this.type = type;
-        }
-
-        @Override
-        public String toString() {
-            return this.type;
-        }
-    }
-
     // TODO: mark all? mark specific? put in issues? notify? if mark all - stop when first issue below is found
     public Rubric applyUpdate(JsonNode patches, Rubric rubric) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -155,7 +115,6 @@ public class RubricService {
                     // get path elements, last part should be an index in the children array
                     String[] path = update.get("path").asText().split("/");
 
-//                    Element element = findInRubric(rubric, path);
                     JsonNode element = findInRubric(rubricJson, path);
 
                     if (element.get("content").get("type").asText().equals(Type.SECTION.toString())) {
@@ -187,8 +146,6 @@ public class RubricService {
         JsonNode currentElement = rubric;
 
         for (int i = 1; i < path.length; i++) {
-//            System.out.println(path[i]);
-//            System.out.println(currentElement);
             if (path[i].equals("children")) {
                 // children
                 currentArray = currentElement.get("children");
@@ -199,5 +156,38 @@ public class RubricService {
         }
 
         return currentElement;
+    }
+
+    private enum Operation {
+        REPLACE("replace"),
+        ADD("add"),
+        REMOVE("remove");
+
+        private final String operation;
+
+        Operation(final String operation) {
+            this.operation = operation;
+        }
+
+        @Override
+        public String toString() {
+            return this.operation;
+        }
+    }
+
+    private enum Type {
+        CRITERION("1"),
+        SECTION("0");
+
+        private final String type;
+
+        Type(final String type) {
+            this.type = type;
+        }
+
+        @Override
+        public String toString() {
+            return this.type;
+        }
     }
 }

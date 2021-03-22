@@ -47,11 +47,5 @@
 //        return assessment.getGrades().size();
 //    }
 //
-//    public double computeProgress(SubmissionAssessment assessment) {
-//        Rubric rubric = getRubric(assessment);
-//        int graded = getGradedCount(assessment);
-//        int total = rubric.getCriterionCount();
-//        return graded/(double) total;
-//    }
 //}
 

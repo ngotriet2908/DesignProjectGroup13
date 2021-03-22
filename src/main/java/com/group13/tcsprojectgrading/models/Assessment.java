@@ -8,15 +8,33 @@ import javax.persistence.Id;
 import java.util.*;
 
 public class Assessment {
-
     @Id
     private UUID id;
-
     private Map<String, CriterionGrade> grades;
+    private int gradedCount = 0;
+    private int finalGrade;
+    private boolean finalGradeManual = false;
+
+    public Assessment(UUID id, Map<String, CriterionGrade> grades, int gradedCount, int finalGrade) {
+        this.id = id;
+        this.grades = grades;
+        this.gradedCount = gradedCount;
+        this.finalGrade = finalGrade;
+    }
+
+    public Assessment(UUID id, Map<String, CriterionGrade> grades, int gradedCount, int finalGrade, boolean finalGradeManual) {
+        this.id = id;
+        this.grades = grades;
+        this.gradedCount = gradedCount;
+        this.finalGrade = finalGrade;
+        this.finalGradeManual = finalGradeManual;
+    }
 
     public Assessment(UUID id, Map<String, CriterionGrade> grades) {
         this.id = id;
         this.grades = grades;
+        this.gradedCount = 0;
+        this.finalGradeManual = false;
     }
 
     public Assessment(UUID id) {
@@ -54,6 +72,38 @@ public class Assessment {
 
     public void setGrades(Map<String, CriterionGrade> grades) {
         this.grades = grades;
+    }
+
+    public int getGradedCount() {
+        return gradedCount;
+    }
+
+    public void setGradedCount(int gradedCount) {
+        this.gradedCount = gradedCount;
+    }
+
+    public int getFinalGrade() {
+        return finalGrade;
+    }
+
+    public void setFinalGrade(int finalGrade) {
+        this.finalGrade = finalGrade;
+    }
+
+    public void incrementGradedCount() {
+        this.gradedCount += 1;
+    }
+
+    public void increaseGradedCount(int n) {
+        this.gradedCount += n;
+    }
+
+    public boolean isFinalGradeManual() {
+        return finalGradeManual;
+    }
+
+    public void setFinalGradeManual(boolean finalGradeManual) {
+        this.finalGradeManual = finalGradeManual;
     }
 
     @Override

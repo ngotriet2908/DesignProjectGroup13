@@ -3,10 +3,8 @@ import React, { Component } from 'react'
 import styles from './rubric.module.css'
 import {connect} from "react-redux";
 import {addBlock, addCriterion, deleteElement, setCurrentPath, setSelectedElement} from "../../redux/rubric/actions";
-import {FaChevronDown, FaChevronRight, FaHandPointRight} from "react-icons/fa";
-import {IoCheckmarkOutline, IoEllipsisVerticalOutline} from "react-icons/io5";
-import {createNewBlock, createNewCriterion, isBlock, isCriterion, removeElement} from "./helpers";
-import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
+import {IoEllipsisVerticalOutline, IoChevronForwardOutline, IoPricetagOutline} from "react-icons/io5";
+import {createNewBlock, createNewCriterion, isBlock, removeElement} from "./helpers";
 import classnames from "classnames";
 import globalStyles from "../helpers/global.module.css";
 import Dropdown from "react-bootstrap/Dropdown";
@@ -38,11 +36,11 @@ class RubricOutlineElement extends Component {
             {isBlock(this.props.data.content.type) ?
               <div className={classnames(styles.outlineElementIcon,
                 !this.props.collapsed && styles.outlineElementIconRotated)}>
-                <FaChevronRight onClick={this.props.onClickBlockCollapse}/>
+                <IoChevronForwardOutline onClick={this.props.onClickBlockCollapse}/>
               </div>
               :
               <div className={classnames(styles.outlineElementIcon)}>
-                <FaHandPointRight/>
+                <IoPricetagOutline/>
               </div>
             }
             <div>
@@ -57,21 +55,26 @@ class RubricOutlineElement extends Component {
                   </Dropdown.Toggle>
 
                   <Dropdown.Menu>
-                    <Dropdown.Item onClick={() => createNewCriterion(
-                      this.props,
-                      this.props.path,
-                      this.props.data.content.id,
-                      this.props.data.children.length
-                    )}>
-                      Add criterion
-                    </Dropdown.Item>
-                    <Dropdown.Item onClick={() => createNewBlock(
-                      this.props,
-                      this.props.path,
-                      this.props.data.content.id,
-                      this.props.data.children.length)}>
-                      Add section
-                    </Dropdown.Item>
+                    {isBlock(this.props.data.content.type) &&
+                      <>
+                        <Dropdown.Item onClick={() => createNewCriterion(
+                          this.props,
+                          this.props.path,
+                          this.props.data.content.id,
+                          this.props.data.children.length
+                        )}>
+                        Add criterion
+                        </Dropdown.Item>
+                        <Dropdown.Item onClick={() => createNewBlock(
+                          this.props,
+                          this.props.path,
+                          this.props.data.content.id,
+                          this.props.data.children.length)}>
+                        Add section
+                        </Dropdown.Item>
+                      </>
+                    }
+
                     <Dropdown.Item onClick={() => removeElement(this.props)}>
                       Delete
                     </Dropdown.Item>

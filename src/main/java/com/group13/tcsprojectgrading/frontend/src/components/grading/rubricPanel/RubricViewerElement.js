@@ -1,14 +1,14 @@
 import React, { Component } from 'react'
-import styles from './grading.module.css'
-import rubricStyles from '../rubric/rubric.module.css'
-import {saveRubric, setSelectedElement} from "../../redux/rubric/actions";
+import styles from '../grading.module.css'
+import rubricStyles from '../../rubric/rubric.module.css'
+import {saveRubric, setSelectedElement} from "../../../redux/rubric/actions";
 import {connect} from "react-redux";
 import Button from "react-bootstrap/Button";
-import RubricViewerElementChildren from "../rubric/RubricViewerElementChildren";
-import {findById} from "../../redux/rubric/functions";
+import RubricViewerElementChildren from "../../rubric/RubricViewerElementChildren";
+import {findById} from "../../../redux/rubric/functions";
 import {FaArrowLeft} from "react-icons/fa";
-import {isBlock, isCriterion} from "../rubric/helpers";
-import RubricViewerElementGrade from "../rubric/RubricViewerElementGrade";
+import {isBlock, isCriterion} from "../../rubric/helpers";
+import RubricViewerElementGrade from "../../rubric/RubricViewerElementGrade";
 
 
 class RubricViewerElement extends Component {

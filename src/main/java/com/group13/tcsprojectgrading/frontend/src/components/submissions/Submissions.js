@@ -14,7 +14,7 @@ import {Link} from "react-router-dom";
 import Breadcrumbs from "../helpers/Breadcrumbs";
 
 import globalStyles from '../helpers/global.module.css';
-import {IoFileTrayOutline} from "react-icons/io5";
+import {IoFileTrayOutline, IoPencil} from "react-icons/io5";
 import {IoSyncOutline} from "react-icons/io5";
 
 import classnames from 'classnames';
@@ -47,21 +47,6 @@ class Submissions extends Component {
   filterGroupSearchChange = (group) => {
     let criteria = this.normalizeLowercase(group.name).includes(this.normalizeLowercase(this.state.searchString))
     if (criteria) return true
-
-    // if (group.hasOwnProperty("sid")) {
-    //   criteria = group.sid.normalizeLowercase().includes(this.state.searchString.normalizeLowercase())
-    //   if (criteria) return true
-    // }
-    // if (group.hasOwnProperty("members")) {
-    //   let i;
-    //   for(i = 0; i < group.members.length; i++) {
-    //     criteria = group.members[i].name.normalizeLowercase().includes(this.state.searchString.normalizeLowercase())
-    //     if (criteria) return true
-    //
-    //     criteria = group.members[i].sid.normalizeLowercase().includes(this.state.searchString.normalizeLowercase())
-    //     if (criteria) return true
-    //   }
-    // }
     return false
   }
 
@@ -181,9 +166,9 @@ class Submissions extends Component {
 
         <div className={classnames(globalStyles.titleContainer, styles.titleContainer, this.state.syncing && styles.titleContainerIconActive)}>
           <h1>Submissions</h1>
-          <span>
-            <IoSyncOutline onClick={this.syncHandler}/>
-          </span>
+          <div className={classnames(globalStyles.iconButton)} onClick={this.syncHandler}>
+            <IoSyncOutline size={26}/>
+          </div>
         </div>
 
         {/*<div className={styles.overview}>*/}

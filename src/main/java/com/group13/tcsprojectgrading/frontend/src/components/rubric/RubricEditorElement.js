@@ -66,9 +66,6 @@ class RubricEditorElement extends Component {
             :
             <h2>Section</h2>
           }
-          {/*<div className={styles.viewerHeaderIcon}>*/}
-          {/*  <IoTrashBinOutline size={28} className={styles.viewerHeaderIconRed} onClick={this.onClickDelete}/>*/}
-          {/*</div>*/}
         </div>
 
         <div className={styles.viewerSectionContainer}>
@@ -93,10 +90,6 @@ class RubricEditorElement extends Component {
         {isCriterion(this.props.data.content.type) && this.props.data.content.grade &&
         <RubricEditorElementGrade id={this.props.data.content.id} data={this.props.data.content.grade}/>
         }
-
-        {/*{isBlock(this.props.data.content.type) &&*/}
-        {/*<RubricEditorElementChildren data={this.props.data}/>*/}
-        {/*}*/}
       </div>
     )
   }

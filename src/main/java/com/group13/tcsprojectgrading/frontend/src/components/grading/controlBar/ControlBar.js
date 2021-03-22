@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import styles from './grading.module.css'
+import styles from '../grading.module.css'
 import {connect} from "react-redux";
 import {IoFlagOutline} from "react-icons/io5";
 import FlagModal from "./FlagModal";
@@ -37,16 +37,9 @@ class ControlBar extends Component {
       <div className={styles.controlBarContainer}>
         <div className={styles.controlBarBody}>
           <div>
-            <h2>
+            <h4>
               {this.props.data.submission.name}
-              {/*<h5>*/}
-              {/*  {*/}
-              {/*    this.props.data.submission.flags.map((flag) => {*/}
-              {/*      return (<Badge variant={flag.variant} key={flag.id}>{flag.name}</Badge>)*/}
-              {/*    })*/}
-              {/*  }*/}
-              {/*</h5>*/}
-            </h2>
+            </h4>
 
           </div>
           <div>
