@@ -5,13 +5,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.api.client.json.Json;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.*;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.services.*;
+import com.group13.tcsprojectgrading.services.grading.AssessmentService;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -32,9 +35,11 @@ public class SubmissionController {
     private final RubricService rubricService;
     private final AssessmentLinkerService assessmentLinkerService;
     private final SubmissionDetailsService submissionDetailsService;
+    private final AssessmentService assessmentService;
+    private final IssueService issueService;
 
     @Autowired
-    public SubmissionController(CanvasApi canvasApi, ProjectService projectService, SubmissionService submissionService, GraderService graderService, FlagService flagService, RubricService rubricService, AssessmentLinkerService assessmentLinkerService, SubmissionDetailsService submissionDetailsService) {
+    public SubmissionController(CanvasApi canvasApi, ProjectService projectService, SubmissionService submissionService, GraderService graderService, FlagService flagService, RubricService rubricService, AssessmentLinkerService assessmentLinkerService, SubmissionDetailsService submissionDetailsService, AssessmentService assessmentService, IssueService issueService) {
         this.canvasApi = canvasApi;
         this.projectService = projectService;
         this.submissionService = submissionService;
@@ -43,6 +48,8 @@ public class SubmissionController {
         this.rubricService = rubricService;
         this.assessmentLinkerService = assessmentLinkerService;
         this.submissionDetailsService = submissionDetailsService;
+        this.assessmentService = assessmentService;
+        this.issueService = issueService;
     }
 
     @GetMapping(value = "")
@@ -141,7 +148,14 @@ public class SubmissionController {
         List<AssessmentLinker> linkers = assessmentLinkerService.findAssessmentLinkersForSubmission(submission);
         List<SubmissionComment> comments = submissionDetailsService.getComments(submission);
         List<SubmissionAttachment> attachments = submissionDetailsService.getAttachments(submission);
-        ObjectNode node = (ObjectNode) submission.convertToJsonWithDetails(linkers, attachments, comments);
+
+        Map<UUID, List<Issue>> issueMap = new HashMap<>();
+        List<Assessment> assessmentList = assessmentService.getAssessmentBySubmission(submission);
+        for (Assessment assessment: assessmentList) {
+            issueMap.put(assessment.getId(), issueService.findIssuesByAssessment(assessment.getId()));
+        }
+
+        ObjectNode node = (ObjectNode) submission.convertToJsonWithDetails(linkers, attachments, comments, issueMap);
 //        node.put("stringId", String.format("%s/%s", (submission.getGroupId() != null)? submission.getGroupId():"individual", submission.getId()));
 //        node.put("id", submission.getId().toString());
 //        node.put("isGroup", (submission.getGroupId() != null));

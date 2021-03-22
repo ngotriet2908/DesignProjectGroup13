@@ -26,6 +26,12 @@ public class Grader {
     @OneToMany(mappedBy = "grader")
     private List<Submission> submissions;
 
+    @OneToMany(mappedBy = "creator")
+    private List<Issue> createdIssues;
+
+    @OneToMany(mappedBy = "addressee")
+    private List<Issue> addressedIssues;
+
     @ManyToMany
     private Collection<ProjectRole> projectRoles;
 
@@ -109,6 +115,22 @@ public class Grader {
 
     public void setFlags(Collection<Flag> flags) {
         this.flags = flags;
+    }
+
+    public List<Issue> getCreatedIssues() {
+        return createdIssues;
+    }
+
+    public void setCreatedIssues(List<Issue> createdIssues) {
+        this.createdIssues = createdIssues;
+    }
+
+    public List<Issue> getAddressedIssues() {
+        return addressedIssues;
+    }
+
+    public void setAddressedIssues(List<Issue> addressedIssues) {
+        this.addressedIssues = addressedIssues;
     }
 
     public ArrayNode getRolesArrayNode() {
