@@ -116,11 +116,13 @@ public class AssessmentController {
                 ));
             }
 
-            // update graded count of assessment
-            submissionAssessment.increaseGradedCount(1);
+            // update graded count of assessment (if it's not a regraded criterion)
+            if (grades.get(criterionId).getHistory().size() == 1) {
+                submissionAssessment.increaseGradedCount(1);
 
-            // update graded count of project
-            // -
+                // update graded count of project
+                // -
+            }
 
             // check if fully graded (should be possible to replace with a manually typed value)
             Rubric rubric = this.rubricService.getRubricById(projectId);
@@ -134,7 +136,6 @@ public class AssessmentController {
         }
     }
 
-    // TODO, doesn't work
     @RequestMapping(value = "/grading/{criterionId}/active/{id}", method = RequestMethod.PUT)
     protected ResponseEntity<String> updateActiveGrading(
             @PathVariable String courseId,

@@ -15,7 +15,7 @@ import PropTypes from 'prop-types';
 import {isBlock, isCriterion} from "./helpers";
 import RubricEditorElementChildren from "./RubricEditorElementChildren";
 import RubricEditorElementGrade from "./RubricEditorElementGrade";
-import {IoTrashBinOutline} from "react-icons/io5";
+import {IoListOutline, IoTrashBinOutline} from "react-icons/io5";
 import debounce from "lodash/debounce"
 
 class RubricEditorElement extends Component {
@@ -28,31 +28,19 @@ class RubricEditorElement extends Component {
     this.props.alterTitle(this.props.data.content.id, event.target.value, this.props.currentPath + "/content/title");
   }
 
-  // onClickDelete = () => {
-  //   this.props.deleteElement(this.props.data.content.id, this.props.currentPath);
-  //   // TODO go to parent
-  //   this.props.setCurrentPath("");
-  //   this.props.setSelectedElement(this.props.rubric.id);
-  // }
-
-  // onClickDeleteAll = () => {
-  //   this.props.deleteAllElements();
-  //   this.props.setCurrentPath("");
-  //   this.props.setSelectedElement(this.props.rubric.id);
-  // }
-
   render () {
     // rubric's header
     if (!this.props.data.hasOwnProperty("content")) {
       return(
-        <div>
+        <div className={styles.viewerContainer}>
           <div className={styles.viewerHeader}>
             <h2>Rubric</h2>
-            {/*<div className={styles.viewerHeaderIcon}>*/}
-            {/*  <IoTrashBinOutline size={28} className={styles.viewerHeaderIconRed} onClick={this.onClickDeleteAll}/>*/}
-            {/*</div>*/}
           </div>
-          {/*<RubricEditorElementChildren data={this.props.data}/>*/}
+
+          <div className={styles.viewerBodyEmpty}>
+            <IoListOutline size={40}/>
+            <h6>Choose a criterion</h6>
+          </div>
         </div>
       )
     }

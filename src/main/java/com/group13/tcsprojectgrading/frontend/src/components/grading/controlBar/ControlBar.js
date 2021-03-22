@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import styles from '../grading.module.css'
 import {connect} from "react-redux";
 import {Badge} from 'react-bootstrap'
+import {request} from "../../../services/request";
 
 
 class ControlBar extends Component {

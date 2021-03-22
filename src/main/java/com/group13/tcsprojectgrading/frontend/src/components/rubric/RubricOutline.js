@@ -102,11 +102,7 @@ class RubricOutline extends Component {
   render () {
     return (
       <div className={styles.outlineContainer}>
-        <div className={classnames(styles.outlineHeaderContainer,
-          (this.props.selectedElement != null && this.props.rubric.id === this.props.selectedElement) &&
-          styles.outlineHeaderContainerSelected
-        )}
-        onClick={() => this.onClickElement(this.props.rubric.id, "")}>
+        <div className={classnames(styles.outlineHeaderContainer)}>
           <div className={
             classnames(styles.outlineHeader)}>
             <h3>Rubric</h3>
@@ -138,7 +134,7 @@ class RubricOutline extends Component {
           {this.props.isEditing &&
             <div className={styles.outlineHeaderContainerBottom}>
               <div>
-                <h5>Rubric Body</h5>
+                <h5>Default main section</h5>
               </div>
               <Dropdown onClick={(event) => {event.stopPropagation();}}>
                 <Dropdown.Toggle as={CustomToggle}>

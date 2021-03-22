@@ -31,7 +31,7 @@ class GradeViewer extends Component {
 
   makeActive = (key) => {
     // send request
-    request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/grading/${this.props.selectedElement}/active/${key}`, "PUT")
+    request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/${this.props.match.params.assessmentId}/grading/${this.props.selectedElement}/active/${key}`, "PUT")
       .then(() => {
         this.props.setActive(this.props.selectedElement, key)
       })
@@ -67,32 +67,35 @@ class GradeViewer extends Component {
 
             {isCriterion ?
               (isGraded ?
-                this.props.grades.history.map((grade, index) => {
-                  return (
-                    <div key={index} onClick={() => this.makeActive(index)}
-                      className={classnames(styles.gradeViewerRow, (index === this.props.grades.active) && styles.gradeViewerRowActive)}>
-                      <div className={styles.gradeViewerRowIcon}>
-                        {index === this.props.grades.active ?
-                          <IoCheckboxOutline size={26}/>
-                          :
-                          <IoSquareOutline size={26}/>
-                        }
-                      </div>
-                      <div className={styles.gradeViewerRowContent}>
-                        <div>
-                            Graded by {grade.userId} on {new Date(grade.created).toDateString()}
-                        </div>
-                        <div>
-                            Grade {grade.grade}
-                          {grade.comment != null &&
-                            <span> with a note: {grade.comment}
-                            </span>
+                <div className={styles.gradeViewerBodyScroll}>
+                  {this.props.grades.history.map((grade, index) => {
+                    return (
+                      <div key={index} onClick={() => this.makeActive(index)}
+                        className={classnames(styles.gradeViewerRow, (index === this.props.grades.active) && styles.gradeViewerRowActive)}>
+                        <div className={styles.gradeViewerRowIcon}>
+                          {index === this.props.grades.active ?
+                            <IoCheckboxOutline size={26}/>
+                            :
+                            <IoSquareOutline size={26}/>
                           }
                         </div>
+                        <div className={styles.gradeViewerRowContent}>
+                          <div>
+                              Graded by {grade.userId} on {new Date(grade.created).toDateString()}
+                          </div>
+                          <div>
+                              Grade {grade.grade}
+                            {grade.comment != null &&
+                              <span> with a note: {grade.comment}
+                              </span>
+                            }
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  )
-                })
+                    )
+                  })
+                  }
+                </div>
                 :
                 <div className={styles.gradeViewerNotGraded}>
                   <IoFileTrayOutline size={40}/>

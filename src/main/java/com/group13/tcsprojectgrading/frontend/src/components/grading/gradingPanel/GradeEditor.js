@@ -90,18 +90,18 @@ class GradeEditor extends Component {
         <Card className={styles.panelCard}>
           <Card.Body className={styles.gradeViewerBody}>
             <div className={classnames(styles.gradingCardTitle, styles.gradingCardTitleWithButton)}>
-              <h4>Grade Editor</h4>
+              <h4>Grade editor</h4>
 
               {isCriterion &&
               <div className={classnames(globalStyles.iconButton, styles.gradingCardTitleButton)}
                 onClick={this.toggleGradeEditor}>
 
                 {isGraded && !this.state.open &&
-                <IoPencilOutline size={26}/>
+                  <IoPencilOutline size={26}/>
                 }
 
                 {isGraded && this.state.open &&
-                <IoCloseOutline size={26}/>
+                  <IoCloseOutline size={26}/>
                 }
               </div>
               }
@@ -110,29 +110,18 @@ class GradeEditor extends Component {
             {isCriterion ?
               (!isGraded || this.state.open ?
                 <div className={styles.gradeEditorContentContainer}>
-                  {/*{this.props.assessment.grades[this.props.selectedElement] &&*/}
-                  {/*this.props.assessment.grades[this.props.selectedElement].history.length > 0 &&*/}
-                  {/*this.state.open &&*/}
-                  {/*<div*/}
-                  {/*  className={classnames(styles.gradeEditorGradedClose, this.state.open && styles.gradeEditorGradedExpandOpened)}*/}
-                  {/*  onClick={this.toggleGradeEditor}>*/}
-                  {/*  <IoCloseOutline size={24}/>*/}
-                  {/*</div>*/}
-                  {/*}*/}
-
                   <div className={styles.gradeEditorCardItem}>
                     Grade
                     <input type="number" value={this.props.criterion.grade} onChange={this.onChangeGrade}/>
                   </div>
-                  <div className={styles.gradeEditorCardItem}>
+                  <div className={classnames(styles.gradeEditorCardItem, styles.gradeEditorCardItemFill)}>
                     Notes (optional)
-                    <textarea value={this.props.criterion.comment} onChange={this.onChangeComment}/>
+                    <textarea placeholder={"Provide explanation for the grade or any additional notes that will be visible to students"} value={this.props.criterion.comment} onChange={this.onChangeComment}/>
                   </div>
                   <div className={styles.gradeEditorCardFooter}>
                     <Button className={styles.gradeEditorCardButton} variant="linkLightGray"
                       onClick={this.resetGrade}>Clear</Button>
-                    <Button className={styles.gradeEditorCardButton} variant="lightGreen" onClick={this.saveGrade}>Save
-                      grade</Button>
+                    <Button className={styles.gradeEditorCardButton} variant="lightGreen" onClick={this.saveGrade}>Save</Button>
                   </div>
                 </div>
                 :
@@ -156,15 +145,10 @@ class GradeEditor extends Component {
 }
 
 const mapStateToProps = state => {
-  // let element = findById(this.props.rubric, this.props.selectedElement)
-  // let criterion = findCriterion(this.props.tempAssessment, this.props.selectedElement);
-
   return {
     user: state.users.self,
     selectedElement: state.rubric.selectedElement,
     rubric: state.rubric.rubric,
-    // tempAssessment: state.grading.tempAssessment,
-    // assessment: state.grading.assessment,
 
     element: findById(state.rubric.rubric, state.rubric.selectedElement),
     criterion: findCriterion(state.grading.tempAssessment, state.rubric.selectedElement),

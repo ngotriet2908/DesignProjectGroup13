@@ -32,6 +32,7 @@ class RubricOutline extends Component {
 
   onClickElement = (id, path) => {
     this.props.setSelectedElement(id);
+    this.props.toggleOutlineHidden();
 
     // open grading for the selected criterion
     // this.props.setCurrentPath(path);
@@ -39,7 +40,7 @@ class RubricOutline extends Component {
 
   render () {
     return (
-      <div className={styles.outlineContainer}>
+      <div className={classnames(styles.outlineContainer, this.props.outlineHidden && styles.outlineContainerHidden)}>
         {this.props.rubric.children.length === 0 ?
           <div className={styles.gradeViewerNotGraded}>
             <IoLogoTux size={40}/>
