@@ -230,7 +230,8 @@ public class Submission {
 
     public JsonNode convertToJsonWithDetails(List<AssessmentLinker> assessmentLinkers,
                                              List<SubmissionAttachment> submissionAttachments,
-                                             List<SubmissionComment> submissionComments) throws JsonProcessingException {
+                                             List<SubmissionComment> submissionComments,
+                                             Map<UUID, List<Issue>> issuesMap) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode node = mapper.createObjectNode();
 
@@ -300,6 +301,7 @@ public class Submission {
             }
 
             assessment.set("participants", participantsNode);
+            assessment.put("issuesCount", issuesMap.get(entry.getKey()).size());
             assessments.add(assessment);
         }
 

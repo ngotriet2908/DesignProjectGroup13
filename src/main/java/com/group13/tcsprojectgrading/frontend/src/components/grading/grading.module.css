@@ -270,3 +270,7 @@
 .gradeViewerNotGraded h6 {
     margin: 0 0 0 0.5rem;
 }
+
+.badge {
+    margin-left: 0.5rem;
+}

@@ -20,7 +20,7 @@ class RubricViewer extends Component {
       <Card className={styles.editorCard}>
         <Card.Body>
           <div>
-            <RubricViewerElement data={element}/>
+            <RubricViewerElement downloadRubric={this.props.downloadRubric} data={element}/>
           </div>
         </Card.Body>
       </Card>

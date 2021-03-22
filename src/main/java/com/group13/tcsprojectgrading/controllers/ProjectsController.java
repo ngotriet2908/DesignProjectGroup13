@@ -210,6 +210,25 @@ public class ProjectsController {
         return new ResponseEntity<>(resultJson, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/{projectId}/graders", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    protected ArrayNode getProjectGraders(@PathVariable String courseId, @PathVariable String projectId, Principal principal) throws JsonProcessingException, ParseException {
+        Project project = projectService.getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "project not found"
+            );
+        }
+
+        List<Grader> graders = graderService.getGraderFromProject(project);
+        ObjectMapper objectMapper = new ObjectMapper();
+        ArrayNode result = objectMapper.createArrayNode();
+        for(Grader grader: graders) {
+            result.add(grader.getGraderJson());
+        }
+        return result;
+    }
+
     @GetMapping(value = "/{projectId}/syncCanvas")
     protected void syncWithCanvas(@PathVariable String courseId,
                                   @PathVariable String projectId,
@@ -427,6 +446,40 @@ public class ProjectsController {
         return new ResponseEntity<byte[]>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.OK);
     }
 
+    @GetMapping(value = "/{projectId}/downloadRubric")
+    @ResponseBody
+    protected ResponseEntity<byte[]> sendFeedbackPdf(@PathVariable String courseId,
+                                                     @PathVariable String projectId,
+                                                     Principal principal) throws IOException, ParseException {
+        Project project = projectService.getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "entity not found"
+            );
+        }
+
+
+        String fileName = project.getName() + " rubric.pdf";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData(fileName, fileName);
+        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+//        response.setContentType("blob");
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        PdfWriter pdfWriter = new PdfWriter(byteArrayOutputStream);
+        PdfDocument pdfDocument = new PdfDocument(pdfWriter);
+        Document document = new Document(pdfDocument, PageSize.A4);
+
+        document.getPdfDocument();
+
+        PdfRubricUtils rubricUtils = new PdfRubricUtils(document, rubricService.getRubricById(projectId));
+        rubricUtils.generateRubrics();
+//        System.out.println(Arrays.toString(byteArrayOutputStream.toByteArray()));
+
+        return new ResponseEntity<byte[]>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.OK);
+    }
+
 //    @PostMapping(value = "/{projectId}/feedbackEmail")
 //    @ResponseBody
 //    protected String sendFeedbackEmail1(@PathVariable String courseId,
@@ -580,53 +633,6 @@ public class ProjectsController {
         for (int i = 0; i < number; i++) {
             paragraph.add(new Paragraph(" "));
         }
-    }
-
-    @GetMapping(value = "/{projectId}/feedbackPdf")
-    @ResponseBody
-    protected ResponseEntity<byte[]> sendFeedbackPdfTemplate(@PathVariable String courseId,
-                                                             @PathVariable String projectId,
-                                                             Principal principal) throws IOException, ParseException {
-        Project project = projectService.getProjectById(courseId, projectId);
-        if (project == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "entity not found"
-            );
-        }
-
-        String fileName = "hello.pdf";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.setContentDispositionFormData(fileName, fileName);
-        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-//        response.setContentType("blob");
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
-        PdfWriter pdfWriter = new PdfWriter(byteArrayOutputStream);
-        PdfDocument pdfDocument = new PdfDocument(pdfWriter);
-        Document document = new Document(pdfDocument, PageSize.A4);
-
-        document.getPdfDocument();
-        PdfFont fontSubject = PdfFontFactory.createFont(FontConstants.COURIER);
-
-        PdfFont fontBody = PdfFontFactory.createFont(FontConstants.COURIER);
-        Paragraph preface = new Paragraph();
-        addEmptyLine(preface, 1);
-
-        Paragraph paragraph = new Paragraph("lalalala").setFont(fontSubject).setFontSize(22);
-        preface.add(paragraph);
-        addEmptyLine(preface, 2);
-
-        paragraph = new Paragraph("lalalalalalal").setFont(fontSubject).setFontSize(13);
-        preface.add(paragraph);
-
-        document.add(preface);
-        document.close();
-
-
-//        System.out.println(Arrays.toString(byteArrayOutputStream.toByteArray()));
-
-        return new ResponseEntity<byte[]>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.OK);
     }
 
     @GetMapping(value = "/{projectId}/feedback")

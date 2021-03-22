@@ -93,6 +93,26 @@ class Rubric extends Component {
     }
   }
 
+  downloadRubric = () => {
+    console.log("download")
+    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/downloadRubric`, "GET", 'application/pdf')
+      .then(response => {
+        if (response.status === 200) {
+          return response.blob()
+        }
+      })
+      .then((blob) => {
+        console.log(blob)
+        const file = new Blob([blob], {
+          type: 'application/pdf',
+        });
+        saveAs(file, 'rubric.pdf');
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
+  }
+
   render () {
     if (!this.state.isLoaded) {
       return(
@@ -114,7 +134,7 @@ class Rubric extends Component {
           {this.props.isEditing ?
             <RubricEditor/>
             :
-            <RubricViewer/>
+            <RubricViewer downloadRubric={this.downloadRubric}/>
           }
         </div>
 

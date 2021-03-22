@@ -29,6 +29,8 @@ class Grading extends Component {
     this.state = {
       data: this.props.location.data,
       isLoaded: false,
+      issues: [],
+      graders: []
     }
 
     // TODO: if submission is undefined, reload it from the server
@@ -80,12 +82,16 @@ class Grading extends Component {
     Promise.all([
       request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/${this.props.match.params.assessmentId}/grading`),
       request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}`),
-      request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/rubric`)
+      request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/rubric`),
+      request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/${this.props.match.params.assessmentId}/issues`),
+      request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/graders`)
     ])
-      .then(async([res1, res2, res3]) => {
+      .then(async([res1, res2, res3, res4, res5]) => {
         const assessment = await res1.json();
         const submission = await res2.json();
         const rubric = await res3.json();
+        const issues = await res4.json();
+        const graders = await res5.json();
 
         let user = submission.user
         if (user !== null && user.privileges !== null) {
@@ -109,6 +115,8 @@ class Grading extends Component {
         this.setState({
           data: submission,
           isLoaded: true,
+          issues: issues,
+          graders: graders
         });
       })
       .catch(error => {
@@ -144,6 +152,12 @@ class Grading extends Component {
           data : tmp
         })
       })
+  }
+
+  updateIssues = (obj) => {
+    this.setState({
+      issues: obj
+    })
   }
 
   createFlagHandler = async (name, description, variant) => {
@@ -220,7 +234,7 @@ class Grading extends Component {
         <div className={styles.container}>
           <RubricPanel/>
           <GradingPanel/>
-          <IssuesPanel/>
+          <IssuesPanel graders={this.state.graders} updateIssues={this.updateIssues} issues={this.state.issues} params={this.props.match.params} createIssue={this.createIssue}/>
         </div>
 
       </>
