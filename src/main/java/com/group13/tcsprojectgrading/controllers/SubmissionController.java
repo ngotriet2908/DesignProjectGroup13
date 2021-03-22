@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.api.client.json.Json;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.*;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
@@ -84,13 +85,13 @@ public class SubmissionController {
         resultNode.set("project", project.convertToJson());
         resultNode.set("course", objectMapper.readTree(courseString));
 
-        List<Flag> yourFlags = flagService.findFlagsWithGrader(grader);
+        List<Flag> yourFlags = flagService.findFlagsWithProject(project);
         ArrayNode yourFlagsArrayNode = createFlagsArrayNode(yourFlags);
+        ((ObjectNode) resultNode.get("project")).set("flags", yourFlagsArrayNode);
 
         ObjectNode userNode = objectMapper.createObjectNode();
         userNode.put("id", grader.getUserId());
         userNode.put("name", grader.getUserId());
-        userNode.set("flags", yourFlagsArrayNode);
 
         resultNode.set("user", userNode);
 
@@ -203,17 +204,14 @@ public class SubmissionController {
         }
         node.put("progress", progress);
 
-        List<Flag> flags = (List<Flag>) submission.getFlags();
-        ArrayNode submissionFlags = createFlagsArrayNode(flags);
-        node.set("flags", submissionFlags);
+        List<Flag> yourFlags = flagService.findFlagsWithProject(project);
+        ArrayNode yourFlagsArrayNode = createFlagsArrayNode(yourFlags);
+        ((ObjectNode) resultNode.get("project")).set("flags", yourFlagsArrayNode);
 
         resultNode.set("submission", node);
         Grader grader = graderService.getGraderFromGraderId(principal.getName(), project);
         if (grader != null) {
             JsonNode graderJson = grader.getGraderJson();
-            List<Flag> yourFlags = flagService.findFlagsWithGrader(grader);
-            ArrayNode yourFlagsArrayNode = createFlagsArrayNode(yourFlags);
-            ((ObjectNode) graderJson).set("flags", yourFlagsArrayNode);
             resultNode.set("user", graderJson);
         }
         return resultNode;
@@ -347,157 +345,164 @@ public class SubmissionController {
 
     }
 
-//    @PostMapping(value = "/{id}/flag")
-//    protected JsonNode addFlag(@PathVariable String courseId,
-//                                         @PathVariable String projectId,
-//                                         @PathVariable String id,
-//                                         @RequestBody ObjectNode flag,
-//                                         Principal principal
-////                                   @RequestParam Map<String, String> queryParameters
-//    ) throws JsonProcessingException {
-//        String projectResponse = this.canvasApi.getCanvasCoursesApi().getCourseProject(courseId, projectId);
-//        String courseString = this.canvasApi.getCanvasCoursesApi().getUserCourse(courseId);
-//
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        ObjectNode resultNode = objectMapper.createObjectNode();
-//
-//        resultNode.set("course", objectMapper.readTree(courseString));
-//        resultNode.set("project", objectMapper.readTree(projectResponse));
-//
-//        Project project = projectService.getProjectById(courseId, projectId);
-//        if (project == null) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.NOT_FOUND, "project not found"
-//            );
-//        }
-//
-////        Task task = taskService.findTaskByTaskId(taskId, Boolean.parseBoolean(queryParameters.get("is_group")), project);
-//        Submission submission = submissionService.findSubmissionById(id, project);
-//        if (submission == null) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.NOT_FOUND, "task not found"
-//            );
-//        }
-//
-//        Grader grader = graderService.getGraderFromGraderId(principal.getName(), project);
-//        if (grader == null) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.NOT_FOUND, "task not found"
-//            );
-//        }
-//        Flag flag1 = flagService.findFlagWithNameAndGrader(flag.get("name").asText(), grader);
-//        if (flag1 != null) {
-//            if (!submission.getFlags().contains(flag1)) submission.getFlags().add(flag1);
-//            Submission submission1 = submissionService.saveFlags(submission);
-//            return createFlagsArrayNode((List<Flag>) submission1.getFlags());
-//        }
-//        return null;
+    @PostMapping(value = "/{id}/flag")
+    protected JsonNode addFlag(@PathVariable String courseId,
+                                         @PathVariable String projectId,
+                                         @PathVariable String id,
+                                         @RequestBody ObjectNode flag,
+                                         Principal principal
+//                                   @RequestParam Map<String, String> queryParameters
+    ) throws JsonProcessingException {
+        String courseString = this.canvasApi.getCanvasCoursesApi().getUserCourse(courseId);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode resultNode = objectMapper.createObjectNode();
+
+        resultNode.set("course", objectMapper.readTree(courseString));
+
+        Project project = projectService.getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "project not found"
+            );
+        }
+        resultNode.set("project", project.convertToJson());
+
+//        Task task = taskService.findTaskByTaskId(taskId, Boolean.parseBoolean(queryParameters.get("is_group")), project);
+        Submission submission = submissionService.findSubmissionById(id);
+        if (submission == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "submission not found"
+            );
+        }
+
+        Grader grader = graderService.getGraderFromGraderId(principal.getName(), project);
+        if (grader == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "task not found"
+            );
+        }
+        Flag flag1 = flagService.findFlagWithNameAndProject(flag.get("name").asText(), project);
+        if (flag1 != null) {
+            if (!submission.getFlags().contains(flag1)) submission.getFlags().add(flag1);
+            Submission submission1 = submissionService.saveFlags(submission);
+            ObjectNode dataNode = objectMapper.createObjectNode();
+            dataNode.set("data", createFlagsArrayNode((List<Flag>) submission1.getFlags()));
+            return dataNode;
+        } else {
+            ObjectNode errorNode = objectMapper.createObjectNode();
+            errorNode.put("error", "flag not fount");
+            return errorNode;
+        }
+    }
+
+    @PostMapping(value = "/{id}/flag/create")
+    protected JsonNode createFlag(@PathVariable String courseId,
+                               @PathVariable String projectId,
+                               @PathVariable String id,
+                               @RequestBody ObjectNode flag,
+                               Principal principal
+//                                   @RequestParam Map<String, String> queryParameters
+    ) throws JsonProcessingException {
+        String courseString = this.canvasApi.getCanvasCoursesApi().getUserCourse(courseId);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode resultNode = objectMapper.createObjectNode();
+
+        resultNode.set("course", objectMapper.readTree(courseString));
+
+        Project project = projectService.getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "project not found"
+            );
+        }
+        resultNode.set("project", project.convertToJson());
+
+//        Task task = taskService.findTaskByTaskId(taskId, Boolean.parseBoolean(queryParameters.get("is_group")), project);
+        Submission submission = submissionService.findSubmissionById(id);
+        if (submission == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "task not found"
+            );
+        }
+
+        Grader grader = graderService.getGraderFromGraderId(principal.getName(), project);
+        if (grader == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "task not found"
+            );
+        }
+        Flag flag1 = flagService.findFlagWithNameAndProject(flag.get("name").asText(), project);
+        if (flag1 == null) {
+
+            flagService.saveNewFlag(new
+                    Flag(flag.get("name").asText(),
+                    flag.get("description").asText(),
+                    flag.get("variant").asText(),
+                    project));
+
+            List<Flag> flags = flagService.findFlagsWithProject(project);
+            ArrayNode yourFlagsArrayNode = createFlagsArrayNode(flags);
+            ObjectNode objectNode = objectMapper.createObjectNode();
+            objectNode.set("data", yourFlagsArrayNode);
+            return objectNode;
+        } else {
+            ObjectNode objectNode = objectMapper.createObjectNode();
+            objectNode.put("error", "flag already exists");
+            return objectNode;
+        }
+    }
+
+    @DeleteMapping(value = "/{id}/flag/{flagId}")
+    protected JsonNode deleteFlag(@PathVariable String courseId,
+                               @PathVariable String projectId,
+                               @PathVariable String id,
+                               @PathVariable String flagId,
+                               Principal principal
+//                                   @RequestParam Map<String, String> queryParameters
+    ) throws JsonProcessingException {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        Project project = projectService.getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "project not found"
+            );
+        }
+
+//        Task task = taskService.findTaskByTaskId(taskId, Boolean.parseBoolean(queryParameters.get("is_group")), project);
+        Submission submission = submissionService.findSubmissionById(id);
+        if (submission == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "task not found"
+            );
+        }
+
+        Grader grader = graderService.getGraderFromGraderId(principal.getName(), project);
+        if (grader == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "grader not found"
+            );
+        }
+        Flag flag1 = flagService.findFlagWithId(UUID.fromString(flagId));
+        if (flag1 != null) {
+            submission.getFlags().remove(flag1);
+            Submission submission1 = submissionService.saveFlags(submission);
+            ObjectNode dataNode = objectMapper.createObjectNode();
+            dataNode.set("data", createFlagsArrayNode((List<Flag>) submission1.getFlags()));
+            return dataNode;
+        } else {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "flag not exist"
+            );
+        }
+    }
+
+//    private double submissionProgress(SubmissionAssessment assessment, Rubric rubric) {
+//        List<Element> criteria = rubric.fetchAllCriteria();
+//        return assessment.getGradedCriteria(criteria).size()*1.0/criteria.size()*100;
 //    }
-//
-//    @PostMapping(value = "/{id}/flag/create")
-//    protected JsonNode createFlag(@PathVariable String courseId,
-//                               @PathVariable String projectId,
-//                               @PathVariable String id,
-//                               @RequestBody ObjectNode flag,
-//                               Principal principal
-////                                   @RequestParam Map<String, String> queryParameters
-//    ) throws JsonProcessingException {
-//        String projectResponse = this.canvasApi.getCanvasCoursesApi().getCourseProject(courseId, projectId);
-//        String courseString = this.canvasApi.getCanvasCoursesApi().getUserCourse(courseId);
-//
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        ObjectNode resultNode = objectMapper.createObjectNode();
-//
-//        resultNode.set("course", objectMapper.readTree(courseString));
-//        resultNode.set("project", objectMapper.readTree(projectResponse));
-//
-//        Project project = projectService.getProjectById(courseId, projectId);
-//        if (project == null) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.NOT_FOUND, "project not found"
-//            );
-//        }
-//
-////        Task task = taskService.findTaskByTaskId(taskId, Boolean.parseBoolean(queryParameters.get("is_group")), project);
-//        Submission submission = submissionService.findSubmissionById(id, project);
-//        if (submission == null) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.NOT_FOUND, "task not found"
-//            );
-//        }
-//
-//        Grader grader = graderService.getGraderFromGraderId(principal.getName(), project);
-//        if (grader == null) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.NOT_FOUND, "task not found"
-//            );
-//        }
-//        Flag flag1 = flagService.findFlagWithNameAndGrader(flag.get("name").asText(), grader);
-//        if (flag1 == null) {
-//
-//            flagService.saveNewFlag(new
-//                    Flag(flag.get("name").asText(),
-//                    flag.get("description").asText(),
-//                    flag.get("variant").asText(),
-//                    grader));
-//
-//            List<Flag> flags = flagService.findFlagsWithGrader(grader);
-//            ArrayNode yourFlagsArrayNode = createFlagsArrayNode(flags);
-//            ObjectNode objectNode = objectMapper.createObjectNode();
-//            objectNode.set("data", yourFlagsArrayNode);
-//            return objectNode;
-//        } else {
-//            ObjectNode objectNode = objectMapper.createObjectNode();
-//            objectNode.put("error", "flag already exists");
-//            return objectNode;
-//        }
-//    }
-//
-//    @DeleteMapping(value = "/{id}/flag/{flagId}")
-//    protected JsonNode deleteFlag(@PathVariable String courseId,
-//                               @PathVariable String projectId,
-//                               @PathVariable String id,
-//                               @PathVariable String flagId,
-//                               Principal principal
-////                                   @RequestParam Map<String, String> queryParameters
-//    ) throws JsonProcessingException {
-//
-//        ObjectMapper objectMapper = new ObjectMapper();
-//
-//        Project project = projectService.getProjectById(courseId, projectId);
-//        if (project == null) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.NOT_FOUND, "project not found"
-//            );
-//        }
-//
-////        Task task = taskService.findTaskByTaskId(taskId, Boolean.parseBoolean(queryParameters.get("is_group")), project);
-//        Submission submission = submissionService.findSubmissionById(id, project);
-//        if (submission == null) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.NOT_FOUND, "task not found"
-//            );
-//        }
-//
-//        Grader grader = graderService.getGraderFromGraderId(principal.getName(), project);
-//        if (grader == null) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.NOT_FOUND, "task not found"
-//            );
-//        }
-//        Flag flag1 = flagService.findFlagWithId(Long.parseLong(flagId));
-//        if (flag1 != null) {
-//            submission.getFlags().remove(flag1);
-//            Submission submission1 = submissionService.saveFlags(submission);
-//            return createFlagsArrayNode((List<Flag>) submission1.getFlags());
-//        }
-//
-//        return null;
-//    }
-//
-////    private double submissionProgress(SubmissionAssessment assessment, Rubric rubric) {
-////        List<Element> criteria = rubric.fetchAllCriteria();
-////        return assessment.getGradedCriteria(criteria).size()*1.0/criteria.size()*100;
-////    }
 
 }

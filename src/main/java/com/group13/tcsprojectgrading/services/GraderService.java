@@ -24,9 +24,7 @@ public class GraderService {
     public Grader addNewGrader(Grader grader) {
         Grader grader1 = repository.findById(new GraderId(grader.getUserId(), grader.getProject().getProjectCompositeKey())).orElse(null);
         if (grader1 == null) {
-            Grader grader2 = repository.save(grader);
-            Flag flag = flagService.saveNewFlag(new Flag("Required attention", "This is a default flag", "primary", grader2));
-            return grader2;
+            return repository.save(grader);
         }
         return grader1;
     }

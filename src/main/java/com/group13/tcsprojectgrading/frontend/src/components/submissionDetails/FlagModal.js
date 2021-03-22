@@ -1,79 +1,121 @@
 import {Button, Modal, Form, InputGroup, FormControl, Card, Alert, ListGroup} from 'react-bootstrap'
 import React, {Component} from "react";
 import FlagModalFlagView from "./FlagModalFlagView";
+import {request} from "../../services/request";
 
 class FlagModal extends Component {
   constructor(props) {
     super(props);
     this.state = {
       createShow: false,
-      name:"",
-      description:"",
-      error:"",
-      color: "primary",
+      error: ""
     }
+    this.formRef = React.createRef()
+  }
+
+  addFlagHandler = (flag) => {
+    request(`/api/courses/${this.props.params.courseId}/projects/${this.props.params.projectId}/submissions/${this.props.params.submissionId}/flag`
+      , "POST", flag)
+      .then((response) => {
+        return response.json()
+      })
+      .then((data) => {
+        console.log(data)
+        if (data.error !== undefined) {
+          console.log(data.error)
+          this.setState({
+            error: data.error
+          })
+        } else {
+          this.props.updateSubmissionFlags(data.data)
+          this.setState({
+            createShow: false,
+            error: ""
+          })
+        }
+      })
+  }
+
+  createFlagHandler = () => {
+    let object = {
+      "name": this.formRef.current.nameInput.value,
+      "description": this.formRef.current.descriptionInput.value,
+      "variant": this.formRef.current.colorSelector.value,
+    }
+    request(`/api/courses/${this.props.params.courseId}/projects/${this.props.params.projectId}/submissions/${this.props.params.submissionId}/flag/create`
+      , "POST", object)
+      .then((response) => {
+        return response.json()
+      })
+      .then((data) => {
+        console.log(data)
+        if (data.error !== undefined) {
+          console.log(data.error)
+          this.setState({
+            error: data.error
+          })
+        } else {
+          this.props.updateProjectFlags(data.data)
+          this.setState({
+            createShow: false,
+            error: ""
+          })
+        }
+      })
+  }
+
+  removeFlagHandler = (id) => {
+    request(`/api/courses/${this.props.params.courseId}/projects/${this.props.params.projectId}/flag/${id}`
+      , "DELETE")
+      .then((response) => {
+        return response.json()
+      })
+      .then((data) => {
+        console.log(data)
+        if (data.error !== undefined) {
+          console.log(data.error)
+          this.setState({
+            error: data.error
+          })
+        } else {
+          this.props.updateProjectFlags(data.data)
+          this.setState({
+            createShow: false,
+            error: ""
+          })
+        }
+      })
+  }
+
+  uncheckFlagHandler = (flag) => {
+    request(`/api/courses/${this.props.params.courseId}/projects/${this.props.params.projectId}/submissions/${this.props.params.submissionId}/flag/${flag.id}`
+      , "DELETE")
+      .then((response) => {
+        return response.json()
+      })
+      .then((data) => {
+        console.log(data)
+        if (data.error !== undefined) {
+          console.log(data.error)
+          this.setState({
+            error: data.error
+          })
+        } else {
+          this.props.updateSubmissionFlags(data.data)
+          this.setState({
+            createShow: false,
+            error: ""
+          })
+        }
+      })
   }
 
   showFlagCreationHandler = () => {
     this.setState((prevState) => {
       return {
         createShow: !prevState.createShow,
-        name:"",
-        description:"",
-        error:"",
-        color: "primary",
       }
     })
-  }
-
-  onNameChange = (event) => {
-    this.setState({
-      name: event.target.value
-    })
-  }
-
-  onColorChange = (event) => {
-    this.setState({
-      color: event.target.value
-    })
-  }
-
-  onDescriptionChange = (event) => {
-    this.setState({
-      description: event.target.value
-    })
-  }
-
-  createFlagHandler = async () => {
-    let response = await this.props.createFlagHandler(this.state.name, this.state.description, this.state.color)
-    console.log("flagModal: " + response)
-    if (response === "ok") {
-      this.setState({
-        createShow: false,
-        name:"",
-        description:"",
-        error:"",
-        color: "primary",
-      })
-    } else {
-      console.log(response)
-      this.setState({
-        error: response
-      })
-    }
-  }
-
-  removeFlagHandler = async (id) => {
-    let response = await this.props.removeFlagHandler(id)
-    console.log("flagModal: " + response)
-    if (response === "ok") {
-      console.log(response)
-    } else {
-      console.log(response)
-      this.setState({
-        error: response
-      })
-    }
   }
 
   handleCloseError = () => {
@@ -105,7 +147,10 @@ class FlagModal extends Component {
                     this.props.flags.map((flag) => {
                       return (
                         <ListGroup.Item key={flag.id}>
-                          <FlagModalFlagView current={true} flag={flag} removeFlag={() => this.props.removeFlag(flag)}/>
+                          <FlagModalFlagView
+                            current={true}
+                            flag={flag}
+                            removeFlag={() => this.uncheckFlagHandler(flag)}/>
                         </ListGroup.Item>
                       )
                     })
@@ -129,7 +174,7 @@ class FlagModal extends Component {
                   (
                     <ListGroup>
                     {
-                      this.props.user.flags
+                      this.props.availableFlags
                         .filter((flag) => {
                           let i;
                           for (i = 0; i < this.props.flags.length; i++) {
@@ -142,7 +187,7 @@ class FlagModal extends Component {
                             <ListGroup.Item key={flag.id}>
                               <FlagModalFlagView current={false}
                                                  flag={flag}
-                                                 addFlag={() => this.props.addFlag(flag)}
+                                                 addFlag={() => this.addFlagHandler(flag)}
                                                  removeFlagPermanently={() => this.removeFlagHandler(flag.id)}
                               />
                             </ListGroup.Item>
@@ -159,18 +204,18 @@ class FlagModal extends Component {
                             <p> Flag name: {this.state.name} is already existed </p>
                           </Alert>
                       }
-                      <Form>
-                        <Form.Group>
+                      <Form ref={this.formRef}>
+                        <Form.Group controlId="nameInput">
                           <Form.Label>Flag Name</Form.Label>
-                          <Form.Control type="text" placeholder="name" onChange={this.onNameChange}/>
+                          <Form.Control type="text" placeholder="name" />
                         </Form.Group>
-                        <Form.Group>
+                        <Form.Group controlId="descriptionInput">
                           <Form.Label>Description</Form.Label>
-                          <Form.Control as="textarea" rows={3} onChange={this.onDescriptionChange}/>
+                          <Form.Control as="textarea" rows={3}/>
                         </Form.Group>
-                        <Form.Group>
+                        <Form.Group controlId="colorSelector">
                           <Form.Label>Select color</Form.Label>
-                          <Form.Control onChange={this.onColorChange} as="select">
+                          <Form.Control as="select">
                             <option value="primary">blue</option>
                             <option value="secondary">gray</option>
                             <option value="success">green</option>

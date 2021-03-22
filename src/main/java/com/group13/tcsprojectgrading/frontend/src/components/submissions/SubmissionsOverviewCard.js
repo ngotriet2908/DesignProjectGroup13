@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import {Badge, Card, Button} from "react-bootstrap";
+import {Badge, Card, Button, OverlayTrigger, Tooltip} from "react-bootstrap";
 import {push} from "connected-react-router";
 import styles from "./submissions.module.css"
 import {Link} from "react-router-dom";
@@ -47,7 +47,16 @@ class SubmissionsOverviewCard extends Component {
               <div style={{marginLeft: "1rem"}}>
                 {
                   (this.props.submission.flags.map((flag) => {
-                    return (<Badge variant={flag.variant} key={flag.id}>{flag.name}</Badge>)
+                    return (<OverlayTrigger
+                      placement="bottom"
+                      delay={{ show: 250, hide: 400 }}
+                      overlay={(props) => (
+                        <Tooltip id={flag.id} {...props}>
+                          flag description: {flag.description}
+                        </Tooltip>)
+                      }>
+                      <Badge style={{marginRight:"0.5rem"}} variant={flag.variant}>{flag.name}</Badge>
+                    </OverlayTrigger>)
                   }))
                 }
               </div>

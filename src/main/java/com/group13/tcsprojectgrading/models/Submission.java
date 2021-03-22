@@ -337,12 +337,10 @@ public class Submission {
         ArrayNode arrayNode = objectMapper.createArrayNode();
         for(Flag flag2: flags) {
             ObjectNode flagNode = objectMapper.createObjectNode();
-            flagNode.put("id", flag2.getId());
+            flagNode.put("id", flag2.getId().toString());
             flagNode.put("name", flag2.getName());
             flagNode.put("variant", flag2.getVariant());
             flagNode.put("description", flag2.getDescription());
-            //TODO check flag again
-//            flagNode.put("changeable", flag2.getGrader().getUserId().equals(userId));
             arrayNode.add(flagNode);
         }
         return arrayNode;

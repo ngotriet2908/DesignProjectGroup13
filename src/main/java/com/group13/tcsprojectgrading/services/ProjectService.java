@@ -1,6 +1,7 @@
 package com.group13.tcsprojectgrading.services;
 
 
+import com.group13.tcsprojectgrading.models.Flag;
 import com.group13.tcsprojectgrading.models.Project;
 import com.group13.tcsprojectgrading.models.ProjectId;
 import com.group13.tcsprojectgrading.models.Role;
@@ -14,14 +15,16 @@ import java.util.List;
 public class ProjectService {
     private final ProjectRepository repository;
 
-    private ProjectRoleService projectRoleService;
-    private RoleService roleService;
+    private final ProjectRoleService projectRoleService;
+    private final RoleService roleService;
+    private final FlagService flagService;
 
     @Autowired
-    public ProjectService(ProjectRepository repository, ProjectRoleService projectRoleService, RoleService roleService) {
+    public ProjectService(ProjectRepository repository, ProjectRoleService projectRoleService, RoleService roleService, FlagService flagService) {
         this.repository = repository;
         this.projectRoleService = projectRoleService;
         this.roleService = roleService;
+        this.flagService = flagService;
     }
 
     public List<Project> getProjectsByCourseId(String courseId) {
@@ -29,7 +32,8 @@ public class ProjectService {
     }
 
     public void addNewProject(Project project) {
-        repository.save(project);
+        Project project1 = repository.save(project);
+        flagService.saveNewFlag(new Flag("Required Attention", "for some godforsaken reason, this submission need a flag", "primary", project1));
     }
 
     public void getOrUpdateProject(Project project) {
@@ -45,6 +49,10 @@ public class ProjectService {
     }
 
     public void deleteProject(Project project) {
+        List<Flag> flags = flagService.findFlagsWithProject(project);
+        for(Flag flag: flags) {
+            flagService.deleteFlag(flag);
+        }
         repository.delete(project);
     }
 

@@ -2,7 +2,7 @@ import React, {Component} from "react";
 import styles from "./submissionDetails.module.css";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
-import {Card, Breadcrumb, Button, ListGroup, ListGroupItem, Spinner, ButtonGroup, DropdownButton, Dropdown, FormControl} from "react-bootstrap";
+import {Card, Badge, Breadcrumb,OverlayTrigger, Tooltip, Button, ListGroup, ListGroupItem, Spinner, ButtonGroup, DropdownButton, Dropdown, FormControl} from "react-bootstrap";
 import store from "../../redux/store";
 import {URL_PREFIX} from "../../services/config";
 import {push} from "connected-react-router";
@@ -11,6 +11,8 @@ import SubmissionDetailsAssessmentsContainer
   from "./SubmissionDetailsAssessmentsContainer/SubmissionDetailsAssessmentsContainer";
 import SubmissionDetailsAssessmentsEditingContainer
   from "./SubmissionDetailsAssessmentsContainer/SubmissionDetailsAssessmentsEditingContainer";
+import {IoFlagOutline} from "react-icons/io5";
+import FlagModal from "./FlagModal";
 
 
 class SubmissionDetails extends Component {
@@ -24,6 +26,7 @@ class SubmissionDetails extends Component {
       submission: {},
       isLoading: true,
       isAssessmentEditing: false,
+      flagModalShow: false
     }
   }
 
@@ -39,13 +42,42 @@ class SubmissionDetails extends Component {
           submission: data.submission,
           project: data.project,
           course: data.course,
-          isLoading: false
+          isLoading: false,
+          flagModalShow: false
         })
       })
       .catch(error => {
         console.error(error.message);
       });
   }
+
+  onFlagModalClose = () => {
+    this.setState({
+      flagModalShow: false
+    })
+  }
+
+  onFlagModalShow = () => {
+    this.setState({
+      flagModalShow: true
+    })
+  }
+
+  updateSubmissionFlags = (data) => {
+    let submissionCopy = {...this.state.submission}
+    submissionCopy.flags = data
+    this.setState({
+      submission: submissionCopy
+    })
+  }
+  updateProjectFlags = (data) => {
+    let projectCopy = {...this.state.project}
+    projectCopy.flags = data
+    this.setState({
+      project: projectCopy
+    })
+  }
+
 
   setAssessment = (data) => {
     let stateCopy = {...this.state.submission}
@@ -90,7 +122,32 @@ class SubmissionDetails extends Component {
           </Breadcrumb>
 
           <div className={styles.header}>
-            <h2>{this.state.submission.name}</h2>
+            <div>
+              <h2 style={{display:"inline"}}>{this.state.submission.name}</h2>
+              <div style={{float: "right", display:"inline"}}>
+                <div className={styles.controlBarButton} onClick={this.onFlagModalShow}>
+                  <IoFlagOutline size={26}/>
+                </div>
+              </div>
+              <h5>
+                {this.state.submission.flags.map((flag) => {
+                  return (
+                    <OverlayTrigger
+                      placement="bottom"
+                      delay={{ show: 250, hide: 400 }}
+                      overlay={(props) => (
+                        <Tooltip id={flag.id} {...props}>
+                          flag description: {flag.description}
+                        </Tooltip>)
+                      }>
+                      <Badge style={{marginRight:"0.5rem"}} variant={flag.variant}>{flag.name}</Badge>
+                    </OverlayTrigger>
+
+                  )
+                })}
+              </h5>
+            </div>
+
           </div>
 
           <div className={styles.bodyContainer}>
@@ -198,6 +255,14 @@ class SubmissionDetails extends Component {
                 <SubmissionDetailsAssessmentsContainer isEditing={this.state.isAssessmentEditing} toggleEditing={this.toggleEditing} submission={this.state.submission} params={this.props.match.params}/>
             }
           </div>
+          <FlagModal show={this.state.flagModalShow}
+                     onClose = {this.onFlagModalClose}
+                     flags = {this.state.submission.flags}
+                     availableFlags = {this.state.project.flags}
+                     updateSubmissionFlags = {this.updateSubmissionFlags}
+                     updateProjectFlags = {this.updateProjectFlags}
+                     params={this.props.match.params}
+          />
         </div>
     );
   }

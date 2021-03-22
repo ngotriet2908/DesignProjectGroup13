@@ -2,13 +2,13 @@ package com.group13.tcsprojectgrading.models;
 
 import javax.persistence.*;
 import java.util.Collection;
+import java.util.UUID;
 
 @Entity
 public class Flag {
-    //TODO should flag be visible to its other creator
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    @GeneratedValue
+    private UUID id;
 
     private String name;
 
@@ -17,26 +17,26 @@ public class Flag {
     private String variant;
 
     @ManyToOne
-    private Grader grader;
+    private Project project;
 
     @ManyToMany
     private Collection<Submission> submissions;
 
-    public Flag(String name, String description, String variant, Grader grader) {
+    public Flag(String name, String description, String variant, Project project) {
         this.name = name;
         this.description = description;
         this.variant = variant;
-        this.grader = grader;
+        this.project = project;
     }
 
     public Flag() {
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -56,12 +56,12 @@ public class Flag {
         this.description = description;
     }
 
-    public Grader getGrader() {
-        return grader;
+    public Project getProject() {
+        return project;
     }
 
-    public void setGrader(Grader grader) {
-        this.grader = grader;
+    public void setProject(Project project) {
+        this.project = project;
     }
 
     public Collection<Submission> getSubmissions() {

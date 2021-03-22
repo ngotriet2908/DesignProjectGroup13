@@ -1,6 +1,6 @@
 import {Button, Modal, Form, InputGroup, FormControl, Card, Alert, ListGroup} from 'react-bootstrap'
 import React, {Component} from "react";
-import styles from "../grading.module.css"
+import styles from "../grading/grading.module.css"
 
 class FlagModalFlagView extends Component {
   constructor(props) {
@@ -32,8 +32,6 @@ class FlagModalFlagView extends Component {
         <div className={styles.flagModalFlagViewButtonGroup}>
           <Button className={styles.flagModalFlagViewButton} size="sm" onClick={this.onClickHandler}> {(this.state.isExpand)? "collapse" : "expand"} </Button>
           {(this.props.current)?
-            (!this.props.flag.changeable)?
-              null :
               <Button className={styles.flagModalFlagViewButton} variant="danger" size="sm" onClick={this.props.removeFlag}> set off </Button>
             :
             (<>

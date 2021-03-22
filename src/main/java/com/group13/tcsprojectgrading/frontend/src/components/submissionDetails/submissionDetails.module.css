@@ -1,3 +1,5 @@
+@value primary, secondary, ternary, quaternary, quinary, senary, senaryShade, pinkishGray, ultraLightGray, primaryShade, lightGray, darkishGray, moderateGray from '../helpers/colors.css';
+
 .container {
     padding: 2rem;
     width: 100%;
@@ -11,9 +13,20 @@
 }
 
 .header {
-    display: flex;
+    display: block;
+}
+.controlBarButton {
+    padding: 0.8rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all .1s ease-out;
+    margin: 1rem 0;
 }
 
+.controlBarButton:hover {
+    background-color: primaryShade;
+    color: white;
+}
 .gradingButton {
     margin-left: 2rem;
     float: right;

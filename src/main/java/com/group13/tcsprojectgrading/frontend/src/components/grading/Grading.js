@@ -13,7 +13,7 @@ import {BASE} from "../../services/endpoints";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 import {setCurrentLocation} from "../../redux/navigation/actions";
 import {Can, ability, updateAbility} from "../permissions/ProjectAbility";
-import FlagModal from "./controlBar/FlagModal";
+import FlagModal from "../submissionDetails/FlagModal";
 import RubricPanel from "./rubricPanel/RubricPanel";
 import GradingPanel from "./gradingPanel/GradingPanel";
 import RightsidePanel from "./rightsidePanel/RightsidePanel";
@@ -121,91 +121,10 @@ class Grading extends Component {
       });
   }
 
-  handleAddFlag = (flag) => {
-    request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/flag`
-      , "POST", flag)
-      .then((response) => {
-        return response.json()
-      })
-      .then((flags) => {
-        let tmp = {...this.state.data}
-        tmp.submission.flags = flags
-        this.setState({
-          data : tmp
-        })
-      })
-  }
-
-  handleRemoveFlag = (flag) => {
-    request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/flag/${flag.id}`
-      , "DELETE")
-      .then((response) => {
-        return response.json()
-      })
-      .then((data) => {
-        let tmp = {...this.state.data}
-        tmp.submission.flags = data
-        this.setState({
-          data : tmp
-        })
-      })
-  }
-
   updateIssues = (obj) => {
     this.setState({
       issues: obj
     })
-  }
-
-  createFlagHandler = async (name, description, variant) => {
-    let object = {
-      "name": name,
-      "description": description,
-      "variant": variant,
-    }
-    let data = await request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/flag/create`
-      , "POST", object)
-      .then((response) => {
-        return response.json()
-      })
-      .then((data) => {
-        return data
-      })
-
-    console.log(data)
-    if (data.error !== undefined) {
-      return "error: " + data.error
-    } else {
-      let tmp = {...this.state.data}
-      tmp.user.flags = data.data
-      this.setState({
-        data : tmp
-      })
-      return "ok";
-    }
-  }
-
-  removeFlagHandler = async (id) => {
-    let data = await request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/flag/${id}`
-      , "DELETE")
-      .then((response) => {
-        return response.json()
-      })
-      .then((data) => {
-        return data
-      })
-
-    console.log(data)
-    if (data.error !== undefined) {
-      return "error: " + data.error
-    } else {
-      let tmp = {...this.state.data}
-      tmp.user.flags = data.data
-      this.setState({
-        data : tmp
-      })
-      return "ok";
-    }
   }
 
   render () {
@@ -222,11 +141,7 @@ class Grading extends Component {
     return (
       <>
         <ControlBar data={this.state.data}
-          flagSubmission={null}
-          addFlag={this.handleAddFlag}
-          removeFlag={this.handleRemoveFlag}
-          createFlagHandler={this.createFlagHandler}
-          removeFlagHandler={this.removeFlagHandler}/>
+          flagSubmission={null}/>
 
         <div className={styles.container}>
           <RubricPanel match={this.props.match}/>

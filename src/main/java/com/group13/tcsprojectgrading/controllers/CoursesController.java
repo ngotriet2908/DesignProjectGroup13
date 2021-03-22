@@ -35,16 +35,18 @@ class CoursesController {
     private final GraderService graderService;
     private final SubmissionService submissionService;
     private final ProjectService projectService;
+    private final FlagService flagService;
 
     @Autowired
     public CoursesController(CanvasApi canvasApi, ActivityService activityService, RubricService rubricService,
-                             GraderService graderService, SubmissionService submissionService, ProjectService projectService) {
+                             GraderService graderService, SubmissionService submissionService, ProjectService projectService, FlagService flagService) {
         this.canvasApi = canvasApi;
         this.activityService = activityService;
         this.rubricService = rubricService;
         this.graderService = graderService;
         this.submissionService = submissionService;
         this.projectService = projectService;
+        this.flagService = flagService;
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")

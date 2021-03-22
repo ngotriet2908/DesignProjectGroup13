@@ -856,38 +856,32 @@ public class ProjectsController {
             );
         }
         //TODO change response to errors
-        Flag flag = flagService.findFlagWithId(Long.parseLong(flagId));
+        Flag flag = flagService.findFlagWithId(UUID.fromString(flagId));
         ObjectNode result = objectMapper.createObjectNode();
         if (flag != null) {
             List<Submission> submissions = submissionService.findSubmissionsByFlags(flag);
-            if (!flag.getGrader().getUserId().equals(principal.getName())) {
-                result.put("error", "This flag is not yours");
-                return result;
-            }
             if (submissions.size() > 0) {
                 result.put("error", "Flag is current used by some submission");
-                return result;
             } else {
                 flagService.deleteFlag(flag);
-                result.set("data", createFlagsArrayNode(flagService.findFlagsWithGrader(grader), principal.getName()));
-                return result;
+                result.set("data", createFlagsArrayNode(flagService.findFlagsWithProject(project)));
             }
+            return result;
 
         }
         result.put("error", "some weird error");
         return result;
     }
 
-    private ArrayNode createFlagsArrayNode(List<Flag> flags, String userId) {
+    private ArrayNode createFlagsArrayNode(List<Flag> flags) {
         ObjectMapper objectMapper = new ObjectMapper();
         ArrayNode arrayNode = objectMapper.createArrayNode();
         for(Flag flag2: flags) {
             ObjectNode flagNode = objectMapper.createObjectNode();
-            flagNode.put("id", flag2.getId());
+            flagNode.put("id", flag2.getId().toString());
             flagNode.put("name", flag2.getName());
             flagNode.put("variant", flag2.getVariant());
             flagNode.put("description", flag2.getDescription());
-            flagNode.put("changeable", flag2.getGrader().getUserId().equals(userId));
             arrayNode.add(flagNode);
         }
         return arrayNode;
