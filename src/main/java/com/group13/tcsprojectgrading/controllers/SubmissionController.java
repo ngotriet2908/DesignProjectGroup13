@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.api.client.json.Json;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.*;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
@@ -14,12 +13,12 @@ import com.group13.tcsprojectgrading.services.grading.AssessmentService;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.group13.tcsprojectgrading.models.Submission.createFlagsArrayNode;
 
@@ -37,9 +36,10 @@ public class SubmissionController {
     private final SubmissionDetailsService submissionDetailsService;
     private final AssessmentService assessmentService;
     private final IssueService issueService;
+    private final ParticipantService participantService;
 
     @Autowired
-    public SubmissionController(CanvasApi canvasApi, ProjectService projectService, SubmissionService submissionService, GraderService graderService, FlagService flagService, RubricService rubricService, AssessmentLinkerService assessmentLinkerService, SubmissionDetailsService submissionDetailsService, AssessmentService assessmentService, IssueService issueService) {
+    public SubmissionController(CanvasApi canvasApi, ProjectService projectService, SubmissionService submissionService, GraderService graderService, FlagService flagService, RubricService rubricService, AssessmentLinkerService assessmentLinkerService, SubmissionDetailsService submissionDetailsService, AssessmentService assessmentService, IssueService issueService, ParticipantService participantService) {
         this.canvasApi = canvasApi;
         this.projectService = projectService;
         this.submissionService = submissionService;
@@ -50,6 +50,7 @@ public class SubmissionController {
         this.submissionDetailsService = submissionDetailsService;
         this.assessmentService = assessmentService;
         this.issueService = issueService;
+        this.participantService = participantService;
     }
 
     @GetMapping(value = "")
@@ -77,7 +78,7 @@ public class SubmissionController {
 
         //sync submissions <-> canvas submissions
 
-        List<Submission> submissions =  submissionService.findSubmissionWithProject(project);
+        List<Submission> submissions = submissionService.findSubmissionWithProject(project);
         ObjectNode resultNode = objectMapper.createObjectNode();
 
         resultNode.set("project", project.convertToJson());
@@ -96,10 +97,23 @@ public class SubmissionController {
         ArrayNode arrayNode = objectMapper.createArrayNode();
 
         List<Integer> progresses = new ArrayList<>();
+
+
         System.out.println(submissions.size());
         for (Submission submission : submissions) {
             List<AssessmentLinker> linkers = assessmentLinkerService.findAssessmentLinkersForSubmission(submission);
-            arrayNode.add(submission.convertToJson(linkers));
+            List<Assessment> assessmentList = assessmentService.getAssessmentBySubmission(submission);
+            List<Issue> issues = new ArrayList<>();
+            for (Assessment assessment : assessmentList) {
+                issues.addAll(
+                        issueService.findIssuesByAssessment(assessment.getId())
+                                .stream()
+                                .filter(issue -> issue.getStatus().equals("unresolved"))
+                                .collect(Collectors.toList())
+                );
+            }
+
+            arrayNode.add(submission.convertToJson(linkers, issues));
         }
 
         //TODO copy this to stats
@@ -151,8 +165,14 @@ public class SubmissionController {
 
         Map<UUID, List<Issue>> issueMap = new HashMap<>();
         List<Assessment> assessmentList = assessmentService.getAssessmentBySubmission(submission);
-        for (Assessment assessment: assessmentList) {
-            issueMap.put(assessment.getId(), issueService.findIssuesByAssessment(assessment.getId()));
+        for (Assessment assessment : assessmentList) {
+            issueMap.put(
+                    assessment.getId(),
+                    issueService.findIssuesByAssessment(assessment.getId())
+                            .stream()
+                            .filter(issue -> issue.getStatus().equals("unresolved"))
+                            .collect(Collectors.toList())
+            );
         }
 
         ObjectNode node = (ObjectNode) submission.convertToJsonWithDetails(linkers, attachments, comments, issueMap);
@@ -197,6 +217,134 @@ public class SubmissionController {
             resultNode.set("user", graderJson);
         }
         return resultNode;
+    }
+
+    @PostMapping(value = "/{submissionId}/assessmentManagement")
+    protected ArrayNode createNewAssessment(@PathVariable String courseId,
+                                         @PathVariable String projectId,
+                                         @PathVariable String submissionId,
+                                         @RequestBody JsonNode object,
+                                         Principal principal
+//                                   @RequestParam Map<String, String> queryParameters
+    ) throws JsonProcessingException {
+        Project project = projectService.getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "project not found"
+            );
+        }
+        Submission submission = submissionService.findSubmissionById(submissionId);
+        if (submission == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "task not found"
+            );
+        }
+
+        switch (object.get("action").asText()) {
+            case "new": {
+                AssessmentLinker linker = assessmentLinkerService.addNewNullAssessment(new AssessmentLinker(
+                        submission,
+                        null,
+                        UUID.randomUUID()
+                ));
+                assessmentService.saveAssessment(linker);
+                break;
+            }
+            case "clone": {
+                String source = object.get("source").asText();
+                Assessment sourceAssignment = assessmentService.getAssessmentById(source);
+                Assessment newAssignment = assessmentService.saveAssessment(new Assessment(UUID.randomUUID(), sourceAssignment.getGrades()));
+                AssessmentLinker linker = assessmentLinkerService.addNewNullAssessment(new AssessmentLinker(
+                        submission,
+                        null,
+                        newAssignment.getId()
+                ));
+                break;
+            }
+            case "move": {
+                String source = object.get("source").asText();
+                String destination = object.get("destination").asText();
+                String participantId = object.get("participantId").asText();
+                Assessment sourceAssignment = assessmentService.getAssessmentById(source);
+                Assessment destinationAssignment = assessmentService.getAssessmentById(destination);
+                Participant participant = participantService.findParticipantWithId(participantId, project);
+                List<AssessmentLinker> linkerSrcList = assessmentLinkerService.findAssessmentLinkersForAssessmentId(source);
+                List<AssessmentLinker> linkerDesList = assessmentLinkerService.findAssessmentLinkersForAssessmentId(destination);
+                AssessmentLinker linkerSrc = null;
+                for(AssessmentLinker linker : linkerSrcList) {
+                    if (linker.getParticipant().getId().equals(participant.getId())) {
+                        linkerSrc = linker;
+                        break;
+                    }
+                }
+
+                if (sourceAssignment == null ||
+                        destinationAssignment == null ||
+                        participant == null ||
+                        linkerSrc == null ||
+                        linkerSrcList.size() == 0 ||
+                        linkerDesList.size() == 0) {
+                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "not found info");
+                }
+
+
+
+                if (linkerDesList.size() == 1 && linkerDesList.get(0).getParticipant() == null) {
+                    linkerDesList.get(0).setParticipant(participant);
+                    assessmentLinkerService.saveInfoAssessment(linkerDesList.get(0));
+                    assessmentLinkerService.deleteAssessmentLinker(linkerSrc);
+                } else {
+                    linkerSrc.setAssessmentId(destinationAssignment.getId());
+                    assessmentLinkerService.saveInfoAssessment(linkerSrc);
+                }
+                if (linkerSrcList.size() == 1) {
+                    AssessmentLinker linker = assessmentLinkerService.addNewNullAssessment(new AssessmentLinker(
+                            submission,
+                            null,
+                            sourceAssignment.getId()
+                    ));
+                    if (linker == null)
+                        throw new ResponseStatusException(HttpStatus.CONFLICT, "conflict with assessments");
+                }
+
+                break;
+            }
+            case "delete": {
+                String source = object.get("source").asText();
+                List<AssessmentLinker> linkers = assessmentLinkerService.findAssessmentLinkersForAssessmentId(source);
+                for (AssessmentLinker linker : linkers) {
+                    if (linker.getParticipant() != null) {
+                        throw new ResponseStatusException(HttpStatus.CONFLICT, "cant remove assessment that has participants");
+                    }
+                }
+                for (AssessmentLinker linker : linkers) {
+                    assessmentLinkerService.deleteAssessmentLinker(linker);
+                }
+                Assessment assessment = assessmentService.findAssessment(source);
+                if (assessment != null) {
+                    assessmentService.deleteAssessment(assessment);
+                } else {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "no assessment found");
+                }
+
+                break;
+            }
+        }
+
+        List<AssessmentLinker> assessmentLinkers = assessmentLinkerService.findAssessmentLinkersForSubmission(submission);
+        Map<UUID, List<Issue>> issueMap = new HashMap<>();
+        List<Assessment> assessmentList = assessmentService.getAssessmentBySubmission(submission);
+        for (Assessment assessment : assessmentList) {
+            issueMap.put(
+                    assessment.getId(),
+                    issueService.findIssuesByAssessment(assessment.getId())
+                            .stream()
+                            .filter(issue -> issue.getStatus().equals("unresolved"))
+                            .collect(Collectors.toList())
+            );
+        }
+        return (ArrayNode) submission.convertToJsonWithDetails(assessmentLinkers, null, null, issueMap).get("assessments");
+
     }
 
 //    @PostMapping(value = "/{id}/flag")

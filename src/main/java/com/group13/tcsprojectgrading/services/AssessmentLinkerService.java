@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class AssessmentLinkerService {
@@ -26,6 +27,21 @@ public class AssessmentLinkerService {
         return repository.save(assessmentLinker);
     }
 
+    public AssessmentLinker addNewNullAssessment(AssessmentLinker assessmentLinker) {
+        return repository.save(assessmentLinker);
+    }
+
+    public AssessmentLinker saveInfoAssessment(AssessmentLinker assessmentLinker) {
+        AssessmentLinker assessmentLinker1 = repository.findById(assessmentLinker.getId()).orElse(null);
+//        if (assessmentLinker1 == null) return null;
+        if (!assessmentLinker1.getId().equals(assessmentLinker.getId())) return null;
+        return repository.save(assessmentLinker);
+    }
+
+    public List<AssessmentLinker> findAssessmentLinkersForAssessmentId(String assessmentId) {
+        return repository.findAssessmentLinkersByAssessmentId(UUID.fromString(assessmentId));
+    }
+
     public List<AssessmentLinker> findAssessmentLinkersForSubmission(Submission submission) {
         return repository.findAssessmentLinkersBySubmission(submission);
     }
@@ -33,4 +49,8 @@ public class AssessmentLinkerService {
     public List<AssessmentLinker> finaAssessmentLinkerForSubmissionAndParticipant(Submission submission, Participant participant) {
         return repository.findAssessmentsLinkersBySubmissionAndParticipant(submission, participant);
     }
+    public void deleteAssessmentLinker(AssessmentLinker assessmentLinker) {
+        repository.delete(assessmentLinker);
+    }
+
 }

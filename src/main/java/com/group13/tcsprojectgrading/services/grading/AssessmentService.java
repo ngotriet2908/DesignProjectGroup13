@@ -61,6 +61,12 @@ public class AssessmentService {
         repository.delete(findAssessment(assessmentLinker));
     }
 
+    public void deleteAssessment(Assessment assessment) {
+        repository.delete(assessment);
+    }
+    public Assessment findAssessment(String id) {
+        return repository.findById(UUID.fromString(id)).orElse(null);
+    }
     public Assessment findAssessment(AssessmentLinker assessmentLinker) {
         return repository.findById(assessmentLinker.getAssessmentId()).orElse(null);
     }

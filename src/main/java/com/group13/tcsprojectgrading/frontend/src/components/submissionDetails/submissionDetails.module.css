@@ -16,6 +16,9 @@
 
 .gradingButton {
     margin-left: 2rem;
+    float: right;
+    width: 5rem;
+    height: 2.5rem;
 }
 
 .bodyContainer {
@@ -52,7 +55,25 @@
 .memberItem {
     width: 100%;
     display: inline-grid;
-    grid-template-columns: 50% 50%;
+    grid-template-columns: 33% 33% 33%;
+}
+
+.memberEditingItem {
+    width: 100%;
+    display: inline-grid;
+    grid-template-columns: 45% 45% auto;
+}
+
+.assessmentCardHalf {
+    width: 100%;
+    display: inline-grid;
+    grid-template-columns: 70% 30%;
+}
+
+.memberAssessmentItem {
+    width: 100%;
+    display: block;
+    /*grid-template-columns: 50% 50%;*/
 }
 
 
