@@ -4,6 +4,7 @@ package com.group13.tcsprojectgrading.services;
 import com.group13.tcsprojectgrading.models.Project;
 import com.group13.tcsprojectgrading.models.ProjectId;
 import com.group13.tcsprojectgrading.models.Role;
+import com.group13.tcsprojectgrading.models.grading.SubmissionAssessment;
 import com.group13.tcsprojectgrading.repositories.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,5 +51,15 @@ public class ProjectService {
 
     public Project getProjectById(String courseId, String projectId) {
         return repository.findById(new ProjectId(courseId, projectId)).orElse(null);
+    }
+
+    //Progress can be updated by dividing the given assessment progress by the amount of submissions, then adding this
+    //to the current overall progress.
+    public Project updateProgress(Project project, double assessProgress) {
+        double currProgress = project.getProgress();
+        int submissionAmount = project.getSubmissions().size();
+        project.setProgress(currProgress + assessProgress / submissionAmount);
+
+        return repository.save(project);
     }
 }

@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/courses")
+@RequestMapping("/api/courses/{courseId}")
 public class StatsController {
     private final CanvasApi canvasApi;
     private final ObjectMapper mapper;
@@ -30,7 +30,7 @@ public class StatsController {
     Retrieve count statistics for the given course denoted by courseId, such as amount of students, TAs, submissions,
     etc.
     */
-    @GetMapping(value = "/{courseId}/stats/count", produces = "application/json")
+    @GetMapping(value = "/stats/count", produces = "application/json")
     @ResponseBody
     protected ResponseEntity<ArrayNode> getCount(@PathVariable String courseId) throws JsonProcessingException {
         List<String> students = this.canvasApi.getCanvasCoursesApi().getCourseStudents(courseId);
@@ -54,50 +54,37 @@ public class StatsController {
         return new ResponseEntity<>(resultNode, HttpStatus.OK);
     }
 
-    @GetMapping(value="/{courseId}/projects/{projectId}/stats/groups", produces = "application/json")
+    @GetMapping(value="/projects/{projectId}/stats/groups", produces = "application/json")
     @ResponseBody
     protected ResponseEntity<ObjectNode> getGroupStats(@PathVariable String courseId, @PathVariable String projectId) throws JsonProcessingException {
-//        String groupsString = this.canvasApi.getCanvasCoursesApi().getAssignmentGroups(courseId, Long.parseLong(projectId));
-//        ArrayNode groups = mapper.readValue(groupsString, ArrayNode.class);
-//        int groupCount = groups.size();
-//
-//        ObjectNode resultNode = mapper.createObjectNode();
-//        resultNode.put("title", "Amount of groups");
-//        resultNode.put("type", "number");
-//        resultNode.put("data", groupCount);
-//        resultNode.put("category", "Member");
-//        resultNode.put("unit", "Groups");
-//
-//        return new ResponseEntity<>(resultNode, HttpStatus.OK);
-        return null;
+        String groupsString = this.canvasApi.getCanvasCoursesApi().getAssignmentGroups(courseId, Long.parseLong(projectId));
+        ArrayNode groups = mapper.readValue(groupsString, ArrayNode.class);
+        int groupCount = groups.size();
+
+        ObjectNode resultNode = mapper.createObjectNode();
+        resultNode.put("title", "Amount of groups");
+        resultNode.put("type", "number");
+        resultNode.put("data", groupCount);
+        resultNode.put("category", "Member");
+        resultNode.put("unit", "Groups");
+
+        return new ResponseEntity<>(resultNode, HttpStatus.OK);
     }
 
-    @GetMapping(value="/{courseId}/projects/{projectId}/stats/submissions", produces = "application/json")
+    @GetMapping(value="/projects/{projectId}/stats/submissions", produces = "application/json")
     @ResponseBody
     protected ResponseEntity<ObjectNode> getSubmissionStats(@PathVariable String courseId, @PathVariable String projectId) throws JsonProcessingException {
-//        String summary = this.canvasApi.getCanvasCoursesApi().getSubmissionsSummary(courseId, Long.parseLong(projectId));
-//
-//        ObjectNode summaryNode = mapper.createObjectNode();
-//        summaryNode.put("title", "Submissions summary");
-//        summaryNode.put("type", "piechart");
-//        summaryNode.put("data", mapper.readTree(summary));
+        String summary = this.canvasApi.getCanvasCoursesApi().getSubmissionsSummary(courseId, Long.parseLong(projectId));
 
         ObjectNode summaryNode = mapper.createObjectNode();
         summaryNode.put("title", "Submissions summary");
         summaryNode.put("type", "piechart");
-        summaryNode.put("category", "Submission");
-
-        ObjectNode dataNode = mapper.createObjectNode();
-        dataNode.put("graded", 100);
-        dataNode.put("ungraded", 250);
-        dataNode.put("not_submitted", 30);
-
-        summaryNode.set("data", dataNode);
+        summaryNode.set("data", mapper.readTree(summary));
 
         return new ResponseEntity<>(summaryNode, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/{courseId}/projects/{projectId}/stats/grades", produces = "application/json")
+    @GetMapping(value = "/projects/{projectId}/stats/grades", produces = "application/json")
     @ResponseBody
     protected ResponseEntity<ArrayNode> getGradeStats(@PathVariable String courseId, @PathVariable String projectId) {
         double mean = 6.7;

@@ -21,7 +21,7 @@ class Statistic extends Component {
     switch (this.state.type) {
     case 'number':
       return (
-        <Can I="view" a={this.state.category}>
+        //<Can I="read" a={this.state.category}>
           <Card className={styles.stat}>
             <Card.Body>
               <Card.Title className={styles.statTitle}>{this.state.title}</Card.Title>
@@ -29,12 +29,11 @@ class Statistic extends Component {
               <Card.Text className={styles.statUnit}>{this.state.unit}</Card.Text>
             </Card.Body>
           </Card>
-        </Can>
+        //</Can>
       );
     case 'piechart':
-      console.log(generatePieData(this.state.data));
       return (
-        <Can I="view" a={this.state.category}>
+        //<Can I="read" a={this.state.category}>
           <Card className={styles.stat}>
             <Card.Body>
               <Card.Title className={styles.statTitle}>{this.state.title}</Card.Title>
@@ -43,7 +42,7 @@ class Statistic extends Component {
                 (acc,cur) => acc + cur)}</p>
             </Card.Body>
           </Card>
-        </Can>
+        //</Can>
       );
     default:
       console.error("Invalid statistic type.");

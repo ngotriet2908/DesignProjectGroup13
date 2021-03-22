@@ -26,6 +26,8 @@ public class Project {
     @OneToMany(mappedBy = "project")
     private List<Submission> submissions;
 
+    private double progress;
+
     public Project(String courseId, String projectId) {
         this.courseId = courseId;
         this.projectId = projectId;
@@ -76,6 +78,14 @@ public class Project {
 
     public void setSubmissions(List<Submission> submissions) {
         this.submissions = submissions;
+    }
+
+    public double getProgress() {
+        return progress;
+    }
+
+    public void setProgress(double progress) {
+        this.progress = progress;
     }
 
     @Override

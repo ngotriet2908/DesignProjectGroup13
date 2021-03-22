@@ -51,15 +51,25 @@ class Project extends Component {
       request(BASE + "courses/" + courseId + "/projects/" + projectId),
       request(`${BASE}courses/${courseId}/projects/${projectId}/stats/submissions`),
       request(`${BASE}courses/${courseId}/projects/${projectId}/stats/grades`),
-      // request(`${BASE}courses/${courseId}/projects/${projectId}/stats/groups`),
+      request(`${BASE}courses/${courseId}/projects/${projectId}/stats/groups`),
     ])
       .then(async([res1, res2, res3, res4]) => {
         const project = await res1.json();
         const statsSubmissions = await res2.json();
         const statsGrades = await res3.json();
-        // const statsGroups = await res4.json();
+        const statsGroups = await res4.json();
 
-        const stats = [statsSubmissions].concat(statsGrades)//.concat(statsGroups);
+        const progressStat = {
+          title: "Grading progress",
+          type: "number",
+          data: Math.round(100 * project.progress),
+          category: "Grade",
+          unit: "%"
+        }
+        const stats = [statsSubmissions]
+          .concat(statsGrades)
+          .concat(statsGroups)
+          .concat(progressStat);
 
         this.props.saveRubric(project.rubric);
 
@@ -212,24 +222,24 @@ class Project extends Component {
                   <Card>
                     <Card.Body>
                     Here comes the Stats
-                      {/*<CardColumns className={styles.stats}>*/}
-                      {/*  {testStats.map(stat => {*/}
-                      {/*    return (*/}
-                      {/*      <Statistic title={stat.title}*/}
-                      {/*        type={stat.type}*/}
-                      {/*        data={stat.data}*/}
-                      {/*        unit={stat.unit}/>*/}
-                      {/*    );*/}
-                      {/*  }).concat(this.state.stats.map((stat, index) => {*/}
-                      {/*    return (*/}
-                      {/*      <Statistic title={stat.title}*/}
-                      {/*        key={index}*/}
-                      {/*        type={stat.type}*/}
-                      {/*        data={stat.data}*/}
-                      {/*        unit={stat.unit}/>*/}
-                      {/*    );*/}
-                      {/*  }))}*/}
-                      {/*</CardColumns>*/}
+                      <CardColumns className={styles.stats}>
+                        {testStats.map(stat => {
+                          return (
+                            <Statistic title={stat.title}
+                              type={stat.type}
+                              data={stat.data}
+                              unit={stat.unit}/>
+                          );
+                        }).concat(this.state.stats.map((stat, index) => {
+                          return (
+                            <Statistic title={stat.title}
+                              key={index}
+                              type={stat.type}
+                              data={stat.data}
+                              unit={stat.unit}/>
+                          );
+                        }))}
+                      </CardColumns>
                     </Card.Body>
                   </Card>
                 </div>

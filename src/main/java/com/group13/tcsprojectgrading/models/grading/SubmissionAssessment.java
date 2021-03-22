@@ -1,5 +1,7 @@
 package com.group13.tcsprojectgrading.models.grading;
 
+import com.group13.tcsprojectgrading.models.Submission;
+
 import javax.persistence.Id;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -9,8 +11,8 @@ import java.util.Map;
 
 public class SubmissionAssessment {
     private Map<String, CriterionGrade> grades;
-
     private double progress;
+    private Submission submission;
 
     @Id
     private SubmissionAssessmentKey id;
@@ -103,4 +105,11 @@ public class SubmissionAssessment {
         this.progress = progress;
     }
 
+    public Submission getSubmission() {
+        return submission;
+    }
+
+    public void setSubmission(Submission submission) {
+        this.submission = submission;
+    }
 }
