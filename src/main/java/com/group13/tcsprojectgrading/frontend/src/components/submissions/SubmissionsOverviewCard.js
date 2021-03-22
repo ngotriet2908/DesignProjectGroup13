@@ -37,6 +37,12 @@ class SubmissionsOverviewCard extends Component {
                 <Badge className={styles.badge} variant="green">Assigned to you</Badge> :
                 <Badge className={styles.badge} variant="red">Not assigned to you</Badge>
             }
+
+            {
+              (this.props.submission.issuesCount > 0)?
+                <Badge className={styles.badge} variant="tomato">Has issues</Badge> : null
+            }
+
             {
               <div style={{marginLeft: "1rem"}}>
                 {

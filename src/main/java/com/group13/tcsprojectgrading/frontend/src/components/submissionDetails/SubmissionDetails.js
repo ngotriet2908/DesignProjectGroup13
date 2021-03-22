@@ -7,6 +7,10 @@ import store from "../../redux/store";
 import {URL_PREFIX} from "../../services/config";
 import {push} from "connected-react-router";
 import {Link} from "react-router-dom";
+import SubmissionDetailsAssessmentsContainer
+  from "./SubmissionDetailsAssessmentsContainer/SubmissionDetailsAssessmentsContainer";
+import SubmissionDetailsAssessmentsEditingContainer
+  from "./SubmissionDetailsAssessmentsContainer/SubmissionDetailsAssessmentsEditingContainer";
 
 
 class SubmissionDetails extends Component {
@@ -18,9 +22,11 @@ class SubmissionDetails extends Component {
       course: {},
       project: {},
       submission: {},
-      isLoading: true
+      isLoading: true,
+      isAssessmentEditing: false,
     }
   }
+
 
   componentDidMount() {
     request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}`)
@@ -39,6 +45,22 @@ class SubmissionDetails extends Component {
       .catch(error => {
         console.error(error.message);
       });
+  }
+
+  setAssessment = (data) => {
+    let stateCopy = {...this.state.submission}
+    stateCopy.assessments = data
+    this.setState({
+      submission: stateCopy
+    })
+  }
+
+  toggleEditing = () => {
+    this.setState((prevState) => {
+      return {
+        isAssessmentEditing: !prevState.isAssessmentEditing
+      }
+    })
   }
 
   render() {
@@ -101,7 +123,7 @@ class SubmissionDetails extends Component {
                   <ListGroup>
                     {this.state.submission.submission_comments.map((comment) => {
                       return (
-                        <ListGroupItem>
+                        <ListGroupItem key={comment.id}>
                           <div>
                             <h6>Name: {comment.author_name}</h6>
                             <h6>Date: {comment.created_at}</h6>
@@ -125,7 +147,7 @@ class SubmissionDetails extends Component {
                   <ListGroup>
                     {this.state.submission.attachments.map((attachment) => {
                       return (
-                        <ListGroupItem>
+                        <ListGroupItem key={attachment.id}>
                           <div>
                             <h6>name: {attachment.display_name}</h6>
                             <h6>type: {attachment["content-type"]}</h6>
@@ -157,7 +179,7 @@ class SubmissionDetails extends Component {
                     <ListGroup>
                       {this.state.submission.participants.map((member) => {
                         return (
-                          <ListGroupItem>
+                          <ListGroupItem key={member.sid}>
                             <div className={styles.memberItem}>
                               <h6>name: {member.name}</h6>
                               <h6>sid: {member.sid}</h6>
@@ -170,53 +192,12 @@ class SubmissionDetails extends Component {
                 </Card>
               </div>
             }
-
             {(this.state.submission.assessments == null) ? null :
-              <div className={styles.memberContainer}>
-                <Card>
-                  <Card.Body>
-                    <Card.Title>
-                      Assessments
-                    </Card.Title>
-                    <ListGroup>
-                      {this.state.submission.assessments.map((assessment) => {
-                        return (
-                          <ListGroupItem>
-                            <div className={styles.memberItem}>
-                              <h6>id: {assessment.id}</h6>
-                              <Button variant="primary" className={styles.gradingButton}>
-                                <Link
-                                  className={styles.plainLink}
-                                  to={
-                                    {
-                                      pathname: URL_PREFIX + `/courses/${this.state.course.id}/projects/${this.state.project.id}/submissions/${this.state.submission.id}/${assessment.id}/grading`,
-                                      data: {
-                                        "submission": this.state.submission,
-                                      }
-                                    }}>
-                                  Grade
-                                </Link>
-                              </Button>
-                              <ListGroup>
-                                {assessment.participants.map((participant) => {
-                                  return (
-                                    <ListGroupItem>
-                                      <div className={styles.memberItem}>
-                                        <h6>name: {participant.name}</h6>
-                                      </div>
-                                    </ListGroupItem>)
-                                })}
-                              </ListGroup>
-                            </div>
-                          </ListGroupItem>)
-                      })}
-                    </ListGroup>
-                  </Card.Body>
-                </Card>
-              </div>
+              (this.state.isAssessmentEditing)?
+                <SubmissionDetailsAssessmentsEditingContainer setAssessment={this.setAssessment} isEditing={this.state.isAssessmentEditing} toggleEditing={this.toggleEditing} submission={this.state.submission} params={this.props.match.params}/> :
+                <SubmissionDetailsAssessmentsContainer isEditing={this.state.isAssessmentEditing} toggleEditing={this.toggleEditing} submission={this.state.submission} params={this.props.match.params}/>
             }
           </div>
-
         </div>
     );
   }
