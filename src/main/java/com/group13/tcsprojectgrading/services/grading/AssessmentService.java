@@ -46,7 +46,6 @@ public class AssessmentService {
                 assessments.add(assessment);
             }
         }
-
         return assessments;
     }
 
@@ -70,9 +69,9 @@ public class AssessmentService {
         return repository.findById(assessmentLinker.getAssessmentId()).orElse(null);
     }
 
-    public int calculateFinalGrade(Rubric rubric, Assessment assessment) {
+    public double calculateFinalGrade(Rubric rubric, Assessment assessment) {
         List<Element> criteria = rubric.fetchAllCriteria();
-        int total = 0;
+        double total = 0;
 
         for (Element criterion: criteria) {
             CriterionGrade grades = assessment.getGrades().get(criterion.getContent().getId());
@@ -83,10 +82,9 @@ public class AssessmentService {
         return total;
     }
 
-//    public double computeProgress(Assessment assessment) {
-//        Rubric rubric = getRubric(assessment);
-//        int graded = getGradedCount(assessment);
-//        int total = rubric.getCriterionCount();
-//        return graded/(double) total;
-//    }
+    public double getProgress(Rubric rubric, Assessment assessment) {
+        int graded = assessment.getGradedCount();
+        int total = rubric.getCriterionCount();
+        return graded/(double) total;
+    }
 }

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.*;
 import com.group13.tcsprojectgrading.models.grading.CriterionGrade;
@@ -116,16 +115,18 @@ public class AssessmentController {
                 ));
             }
 
-            // update graded count of assessment
+            // update graded count and progress of assessment
             submissionAssessment.increaseGradedCount(1);
-
-            // update graded count of project
-            // -
+            double progress = assessmentService.getProgress(rubricService.getRubricById(projectId), submissionAssessment);
+            submissionAssessment.setProgress(progress);
+            // update progress of project
+            Project project = projectService.getProjectById(courseId, projectId);
+            projectService.updateProgress(project, progress);
 
             // check if fully graded (should be possible to replace with a manually typed value)
             Rubric rubric = this.rubricService.getRubricById(projectId);
             if (rubric.getCriterionCount() == submissionAssessment.getGradedCount()) {
-                int total = this.assessmentService.calculateFinalGrade(rubric, submissionAssessment);
+                double total = this.assessmentService.calculateFinalGrade(rubric, submissionAssessment);
                 submissionAssessment.setFinalGrade(total);
             }
 

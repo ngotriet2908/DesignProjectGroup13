@@ -4,7 +4,6 @@ package com.group13.tcsprojectgrading.services;
 import com.group13.tcsprojectgrading.models.Project;
 import com.group13.tcsprojectgrading.models.ProjectId;
 import com.group13.tcsprojectgrading.models.Role;
-import com.group13.tcsprojectgrading.models.grading.SubmissionAssessment;
 import com.group13.tcsprojectgrading.repositories.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,8 +28,8 @@ public class ProjectService {
         return repository.findProjectsByCourseId(courseId);
     }
 
-    public void addNewProject(Project project) {
-        repository.save(project);
+    public Project addNewProject(Project project) {
+        return repository.save(project);
     }
 
     public void getOrUpdateProject(Project project) {

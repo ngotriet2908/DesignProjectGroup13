@@ -23,8 +23,8 @@ public class TcsProjectGradingApplication {
         SpringApplication.run(TcsProjectGradingApplication.class, args);
     }
 
-    @Autowired
-    private RubricRepository repository;
+//    @Autowired
+//    private RubricRepository repository;
 
 //    @Override
 //    public void run(String... args) {
@@ -60,6 +60,8 @@ public class TcsProjectGradingApplication {
             Privilege gradingWriteAll = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.GRADING_WRITE_ALL.toString());
             Privilege gradingRead = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.GRADING_READ.toString());
 
+            Privilege memberRead = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.MEMBER_READ.toString());
+
 
             Role teacherRole = roleService.addRoleIfNotExist(
                     RoleEnum.TEACHER.toString(),
@@ -73,7 +75,8 @@ public class TcsProjectGradingApplication {
                             todoListView,
                             statsWrite,
                             gradingRead,
-                            gradingWriteSingle
+                            gradingWriteSingle,
+                            memberRead
                             )
             );
 

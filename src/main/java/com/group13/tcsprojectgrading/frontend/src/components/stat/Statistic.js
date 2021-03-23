@@ -3,7 +3,7 @@ import { Pie } from 'react-chartjs-2';
 import Card from 'react-bootstrap/Card';
 import styles from './stat.module.css';
 import 'chartjs-plugin-colorschemes';
-import Can from '../permissions/Can';
+import {Can} from '../permissions/ProjectAbility';
 
 class Statistic extends Component {
   constructor(props) {
@@ -21,7 +21,7 @@ class Statistic extends Component {
     switch (this.state.type) {
     case 'number':
       return (
-        //<Can I="read" a={this.state.category}>
+        <Can I="read" a={this.state.category}>
           <Card className={styles.stat}>
             <Card.Body>
               <Card.Title className={styles.statTitle}>{this.state.title}</Card.Title>
@@ -29,11 +29,11 @@ class Statistic extends Component {
               <Card.Text className={styles.statUnit}>{this.state.unit}</Card.Text>
             </Card.Body>
           </Card>
-        //</Can>
+        </Can>
       );
     case 'piechart':
       return (
-        //<Can I="read" a={this.state.category}>
+        <Can I="read" a={this.state.category}>
           <Card className={styles.stat}>
             <Card.Body>
               <Card.Title className={styles.statTitle}>{this.state.title}</Card.Title>
@@ -42,7 +42,7 @@ class Statistic extends Component {
                 (acc,cur) => acc + cur)}</p>
             </Card.Body>
           </Card>
-        //</Can>
+        </Can>
       );
     default:
       console.error("Invalid statistic type.");

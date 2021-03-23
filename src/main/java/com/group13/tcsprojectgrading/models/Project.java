@@ -47,6 +47,7 @@ public class Project {
         this.name = name;
         this.description = description;
         this.createAt = createAt;
+        this.progress = 0;
     }
 
     public Project() {

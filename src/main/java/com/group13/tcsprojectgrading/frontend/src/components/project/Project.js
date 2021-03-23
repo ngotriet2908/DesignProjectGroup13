@@ -62,8 +62,8 @@ class Project extends Component {
         const progressStat = {
           title: "Grading progress",
           type: "number",
-          data: Math.round(100 * project.progress),
-          category: "Grade",
+          data: Math.round(100 * project.project.progress),
+          category: "Grading",
           unit: "%"
         }
         const stats = [statsSubmissions]
@@ -236,17 +236,19 @@ class Project extends Component {
                       {testStats.map(stat => {
                         return (
                           <Statistic title={stat.title}
-                            type={stat.type}
-                            data={stat.data}
-                            unit={stat.unit}/>
+                                     type={stat.type}
+                                     category={stat.category}
+                                     data={stat.data}
+                                     unit={stat.unit}/>
                         );
                       }).concat(this.state.stats.map((stat, index) => {
                         return (
                           <Statistic title={stat.title}
-                            key={index}
-                            type={stat.type}
-                            data={stat.data}
-                            unit={stat.unit}/>
+                                     key={index}
+                                     type={stat.type}
+                                     category={stat.category}
+                                     data={stat.data}
+                                     unit={stat.unit}/>
                         );
                       }))}
                     </CardColumns>

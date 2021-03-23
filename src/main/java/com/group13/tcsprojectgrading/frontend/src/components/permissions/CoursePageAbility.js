@@ -8,12 +8,13 @@ function updateAbilityCoursePage(ability, user) {
   const { can, rules } = new AbilityBuilder();
 
   if (user.role === 'teacher') {
-    can(['read', 'write'], 'Project');
-    can(['read', 'write'], 'Grade');
+    can(['read', 'write'], 'Projects');
+    can(['read', 'write'], 'Grades');
+    can(['read'], 'Statistic');
     can(['read'], 'Member');
   } else if (user.role === 'ta') {
-    can(['read'], 'Project');
-    can(['read'], 'Grade', {studentId: {$in: user.assigned}});
+    can(['read'], 'Projects');
+    can(['read'], 'Statistic');
     can(['read'], 'Member');
   }
 

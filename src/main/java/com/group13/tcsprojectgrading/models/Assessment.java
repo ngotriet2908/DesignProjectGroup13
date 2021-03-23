@@ -12,7 +12,8 @@ public class Assessment {
     private UUID id;
     private Map<String, CriterionGrade> grades;
     private int gradedCount = 0;
-    private int finalGrade;
+    private double progress;
+    private double finalGrade;
     private boolean finalGradeManual = false;
 
     public Assessment(UUID id, Map<String, CriterionGrade> grades, int gradedCount, int finalGrade) {
@@ -20,6 +21,7 @@ public class Assessment {
         this.grades = grades;
         this.gradedCount = gradedCount;
         this.finalGrade = finalGrade;
+        this.progress = 0;
     }
 
     public Assessment(UUID id, Map<String, CriterionGrade> grades, int gradedCount, int finalGrade, boolean finalGradeManual) {
@@ -28,6 +30,7 @@ public class Assessment {
         this.gradedCount = gradedCount;
         this.finalGrade = finalGrade;
         this.finalGradeManual = finalGradeManual;
+        this.progress = 0;
     }
 
     public Assessment(UUID id, Map<String, CriterionGrade> grades) {
@@ -35,11 +38,13 @@ public class Assessment {
         this.grades = grades;
         this.gradedCount = 0;
         this.finalGradeManual = false;
+        this.progress = 0;
     }
 
     public Assessment(UUID id) {
         this.id = id;
         this.grades = new HashMap<>();
+        this.progress = 0;
     }
 
     public Assessment() {
@@ -82,11 +87,11 @@ public class Assessment {
         this.gradedCount = gradedCount;
     }
 
-    public int getFinalGrade() {
+    public double getFinalGrade() {
         return finalGrade;
     }
 
-    public void setFinalGrade(int finalGrade) {
+    public void setFinalGrade(double finalGrade) {
         this.finalGrade = finalGrade;
     }
 
@@ -104,6 +109,14 @@ public class Assessment {
 
     public void setFinalGradeManual(boolean finalGradeManual) {
         this.finalGradeManual = finalGradeManual;
+    }
+
+    public double getProgress() {
+        return progress;
+    }
+
+    public void setProgress(double progress) {
+        this.progress = progress;
     }
 
     @Override

@@ -13,13 +13,11 @@ import java.util.UUID;
 @Service
 public class SubmissionService {
     private final SubmissionRepository repository;
-    private final GradingService gradingService;
     private final AssessmentService assessmentService;
 
     @Autowired
-    public SubmissionService(SubmissionRepository repository, GradingService gradingService, AssessmentService assessmentService) {
+    public SubmissionService(SubmissionRepository repository, AssessmentService assessmentService) {
         this.repository = repository;
-        this.gradingService = gradingService;
         this.assessmentService = assessmentService;
     }
 
@@ -31,7 +29,7 @@ public class SubmissionService {
         if (currentSubmission != null) {
             return null;
         } else {
-            gradingService.saveAssessment(submission.getProject().getProjectId(), submission.getId(), submission);
+//            gradingService.saveAssessment(project.getProjectId(), userId, submission);
             return repository.save(new Submission(date, userId, groupId, project, name));
         }
     }

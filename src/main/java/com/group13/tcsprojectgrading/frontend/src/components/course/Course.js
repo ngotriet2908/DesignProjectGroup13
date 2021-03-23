@@ -132,18 +132,18 @@ class Course extends Component {
         {/*</Can>*/}
 
         <div className={styles.container}>
-          <SectionContainer
+          <Can I="write" a="Projects">
+            <SectionContainer
             title={"Course projects"}
             data={this.state.projects}
             emptyText={"No projects selected in this course. Click on the pencil button to select course projects."}
             Component={ProjectCard}
             icon={
-              <Can I="write" a="Projects">
                 <IoPencil size={28} onClick={this.openModal}/>
-              </Can>
             }
             EmptyIcon={IoFileTrayOutline}
-          />
+            />
+          </Can>
 
           <Can I="read" a="Statistic">
             <div className={globalStyles.sectionContainer}>
