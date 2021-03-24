@@ -5,6 +5,7 @@ import com.group13.tcsprojectgrading.repositories.ProjectRoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class ProjectRoleService {
         this.roleService = roleService;
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public ProjectRole addNewRoleToProject(Project project, Role role) {
         if (repository.existsById(new ProjectRoleId(role.getId(), project.getProjectCompositeKey()))) {
             return findByProjectAndRole(project, role);
@@ -33,10 +35,17 @@ public class ProjectRoleService {
         return repository.save(new ProjectRole(project, role, privilegeList));
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public ProjectRole findByProjectAndRole(Project project, Role role) {
         return repository.findById(new ProjectRoleId(role.getId(), project.getProjectCompositeKey())).orElse(null);
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public List<ProjectRole> findByProject(Project project) {
+        return repository.findProjectRolesByProject(project);
+    }
+
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public List<Privilege> findPrivilegesByProjectAndRoleEnum(Project project, RoleEnum roleName) {
 
         Role role = roleService.findRoleByName(roleName.getName());

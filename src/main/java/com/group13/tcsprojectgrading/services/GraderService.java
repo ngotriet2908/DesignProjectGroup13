@@ -8,17 +8,16 @@ import com.group13.tcsprojectgrading.repositories.GraderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
 public class GraderService {
-    private GraderRepository repository;
-    private FlagService flagService;
+    private final GraderRepository repository;
 
     @Autowired
-    public GraderService(GraderRepository repository, FlagService flagService) {
+    public GraderService(GraderRepository repository) {
         this.repository = repository;
-        this.flagService = flagService;
     }
 
     public Grader addNewGrader(Grader grader) {
@@ -29,14 +28,17 @@ public class GraderService {
         return grader1;
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public List<Grader> getGraderFromProject(Project project) {
         return repository.findGraderByProject(project);
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public void deleteGrader(Grader grader) {
         repository.delete(grader);
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public Grader getGraderFromGraderId(String userId, Project project) {
         return repository.findById(new GraderId(userId, project.getProjectCompositeKey())).orElse(null);
     }

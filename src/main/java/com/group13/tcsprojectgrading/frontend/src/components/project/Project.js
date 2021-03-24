@@ -155,8 +155,8 @@ class Project extends Component {
                 <div className={globalStyles.sectionFlexContainer}>
                   <Card className={styles.card}>
                     <Card.Body className={[styles.cardBody, styles.administrationSectionContainerBody].join(" ")}>
-                      <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/groups"))}>
-                      Groups
+                      <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/participants"))}>
+                      Participants
                       </Button>
 
                       <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/submissions"))}>

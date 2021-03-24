@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.lang.model.util.Elements;
+import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
 
@@ -27,16 +28,19 @@ public class RubricService {
         this.historyRepository = historyRepository;
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public Rubric getRubricById(String id) {
         return repository.getById(id);
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public Rubric saveRubric(Rubric rubric) {
         updateCriterionCount(rubric);
         updateLastModified(rubric);
         return repository.save(rubric);
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public void updateCriterionCount(Rubric rubric) {
         int total = 0;
         if (rubric.getChildren() != null) {
@@ -48,22 +52,27 @@ public class RubricService {
         rubric.setCriterionCount(total);
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public void updateLastModified(Rubric rubric) {
         rubric.setLastModified(new Date());
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public List<Rubric> getAllRubrics() {
         return repository.findAll();
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public void deleteRubric(String projectId) {
         repository.deleteById(projectId);
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public void storeHistory(RubricHistory history) {
         this.historyRepository.save(history);
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public RubricHistory getHistory(String projectId) {
         return this.historyRepository.getById(projectId);
     }
