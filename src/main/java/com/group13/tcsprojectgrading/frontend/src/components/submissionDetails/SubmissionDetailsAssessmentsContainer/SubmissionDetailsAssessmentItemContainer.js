@@ -1,12 +1,14 @@
 import React, {Component} from "react";
 import styles from "../submissionDetails.module.css";
-import {request} from "../../../services/request";
-import {BASE} from "../../../services/endpoints";
-import {Card, Breadcrumb, Button, ListGroup, ListGroupItem, Spinner, ButtonGroup, DropdownButton, Dropdown, FormControl} from "react-bootstrap";
+import {Button, ListGroup, ListGroupItem, Spinner, ButtonGroup, DropdownButton, Dropdown, FormControl} from "react-bootstrap";
 import store from "../../../redux/store";
 import {URL_PREFIX} from "../../../services/config";
 import {push} from "connected-react-router";
 import {Link} from "react-router-dom";
+import {IoArrowForward, IoSwapHorizontal} from "react-icons/io5";
+import classnames from 'classnames';
+import globalStyles from "../../helpers/global.module.css";
+
 
 class SubmissionDetailsAssessmentItemContainer extends Component {
   constructor(props) {
@@ -17,41 +19,49 @@ class SubmissionDetailsAssessmentItemContainer extends Component {
   render() {
     return (
       <div className={styles.memberAssessmentItem}>
-        <div className={styles.assessmentCardHalf}>
-          <div>
-            <h6>id: {this.props.assessment.id}</h6>
-            <h6>issues count: {this.props.assessment.issuesCount}</h6>
-          </div>
-          <div>
-            <Button variant="primary" className={styles.gradingButton}>
-              <Link
-                className={styles.plainLink}
-                to={
-                  {
-                    pathname: URL_PREFIX + `/courses/${this.props.params.courseId}/projects/${this.props.params.projectId}/submissions/${this.props.params.submissionId}/${this.props.assessment.id}/grading`,
-                    data: {
-                      "submission": this.props.submission,
-                    }
-                  }}>
-                Grade
-              </Link>
-            </Button>
-          </div>
+        <div className={styles.memberAssessmentHeader}>
+          <h4>
+            Assessment
+          </h4>
+
+          <Link
+            to={
+              {
+                pathname: URL_PREFIX + `/courses/${this.props.params.courseId}/projects/${this.props.params.projectId}/submissions/${this.props.params.submissionId}/${this.props.assessment.id}/grading`,
+                data: {
+                  "submission": this.props.submission,
+                }
+              }}>
+            <div className={classnames(globalStyles.iconButton, styles.primaryButton)}
+            >
+              <IoArrowForward size={26}/>
+            </div>
+          </Link>
         </div>
-        <ListGroup>
-          {this.props.assessment.participants.map((participant) => {
-            return (
-              <ListGroupItem key={"a-"+participant.id}>
-                <div className={styles.memberItem}>
-                  <h6>name: {participant.name}</h6>
-                </div>
-              </ListGroupItem>)
-          })}
-        </ListGroup>
+        <div>
+          <p>id: {this.props.assessment.id}</p>
+          <p>issues count: {this.props.assessment.issuesCount}</p>
+        </div>
+        <div>
+          Members:
+          <ListGroup>
+            {this.props.assessment.participants.map((participant) => {
+              return (
+                <ListGroupItem key={"a-"+participant.id}>
+                  <div>
+                    <div className={styles.memberEditingItemHeader}>
+                      <h5>{participant.name}</h5>
+                    </div>
+                    <p>sid: {participant.sid}</p>
+                  </div>
+                </ListGroupItem>)
+            })}
+          </ListGroup>
+        </div>
       </div>
     );
   }
 
 }
 
-export default SubmissionDetailsAssessmentItemContainer
+export default SubmissionDetailsAssessmentItemContainer;

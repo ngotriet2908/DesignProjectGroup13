@@ -11,7 +11,7 @@ class SectionContainer extends Component {
   render() {
     return(
       <div className={classnames(styles.sectionContainer, this.props.className)}>
-        <div className={[styles.sectionTitle, styles.sectionTitleWithButton].join(" ")}>
+        <div className={classnames(styles.sectionTitle, styles.sectionTitleWithButton)}>
           <h3 className={styles.sectionTitleH}>{this.props.title}</h3>
 
           {this.props.icon &&
@@ -21,22 +21,15 @@ class SectionContainer extends Component {
           }
         </div>
 
-        {/*<div className={styles.sectionFlexContainer}>*/}
         {this.props.data.length > 0 ?
           (this.props.data.map((item, index) => {
             return (
-            // <div key={index}>
               <this.props.Component key={index} data={item}/>
-            // </div>
             )
           }))
           :
-        // (<div>
-        //   <p>{this.props.emptyText}</p>
           <EmptyCard data={this.props.emptyText} icon={this.props.EmptyIcon}/>
-          // </div>)
         }
-        {/*</div>*/}
       </div>
     )
   }

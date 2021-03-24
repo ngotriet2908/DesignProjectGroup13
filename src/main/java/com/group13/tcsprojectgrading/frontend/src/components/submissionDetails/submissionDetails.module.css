@@ -1,97 +1,108 @@
 @value primary, secondary, ternary, quaternary, quinary, senary, senaryShade, pinkishGray, ultraLightGray, primaryShade, lightGray, darkishGray, moderateGray from '../helpers/colors.css';
 
-.container {
-    padding: 2rem;
-    width: 100%;
-}
 
-.spinner{
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    color: dodgerblue;
-}
-
-.header {
-    display: block;
-}
-.controlBarButton {
-    padding: 0.8rem;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all .1s ease-out;
-    margin: 1rem 0;
-}
-
-.controlBarButton:hover {
-    background-color: primaryShade;
-    color: white;
-}
-.gradingButton {
-    margin-left: 2rem;
-    float: right;
-    width: 5rem;
-    height: 2.5rem;
-}
-
-.bodyContainer {
-    padding: 1rem 1rem;
+.titleContainer {
     display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.titleContainer svg {
+    cursor: pointer;
+}
+
+
+.labelsContainer {
     width: 100%;
+    margin: 0.5rem 0 1.5rem 0;
+}
+
+.labelsContainer > * {
+    margin-right: 0.5rem;
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
     flex-wrap: wrap;
 }
 
-.infoContainer {
-    width: 25rem;
-    margin-right: 2rem;
-    margin-bottom: 2rem;
+.section {
+    width: 50%;
+    margin-top: 1rem;
 }
 
-.attachmentContainer {
-    width: 20rem;
-    margin-right: 2rem;
-    margin-bottom: 2rem;
+.section :global(.card) {
+    min-height: 10rem;
 }
 
-.discussionContainer {
-    width: 20rem;
-    margin-right: 2rem;
-    margin-bottom: 2rem;
+.section:nth-child(odd) {
+    padding-right: 2rem;
 }
 
-.memberContainer {
-    width: 50rem;
-    margin-right: 2rem;
-    margin-bottom: 2rem;
+.sectionTitle {
+    min-height: 48px;
+    margin: 1rem 0 0.5rem 0;
 }
 
-.memberItem {
-    width: 100%;
-    display: inline-grid;
-    grid-template-columns: 33% 33% 33%;
+.sectionTitleWithButton {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.memberEditingItem {
-    width: 100%;
-    display: inline-grid;
-    grid-template-columns: 45% 45% auto;
+
+.containerInfo {
+
 }
 
-.assessmentCardHalf {
-    width: 100%;
-    display: inline-grid;
-    grid-template-columns: 70% 30%;
-}
-
-.memberAssessmentItem {
-    width: 100%;
-    display: block;
-    /*grid-template-columns: 50% 50%;*/
+.assessmentSection {
+    /*width: 100%;*/
+    /*padding-right: 0 !important;*/
 }
 
 
 
-.plainLink, .plainLink:hover {
-    text-decoration: none;
-    color: white;
+
+
+
+
+.memberAssessmentHeader {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.memberEditingItemHeader {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.buttonGroup {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.buttonGroup > *:not(:last-child) {
+    margin-right: 0.5rem;
+}
+
+.primaryButton {
+    color: primary;
+}
+
+.dangerButton {
+    color: senary;
+}
+
+.neuterButton {
+    color: quaternary;
 }

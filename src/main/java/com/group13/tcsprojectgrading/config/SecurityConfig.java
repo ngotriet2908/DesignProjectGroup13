@@ -23,6 +23,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private GoogleAuthorizationCodeFlow flow;
 
+
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http

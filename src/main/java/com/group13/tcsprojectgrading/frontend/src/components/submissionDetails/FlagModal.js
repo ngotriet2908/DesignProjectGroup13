@@ -127,12 +127,13 @@ class FlagModal extends Component {
   render() {
     return(
       <Modal centered
-             backdrop="static"
-             size="lg"
-             show={this.props.show}
-             onHide={this.props.onClose}
-             // onEnter={this.onShowHandle}
-             // onExited={this.onExitHandle}
+        backdrop="static"
+        size="lg"
+        show={this.props.show}
+        onHide={this.props.onClose}
+        animation={false}
+        // onEnter={this.onShowHandle}
+        // onExited={this.onExitHandle}
       >
         <Modal.Header closeButton>
           <Modal.Title>Flag manager</Modal.Title>
@@ -164,37 +165,37 @@ class FlagModal extends Component {
                 <div style={{marginBottom: "0.6rem"}}>
                   <h5 style={{display: "inline"}}>Available flag</h5>
                   <Button style={{marginLeft: "0.6rem"}}
-                          variant={(this.state.createShow)? "danger":"primary"}
-                          size="sm"
-                          onClick={this.showFlagCreationHandler}>
+                    variant={(this.state.createShow)? "danger":"primary"}
+                    size="sm"
+                    onClick={this.showFlagCreationHandler}>
                     {(this.state.createShow)? "Cancel" : "Create new flag"}
                   </Button>
                 </div>
                 {(!this.state.createShow) ?
                   (
                     <ListGroup>
-                    {
-                      this.props.availableFlags
-                        .filter((flag) => {
-                          let i;
-                          for (i = 0; i < this.props.flags.length; i++) {
-                            if (flag.id === this.props.flags[i].id) return false
-                          }
-                          return true
-                        })
-                        .map((flag) => {
-                          return (
-                            <ListGroup.Item key={flag.id}>
-                              <FlagModalFlagView current={false}
-                                                 flag={flag}
-                                                 addFlag={() => this.addFlagHandler(flag)}
-                                                 removeFlagPermanently={() => this.removeFlagHandler(flag.id)}
-                              />
-                            </ListGroup.Item>
-                          )
-                        })
-                    }
-                  </ListGroup>)
+                      {
+                        this.props.availableFlags
+                          .filter((flag) => {
+                            let i;
+                            for (i = 0; i < this.props.flags.length; i++) {
+                              if (flag.id === this.props.flags[i].id) return false
+                            }
+                            return true
+                          })
+                          .map((flag) => {
+                            return (
+                              <ListGroup.Item key={flag.id}>
+                                <FlagModalFlagView current={false}
+                                  flag={flag}
+                                  addFlag={() => this.addFlagHandler(flag)}
+                                  removeFlagPermanently={() => this.removeFlagHandler(flag.id)}
+                                />
+                              </ListGroup.Item>
+                            )
+                          })
+                      }
+                    </ListGroup>)
                   :
                   (
                     <div>
@@ -216,12 +217,11 @@ class FlagModal extends Component {
                         <Form.Group controlId="colorSelector">
                           <Form.Label>Select color</Form.Label>
                           <Form.Control as="select">
-                            <option value="primary">blue</option>
-                            <option value="secondary">gray</option>
-                            <option value="success">green</option>
-                            <option value="danger">red</option>
-                            <option value="warning">orange</option>
-                            <option value="info">cyan</option>
+                            {/*<option value="secondary">gray</option>*/}
+                            <option value="green">green</option>
+                            <option value="tomato">red</option>
+                            <option value="orange">orange</option>
+                            {/*<option value="info">cyan</option>*/}
                             <option value="light">white</option>
                             <option value="dark">black</option>
                           </Form.Control>

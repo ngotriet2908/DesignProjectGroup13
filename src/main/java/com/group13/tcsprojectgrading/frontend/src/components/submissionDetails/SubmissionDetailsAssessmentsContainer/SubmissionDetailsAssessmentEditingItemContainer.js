@@ -3,10 +3,9 @@ import styles from "../submissionDetails.module.css";
 import {request} from "../../../services/request";
 import {BASE} from "../../../services/endpoints";
 import {Card, Breadcrumb, Button, ListGroup, ListGroupItem, Form, Modal, Spinner, ButtonGroup, DropdownButton, Dropdown, FormControl} from "react-bootstrap";
-import store from "../../../redux/store";
-import {URL_PREFIX} from "../../../services/config";
-import {push} from "connected-react-router";
-import {Link} from "react-router-dom";
+import classnames from "classnames";
+import globalStyles from "../../helpers/global.module.css";
+import {IoCopyOutline, IoTrashOutline, IoSwapHorizontal} from "react-icons/io5";
 
 class SubmissionDetailsAssessmentEditingItemContainer extends Component {
   constructor(props) {
@@ -53,35 +52,52 @@ class SubmissionDetailsAssessmentEditingItemContainer extends Component {
   render() {
     return (
       <div className={styles.memberAssessmentItem}>
-        <div className={styles.assessmentCardHalf}>
-          <div>
-            <h6>id: {this.props.assessment.id}</h6>
-            <h6>issues count: {this.props.assessment.issuesCount}</h6>
-          </div>
-          <div>
-            <div style={{display:"inline", float:"right"}}>
-              <Button onClick={this.props.handleClone} style={{display:"inline", marginLeft:"1rem"}}
-                      variant="success"> Clone </Button>
-              <Button onClick={this.props.handleDelete} style={{display:"inline", marginLeft:"0.5rem"}}
-                      variant="danger"> Delete </Button>
+        <div className={styles.memberAssessmentHeader}>
+          <h4>
+            Assessment
+          </h4>
+
+          <div className={styles.buttonGroup}>
+            <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.props.handleClone}>
+              <IoCopyOutline size={26}/>
+            </div>
+
+            <div className={classnames(globalStyles.iconButton, styles.dangerButton)} onClick={this.props.handleDelete}>
+              <IoTrashOutline size={26}/>
             </div>
           </div>
+
         </div>
-        <ListGroup>
-          {this.props.assessment.participants.map((participant) => {
-            return (
-              <ListGroupItem key={"a-"+participant.id}>
-                <div className={styles.memberEditingItem}>
-                  <h6>name: {participant.name}</h6>
-                  <h6>name: {participant.sid}</h6>
-                  <Button onClick={() => this.handleShowMoveModal(participant)}
-                          style={{float:"right", marginLeft:"0.5rem"}}
-                          variant="warning"> Move </Button>
-                </div>
-              </ListGroupItem>)
-          })}
-        </ListGroup>
-        <Modal centered show={this.state.show} onHide={this.handleCloseMoveModal}>
+        <div>
+          <p>id: {this.props.assessment.id}</p>
+          <p>issues count: {this.props.assessment.issuesCount}</p>
+        </div>
+        <div>
+          Members:
+          <ListGroup>
+            {this.props.assessment.participants.map((participant) => {
+              return (
+                <ListGroupItem key={"a-"+participant.id}>
+                  <div className={styles.memberEditingItem}>
+                    <div className={styles.memberEditingItemHeader}>
+                      <h5>{participant.name}</h5>
+                      <div className={classnames(globalStyles.iconButtonSmall, styles.neuterButton)} onClick={() => this.handleShowMoveModal(participant)}>
+                        <IoSwapHorizontal size={26}/>
+                      </div>
+                    </div>
+                    <p>sid: {participant.sid}</p>
+                  </div>
+                </ListGroupItem>)
+            })}
+          </ListGroup>
+        </div>
+
+        <Modal
+          centered
+          show={this.state.show}
+          onHide={this.handleCloseMoveModal}
+          animation={false}
+        >
           <Modal.Header closeButton>
             <Modal.Title>Modal heading</Modal.Title>
           </Modal.Header>
@@ -114,7 +130,6 @@ class SubmissionDetailsAssessmentEditingItemContainer extends Component {
       </div>
     );
   }
-
 }
 
 export default SubmissionDetailsAssessmentEditingItemContainer

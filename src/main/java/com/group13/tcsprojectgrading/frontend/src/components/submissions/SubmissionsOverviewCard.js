@@ -18,57 +18,59 @@ class SubmissionsOverviewCard extends Component {
             <h5>
               {this.props.submission.name}
             </h5>
-            {
-              (this.props.submission.isGroup)?
-                <Badge className={styles.badge} variant="green">Group</Badge> :
-                <Badge className={styles.badge} variant="tomato">Individual</Badge>
-            }
-
-            {
-              (this.props.submission.progress <= 0)?
-                <Badge className={styles.badge} variant="red">Not started</Badge> :
-                (this.props.submission.progress < 100)?
-                  <Badge className={styles.badge} variant="orange">In progress</Badge> :
-                  <Badge className={styles.badge} variant="green">Graded</Badge>
-            }
-
-            {
-              (this.props.submission.hasOwnProperty("grader") && this.props.submission.grader.id === this.props.user.id)?
-                <Badge className={styles.badge} variant="green">Assigned to you</Badge> :
-                <Badge className={styles.badge} variant="red">Not assigned to you</Badge>
-            }
-
-            {
-              (this.props.submission.issuesCount > 0)?
-                <Badge className={styles.badge} variant="tomato">Has issues</Badge> : null
-            }
-
-            {
-              <div style={{marginLeft: "1rem"}}>
-                {
-                  (this.props.submission.flags.map((flag) => {
-                    return (<OverlayTrigger
-                      placement="bottom"
-                      delay={{ show: 250, hide: 400 }}
-                      overlay={(props) => (
-                        <Tooltip id={flag.id} {...props}>
-                          flag description: {flag.description}
-                        </Tooltip>)
-                      }>
-                      <Badge style={{marginRight:"0.5rem"}} variant={flag.variant}>{flag.name}</Badge>
-                    </OverlayTrigger>)
-                  }))
-                }
-              </div>
-            }
 
             <div className={styles.submissionCardHeaderButtonContainer}>
               <div className={classnames(globalStyles.iconButton)} onClick={() => store.dispatch(push(this.props.route.url + "/" + this.props.submission.id))}>
                 <IoArrowForward size={26}/>
               </div>
             </div>
-
           </div>
+
+          <div className={styles.submissionCardLabels}>
+            {
+              (this.props.submission.isGroup)?
+                <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant="green">Group</Badge> :
+                <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant="tomato">Individual</Badge>
+            }
+
+            {
+              (this.props.submission.progress <= 0)?
+                <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant="tomato">Not started</Badge> :
+                (this.props.submission.progress < 100)?
+                  <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant="orange">In progress</Badge> :
+                  <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant="green">Graded</Badge>
+            }
+
+            {
+              (this.props.submission.hasOwnProperty("grader") && this.props.submission.grader.id === this.props.user.id)?
+                <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant="green">Assigned to you</Badge> :
+                <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant="tomato">Not assigned to you</Badge>
+            }
+
+            {
+              (this.props.submission.issuesCount > 0) &&
+                <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant="tomato">Has issues</Badge>
+            }
+
+            {(this.props.submission.flags.map((flag) => {
+              return (
+                <OverlayTrigger
+                  key={flag.id}
+                  placement="bottom"
+                  delay={{ show: 250, hide: 400 }}
+                  overlay={(props) => (
+                    <Tooltip id={flag.id} {...props}>
+                      {flag.description}
+                    </Tooltip>)
+                  }>
+                  <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant={flag.variant}>{flag.name}</Badge>
+                </OverlayTrigger>
+
+              )
+            }))
+            }
+          </div>
+
           <div className={styles.submissionCardBody}>
             <div>Submitted on {(new Date(this.props.submission.submittedAt)).toDateString()}</div>
             <div>Progress: {this.props.submission.progress}%</div>
