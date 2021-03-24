@@ -18,8 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.group13.tcsprojectgrading.controllers.ProjectsController.addEmptyLine;
-
 public class PdfUtils {
     private Document document;
     private Rubric rubric;
@@ -285,6 +283,12 @@ public class PdfUtils {
 
         public void setCriterionCount(int criterionCount) {
             this.criterionCount = criterionCount;
+        }
+    }
+
+    public static void addEmptyLine(Paragraph paragraph, int number) {
+        for (int i = 0; i < number; i++) {
+            paragraph.add(new Paragraph(" "));
         }
     }
 

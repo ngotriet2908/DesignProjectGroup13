@@ -6,38 +6,82 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.flipkart.zjsonpatch.JsonPatch;
 import com.flipkart.zjsonpatch.JsonPatchApplicationException;
+import com.group13.tcsprojectgrading.models.RubricHistoryLinker;
+import com.group13.tcsprojectgrading.models.RubricLinker;
 import com.group13.tcsprojectgrading.models.rubric.*;
+import com.group13.tcsprojectgrading.repositories.RubricHistoryLinkerRepository;
+import com.group13.tcsprojectgrading.repositories.RubricLinkerRepository;
 import com.group13.tcsprojectgrading.repositories.rubric.RubricHistoryRepository;
-import com.group13.tcsprojectgrading.repositories.rubric.RubricRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.lang.model.util.Elements;
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 @Service
 public class RubricService {
-    private final RubricRepository repository;
-    private final RubricHistoryRepository historyRepository;
+    private final RubricLinkerRepository rubricLinkerRepository;
+    private final RubricHistoryLinkerRepository rubricHistoryLinkerRepository;
 
     @Autowired
-    public RubricService(RubricRepository repository, RubricHistoryRepository historyRepository) {
-        this.repository = repository;
-        this.historyRepository = historyRepository;
+    public RubricService(RubricLinkerRepository repository, RubricHistoryLinkerRepository rubricHistoryLinkerRepository) {
+        this.rubricLinkerRepository = repository;
+        this.rubricHistoryLinkerRepository = rubricHistoryLinkerRepository;
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Rubric getRubricById(String id) {
-        return repository.getById(id);
+        return getRubricFromLinker(rubricLinkerRepository.findById(id).orElse(null));
+    }
+
+    private Rubric getRubricFromLinker(RubricLinker linker) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            if (linker != null) {
+                return objectMapper.readValue(linker.getRubric(), Rubric.class);
+            }
+        } catch (JsonProcessingException e) {
+            return null;
+        }
+        return null;
+    }
+
+    private RubricHistory getRubricHistoryFromLinker(RubricHistoryLinker linker) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            if (linker != null) {
+                return objectMapper.readValue(linker.getRubricHistory(), RubricHistory.class);
+            }
+        } catch (JsonProcessingException e) {
+            return null;
+        }
+        return null;
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
-    public Rubric saveRubric(Rubric rubric) {
+    public Rubric saveRubric(Rubric rubric) throws JsonProcessingException {
         updateCriterionCount(rubric);
         updateLastModified(rubric);
-        return repository.save(rubric);
+        RubricLinker linker = rubricLinkerRepository.findById(rubric.getId()).orElse(null);
+        if (linker == null) return null;
+        ObjectMapper mapper = new ObjectMapper();
+        linker.setRubric(mapper.writeValueAsString(rubric));
+
+        return getRubricFromLinker(rubricLinkerRepository.save(linker));
+    }
+
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public Rubric addNewRubric(Rubric rubric) throws JsonProcessingException {
+        updateCriterionCount(rubric);
+        updateLastModified(rubric);
+        RubricLinker linker = rubricLinkerRepository.findById(rubric.getId()).orElse(null);
+        if (linker != null) return null;
+        ObjectMapper mapper = new ObjectMapper();
+        linker = new RubricLinker(rubric.getId(), mapper.writeValueAsString(rubric));
+        return getRubricFromLinker(rubricLinkerRepository.save(linker));
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
@@ -59,22 +103,39 @@ public class RubricService {
 
     @Transactional(value = Transactional.TxType.MANDATORY)
     public List<Rubric> getAllRubrics() {
-        return repository.findAll();
+        List<Rubric> rubrics = new ArrayList<>();
+        List<RubricLinker> linkers = rubricLinkerRepository.findAll();
+        for(RubricLinker linker: linkers) {
+            Rubric rubric = getRubricFromLinker(linker);
+            if (rubric != null) {
+                rubrics.add(rubric);
+            }
+        }
+        return rubrics;
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
     public void deleteRubric(String projectId) {
-        repository.deleteById(projectId);
+        rubricLinkerRepository.deleteById(projectId);
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
-    public void storeHistory(RubricHistory history) {
-        this.historyRepository.save(history);
+    public void storeHistory(RubricHistory history) throws JsonProcessingException {
+
+        RubricHistoryLinker linker = rubricHistoryLinkerRepository.findById(history.getId()).orElse(null);
+        if (linker == null) {
+//            throw new NullPointerException("null linker")
+            linker = new RubricHistoryLinker(history.getId());
+        };
+        ObjectMapper mapper = new ObjectMapper();
+        linker.setRubricHistory(mapper.writeValueAsString(history));
+        rubricHistoryLinkerRepository.save(linker);
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
     public RubricHistory getHistory(String projectId) {
-        return this.historyRepository.getById(projectId);
+        RubricHistoryLinker linker = rubricHistoryLinkerRepository.findById(projectId).orElse(null);
+        return getRubricHistoryFromLinker(linker);
     }
 
     // TODO: mark all? mark specific? put in issues? notify? if mark all - stop when first issue below is found

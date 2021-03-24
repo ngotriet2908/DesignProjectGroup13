@@ -107,10 +107,15 @@ public class SubmissionService {
         return repository.findSubmissionsByFlags(flag);
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public List<Submission> findSubmissionsForGraderAll(String graderId) {
         return repository.findSubmissionsByGrader_UserId(graderId);
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public List<Submission> findSubmissionsForGraderCourse(String graderId, String courseId) {
+        return repository.findSubmissionsByGrader_UserIdAndProject_CourseId(graderId, courseId);
+    }
     @Transactional
     public ObjectNode getSubmission(String courseId, String projectId, String userId) {
         Project project = projectRepository.findById(new ProjectId(courseId, projectId)).orElse(null);

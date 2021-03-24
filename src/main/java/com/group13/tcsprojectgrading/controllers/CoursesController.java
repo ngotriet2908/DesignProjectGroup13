@@ -9,9 +9,11 @@ import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.*;
 import com.group13.tcsprojectgrading.services.ProjectService;
 import com.group13.tcsprojectgrading.services.*;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.util.Pair;
 
 import org.springframework.web.server.ResponseStatusException;
 
@@ -57,63 +59,8 @@ class CoursesController {
     }
 
     @RequestMapping(value = "/{course_id}", method = RequestMethod.GET, produces = "application/json")
-    protected ResponseEntity<JsonNode> getCourse(@PathVariable String course_id, Principal principal) throws JsonProcessingException {
-        String courseString = this.canvasApi.getCanvasCoursesApi().getUserCourse(course_id);
-        List<Project> projects = courseServices.getProjectsInCourse(course_id);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        ArrayNode arrayNode = objectMapper.createArrayNode();
-        JsonNode jsonCourseNode = objectMapper.readTree(courseString);
-
-        for(Project project: projects) {
-//            ObjectNode projectNode = objectMapper.createObjectNode();
-            String nodeString = this.canvasApi.getCanvasCoursesApi().getCourseProject(project.getCourseId(), project.getProjectId());
-            JsonNode node = objectMapper.readTree(nodeString);
-//            projectNode.put("id", node.get("id").asText());
-//            projectNode.put("name", node.get("name").asText());
-            arrayNode.add(node);
-        }
-
-        ObjectNode resultNode = objectMapper.createObjectNode();
-        resultNode.set("course", jsonCourseNode);
-        resultNode.set("projects", arrayNode);
-//        JsonNode resultNode = objectMapper.createObjectNode();
-
-
-        String userResponse = this.canvasApi.getCanvasCoursesApi().getCourseUser(course_id, principal.getName());
-        ArrayNode enrolmentsNode = groupPages(objectMapper, this.canvasApi.getCanvasUsersApi().getEnrolments(principal.getName()));
-        JsonNode userJson = objectMapper.readTree(userResponse);
-
-        RoleEnum roleEnum = null;
-
-        for (Iterator<JsonNode> it = enrolmentsNode.elements(); it.hasNext(); ) {
-            JsonNode enrolmentNode = it.next();
-            if (enrolmentNode.get("course_id").asText().equals(course_id)) {
-                roleEnum = RoleEnum.getRoleFromEnrolment(enrolmentNode.get("role").asText());
-            }
-        }
-
-        if (roleEnum == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED, "Enrolment not found"
-            );
-        }
-
-        if (roleEnum.equals(RoleEnum.TEACHER)) {
-            ((ObjectNode) userJson).put("role", "teacher");
-        } else if (roleEnum.equals(RoleEnum.TA)) {
-            ((ObjectNode) userJson).put("role", "ta");
-        }
-
-        ((ObjectNode)resultNode).set("course", jsonCourseNode);
-        ((ObjectNode)resultNode).set("projects", arrayNode);
-        ((ObjectNode)resultNode).set("user", userJson);
-
-        if (arrayNode == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        } else {
-            return new ResponseEntity<>(resultNode, HttpStatus.OK);
-        }
+    protected JsonNode getCourse(@PathVariable String course_id, Principal principal) throws JsonProcessingException {
+        return courseServices.getCourse(course_id, this.canvasApi, principal.getName());
     }
 
     @RequestMapping(value = "/{course_id}/participants", method = RequestMethod.GET, produces = "application/json")
@@ -136,15 +83,16 @@ class CoursesController {
 
         List<String> responseString = this.canvasApi.getCanvasCoursesApi().getCourseProjects(course_id);
 
-
-        List<String> volatileProjectsId = projectService.getVolatileProjectsId(course_id);
+        Object[] objects = projectService.getVolatileProjectsId(course_id);
+        List<String> volatileProjectsId = (List<String>) objects[0];
+        Map<String, Project> projectMap = (Map<String, Project>) objects[1];
         ObjectMapper objectMapper = new ObjectMapper();
         ArrayNode arrayNode = objectMapper.createArrayNode();
         for(String nodeListString: responseString) {
             JsonNode jsonNode = objectMapper.readTree(nodeListString);
             for (Iterator<JsonNode> it = jsonNode.elements(); it.hasNext(); ) {
                 JsonNode node = it.next();
-                Project project = projectService.getProjectById(course_id, node.get("id").asText());
+                Project project = projectMap.get(node.get("id").asText());
                 boolean isVolatile = project != null;
 
                 //TODO check whether needed to check the latter 2 conditions

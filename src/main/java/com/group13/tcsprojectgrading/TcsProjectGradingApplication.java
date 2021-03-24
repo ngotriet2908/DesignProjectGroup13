@@ -2,7 +2,6 @@ package com.group13.tcsprojectgrading;
 
 import com.group13.tcsprojectgrading.models.Privilege;
 import com.group13.tcsprojectgrading.models.Role;
-import com.group13.tcsprojectgrading.repositories.rubric.RubricRepository;
 import com.group13.tcsprojectgrading.models.PrivilegeEnum;
 import com.group13.tcsprojectgrading.services.PrivilegeService;
 import com.group13.tcsprojectgrading.models.RoleEnum;
@@ -23,8 +22,6 @@ public class TcsProjectGradingApplication {
         SpringApplication.run(TcsProjectGradingApplication.class, args);
     }
 
-    @Autowired
-    private RubricRepository repository;
 
 //    @Override
 //    public void run(String... args) {

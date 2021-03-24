@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.flipkart.zjsonpatch.JsonPatchApplicationException;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.Message;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
@@ -43,6 +44,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.io.*;
+import java.security.GeneralSecurityException;
 import java.security.Principal;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -68,7 +70,7 @@ public class ProjectsController {
     private final GraderService graderService;
     private final ProjectRoleService projectRoleService;
     private final FlagService flagService;
-//    private final GoogleAuthorizationCodeFlow flow;
+    private final GoogleAuthorizationCodeFlow flow;
     private final SubmissionService submissionService;
     private final ParticipantService participantService;
     private final AssessmentLinkerService assessmentLinkerService;
@@ -81,7 +83,7 @@ public class ProjectsController {
                               RoleService roleService, GraderService graderService,
                               ProjectRoleService projectRoleService,
                               FlagService flagService,
-//                              GoogleAuthorizationCodeFlow flow,
+                              GoogleAuthorizationCodeFlow flow,
                               SubmissionService submissionService, ParticipantService participantService,
                               AssessmentLinkerService assessmentLinkerService, AssessmentService assessmentService, SubmissionDetailsService submissionDetailsService) {
         this.canvasApi = canvasApi;
@@ -92,7 +94,7 @@ public class ProjectsController {
         this.graderService = graderService;
         this.projectRoleService = projectRoleService;
         this.flagService = flagService;
-//        this.flow = flow;
+        this.flow = flow;
         this.submissionService = submissionService;
         this.participantService = participantService;
         this.assessmentLinkerService = assessmentLinkerService;
@@ -197,44 +199,10 @@ public class ProjectsController {
                                                      @PathVariable String projectId,
                                                      @RequestBody ObjectNode feedback,
                                                      Principal principal) throws IOException, ParseException {
-        Project project = projectService.getProjectById(courseId, projectId);
-        if (project == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "entity not found"
-            );
-        }
 
-        String id = feedback.get("id").asText();
-        boolean isGroup = feedback.get("isGroup").asBoolean();
-        String body = feedback.get("body").asText();
-        String subject = feedback.get("subject").asText();
-
-        String fileName = id + "_" + subject + ".pdf";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.setContentDispositionFormData(fileName, fileName);
-        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-//        response.setContentType("blob");
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
-        PdfWriter pdfWriter = new PdfWriter(byteArrayOutputStream);
-        PdfDocument pdfDocument = new PdfDocument(pdfWriter);
-        Document document = new Document(pdfDocument, PageSize.A4);
-
-        document.getPdfDocument();
-
-        Participant participant = participantService.findParticipantWithId(id, project);
-        Submission submission = submissionService.findSubmissionById(body);
-
-        Assessment submissionAssessment = assessmentService.getAssessmentBySubmissionAndParticipant(submission, participant);
-        PdfUtils pdfUtils = new PdfUtils(document, rubricService.getRubricById(projectId), submissionAssessment
-        );
-        pdfUtils.generatePdfOfFeedback();
-        document.close();
 
 //        System.out.println(Arrays.toString(byteArrayOutputStream.toByteArray()));
-
-        return new ResponseEntity<byte[]>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.OK);
+        return projectService.sendFeedbackPdf(courseId, projectId, feedback);
     }
 
     @GetMapping(value = "/{projectId}/downloadRubric")
@@ -242,115 +210,23 @@ public class ProjectsController {
     protected ResponseEntity<byte[]> sendFeedbackPdf(@PathVariable String courseId,
                                                      @PathVariable String projectId,
                                                      Principal principal) throws IOException, ParseException {
-        Project project = projectService.getProjectById(courseId, projectId);
-        if (project == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "entity not found"
-            );
-        }
-
-
-        String fileName = project.getName() + " rubric.pdf";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.setContentDispositionFormData(fileName, fileName);
-        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-//        response.setContentType("blob");
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
-        PdfWriter pdfWriter = new PdfWriter(byteArrayOutputStream);
-        PdfDocument pdfDocument = new PdfDocument(pdfWriter);
-        Document document = new Document(pdfDocument, PageSize.A4);
-
-        document.getPdfDocument();
-
-        PdfRubricUtils rubricUtils = new PdfRubricUtils(document, rubricService.getRubricById(projectId));
-        rubricUtils.generateRubrics();
-//        System.out.println(Arrays.toString(byteArrayOutputStream.toByteArray()));
-
-        return new ResponseEntity<byte[]>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.OK);
+        return projectService.downloadRubric(courseId, projectId);
     }
 
-//    @PostMapping(value = "/{projectId}/feedbackEmail")
-//    @ResponseBody
-//    protected String sendFeedbackEmail1(@PathVariable String courseId,
-//                                        @PathVariable String projectId,
-//                                        @RequestBody ObjectNode feedback,
-//                                        Principal principal) throws IOException, ParseException, GeneralSecurityException, MessagingException {
-//        Project project = projectService.getProjectById(courseId, projectId);
-//        if (project == null) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.NOT_FOUND, "entity not found"
-//            );
-//        }
-//
-//        String id = feedback.get("id").asText();
-//        boolean isGroup = feedback.get("isGroup").asBoolean();
-//        String body = feedback.get("body").asText();
-//        String subject = feedback.get("subject").asText();
-//
-//        System.out.println("getting credential for " + principal.getName());
-//        Credential credential = flow.loadCredential(principal.getName());
-//        if (credential == null) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.UNAUTHORIZED, "token not found"
-//            );
-//        }
-//
-//        System.out.println("Access token of " + principal.getName() + ": " + credential.getAccessToken());
-////        NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-////        JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-//
-//        Gmail service = new Gmail.Builder(flow.getTransport(), flow.getJsonFactory(), credential)
-//                .setApplicationName("Pro Grading")
-//                .build();
-//
-//        String FILE_NAME = "src/main/resources/fileToCreate.pdf";
-//        File targetFile = new File(FILE_NAME);
-//        targetFile.delete();
-//        Path newFilePath = Paths.get(FILE_NAME);
-//        Files.createFile(newFilePath);
-//
-//        OutputStream out = new FileOutputStream(FILE_NAME);
-//
-//        PdfWriter pdfWriter = new PdfWriter(out);
-//        PdfDocument pdfDocument = new PdfDocument(pdfWriter);
-//        Document document = new Document(pdfDocument, PageSize.A4);
-//
-//        document.getPdfDocument();
-//
-//        Participant participant = participantService.findParticipantWithId(id, project);
-//        Submission submission = submissionService.findSubmissionById(body);
-//
-//        Assessment submissionAssessment = assessmentService.getAssessmentBySubmissionAndParticipant(submission, participant);
-//        PdfUtils pdfUtils = new PdfUtils(document, rubricService.getRubricById(projectId), submissionAssessment
-//        );
-//        pdfUtils.generatePdfOfFeedback();
-//        document.close();
-//
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        JsonNode jsonNode = objectMapper.readTree(this.canvasApi.getCanvasUsersApi().getAccountWithId(id));
-//        if (jsonNode.get("primary_email") != null) {
-//            sendMessage(service, "me", createEmailWithAttachment(
-//                    jsonNode.get("primary_email").asText(),
-//                    "me",
-//                    subject,
-//                    body,
-//                    new File(FILE_NAME)
-//            ));
-//            return "ok";
-//        }
-////        System.out.println(Arrays.toString(byteArrayOutputStream.toByteArray()));
-//
-//        return "something is wrong";
-//    }
+    @PostMapping(value = "/{projectId}/feedbackEmail")
+    @ResponseBody
+    protected String sendFeedbackEmail1(@PathVariable String courseId,
+                                        @PathVariable String projectId,
+                                        @RequestBody ObjectNode feedback,
+                                        Principal principal) throws IOException, ParseException, GeneralSecurityException, MessagingException {
 
-
-
-    public static void addEmptyLine(Paragraph paragraph, int number) {
-        for (int i = 0; i < number; i++) {
-            paragraph.add(new Paragraph(" "));
-        }
+        String id = feedback.get("id").asText();
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = objectMapper.readTree(this.canvasApi.getCanvasUsersApi().getAccountWithId(id));
+        return projectService.sendFeedbackEmail(courseId, projectId,
+                feedback, principal.getName(), flow,
+                jsonNode.get("primary_email").asText()
+        );
     }
 
     @GetMapping(value = "/{projectId}/feedback")
@@ -358,7 +234,7 @@ public class ProjectsController {
     protected ObjectNode getFeedbackInfoPage(@PathVariable String courseId,
                                              @PathVariable String projectId,
                                              Principal principal) throws JsonProcessingException, ParseException {
-        Project project = projectService.getProjectById(courseId, projectId);
+        Project project = projectService.getProject(courseId, projectId);
         if (project == null) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "entity not found"

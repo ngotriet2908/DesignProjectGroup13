@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.group13.tcsprojectgrading.controllers.ProjectsController.addEmptyLine;
+import static com.group13.tcsprojectgrading.controllers.PdfUtils.addEmptyLine;
 
 public class PdfRubricUtils {
     private Document document;

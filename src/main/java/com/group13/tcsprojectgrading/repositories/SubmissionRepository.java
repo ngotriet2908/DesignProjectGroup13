@@ -11,6 +11,7 @@ import java.util.UUID;
 public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
     public List<Submission> findSubmissionsByProject(Project project);
     public List<Submission> findSubmissionsByGrader_UserId(String userId);
+    public List<Submission> findSubmissionsByGrader_UserIdAndProject_CourseId(String userId, String courseId);
     public List<Submission> findSubmissionsByProjectAndGrader_UserId(Project project, String userId);
     public List<Submission> findSubmissionsByFlags(Flag flag);
     public Submission findSubmissionByProjectAndUserIdAndGroupIdAndDate(Project project, String userId, String groupId, String date);

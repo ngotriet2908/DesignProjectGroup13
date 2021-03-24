@@ -1,12 +1,15 @@
 package com.group13.tcsprojectgrading.services;
 
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.api.client.json.Json;
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+import com.google.api.services.gmail.Gmail;
+import com.group13.tcsprojectgrading.controllers.PdfRubricUtils;
+import com.group13.tcsprojectgrading.controllers.PdfUtils;
 import com.group13.tcsprojectgrading.models.*;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.models.rubric.RubricHistory;
@@ -14,13 +17,24 @@ import com.group13.tcsprojectgrading.models.rubric.RubricUpdate;
 import com.group13.tcsprojectgrading.repositories.ProjectRepository;
 import com.group13.tcsprojectgrading.services.grading.AssessmentService;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
+import com.itextpdf.kernel.geom.PageSize;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.mail.MessagingException;
 import javax.persistence.EntityExistsException;
 import javax.transaction.Transactional;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,6 +45,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.*;
 
+import static com.group13.tcsprojectgrading.controllers.EmailUtils.createEmailWithAttachment;
+import static com.group13.tcsprojectgrading.controllers.EmailUtils.sendMessage;
 import static com.group13.tcsprojectgrading.models.Submission.createFlagsArrayNode;
 
 @Service
@@ -64,18 +80,21 @@ public class ProjectService {
         this.assessmentService = assessmentService;
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public List<Project> getProjectsByCourseId(String courseId) {
         return projectRepository.findProjectsByCourseId(courseId);
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public void deleteProject(Project project) {
         List<Flag> flags = flagService.findFlagsWithProject(project);
-        for(Flag flag: flags) {
+        for (Flag flag : flags) {
             flagService.deleteFlag(flag);
         }
         projectRepository.delete(project);
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public Project getProjectById(String courseId, String projectId) {
         return projectRepository.findById(new ProjectId(courseId, projectId)).orElse(null);
     }
@@ -91,18 +110,24 @@ public class ProjectService {
     }
 
     @Transactional
-    public List<String> getVolatileProjectsId(String courseId) {
+    public Object[] getVolatileProjectsId(String courseId) {
         List<String> projectsId = new ArrayList<>();
         List<Project> projects = projectRepository.findProjectsByCourseId(courseId);
-        for(Project project: projects) {
+        Map<String, Project> projectMap = new HashMap<>();
+        for (Project project : projects) {
             if (project != null) {
                 project.setVolatile(activityService.getActivitiesByProject(project).size() > 0);
                 if (project.isVolatile()) {
                     projectsId.add(project.getProjectId());
                 }
+                projectMap.put(project.getProjectId(), project);
             }
         }
-        return projectsId;
+        Object[] objects = new Object[2];
+        objects[0] = projectsId;
+        objects[1] = projectMap;
+
+        return objects;
     }
 
     @Transactional(rollbackOn = Exception.class)
@@ -110,7 +135,7 @@ public class ProjectService {
                                       Map<String, Project> canvasProjects,
                                       String courseId) throws Exception {
         List<Project> activeProjects = projectRepository.findProjectsByCourseId(courseId);
-        for (Project project: activeProjects) {
+        for (Project project : activeProjects) {
             if (!postActiveProjectIds.contains(project.getProjectId())) {
 //                Random random = new Random();
 //                if (random.nextInt(100) < 30) {
@@ -120,9 +145,9 @@ public class ProjectService {
                 deleteProject(project);
             }
         }
-        for(String activeProjectId: postActiveProjectIds) {
+        for (String activeProjectId : postActiveProjectIds) {
             boolean existed = false;
-            for(Project project: activeProjects) {
+            for (Project project : activeProjects) {
                 if (project.getProjectId().equals(activeProjectId)) {
                     existed = true;
                     break;
@@ -132,7 +157,7 @@ public class ProjectService {
             if (existed) continue;
 
             addNewProject(canvasProjects.get(activeProjectId));
-            rubricService.saveRubric(new Rubric(activeProjectId));
+            rubricService.addNewRubric(new Rubric(activeProjectId));
         }
     }
 
@@ -159,7 +184,7 @@ public class ProjectService {
         List<Participant> participants = participantService.findParticipantsWithProject(project);
         ObjectMapper objectMapper = new ObjectMapper();
         ArrayNode participantsNode = objectMapper.createArrayNode();
-        for(Participant participant: participants) {
+        for (Participant participant : participants) {
             List<AssessmentLinker> assessmentLinkers = assessmentLinkerService.findAssessmentLinkersForParticipant(participant);
             participantsNode.add(participant.convertToJson(assessmentLinkers));
         }
@@ -213,7 +238,7 @@ public class ProjectService {
             ObjectNode graderNode = objectMapper.createObjectNode();
             ArrayNode privilegesNode = objectMapper.createArrayNode();
             List<Privilege> privileges = projectRoleService.findPrivilegesByProjectAndRoleEnum(project, RoleEnum.STUDENT);
-            for (Privilege privilege: privileges) {
+            for (Privilege privilege : privileges) {
                 ObjectNode privilegeNode = objectMapper.createObjectNode();
                 privilegeNode.put("name", privilege.getName());
                 privilegesNode.add(privilegeNode);
@@ -264,7 +289,7 @@ public class ProjectService {
     public void addProjectRoles(Project project) {
         Project project1 = projectRepository.findById(project.getProjectCompositeKey()).orElse(null);
         if (project1 == null) return;
-        for(Role role: roleService.findAllRoles()) {
+        for (Role role : roleService.findAllRoles()) {
             projectRoleService.addNewRoleToProject(project1, role);
         }
     }
@@ -329,11 +354,11 @@ public class ProjectService {
                         jsonNode.get("submitted_at").asText(),
                         participant.getName() + " on " + date);
 
-                for(SubmissionComment comment: submissionComments) {
+                for (SubmissionComment comment : submissionComments) {
                     comment.setSubmission(submission);
                     submissionDetailsService.saveComment(comment);
                 }
-                for(SubmissionAttachment attachment: submissionAttachments) {
+                for (SubmissionAttachment attachment : submissionAttachments) {
                     attachment.setSubmission(submission);
                     submissionDetailsService.saveAttachment(attachment);
                 }
@@ -375,7 +400,7 @@ public class ProjectService {
             }
         }
 
-        for(Map.Entry<String, Submission> entry: groupToSubmissionMap.entrySet()) {
+        for (Map.Entry<String, Submission> entry : groupToSubmissionMap.entrySet()) {
 
             Submission submission = submissionService.addNewSubmission(
                     entry.getValue().getProject(),
@@ -387,18 +412,18 @@ public class ProjectService {
 
             if (submission == null) continue;
 
-            for(SubmissionComment comment: groupToComments.get(entry.getKey())) {
+            for (SubmissionComment comment : groupToComments.get(entry.getKey())) {
                 comment.setSubmission(submission);
                 submissionDetailsService.saveComment(comment);
             }
-            for(SubmissionAttachment attachment: groupToAttachments.get(entry.getKey())) {
+            for (SubmissionAttachment attachment : groupToAttachments.get(entry.getKey())) {
                 attachment.setSubmission(submission);
                 submissionDetailsService.saveAttachment(attachment);
             }
 
             UUID assessmentId = UUID.randomUUID();
             System.out.println("size: " + groupToParticipant.get(entry.getValue().getGroupId()).size());
-            for(Participant participant: groupToParticipant.get(entry.getValue().getGroupId())) {
+            for (Participant participant : groupToParticipant.get(entry.getValue().getGroupId())) {
                 AssessmentLinker assessmentLinker = assessmentLinkerService.addNewAssessment(new AssessmentLinker(
                         submission,
                         participant,
@@ -493,5 +518,149 @@ public class ProjectService {
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.writeValueAsString(rubric);
         }
+    }
+
+    @Transactional
+    public ResponseEntity<byte[]> sendFeedbackPdf(String courseId, String projectId, ObjectNode feedback) throws IOException {
+        Project project = getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "entity not found"
+            );
+        }
+
+        String id = feedback.get("id").asText();
+        boolean isGroup = feedback.get("isGroup").asBoolean();
+        String body = feedback.get("body").asText();
+        String subject = feedback.get("subject").asText();
+
+        String fileName = id + "_" + subject + ".pdf";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData(fileName, fileName);
+        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+//        response.setContentType("blob");
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        PdfWriter pdfWriter = new PdfWriter(byteArrayOutputStream);
+        PdfDocument pdfDocument = new PdfDocument(pdfWriter);
+        Document document = new Document(pdfDocument, PageSize.A4);
+
+        document.getPdfDocument();
+
+        Participant participant = participantService.findParticipantWithId(id, project);
+        Submission submission = submissionService.findSubmissionById(body);
+
+        Assessment submissionAssessment = assessmentService.getAssessmentBySubmissionAndParticipant(submission, participant);
+        PdfUtils pdfUtils = new PdfUtils(document, rubricService.getRubricById(projectId), submissionAssessment
+        );
+        pdfUtils.generatePdfOfFeedback();
+        document.close();
+        return new ResponseEntity<byte[]>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.OK);
+    }
+
+    @Transactional
+    public ResponseEntity<byte[]> downloadRubric(String courseId, String projectId) throws IOException {
+        Project project = getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "entity not found"
+            );
+        }
+
+
+        String fileName = project.getName() + " rubric.pdf";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData(fileName, fileName);
+        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+//        response.setContentType("blob");
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        PdfWriter pdfWriter = new PdfWriter(byteArrayOutputStream);
+        PdfDocument pdfDocument = new PdfDocument(pdfWriter);
+        Document document = new Document(pdfDocument, PageSize.A4);
+
+        document.getPdfDocument();
+
+        PdfRubricUtils rubricUtils = new PdfRubricUtils(document, rubricService.getRubricById(projectId));
+        rubricUtils.generateRubrics();
+//        System.out.println(Arrays.toString(byteArrayOutputStream.toByteArray()));
+
+        return new ResponseEntity<byte[]>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.OK);
+    }
+
+    @Transactional
+    public String sendFeedbackEmail(String courseId, String projectId,
+                                    ObjectNode feedback, String userId,
+                                    GoogleAuthorizationCodeFlow flow, String email
+                                    ) throws IOException, MessagingException {
+        Project project = getProjectById(courseId, projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "entity not found"
+            );
+        }
+
+        String id = feedback.get("id").asText();
+        boolean isGroup = feedback.get("isGroup").asBoolean();
+        String body = feedback.get("body").asText();
+        String subject = feedback.get("subject").asText();
+
+        System.out.println("getting credential for " + userId);
+        Credential credential = flow.loadCredential(userId);
+        if (credential == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "token not found"
+            );
+        }
+
+        System.out.println("Access token of " + userId + ": " + credential.getAccessToken());
+
+        Gmail service = new Gmail.Builder(flow.getTransport(), flow.getJsonFactory(), credential)
+                .setApplicationName("Pro Grading")
+                .build();
+
+        String FILE_NAME = "src/main/resources/fileToCreate.pdf";
+        File targetFile = new File(FILE_NAME);
+        targetFile.delete();
+        Path newFilePath = Paths.get(FILE_NAME);
+        Files.createFile(newFilePath);
+
+        OutputStream out = new FileOutputStream(FILE_NAME);
+
+        PdfWriter pdfWriter = new PdfWriter(out);
+        PdfDocument pdfDocument = new PdfDocument(pdfWriter);
+        Document document = new Document(pdfDocument, PageSize.A4);
+
+        document.getPdfDocument();
+
+        Participant participant = participantService.findParticipantWithId(id, project);
+        Submission submission = submissionService.findSubmissionById(body);
+
+        Assessment submissionAssessment = assessmentService.getAssessmentBySubmissionAndParticipant(submission, participant);
+        PdfUtils pdfUtils = new PdfUtils(document, rubricService.getRubricById(projectId), submissionAssessment
+        );
+        pdfUtils.generatePdfOfFeedback();
+        document.close();
+
+        if (email != null) {
+            sendMessage(service, "me", createEmailWithAttachment(
+                    email,
+                    "me",
+                    subject,
+                    body,
+                    new File(FILE_NAME)
+            ));
+            return "ok";
+        }
+//        System.out.println(Arrays.toString(byteArrayOutputStream.toByteArray()));
+
+        return "something is wrong";
+    }
+
+    @Transactional
+    public Project getProject(String courseId, String projectId) {
+        return projectRepository.findById(new ProjectId(courseId, projectId)).orElse(null);
     }
 }

@@ -127,7 +127,7 @@ class Rubric extends Component {
     return (
       <div className={classnames(styles.container)}>
         <div className={styles.outline}>
-          <RubricOutline courseId={this.props.match.params.courseId} projectId={this.props.match.params.projectId}/>
+          <RubricOutline downloadRubric={this.downloadRubric} courseId={this.props.match.params.courseId} projectId={this.props.match.params.projectId}/>
         </div>
 
         <div className={styles.editor}>

@@ -26,6 +26,8 @@ class UsersController {
 
     private final ActivityService activityService;
 
+    private final UserService userService;
+
     private final GraderService graderService;
 
     private final SubmissionService submissionService;
@@ -35,9 +37,10 @@ class UsersController {
     private final AssessmentLinkerService assessmentLinkerService;
 
     @Autowired
-    public UsersController(CanvasApi canvasApi, ActivityService activityService, GraderService graderService, SubmissionService submissionService, ParticipantService participantService, AssessmentLinkerService assessmentLinkerService) {
+    public UsersController(CanvasApi canvasApi, ActivityService activityService, UserService userService, GraderService graderService, SubmissionService submissionService, ParticipantService participantService, AssessmentLinkerService assessmentLinkerService) {
         this.canvasApi = canvasApi;
         this.activityService = activityService;
+        this.userService = userService;
         this.graderService = graderService;
         this.submissionService = submissionService;
         this.participantService = participantService;
@@ -89,7 +92,7 @@ class UsersController {
     @GetMapping(value = "/submissions")
     protected ArrayNode getTasks(Principal principal) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
-        List<Submission> submissions = submissionService.findSubmissionsForGraderAll(principal.getName());
+        List<Submission> submissions = userService.findSubmissionsForGraderAll(principal.getName());
         Map<Project, List<Submission>> projectListMap = new HashMap<>();
 
         for(Submission submission : submissions) {

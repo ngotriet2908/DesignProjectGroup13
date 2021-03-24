@@ -57,7 +57,7 @@ class RubricOutline extends Component {
   }
 
   downloadRubric = () => {
-    alert("Handle download.")
+    this.props.downloadRubric();
   }
 
   onClickCancelButton = () => {
