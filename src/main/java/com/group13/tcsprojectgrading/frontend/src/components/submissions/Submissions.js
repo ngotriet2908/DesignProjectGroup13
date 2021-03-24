@@ -170,9 +170,6 @@ class Submissions extends Component {
           <Button variant="lightGreen" onClick={this.syncHandler}>
             <IoSyncOutline size={20}/> Sync
           </Button>
-          {/*<div className={classnames(globalStyles.iconButton)} onClick={this.syncHandler}>*/}
-          {/*  <IoSyncOutline size={26}/>*/}
-          {/*</div>*/}
         </div>
 
         {/*<div className={styles.overview}>*/}

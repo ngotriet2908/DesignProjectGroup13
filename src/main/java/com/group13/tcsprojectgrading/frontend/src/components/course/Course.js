@@ -24,6 +24,7 @@ import SectionContainer from "../home/SectionContainer";
 
 import globalStyles from '../helpers/global.module.css';
 import {IoFileTrayOutline} from "react-icons/io5";
+import classnames from 'classnames';
 
 
 class Course extends Component {
@@ -119,8 +120,9 @@ class Course extends Component {
           <Breadcrumbs.Item active>{this.state.course.name}</Breadcrumbs.Item>
         </Breadcrumbs>
 
-        <div className={[globalStyles.titleContainer].join(" ")}>
-          <h1>{this.state.course.name}</h1><span>{(new Date(this.state.course.start_at)).getFullYear()}</span>
+        <div className={classnames(globalStyles.titleContainer, styles.titleContainer)}>
+          <h1>{this.state.course.name}</h1>
+          <span>{(new Date(this.state.course.start_at)).getFullYear()}</span>
         </div>
 
         <div className={styles.container}>
@@ -130,9 +132,10 @@ class Course extends Component {
             data={this.state.projects}
             emptyText={"No projects selected in this course. Click on the pencil button to select course projects."}
             Component={ProjectCard}
+            onClickIcon={this.openModal}
             icon={
               <Can I="write" a="Projects">
-                <IoPencil size={28} onClick={this.openModal}/>
+                <IoPencil size={28}/>
               </Can>
             }
             EmptyIcon={IoFileTrayOutline}

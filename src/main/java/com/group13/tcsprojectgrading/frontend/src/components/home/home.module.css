@@ -9,11 +9,13 @@
 /* card */
 .card {
     /*width: 22rem;*/
-    min-height: 150px;
+    /*min-height: 150px;*/
     position:relative;
     /*width: 50%;*/
     width: 100%;
     margin-bottom: 1rem;
+
+    min-height: 10rem;
 }
 
 .cardBodyContainer {
@@ -137,7 +139,7 @@
     text-align: center;
     border: 2px dashed rgba(0,0,0,.125);
 
-    min-height: 6rem;
+    min-height: 10rem;
 }
 
 .emptyCardBodyContainer {

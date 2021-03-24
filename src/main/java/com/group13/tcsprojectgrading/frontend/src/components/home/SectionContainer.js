@@ -15,7 +15,7 @@ class SectionContainer extends Component {
           <h3 className={styles.sectionTitleH}>{this.props.title}</h3>
 
           {this.props.icon &&
-            <div className={classnames(styles.iconButton, styles.sectionTitleButton)}>
+            <div onClick={this.props.onClickIcon} className={classnames(styles.iconButton, styles.sectionTitleButton)}>
               {this.props.icon}
             </div>
           }
