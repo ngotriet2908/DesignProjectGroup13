@@ -58,7 +58,7 @@ public class AssessmentLinkerService {
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
-    public List<AssessmentLinker> finaAssessmentLinkerForSubmissionAndParticipant(Submission submission, Participant participant) {
+    public List<AssessmentLinker> findAssessmentLinkerForSubmissionAndParticipant(Submission submission, Participant participant) {
         return repository.findAssessmentsLinkersBySubmissionAndParticipant(submission, participant);
     }
 

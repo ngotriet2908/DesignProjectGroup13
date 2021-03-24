@@ -33,8 +33,11 @@ public class AssessmentService {
 
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Assessment getAssessmentBySubmissionAndParticipant(Submission submission, Participant participant) {
-        List<AssessmentLinker> linkers = service.finaAssessmentLinkerForSubmissionAndParticipant(submission, participant);
-        if (linkers.size() != 1) return null;
+        List<AssessmentLinker> linkers = service.findAssessmentLinkerForSubmissionAndParticipant(submission, participant);
+        if (linkers.size() != 1) {
+            System.out.println("linker size:" + linkers.size());
+            return null;
+        }
         return repository.findById(linkers.get(0).getAssessmentId()).orElse(null);
     }
 
