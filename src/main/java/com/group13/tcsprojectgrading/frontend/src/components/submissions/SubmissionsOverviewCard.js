@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import {Badge, Card, Button, OverlayTrigger, Tooltip} from "react-bootstrap";
+import {Badge, Card, Button, OverlayTrigger, Tooltip, ListGroup} from "react-bootstrap";
 import {push} from "connected-react-router";
 import styles from "./submissions.module.css"
 import {Link} from "react-router-dom";
@@ -74,14 +74,18 @@ class SubmissionsOverviewCard extends Component {
           <div className={styles.submissionCardBody}>
             <div>Submitted on {(new Date(this.props.submission.submittedAt)).toDateString()}</div>
             <div>Progress: {this.props.submission.progress}%</div>
-            <div>Attempts: {this.props.submission.attempt}</div>
-
-            {/*<Button variant="primary" className={styles.goTaskButton}>*/}
-            {/*  <Link className={styles.plainLink} to={{*/}
-            {/*    pathname: this.props.route.url + "/" + this.props.submission.id,*/}
-            {/*  }}>Open*/}
-            {/*  </Link>*/}
-            {/*</Button>*/}
+            <ListGroup>
+              Participants:
+              {this.props.submission.participants.map((member) => {
+                return (
+                  <ListGroup.Item key={member.id}>
+                    <div className={styles.memberItem}>
+                      <h6>name: {member.name}</h6>
+                      <h6>sid: {member.sid}</h6>
+                    </div>
+                  </ListGroup.Item>)
+              })}
+            </ListGroup>
           </div>
         </Card.Body>
       </Card>

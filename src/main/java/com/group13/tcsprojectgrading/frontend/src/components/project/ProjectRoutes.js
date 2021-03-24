@@ -10,13 +10,15 @@ import Submissions from "../submissions/Submissions";
 import SubmissionDetails from "../submissionDetails/SubmissionDetails";
 import NotFound from "../error/NotFound";
 import {URL_PREFIX} from "../../services/config";
+import Participants from "../participants/Participants";
 
 
 class ProjectRoutes extends Component {
   render () {
     return (
       <Switch>
-        <Route exact path={this.props.match.path + "/groups"} component={Groups}/>
+        {/*<Route exact path={this.props.match.path + "/groups"} component={Groups}/>*/}
+        <Route exact path={this.props.match.path + "/participants"} component={Participants}/>
         <Route exact path={this.props.match.path + "/rubric"} component={Rubric}/>
         <Route exact path={this.props.match.path + "/graders"} component={GraderManagement}/>
         {/*<Route path={this.props.match.path + "/grading"} component={Grading}/>*/}

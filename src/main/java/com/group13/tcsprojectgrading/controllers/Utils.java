@@ -21,7 +21,7 @@ public class Utils {
                 arrayNode.add(node);
             }
         }
-        System.out.println(arrayNode.toString());
+//        System.out.println(arrayNode.toString());
         return arrayNode;
     }
 

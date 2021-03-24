@@ -7,6 +7,7 @@ import com.group13.tcsprojectgrading.repositories.FlagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,6 +21,7 @@ public class FlagService {
         this.repository = repository;
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public Flag saveNewFlag(Flag flag) {
         Flag currentFlag = findFlagWithNameAndProject(flag.getName(), flag.getProject());
         if (currentFlag != null) {
@@ -28,18 +30,22 @@ public class FlagService {
         return this.repository.save(flag);
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public Flag findFlagWithNameAndProject(String name, Project project) {
         return repository.findFlagByNameAndProject(name, project);
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public Flag findFlagWithId(UUID id) {
         return repository.findById(id).orElse(null);
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public List<Flag> findFlagsWithProject(Project project) {
         return repository.findFlagsByProject(project);
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public void deleteFlag(Flag flag) {
         repository.delete(flag);
     }

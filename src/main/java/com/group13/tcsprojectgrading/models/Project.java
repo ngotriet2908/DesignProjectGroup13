@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.List;
 import java.util.Objects;
 
@@ -38,6 +35,8 @@ public class Project {
     @OneToMany(mappedBy = "project")
     private List<Flag> flags;
 
+    @Transient
+    private boolean isVolatile;
 
     private String name;
 
@@ -161,6 +160,14 @@ public class Project {
         objectNode.put("description", description);
         objectNode.set("flags", createFlagsArrayNode(flags));
         return objectNode;
+    }
+
+    public boolean isVolatile() {
+        return isVolatile;
+    }
+
+    public void setVolatile(boolean aVolatile) {
+        isVolatile = aVolatile;
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.group13.tcsprojectgrading.repositories.PrivilegeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +19,7 @@ public class PrivilegeService {
         this.repository = repository;
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public Privilege findPrivilegeByName(String name) {
         return repository.findPrivilegeByName(name);
     }

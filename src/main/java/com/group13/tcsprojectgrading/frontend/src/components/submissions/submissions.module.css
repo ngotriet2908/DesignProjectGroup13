@@ -138,3 +138,9 @@
 .goTaskButton {
 
 }
+
+.memberItem {
+    width: 100%;
+    display: inline-grid;
+    grid-template-columns: 50% 50%;
+}
