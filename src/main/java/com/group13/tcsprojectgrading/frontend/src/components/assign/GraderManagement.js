@@ -1,6 +1,6 @@
 import styles from "./assign.module.css";
 import React, {Component} from "react";
-import {ListGroup, ListGroupItem} from "react-bootstrap";
+import {ButtonGroup, Dropdown, DropdownButton, ListGroup, ListGroupItem} from "react-bootstrap";
 import TaskCard from "./TaskCard";
 import {notAssignedGroupsData, gradersData} from './GradersData'
 import {Button, Card, FormControl, Modal, Alert, Spinner, Breadcrumb} from 'react-bootstrap'
@@ -15,7 +15,7 @@ import BulkAssignModal from "./BulkAssignModal";
 import globalStyles from "../helpers/global.module.css";
 import Breadcrumbs from "../helpers/Breadcrumbs";
 import classnames from "classnames";
-import {IoSyncOutline} from "react-icons/io5";
+import {IoPencilOutline} from "react-icons/io5";
 import Grader from "./Grader";
 import AssignSubmissionModal from "./AssignSubmissionModal";
 
@@ -477,32 +477,31 @@ class GraderManagement extends Component {
           <h1>Graders</h1>
         </div>
 
-        {/*<Card className={styles.gradersCardContainer}>*/}
-        {/*<div className={styles.manageTaToolbar}>*/}
-        {/*  <h3 className={styles.subtitle} >Manage Graders</h3>*/}
-        {/*  <FormControl className={styles.manageTaSearch}*/}
-        {/*    type="text"*/}
-        {/*    placeholder="Search for grader or group name"*/}
-        {/*    onChange={this.handleGraderSearchChange}/>*/}
+        <div className={styles.toolbar}>
+          <FormControl className={styles.groupsSearchBar}
+            type="text"
+            placeholder="Search by a group or grader name"
+            onChange={this.handleGraderSearchChange}/>
 
-        {/*  <Button className={styles.manageTaToolbarButton}*/}
-        {/*    variant="primary"*/}
-        {/*    onClick={null}>*/}
-        {/*    sort*/}
-        {/*  </Button>*/}
+          {/*<Button className={styles.manageTaToolbarButton}*/}
+          {/*  variant="primary" onClick={null}>*/}
+          {/*   Sort*/}
+          {/*</Button>*/}
 
-        {/*</div>*/}
-        {/*</Card>*/}
+          <Button variant="lightGreen" onClick={this.modalEditGradersHandleShow}>
+            <IoPencilOutline size={20}/> Graders
+          </Button>
+        </div>
 
         {/* assigned */}
         <div className={styles.gradersContainer}>
           {
             this.state.graders
-            // .filter((grader) => {
-            //   let filterStringTmp = this.state.gradersFilterString.toLowerCase()
-            //   return (grader.name.toLowerCase().includes(filterStringTmp)
-            //     || grader.groups.reduce(((result, group) => result || group.name.toLowerCase().includes(filterStringTmp)),false))
-            // })
+              .filter((grader) => {
+                let filterStringTmp = this.state.gradersFilterString.toLowerCase()
+                return (grader.name.toLowerCase().includes(filterStringTmp)
+                || grader.groups.reduce(((result, group) => result || group.name.toLowerCase().includes(filterStringTmp)),false))
+              })
               .map(grader => {
                 return (
                   <Grader
@@ -526,25 +525,6 @@ class GraderManagement extends Component {
             grader={null}
           />
         </div>
-
-        <Button className={styles.manageTaToolbarButton}
-          variant="primary"
-          onClick={this.modalEditGradersHandleShow}>
-          edit graders
-        </Button>
-
-        <Button className={styles.manageTaToolbarButton}
-          variant="primary"
-          onClick={this.syncHandler}>
-          {(!this.state.syncing)? "Sync with Canvas":
-            <Spinner
-              as="span"
-              animation="grow"
-              size="sm"
-              role="status"
-              aria-hidden="true"/>
-          }
-        </Button>
 
 
         {/*<Card className={styles.notAssignedContainer}>*/}

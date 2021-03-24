@@ -5,6 +5,7 @@ import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
 import {connect} from "react-redux";
 import {IoCloseOutline, IoCheckboxOutline, IoSquareOutline} from "react-icons/io5";
+import classnames from "classnames";
 
 
 class EditProjectsModal extends Component {
@@ -147,9 +148,7 @@ class EditProjectsModal extends Component {
               return (
                 <div
                   key={project.id}
-                  className={
-                    [styles.modalBodyContainerRow, (projectFound ? styles.modalBodyContainerRowActive : [])
-                    ].join(' ')}
+                  className={classnames(styles.modalBodyContainerRow, projectFound && styles.modalBodyContainerRowActive)}
                   onClick={this.handleChangeStatus.bind(this, project)}
                 >
                   {projectFound ?

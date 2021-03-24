@@ -190,7 +190,11 @@ public class RubricService {
                     if (element.get("content").get("type").asText().equals(Type.SECTION.toString())) {
                         // it was a title with non-empty subtree
                         // TODO it might have been a hierarchy of headers, too tired to check
-                        System.out.println(element.get("children").size());
+
+                        // recursively get all criteria
+
+
+
                         if (element.get("children").size() > 0) {
                             System.out.println("A section with criteria has been removed (well, not necessarily, but hey). Mark all submissions.");
                         }

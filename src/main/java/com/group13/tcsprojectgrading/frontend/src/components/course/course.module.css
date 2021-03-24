@@ -10,6 +10,12 @@
     grid-column: 1 / 2;
 }
 
+.titleContainer span {
+    font-size: 2rem;
+    color: moderateGray;
+    margin-left: 1rem;
+}
+
 
 
 .editProjectsModalCard {
@@ -102,9 +108,11 @@
 }
 
 .modalBodyContainerRowActive {
-    background-color: primary;
-    color: white;
     border: 1px solid primary;
+}
+
+.modalBodyContainerRowActive > *:first-child {
+    color: primary;
 }
 
 .modalFooterContainer {

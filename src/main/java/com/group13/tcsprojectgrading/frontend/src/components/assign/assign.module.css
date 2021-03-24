@@ -4,14 +4,81 @@
     margin-bottom: 2rem;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+/* toolbar */
+.toolbar {
+    display: flex;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid lightGray;
+}
+
+.toolbar > *:last-child {
+    margin-left: 0.5rem;
+}
+
+.groupsSearchBar {
+    margin-right: 0.5rem;
+    width: 100%;
+}
+
+.toolbarButton {
+    margin-top: 1rem;
+    display: flex;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 .gradersCardContainer {
     padding: 0.5rem 0.5rem;
     margin-bottom: 1.2rem;
 }
 
-.manageTaToolbar {
-    display: inline-flex;
-}
 
 .subtitle {
     padding: 0.5rem 0.5rem;
@@ -20,18 +87,6 @@
     margin-right: 1rem;
 }
 
-.manageTaSearch {
-    display: inline;
-    margin-top: 0.5rem;
-    width: 30%;
-}
-
-.manageTaToolbarButton {
-    display: inline;
-    margin-top: 0.5rem;
-    margin-bottom: 0.7rem;
-    margin-left: 0.5rem;
-}
 
 .graderManagement {
     width: 100%;
@@ -232,6 +287,10 @@
 
 
 
+
+
+
+
 /* modal */
 .modalContainer {
     padding: 2rem 2rem 1rem 2rem;
@@ -360,12 +419,12 @@
     display: none;
 }
 
-.collapseButton {
+.collapseButton svg {
     transform: rotate(180deg);
     transition: transform .1s ease-in-out;
 }
 
-.graderBodyContainerCollapsed .collapseButton {
+.graderBodyContainerCollapsed .collapseButton svg {
     transform: rotate(0deg);
 }
 

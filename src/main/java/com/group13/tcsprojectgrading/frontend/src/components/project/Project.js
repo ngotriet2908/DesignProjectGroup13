@@ -212,38 +212,38 @@ class Project extends Component {
             {/*  </div>*/}
             {/*</Can>*/}
 
-            <Can I="read" a="Statistic">
-              <div className={[globalStyles.sectionContainer, styles.statisticSectionContainer].join(" ")}>
-                <div className={[globalStyles.sectionTitle, globalStyles.sectionTitleWithButton].join(" ")}>
-                  <h3 className={globalStyles.sectionTitleH}>
-                    Statistics
-                  </h3>
-                </div>
-                <Card>
-                  <Card.Body>
-                    Here comes the Stats
-                    {/*<CardColumns className={styles.stats}>*/}
-                    {/*  {testStats.map(stat => {*/}
-                    {/*    return (*/}
-                    {/*      <Statistic title={stat.title}*/}
-                    {/*        type={stat.type}*/}
-                    {/*        data={stat.data}*/}
-                    {/*        unit={stat.unit}/>*/}
-                    {/*    );*/}
-                    {/*  }).concat(this.state.stats.map((stat, index) => {*/}
-                    {/*    return (*/}
-                    {/*      <Statistic title={stat.title}*/}
-                    {/*        key={index}*/}
-                    {/*        type={stat.type}*/}
-                    {/*        data={stat.data}*/}
-                    {/*        unit={stat.unit}/>*/}
-                    {/*    );*/}
-                    {/*  }))}*/}
-                    {/*</CardColumns>*/}
-                  </Card.Body>
-                </Card>
-              </div>
-            </Can>
+            {/*<Can I="read" a="Statistic">*/}
+            {/*  <div className={[globalStyles.sectionContainer, styles.statisticSectionContainer].join(" ")}>*/}
+            {/*    <div className={[globalStyles.sectionTitle, globalStyles.sectionTitleWithButton].join(" ")}>*/}
+            {/*      <h3 className={globalStyles.sectionTitleH}>*/}
+            {/*        Statistics*/}
+            {/*      </h3>*/}
+            {/*    </div>*/}
+            {/*    <Card>*/}
+            {/*      <Card.Body>*/}
+            {/*        Here comes the Stats*/}
+            {/*        /!*<CardColumns className={styles.stats}>*!/*/}
+            {/*        /!*  {testStats.map(stat => {*!/*/}
+            {/*        /!*    return (*!/*/}
+            {/*        /!*      <Statistic title={stat.title}*!/*/}
+            {/*        /!*        type={stat.type}*!/*/}
+            {/*        /!*        data={stat.data}*!/*/}
+            {/*        /!*        unit={stat.unit}/>*!/*/}
+            {/*        /!*    );*!/*/}
+            {/*        /!*  }).concat(this.state.stats.map((stat, index) => {*!/*/}
+            {/*        /!*    return (*!/*/}
+            {/*        /!*      <Statistic title={stat.title}*!/*/}
+            {/*        /!*        key={index}*!/*/}
+            {/*        /!*        type={stat.type}*!/*/}
+            {/*        /!*        data={stat.data}*!/*/}
+            {/*        /!*        unit={stat.unit}/>*!/*/}
+            {/*        /!*    );*!/*/}
+            {/*        /!*  }))}*!/*/}
+            {/*        /!*</CardColumns>*!/*/}
+            {/*      </Card.Body>*/}
+            {/*    </Card>*/}
+            {/*  </div>*/}
+            {/*</Can>*/}
           </div>
 
           <div>
