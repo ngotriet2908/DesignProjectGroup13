@@ -9,6 +9,7 @@ import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.Project;
 import com.group13.tcsprojectgrading.models.RoleEnum;
 import com.group13.tcsprojectgrading.models.Submission;
+import com.group13.tcsprojectgrading.services.submissions.SubmissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

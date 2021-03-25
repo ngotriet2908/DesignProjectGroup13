@@ -5,23 +5,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.api.client.json.Json;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
-import com.group13.tcsprojectgrading.models.*;
-import com.group13.tcsprojectgrading.models.rubric.Rubric;
-import com.group13.tcsprojectgrading.services.*;
-import com.group13.tcsprojectgrading.services.grading.AssessmentService;
-import com.group13.tcsprojectgrading.services.rubric.RubricService;
+import com.group13.tcsprojectgrading.services.submissions.SubmissionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static com.group13.tcsprojectgrading.models.Submission.createFlagsArrayNode;
 
 @RestController
 @RequestMapping("/api/courses/{courseId}/projects/{projectId}/submissions")

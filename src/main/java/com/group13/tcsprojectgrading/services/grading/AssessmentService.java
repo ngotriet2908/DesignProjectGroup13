@@ -10,7 +10,6 @@ import com.group13.tcsprojectgrading.models.grading.Grade;
 import com.group13.tcsprojectgrading.models.rubric.Element;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.repositories.grading.AssessmentRepository;
-import com.group13.tcsprojectgrading.services.AssessmentLinkerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

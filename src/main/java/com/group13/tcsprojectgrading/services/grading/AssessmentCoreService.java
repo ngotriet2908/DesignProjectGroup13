@@ -1,4 +1,4 @@
-package com.group13.tcsprojectgrading.services;
+package com.group13.tcsprojectgrading.services.grading;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -8,7 +8,9 @@ import com.group13.tcsprojectgrading.models.*;
 import com.group13.tcsprojectgrading.models.grading.CriterionGrade;
 import com.group13.tcsprojectgrading.models.grading.Grade;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
-import com.group13.tcsprojectgrading.services.grading.AssessmentService;
+import com.group13.tcsprojectgrading.services.graders.GraderService;
+import com.group13.tcsprojectgrading.services.ProjectService;
+import com.group13.tcsprojectgrading.services.submissions.SubmissionService;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

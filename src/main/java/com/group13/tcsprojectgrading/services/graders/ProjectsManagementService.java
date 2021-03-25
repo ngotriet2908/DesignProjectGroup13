@@ -1,4 +1,4 @@
-package com.group13.tcsprojectgrading.services;
+package com.group13.tcsprojectgrading.services.graders;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,15 +8,17 @@ import com.group13.tcsprojectgrading.models.Grader;
 import com.group13.tcsprojectgrading.models.Project;
 import com.group13.tcsprojectgrading.models.RoleEnum;
 import com.group13.tcsprojectgrading.models.Submission;
+import com.group13.tcsprojectgrading.services.ProjectService;
+import com.group13.tcsprojectgrading.services.permissions.ProjectRoleService;
+import com.group13.tcsprojectgrading.services.permissions.RoleService;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
+import com.group13.tcsprojectgrading.services.submissions.SubmissionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
 import java.util.*;
-
-import static com.group13.tcsprojectgrading.controllers.Utils.groupPages;
 
 @Service
 public class ProjectsManagementService {

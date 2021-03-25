@@ -33,13 +33,14 @@ class SubmissionsOverviewCard extends Component {
                 <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant="tomato">Individual</Badge>
             }
 
-            {
-              (this.props.submission.progress <= 0)?
-                <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant="tomato">Not started</Badge> :
-                (this.props.submission.progress < 100)?
-                  <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant="orange">In progress</Badge> :
-                  <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant="green">Graded</Badge>
-            }
+            {/* TODO doesn't work*/}
+            {/*{*/}
+            {/*  (this.props.submission.progress <= 0)?*/}
+            {/*    <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant="tomato">Not started</Badge> :*/}
+            {/*    (this.props.submission.progress < 100)?*/}
+            {/*      <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant="orange">In progress</Badge> :*/}
+            {/*      <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant="green">Graded</Badge>*/}
+            {/*}*/}
 
             {
               (this.props.submission.hasOwnProperty("grader") && this.props.submission.grader.id === this.props.user.id)?
@@ -72,10 +73,10 @@ class SubmissionsOverviewCard extends Component {
           </div>
 
           <div className={styles.submissionCardBody}>
-            <div>Submitted on {(new Date(this.props.submission.submittedAt)).toDateString()}</div>
-            <div>Progress: {this.props.submission.progress}%</div>
+            <p>Submitted on {(new Date(this.props.submission.submittedAt)).toDateString()}</p>
+            <p>Progress: {this.props.submission.progress}%</p>
             <ListGroup>
-              Participants:
+              <p>Members:</p>
               {this.props.submission.participants.map((member) => {
                 return (
                   <ListGroup.Item key={member.id}>

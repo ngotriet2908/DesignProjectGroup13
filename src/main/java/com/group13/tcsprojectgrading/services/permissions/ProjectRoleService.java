@@ -1,4 +1,4 @@
-package com.group13.tcsprojectgrading.services;
+package com.group13.tcsprojectgrading.services.permissions;
 
 import com.group13.tcsprojectgrading.models.*;
 import com.group13.tcsprojectgrading.repositories.ProjectRoleRepository;

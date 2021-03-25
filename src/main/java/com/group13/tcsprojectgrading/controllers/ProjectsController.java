@@ -7,53 +7,31 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.flipkart.zjsonpatch.JsonPatchApplicationException;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.services.gmail.Gmail;
-import com.google.api.services.gmail.model.Message;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.*;
-import com.group13.tcsprojectgrading.models.rubric.Rubric;
-import com.group13.tcsprojectgrading.models.rubric.RubricHistory;
-import com.group13.tcsprojectgrading.models.rubric.RubricUpdate;
 import com.group13.tcsprojectgrading.services.*;
+import com.group13.tcsprojectgrading.services.graders.GraderService;
+import com.group13.tcsprojectgrading.services.grading.AssessmentLinkerService;
 import com.group13.tcsprojectgrading.services.grading.AssessmentService;
+import com.group13.tcsprojectgrading.services.permissions.ProjectRoleService;
+import com.group13.tcsprojectgrading.services.permissions.RoleService;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
 //import com.itextpdf.text.*;
 //import com.itextpdf.text.pdf.PdfWriter;
-import com.itextpdf.kernel.geom.PageSize;
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfWriter;
-import com.itextpdf.layout.Document;
-import com.itextpdf.layout.element.Paragraph;
+import com.group13.tcsprojectgrading.services.submissions.FlagService;
+import com.group13.tcsprojectgrading.services.submissions.SubmissionDetailsService;
+import com.group13.tcsprojectgrading.services.submissions.SubmissionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import org.apache.commons.codec.binary.Base64;
 
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import javax.activation.FileDataSource;
 import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.Session;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
 import java.io.*;
 import java.security.GeneralSecurityException;
 import java.security.Principal;
-import java.sql.Timestamp;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.List;
 
@@ -232,8 +210,7 @@ public class ProjectsController {
     @GetMapping(value = "/{projectId}/feedback")
     @ResponseBody
     protected ObjectNode getFeedbackInfoPage(@PathVariable String courseId,
-                                             @PathVariable String projectId,
-                                             Principal principal) throws JsonProcessingException, ParseException {
+                                             @PathVariable String projectId) throws JsonProcessingException {
         Project project = projectService.getProject(courseId, projectId);
         if (project == null) {
             throw new ResponseStatusException(

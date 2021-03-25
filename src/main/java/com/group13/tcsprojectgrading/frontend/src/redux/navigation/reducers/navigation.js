@@ -9,7 +9,8 @@ export const LOCATIONS = Object.freeze(
     "grading": 5,
     "graders": 6,
     "submissions": 7,
-    "submission": 8
+    "submission": 8,
+    "settings": 9,
   })
 
 const initialState = {

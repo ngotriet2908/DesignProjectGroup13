@@ -134,13 +134,7 @@ class SubmissionDetails extends Component {
           <h1>{this.state.submission.name}</h1>
         </div>
 
-
-
         <div className={styles.labelsContainer}>
-          <Button variant="dashed" onClick={this.onFlagModalShow}>
-            <IoAdd/> Add label
-          </Button>
-
           {this.state.submission.flags.map((flag) => {
             return (
               <OverlayTrigger
@@ -157,6 +151,10 @@ class SubmissionDetails extends Component {
 
             )
           })}
+
+          <Button variant="dashed" onClick={this.onFlagModalShow}>
+            <IoAdd/> Add label
+          </Button>
         </div>
 
         <div className={classnames(styles.container)}>

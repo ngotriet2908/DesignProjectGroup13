@@ -1,4 +1,4 @@
-package com.group13.tcsprojectgrading.services;
+package com.group13.tcsprojectgrading.services.grading;
 
 import com.group13.tcsprojectgrading.models.AssessmentLinker;
 import com.group13.tcsprojectgrading.models.Participant;

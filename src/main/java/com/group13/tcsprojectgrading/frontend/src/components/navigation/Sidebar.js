@@ -17,7 +17,8 @@ import {
   IoReturnDownBackOutline,
   IoPencilSharp,
   IoListOutline,
-  IoReaderOutline
+  IoReaderOutline,
+  IoSettingsOutline
 } from "react-icons/io5";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 import classnames from 'classnames';
@@ -207,7 +208,21 @@ class Sidebar extends React.Component {
         </div>)
       )
     }
-    // }
+
+    result.push(
+      <div key="settings" className={`${styles.sidebarBodyItem}`}
+        onClick={this.onClickLogo}
+      >
+        <div className={styles.sidebarBodyItemLeft}>
+          <IoSettingsOutline className={styles.sidebarIcon} size={26}/>
+        </div>
+        {!this.state.isHidden &&
+        <span className={styles.sidebarBodyItemRight}>
+                  Settings
+        </span>
+        }
+      </div>
+    )
 
     return result;
   }

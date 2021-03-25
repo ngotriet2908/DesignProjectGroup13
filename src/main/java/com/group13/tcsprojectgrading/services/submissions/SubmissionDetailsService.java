@@ -1,4 +1,4 @@
-package com.group13.tcsprojectgrading.services;
+package com.group13.tcsprojectgrading.services.submissions;
 
 import com.group13.tcsprojectgrading.models.Submission;
 import com.group13.tcsprojectgrading.models.SubmissionAttachment;

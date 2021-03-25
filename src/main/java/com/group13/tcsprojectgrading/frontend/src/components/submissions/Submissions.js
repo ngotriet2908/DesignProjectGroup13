@@ -185,10 +185,6 @@ class Submissions extends Component {
             <h3 className={styles.sectionTitleH}>Submission List</h3>
           </div>
 
-          {/*<Card>*/}
-          {/*  <Card.Body>*/}
-          {/*<h3>Submissions List</h3>*/}
-
           <div className={styles.toolbar}>
             <FormControl className={styles.groupsSearchBar}
               type="text"
@@ -263,8 +259,6 @@ class Submissions extends Component {
                   )
                 })}
           </div>
-          {/*</Card.Body>*/}
-          {/*</Card>*/}
         </div>
 
       </div>

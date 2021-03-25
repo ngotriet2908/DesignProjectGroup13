@@ -246,19 +246,19 @@ class Project extends Component {
             {/*</Can>*/}
           </div>
 
-          <div>
-            <Can I="view" a="TodoList">
-              <SectionContainer
-                title={"To-Do list"}
-                data={[]}
-                // emptyText={"Your tasks will appear here when they are assigned to you."}
-                emptyText={"Nothing to do"}
-                Component={HomeTaskCard}
-                className={styles.tasksSectionContainer}
-                EmptyIcon={IoCheckboxOutline}
-              />
-            </Can>
-          </div>
+          {/*<div>*/}
+          {/*  <Can I="view" a="TodoList">*/}
+          {/*    <SectionContainer*/}
+          {/*      title={"To-Do list"}*/}
+          {/*      data={[]}*/}
+          {/*      // emptyText={"Your tasks will appear here when they are assigned to you."}*/}
+          {/*      emptyText={"Nothing to do"}*/}
+          {/*      Component={HomeTaskCard}*/}
+          {/*      className={styles.tasksSectionContainer}*/}
+          {/*      EmptyIcon={IoCheckboxOutline}*/}
+          {/*    />*/}
+          {/*  </Can>*/}
+          {/*</div>*/}
         </div>
       </div>
     )
