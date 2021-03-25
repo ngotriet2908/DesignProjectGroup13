@@ -1,15 +1,15 @@
 package com.group13.tcsprojectgrading.services.grading;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.group13.tcsprojectgrading.models.Assessment;
-import com.group13.tcsprojectgrading.models.AssessmentLinker;
-import com.group13.tcsprojectgrading.models.Participant;
-import com.group13.tcsprojectgrading.models.Submission;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.group13.tcsprojectgrading.models.*;
 import com.group13.tcsprojectgrading.models.grading.CriterionGrade;
 import com.group13.tcsprojectgrading.models.grading.Grade;
 import com.group13.tcsprojectgrading.models.rubric.Element;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.repositories.grading.AssessmentRepository;
+import com.group13.tcsprojectgrading.repositories.AssessmentContainerRepository;
+import com.group13.tcsprojectgrading.services.AssessmentLinkerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,13 +21,27 @@ import java.util.UUID;
 @Service
 public class AssessmentService {
 
-    private final AssessmentRepository repository;
+//    private final AssessmentRepository repository;
     private final AssessmentLinkerService service;
+    private final AssessmentContainerRepository containerRepository;
 
     @Autowired
-    public AssessmentService(AssessmentRepository repository, AssessmentLinkerService service) {
-        this.repository = repository;
+    public AssessmentService(AssessmentLinkerService service, AssessmentContainerRepository containerRepository) {
+//        this.repository = repository;
         this.service = service;
+        this.containerRepository = containerRepository;
+    }
+
+    private Assessment getAssessmentFromContainer(AssessmentContainer container) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            if (container != null) {
+                return objectMapper.readValue(container.getAssessment(), Assessment.class);
+            }
+        } catch (JsonProcessingException e) {
+            return null;
+        }
+        return null;
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
@@ -37,7 +51,8 @@ public class AssessmentService {
             System.out.println("linker size:" + linkers.size());
             return null;
         }
-        return repository.findById(linkers.get(0).getAssessmentId()).orElse(null);
+
+        return getAssessmentFromContainer(containerRepository.findById(linkers.get(0).getAssessmentId()).orElse(null));
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
@@ -45,7 +60,7 @@ public class AssessmentService {
         List<AssessmentLinker> linkers = service.findAssessmentLinkersForSubmission(submission);
         List<Assessment> assessments = new ArrayList<>();
         for(AssessmentLinker linker: linkers) {
-            Assessment assessment = repository.findById(linker.getAssessmentId()).orElse(null);
+            Assessment assessment = getAssessmentFromContainer(containerRepository.findById(linker.getAssessmentId()).orElse(null));
             if (assessment == null) continue;
             if (!assessments.contains(assessment)) {
                 assessments.add(assessment);
@@ -55,40 +70,70 @@ public class AssessmentService {
         return assessments;
     }
 
+    private String convertAssessmentToString(Assessment assessment) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.writeValueAsString(assessment);
+    }
+
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Assessment getAssessmentById(String id) {
-        return repository.findById(UUID.fromString(id)).orElse(null);
+        return getAssessmentFromContainer(containerRepository.findById(UUID.fromString(id)).orElse(null));
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Assessment saveAssessment(Assessment assessment) {
-        return repository.save(assessment);
+        try {
+            AssessmentContainer container = containerRepository.findById(assessment.getId()).orElse(null);
+            if (container == null) return null;
+            container.setAssessment(convertAssessmentToString(assessment));
+            return getAssessmentFromContainer(containerRepository.save(container));
+        } catch (Exception e) {
+            return null;
+        }
+
     }
+
 
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Assessment saveAssessment(AssessmentLinker assessmentLinker) {
-        return repository.save(new Assessment(assessmentLinker.getAssessmentId()));
+        try {
+            Assessment assessment = new Assessment(assessmentLinker.getAssessmentId());
+            AssessmentContainer container = new AssessmentContainer(assessment.getId(), convertAssessmentToString(assessment));
+            return getAssessmentFromContainer(containerRepository.save(container));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public Assessment addNewAssignment(Assessment assessment) {
+        try {
+            AssessmentContainer container = new AssessmentContainer(assessment.getId(), convertAssessmentToString(assessment));
+            return getAssessmentFromContainer(containerRepository.save(container));
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
     public void deleteAssessment(AssessmentLinker assessmentLinker) {
-        repository.delete(findAssessment(assessmentLinker));
+        containerRepository.deleteById(assessmentLinker.getAssessmentId());
+//        repository.delete(findAssessment(assessmentLinker));
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
     public void deleteAssessment(Assessment assessment) {
-        repository.delete(assessment);
+        containerRepository.deleteById(assessment.getId());
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Assessment findAssessment(String id) {
-        return repository.findById(UUID.fromString(id)).orElse(null);
+        AssessmentContainer container = containerRepository.findById(UUID.fromString(id)).orElse(null);
+        if (container == null) return null;
+        return getAssessmentFromContainer(container);
+
     }
 
-    @Transactional(value = Transactional.TxType.MANDATORY)
-    public Assessment findAssessment(AssessmentLinker assessmentLinker) {
-        return repository.findById(assessmentLinker.getAssessmentId()).orElse(null);
-    }
 
     public int calculateFinalGrade(Rubric rubric, Assessment assessment) {
         List<Element> criteria = rubric.fetchAllCriteria();

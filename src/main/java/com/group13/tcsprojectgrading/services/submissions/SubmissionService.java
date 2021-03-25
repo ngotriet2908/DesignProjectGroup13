@@ -282,7 +282,7 @@ public class SubmissionService {
             case "clone": {
                 String source = object.get("source").asText();
                 Assessment sourceAssignment = assessmentService.getAssessmentById(source);
-                Assessment newAssignment = assessmentService.saveAssessment(new Assessment(UUID.randomUUID(), sourceAssignment.getGrades()));
+                Assessment newAssignment = assessmentService.addNewAssignment(new Assessment(UUID.randomUUID(), sourceAssignment.getGrades()));
                 AssessmentLinker linker = assessmentLinkerService.addNewNullAssessment(new AssessmentLinker(
                         submission,
                         null,
