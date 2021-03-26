@@ -12,7 +12,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import static com.group13.tcsprojectgrading.models.PrivilegeEnum.*;
 
 @SpringBootApplication
 //public class TcsProjectGradingApplication implements CommandLineRunner {
@@ -40,55 +43,54 @@ public class TcsProjectGradingApplication {
     @Bean
     public CommandLineRunner demoData(RoleService roleService, PrivilegeService privilegeService) {
         return args -> {
-            Privilege mangeGradersOpen = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.MANAGE_GRADERS_OPEN.toString());
 
-            Privilege rubricRead = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.RUBRIC_READ.toString());
-            Privilege rubricWrite = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.RUBRIC_WRITE.toString());
+            List<PrivilegeEnum> teacherPrivilegesEnum = List.of(
+                    MANAGE_GRADERS_OPEN, MANAGE_GRADERS_EDIT, MANAGE_GRADERS_SELF_EDIT,
+                    RUBRIC_READ, RUBRIC_WRITE, RUBRIC_DOWNLOAD,
+                    STATISTIC_READ, STATISTIC_WRITE,
+                    ADMIN_TOOLBAR_VIEW,
+                    TODO_LIST_VIEW,
+                    GRADING_WRITE_ALL, GRADING_READ_ALL,
+                    PROJECT_READ,
+                    SUBMISSIONS_SYNC, SUBMISSIONS_READ,
+                    SUBMISSION_READ_ALL, SUBMISSION_EDIT_ALL,
+                    FEEDBACK_SEND, FEEDBACK_OPEN,
+                    FLAG_CREATE, FLAG_DELETE, FLAG_ASSIGN
+            );
 
-            Privilege statsRead = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.STATISTIC_READ.toString());
-            Privilege statsWrite = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.STATISTIC_WRITE.toString());
+            List<PrivilegeEnum> taPrivilegesEnum = List.of(
+                    MANAGE_GRADERS_OPEN, MANAGE_GRADERS_SELF_EDIT,
+                    RUBRIC_READ, RUBRIC_DOWNLOAD,
+                    STATISTIC_READ,
+                    ADMIN_TOOLBAR_VIEW,
+                    TODO_LIST_VIEW,
+                    GRADING_WRITE_SINGLE, GRADING_READ_ALL,
+                    PROJECT_READ,
+                    SUBMISSIONS_READ,
+                    SUBMISSION_READ_ALL, SUBMISSION_EDIT_SINGLE,
+                    FLAG_CREATE, FLAG_ASSIGN
+            );
 
-            Privilege studentView = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.STUDENT_PERSONAL_VIEW.toString());
+            List<Privilege> teacherPrivileges = new ArrayList<>();
+            teacherPrivilegesEnum.forEach(privilegeEnum -> teacherPrivileges.add(privilegeService.addPrivilegeIfNotExist(privilegeEnum.toString())));
 
-            Privilege adminToolBarView = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.ADMIN_TOOLBAR_VIEW.toString());
-            Privilege todoListView = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.TODO_LIST_VIEW.toString());
-
-            Privilege gradingWriteSingle = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.GRADING_WRITE_SINGLE.toString());
-            Privilege gradingWriteAll = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.GRADING_WRITE_ALL.toString());
-            Privilege gradingRead = privilegeService.addPrivilegeIfNotExist(PrivilegeEnum.GRADING_READ.toString());
-
+            List<Privilege> taPrivileges = new ArrayList<>();
+            taPrivilegesEnum.forEach(privilegeEnum -> taPrivileges.add(privilegeService.addPrivilegeIfNotExist(privilegeEnum.toString())));
 
             Role teacherRole = roleService.addRoleIfNotExist(
                     RoleEnum.TEACHER.toString(),
-                    List.of(
-//                            studentView
-                            mangeGradersOpen,
-                            rubricRead,
-                            rubricWrite,
-                            statsRead,
-                            adminToolBarView,
-                            todoListView,
-                            statsWrite,
-                            gradingRead,
-                            gradingWriteSingle
-                            )
+                    teacherPrivileges
             );
 
             Role taRole = roleService.addRoleIfNotExist(
                     RoleEnum.TA.toString(),
-                    List.of(mangeGradersOpen,
-                            rubricRead,
-                            statsRead,
-                            adminToolBarView,
-                            todoListView
-                            )
+                    taPrivileges
             );
 
-            Role studentRole = roleService.addRoleIfNotExist(
-                    RoleEnum.STUDENT.toString(),
-                    List.of(studentView
-                    )
-            );
+//            Role studentRole = roleService.addRoleIfNotExist(
+//                    RoleEnum.STUDENT.toString(),
+//
+//            );
         };
     }
 }

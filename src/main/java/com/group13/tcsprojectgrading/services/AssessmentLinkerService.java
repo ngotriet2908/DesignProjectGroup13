@@ -62,6 +62,12 @@ public class AssessmentLinkerService {
         return repository.findAssessmentsLinkersBySubmissionAndParticipant(submission, participant);
     }
 
+
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public AssessmentLinker findAssessmentsLinkerBySubmissionAndParticipantAndAssessmentId
+            (Submission submission, Participant participant, UUID assessmentId) {
+        return repository.findAssessmentsLinkerBySubmissionAndParticipantAndAssessmentId(submission, participant, assessmentId);
+    }
     @Transactional(value = Transactional.TxType.MANDATORY)
     public void deleteAssessmentLinker(AssessmentLinker assessmentLinker) {
         repository.delete(assessmentLinker);

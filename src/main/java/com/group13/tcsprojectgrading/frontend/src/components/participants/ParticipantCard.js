@@ -25,6 +25,8 @@ class ParticipantCard extends Component {
             </div>
               <div>
                 <h6>Submissions: {this.props.participant.submissions.length}</h6>
+                <Button onClick={() => store.dispatch(push(this.props.match.url +"/"+ this.props.participant.id))}>
+                  open </Button>
                 {/*<h6>Members List</h6>*/}
                 <ListGroup>
                   {/*Submissions List*/}

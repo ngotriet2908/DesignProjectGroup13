@@ -11,7 +11,7 @@ import SubmissionDetailsAssessmentItemContainer from "./SubmissionDetailsAssessm
 import SubmissionDetailsAssessmentEditingItemContainer from "./SubmissionDetailsAssessmentEditingItemContainer";
 import classnames from 'classnames';
 import globalStyles from "../../helpers/global.module.css";
-import {IoCloseOutline, IoPencilOutline} from "react-icons/io5";
+import {IoCloseOutline, IoPencilOutline, IoAdd} from "react-icons/io5";
 
 class SubmissionDetailsAssessmentsEditingContainer extends Component {
   constructor(props) {
@@ -88,6 +88,10 @@ class SubmissionDetailsAssessmentsEditingContainer extends Component {
         return response.json();
       })
       .then(data => {
+        if (data.status === 409) {
+          alert(data.message)
+          return
+        }
         this.props.setAssessment(data)
       })
       .catch(error => {
@@ -100,8 +104,13 @@ class SubmissionDetailsAssessmentsEditingContainer extends Component {
       <div className={classnames(styles.section, styles.assessmentSection)}>
         <div className={classnames(styles.sectionTitle, styles.sectionTitleWithButton)}>
           <h3 className={styles.sectionTitleH}>Assessments</h3>
-          <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.props.toggleEditing}>
-            <IoCloseOutline size={26}/>
+          <div className={styles.buttonGroup}>
+            <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.handleCreateEmpty}>
+              <IoAdd size={26}/>
+            </div>
+            <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.props.toggleEditing}>
+              <IoCloseOutline size={26}/>
+            </div>
           </div>
         </div>
 

@@ -3,7 +3,8 @@ package com.group13.tcsprojectgrading.models;
 public enum RoleEnum {
     TEACHER("TEACHER_ROLE"),
     TA("TA_ROLE"),
-    STUDENT("STUDENT_ROLE");
+    STUDENT("STUDENT_ROLE"),
+    NULL("null");
 
     private final String name;
 
@@ -18,6 +19,15 @@ public enum RoleEnum {
     @Override
     public String toString() {
         return name;
+    }
+
+    public static RoleEnum fromName(String name) {
+        for (RoleEnum roleEnum : RoleEnum.values()) {
+            if (roleEnum.name.equals(name)) {
+                return roleEnum;
+            }
+        }
+        return RoleEnum.NULL;
     }
 
     public static RoleEnum getRoleFromEnrolment(String enrolment) {

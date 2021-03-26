@@ -40,8 +40,12 @@ public class Assessment {
         this.finalGradeManual = false;
     }
 
+
+
     public Assessment(UUID id) {
         this.id = id;
+        this.gradedCount = 0;
+        this.finalGradeManual = false;
         this.grades = new HashMap<>();
     }
 

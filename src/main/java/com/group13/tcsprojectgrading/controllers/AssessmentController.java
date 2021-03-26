@@ -3,28 +3,20 @@ package com.group13.tcsprojectgrading.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.*;
-import com.group13.tcsprojectgrading.models.grading.CriterionGrade;
 import com.group13.tcsprojectgrading.models.grading.Grade;
-import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.services.*;
-import com.group13.tcsprojectgrading.services.grading.AssessmentService;
-import com.group13.tcsprojectgrading.services.rubric.RubricService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+
+import static com.group13.tcsprojectgrading.models.PrivilegeEnum.*;
 
 @RestController
 @RequestMapping("/api/courses/{courseId}/projects/{projectId}/submissions/{submissionId}/{assessmentId}")
@@ -32,22 +24,33 @@ public class AssessmentController {
     private final CanvasApi canvasApi;
 
     private final AssessmentCoreService assessmentCoreService;
+    private final SecurityService securityService;
 
     @Autowired
-    public AssessmentController(CanvasApi canvasApi, AssessmentCoreService assessmentCoreService) {
+    public AssessmentController(CanvasApi canvasApi, AssessmentCoreService assessmentCoreService, SecurityService securityService) {
         this.canvasApi = canvasApi;
         this.assessmentCoreService = assessmentCoreService;
+        this.securityService = securityService;
     }
 
 
 
     @RequestMapping(value = "/grading", method = RequestMethod.GET, produces = "application/json")
     protected String getAssessment(@PathVariable String courseId,
-                                                   @PathVariable String projectId,
-                                                   @PathVariable String submissionId,
-                                                   @PathVariable String assessmentId)
+                                   @PathVariable String projectId,
+                                   @PathVariable String submissionId,
+                                   @PathVariable String assessmentId,
+                                   Principal principal)
             throws JsonProcessingException {
-        return assessmentCoreService.getAssessment(courseId, projectId, submissionId, assessmentId);
+
+        List<PrivilegeEnum> privileges = securityService
+                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+        if (!(privileges != null
+                && (privileges.contains(GRADING_READ_ALL) || privileges.contains(GRADING_READ_SINGLE)))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
+
+        return assessmentCoreService.getAssessment(courseId, projectId, submissionId, assessmentId, privileges, principal.getName());
     }
 
     @RequestMapping(value = "/grading/{criterionId}", method = RequestMethod.PUT)
@@ -57,9 +60,16 @@ public class AssessmentController {
             @PathVariable String submissionId,
             @PathVariable String assessmentId,
             @PathVariable String criterionId,
-            @RequestBody Grade newGrade
+            @RequestBody Grade newGrade,
+            Principal principal
     ) {
-        return assessmentCoreService.alterCriterionAssessment(courseId, projectId, submissionId, assessmentId, criterionId, newGrade);
+        List<PrivilegeEnum> privileges = securityService
+                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+        if (!(privileges != null
+                && (privileges.contains(GRADING_WRITE_ALL) || privileges.contains(GRADING_WRITE_SINGLE)))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
+        return assessmentCoreService.alterCriterionAssessment(courseId, projectId, submissionId, assessmentId, criterionId, newGrade, privileges, principal.getName());
     }
 
     @RequestMapping(value = "/grading/{criterionId}/active/{id}", method = RequestMethod.PUT)
@@ -69,9 +79,16 @@ public class AssessmentController {
             @PathVariable String submissionId,
             @PathVariable String assessmentId,
             @PathVariable String criterionId,
-            @PathVariable int id
+            @PathVariable int id,
+            Principal principal
     ) {
-        return assessmentCoreService.updateActiveGrading(courseId, projectId, submissionId, assessmentId, criterionId, id);
+        List<PrivilegeEnum> privileges = securityService
+                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+        if (!(privileges != null
+                && (privileges.contains(GRADING_WRITE_ALL) || privileges.contains(GRADING_WRITE_SINGLE)))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
+        return assessmentCoreService.updateActiveGrading(courseId, projectId, submissionId, assessmentId, criterionId, id, privileges, principal.getName());
     }
 
     @RequestMapping(value = "/issues", method = RequestMethod.POST)
@@ -83,7 +100,14 @@ public class AssessmentController {
             @RequestBody JsonNode issue,
             Principal principal
     ) {
-        return assessmentCoreService.createIssue(courseId, projectId, submissionId, assessmentId, issue, principal.getName());
+        List<PrivilegeEnum> privileges = securityService
+                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+        if (!(privileges != null
+                && (privileges.contains(GRADING_WRITE_ALL) || privileges.contains(GRADING_WRITE_SINGLE)))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
+
+        return assessmentCoreService.createIssue(courseId, projectId, submissionId, assessmentId, issue, privileges, principal.getName());
     }
 
     @RequestMapping(value = "/issues/resolve", method = RequestMethod.POST)
@@ -95,7 +119,13 @@ public class AssessmentController {
             @RequestBody JsonNode issue,
             Principal principal
     ) {
-        return assessmentCoreService.resolveIssue(courseId, projectId, submissionId, assessmentId, issue, principal.getName());
+        List<PrivilegeEnum> privileges = securityService
+                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+        if (!(privileges != null
+                && (privileges.contains(GRADING_WRITE_ALL) || privileges.contains(GRADING_WRITE_SINGLE)))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
+        return assessmentCoreService.resolveIssue(courseId, projectId, submissionId, assessmentId, issue, privileges, principal.getName());
     }
 
     @RequestMapping(value = "/issues", method = RequestMethod.GET)
@@ -103,8 +133,15 @@ public class AssessmentController {
             @PathVariable String courseId,
             @PathVariable String projectId,
             @PathVariable String submissionId,
-            @PathVariable String assessmentId
+            @PathVariable String assessmentId,
+            Principal principal
     ) {
-        return assessmentCoreService.getIssues(courseId, projectId, submissionId, assessmentId);
+        List<PrivilegeEnum> privileges = securityService
+                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+        if (!(privileges != null
+                && (privileges.contains(SUBMISSION_READ_ALL) || privileges.contains(SUBMISSION_READ_SINGLE)))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
+        return assessmentCoreService.getIssues(courseId, projectId, submissionId, assessmentId, privileges, principal.getName());
     }
 }

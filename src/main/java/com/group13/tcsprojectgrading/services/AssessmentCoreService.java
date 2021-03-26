@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.group13.tcsprojectgrading.models.PrivilegeEnum.*;
+
 @Service
 public class AssessmentCoreService {
     private final AssessmentService assessmentService;
@@ -41,7 +43,7 @@ public class AssessmentCoreService {
     }
 
     @Transactional
-    public String getAssessment(String courseId, String projectId, String submissionId, String assessmentId) throws JsonProcessingException {
+    public String getAssessment(String courseId, String projectId, String submissionId, String assessmentId, List<PrivilegeEnum> privileges, String userId) throws JsonProcessingException {
         Project project = projectService.getProjectById(courseId, projectId);
         if (project == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "no project");
@@ -51,6 +53,14 @@ public class AssessmentCoreService {
 
         if (submission == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "no submission");
+        }
+
+        if (privileges != null && privileges.contains(GRADING_READ_SINGLE)) {
+            if (submission.getGrader() == null || !submission.getGrader().getUserId().equals(userId)) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "submission not assigned"
+                );
+            }
         }
 
         List<Assessment> assessmentList = assessmentService.getAssessmentBySubmission(submission);
@@ -73,8 +83,21 @@ public class AssessmentCoreService {
 
     @Transactional(rollbackOn = Exception.class)
     public String alterCriterionAssessment(String courseId, String projectId, String submissionId,
-                                           String assessmentId, String criterionId, Grade newGrade) {
+                                           String assessmentId, String criterionId, Grade newGrade, List<PrivilegeEnum> privileges, String userId) {
         Submission submission = submissionService.findSubmissionById(submissionId);
+
+        if (submission == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "no submission");
+        }
+
+        if (privileges != null && privileges.contains(GRADING_WRITE_SINGLE)) {
+            if (submission.getGrader() == null || !submission.getGrader().getUserId().equals(userId)) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "submission not assigned"
+                );
+            }
+        }
+
         List<Assessment> assessmentList = assessmentService.getAssessmentBySubmission(submission);
 
         Assessment submissionAssessment = assessmentService.getAssessmentById(assessmentId);
@@ -122,9 +145,22 @@ public class AssessmentCoreService {
 
     @Transactional(rollbackOn = Exception.class)
     public String updateActiveGrading(String courseId, String projectId, String submissionId,
-                                           String assessmentId, String criterionId, int id) {
+                                           String assessmentId, String criterionId, int id, List<PrivilegeEnum> privileges, String userId) {
         Project project = projectService.getProjectById(courseId, projectId);
         Submission submission = submissionService.findSubmissionById(submissionId);
+
+        if (submission == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "no submission");
+        }
+
+        if (privileges != null && privileges.contains(GRADING_WRITE_SINGLE)) {
+            if (submission.getGrader() == null || !submission.getGrader().getUserId().equals(userId)) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "submission not assigned"
+                );
+            }
+        }
+
         List<Assessment> assessmentList = assessmentService.getAssessmentBySubmission(submission);
 
         Assessment submissionAssessment = assessmentService.getAssessmentById(assessmentId);
@@ -151,9 +187,22 @@ public class AssessmentCoreService {
 
     @Transactional(rollbackOn = Exception.class)
     public ArrayNode createIssue(String courseId, String projectId, String submissionId,
-                              String assessmentId, JsonNode issue, String userId) {
+                              String assessmentId, JsonNode issue, List<PrivilegeEnum> privileges, String userId) {
         Project project = projectService.getProjectById(courseId, projectId);
         Submission submission = submissionService.findSubmissionById(submissionId);
+
+        if (submission == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "no submission");
+        }
+
+        if (privileges != null && privileges.contains(GRADING_WRITE_SINGLE)) {
+            if (submission.getGrader() == null || !submission.getGrader().getUserId().equals(userId)) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "submission not assigned"
+                );
+            }
+        }
+
         List<Assessment> assessmentList = assessmentService.getAssessmentBySubmission(submission);
 
         Assessment submissionAssessment = assessmentService.getAssessmentById(assessmentId);
@@ -209,9 +258,22 @@ public class AssessmentCoreService {
 
     @Transactional(rollbackOn = Exception.class)
     public ArrayNode resolveIssue(String courseId, String projectId, String submissionId,
-                                 String assessmentId, JsonNode issue, String userId) {
+                                 String assessmentId, JsonNode issue, List<PrivilegeEnum> privileges, String userId) {
         Project project = projectService.getProjectById(courseId, projectId);
         Submission submission = submissionService.findSubmissionById(submissionId);
+
+        if (submission == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "no submission");
+        }
+
+        if (privileges != null && privileges.contains(GRADING_WRITE_SINGLE)) {
+            if (submission.getGrader() == null || !submission.getGrader().getUserId().equals(userId)) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "submission not assigned"
+                );
+            }
+        }
+
         List<Assessment> assessmentList = assessmentService.getAssessmentBySubmission(submission);
 
         Assessment submissionAssessment = assessmentService.getAssessmentById(assessmentId);
@@ -242,9 +304,22 @@ public class AssessmentCoreService {
 
     @Transactional(rollbackOn = Exception.class)
     public ArrayNode getIssues(String courseId, String projectId, String submissionId,
-                                  String assessmentId) {
+                                  String assessmentId, List<PrivilegeEnum> privileges, String userId) {
         Project project = projectService.getProjectById(courseId, projectId);
         Submission submission = submissionService.findSubmissionById(submissionId);
+
+        if (submission == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "no submission");
+        }
+
+        if (privileges != null && privileges.contains(SUBMISSION_READ_SINGLE)) {
+            if (submission.getGrader() == null || !submission.getGrader().getUserId().equals(userId)) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "submission not assigned"
+                );
+            }
+        }
+
         List<Assessment> assessmentList = assessmentService.getAssessmentBySubmission(submission);
 
         Assessment submissionAssessment = assessmentService.getAssessmentById(assessmentId);

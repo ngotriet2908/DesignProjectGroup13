@@ -26,6 +26,9 @@ public class AssessmentLinker {
     @ManyToOne
     private Participant participant;
 
+    @OneToMany(mappedBy = "currentAssessmentLinker")
+    private List<Participant> currentAppliedParticipants;
+
     public AssessmentLinker(Submission submission, Participant participant, UUID assessmentId) {
         this.submission = submission;
         this.participant = participant;
@@ -65,6 +68,14 @@ public class AssessmentLinker {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public List<Participant> getCurrentAppliedParticipants() {
+        return currentAppliedParticipants;
+    }
+
+    public void setCurrentAppliedParticipants(List<Participant> currentAppliedParticipants) {
+        this.currentAppliedParticipants = currentAppliedParticipants;
     }
 
     //    public List<Participant> getCurrentParticipant() {

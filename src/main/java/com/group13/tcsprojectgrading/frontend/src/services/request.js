@@ -47,8 +47,8 @@ export function request(url, method = "GET", data = {}, accept = 'application/js
       }
       // TODO: we should catch 404
       else if (response.status === 404) {
-        store.dispatch(push(URL_PREFIX + "/404/"))
-        throw new Error("Not found: 404")
+        // store.dispatch(push(URL_PREFIX + "/404/"))
+        // throw new Error("Not found: 404")
       }
       else {
         return response;

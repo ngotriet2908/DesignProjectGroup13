@@ -14,5 +14,6 @@ public interface AssessmentLinkerRepository extends JpaRepository<AssessmentLink
     public List<AssessmentLinker> findAssessmentLinkersByParticipant(Participant participant);
     public List<AssessmentLinker> findAssessmentLinkersByAssessmentId(UUID assessmentId);
     public List<AssessmentLinker> findAssessmentsLinkersBySubmissionAndParticipant(Submission submission, Participant participant);
+    public AssessmentLinker findAssessmentsLinkerBySubmissionAndParticipantAndAssessmentId(Submission submission, Participant participant, UUID assessmentId);
 
 }

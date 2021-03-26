@@ -11,6 +11,7 @@ import SubmissionDetails from "../submissionDetails/SubmissionDetails";
 import NotFound from "../error/NotFound";
 import {URL_PREFIX} from "../../services/config";
 import Participants from "../participants/Participants";
+import ParticipantDetails from "../participantDetails/ParticipantDetails";
 
 
 class ProjectRoutes extends Component {
@@ -18,6 +19,7 @@ class ProjectRoutes extends Component {
     return (
       <Switch>
         {/*<Route exact path={this.props.match.path + "/groups"} component={Groups}/>*/}
+        <Route exact path={this.props.match.path + "/participants/:participantId"} component={ParticipantDetails}/>
         <Route exact path={this.props.match.path + "/participants"} component={Participants}/>
         <Route exact path={this.props.match.path + "/rubric"} component={Rubric}/>
         <Route exact path={this.props.match.path + "/graders"} component={GraderManagement}/>

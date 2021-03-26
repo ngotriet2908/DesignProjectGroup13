@@ -20,6 +20,7 @@ import javax.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.group13.tcsprojectgrading.models.PrivilegeEnum.*;
 import static com.group13.tcsprojectgrading.models.Submission.createFlagsArrayNode;
 
 @Service
@@ -167,6 +168,25 @@ public class SubmissionService {
             }
 
             arrayNode.add(submission.convertToJson(linkers, issues));
+
+            for (Iterator<JsonNode> it = arrayNode.elements(); it.hasNext(); ) {
+                JsonNode submissionNode = it.next();
+                int progress = 0;
+                if (rubric != null) {
+
+                    for (Iterator<JsonNode> it1 = submissionNode.get("assessments").elements(); it1.hasNext(); ) {
+                        JsonNode assessmentNode = it1.next();
+                        Assessment assessment = assessmentService.getAssessmentById(assessmentNode.get("id").asText());
+                        int assessmentProgress = (int) (assessment.getGradedCount()*1.0/rubric.getCriterionCount()*100);
+                        ((ObjectNode) assessmentNode).put("progress", assessmentProgress);
+                        progress += assessmentProgress;
+                    }
+                    progress = (submissionNode.get("assessments").size() == 0)? 0 : (int) (progress * 1.0 / submissionNode.get("assessments").size());
+                }
+                ((ObjectNode) submissionNode).put("progress", progress);
+            }
+
+
         }
 
         //TODO copy this to stats
@@ -177,7 +197,7 @@ public class SubmissionService {
     }
 
     @Transactional
-    public ObjectNode getSubmissionInfo(String courseId, String projectId, String id, String userId) throws JsonProcessingException {
+    public ObjectNode getSubmissionInfo(String courseId, String projectId, String id, String userId, List<PrivilegeEnum> privileges) throws JsonProcessingException {
         Project project = projectRepository.findById(new ProjectId(courseId, projectId)).orElse(null);
         if (project == null) {
             throw new ResponseStatusException(
@@ -200,6 +220,14 @@ public class SubmissionService {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT, "submission is not in project"
             );
+        }
+
+        if (privileges != null && privileges.contains(SUBMISSION_READ_SINGLE)) {
+            if (submission.getGrader() == null || !submission.getGrader().getUserId().equals(userId)) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "submission not assigned"
+                );
+            }
         }
 
         List<AssessmentLinker> linkers = assessmentLinkerService.findAssessmentLinkersForSubmission(submission);
@@ -234,6 +262,14 @@ public class SubmissionService {
 //            if (assessment != null) {
 //                progress = (int) Math.round(submissionProgress(assessment, rubric));
 //            }
+            for (Iterator<JsonNode> it = node.get("assessments").elements(); it.hasNext(); ) {
+                JsonNode assessmentNode = it.next();
+                Assessment assessment = assessmentService.getAssessmentById(assessmentNode.get("id").asText());
+                int assessmentProgress = (int) (assessment.getGradedCount()*1.0/rubric.getCriterionCount()*100);
+                ((ObjectNode) assessmentNode).put("progress", assessmentProgress);
+                progress += assessmentProgress;
+            }
+            progress = (node.get("assessments").size() == 0)? 0 : (int) (progress * 1.0 / node.get("assessments").size());
         }
         node.put("progress", progress);
 
@@ -251,7 +287,8 @@ public class SubmissionService {
     }
 
     @Transactional(rollbackOn = Exception.class)
-    public ArrayNode assessmentManagement(String courseId, String projectId, String submissionId, JsonNode object) throws JsonProcessingException {
+    public ArrayNode assessmentManagement(String courseId, String projectId, String submissionId,
+                                          JsonNode object, List<PrivilegeEnum> privileges, String userId) throws JsonProcessingException {
         Project project = projectRepository.findById(new ProjectId(courseId, projectId)).orElse(null);
         if (project == null) {
             throw new ResponseStatusException(
@@ -263,6 +300,14 @@ public class SubmissionService {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "task not found"
             );
+        }
+
+        if (privileges != null && privileges.contains(SUBMISSION_EDIT_SINGLE)) {
+            if (submission.getGrader() == null || !submission.getGrader().getUserId().equals(userId)) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "submission not assigned"
+                );
+            }
         }
 
         switch (object.get("action").asText()) {
@@ -278,7 +323,13 @@ public class SubmissionService {
             case "clone": {
                 String source = object.get("source").asText();
                 Assessment sourceAssignment = assessmentService.getAssessmentById(source);
-                Assessment newAssignment = assessmentService.addNewAssignment(new Assessment(UUID.randomUUID(), sourceAssignment.getGrades()));
+                Assessment newAssignment = assessmentService.addNewAssignment(
+                        new Assessment(
+                                UUID.randomUUID(),
+                                sourceAssignment.getGrades(),
+                                sourceAssignment.getGradedCount(),
+                                sourceAssignment.getFinalGrade())
+                );
                 AssessmentLinker linker = assessmentLinkerService.addNewNullAssessment(new AssessmentLinker(
                         submission,
                         null,
@@ -317,6 +368,10 @@ public class SubmissionService {
                 if (linkerDesList.size() == 1 && linkerDesList.get(0).getParticipant() == null) {
                     linkerDesList.get(0).setParticipant(participant);
                     assessmentLinkerService.saveInfoAssessment(linkerDesList.get(0));
+                    if (participant.getCurrentAssessmentLinker().getAssessmentId().equals(linkerSrc.getAssessmentId())) {
+                        participantService.saveParticipantCurrentAssessmentLinker(participant, linkerDesList.get(0));
+                    }
+
                     assessmentLinkerService.deleteAssessmentLinker(linkerSrc);
                 } else {
                     linkerSrc.setAssessmentId(destinationAssignment.getId());
@@ -367,11 +422,144 @@ public class SubmissionService {
                             .collect(Collectors.toList())
             );
         }
-        return (ArrayNode) submission.convertToJsonWithDetails(assessmentLinkers, null, null, issueMap).get("assessments");
+
+        Rubric rubric = rubricService.getRubricById(projectId);
+        ArrayNode assessmentsNode = (ArrayNode) submission.convertToJsonWithDetails(assessmentLinkers, null, null, issueMap).get("assessments");
+        for (Iterator<JsonNode> it1 = assessmentsNode.elements(); it1.hasNext(); ) {
+            JsonNode assessmentNode = it1.next();
+            Assessment assessment = assessmentService.getAssessmentById(assessmentNode.get("id").asText());
+            int assessmentProgress = (int) (assessment.getGradedCount()*1.0/rubric.getCriterionCount()*100);
+            ((ObjectNode) assessmentNode).put("progress", assessmentProgress);
+        }
+
+        return assessmentsNode;
     }
 
     @Transactional(rollbackOn = Exception.class)
-    public JsonNode addFlag(String courseId, String projectId, String id, ObjectNode flag, String userId) {
+    public ObjectNode addParticipantToSubmission(String courseId, String projectId, String submissionId,
+                                          String participantId, String assessmentId,
+                                          List<PrivilegeEnum> privileges, String userId) throws JsonProcessingException {
+
+        Project project = projectRepository.findById(new ProjectId(courseId, projectId)).orElse(null);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "project not found"
+            );
+        }
+        Submission submission = findSubmissionById(submissionId);
+        if (submission == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "task not found"
+            );
+        }
+        Assessment assessment = assessmentService.findAssessment(assessmentId);
+        if (assessment == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "task not found"
+            );
+        }
+        Participant participant = participantService.findParticipantWithId(participantId, project);
+        if (participant == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "task not found"
+            );
+        }
+        if (privileges != null && privileges.contains(SUBMISSION_EDIT_SINGLE)) {
+            if (submission.getGrader() == null || !submission.getGrader().getUserId().equals(userId)) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "submission not assigned"
+                );
+            }
+        }
+        AssessmentLinker assessmentLinker = assessmentLinkerService
+                .findAssessmentsLinkerBySubmissionAndParticipantAndAssessmentId(
+                        submission,
+                        participant,
+                        UUID.fromString(assessmentId));
+        if (assessmentLinker != null) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "link exists"
+            );
+        }
+
+        assessmentLinkerService.addNewAssessment(new AssessmentLinker(
+                submission,
+                participant,
+                UUID.fromString(assessmentId)
+        ));
+
+        ObjectNode objectNode = getSubmissionInfo(courseId, projectId, submissionId, userId, privileges);
+        return (ObjectNode) objectNode.get("submission");
+    }
+
+    @Transactional(rollbackOn = Exception.class)
+    public ObjectNode removeParticipantFromSubmission(String courseId, String projectId, String submissionId, String participantId,
+                                                 List<PrivilegeEnum> privileges, String userId) throws JsonProcessingException {
+
+        Project project = projectRepository.findById(new ProjectId(courseId, projectId)).orElse(null);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "project not found"
+            );
+        }
+        Submission submission = findSubmissionById(submissionId);
+        if (submission == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "task not found"
+            );
+        }
+        Participant participant = participantService.findParticipantWithId(participantId, project);
+        if (participant == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "task not found"
+            );
+        }
+        if (privileges != null && privileges.contains(SUBMISSION_EDIT_SINGLE)) {
+            if (submission.getGrader() == null || !submission.getGrader().getUserId().equals(userId)) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "submission not assigned"
+                );
+            }
+        }
+        List<AssessmentLinker> submissionAssessmentLinker = assessmentLinkerService
+                .findAssessmentLinkersForSubmission(
+                        submission);
+
+        int participantCount = 0;
+        for(AssessmentLinker assessmentLinker: submissionAssessmentLinker) {
+            if (assessmentLinker != null && assessmentLinker.getParticipant() != null) {
+                participantCount += 1;
+            }
+        }
+
+        if (participantCount <= 1) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "submission only have 0-1 participant"
+            );
+        }
+
+        List<AssessmentLinker> assessmentLinkers = assessmentLinkerService
+                .findAssessmentLinkerForSubmissionAndParticipant(submission, participant);
+        if (assessmentLinkers.size() != 1) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "submission and participant have: " + assessmentLinkers.size()
+            );
+        }
+
+        AssessmentLinker assessmentLinker = assessmentLinkers.get(0);
+        if (assessmentLinker.getAssessmentId().equals(participant.getCurrentAssessmentLinker().getAssessmentId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "cannot delete current assessment");
+        }
+
+        assessmentLinkerService.deleteAssessmentLinker(assessmentLinker);
+
+        ObjectNode objectNode = getSubmissionInfo(courseId, projectId, submissionId, userId, privileges);
+        return (ObjectNode) objectNode.get("submission");
+    }
+
+    @Transactional(rollbackOn = Exception.class)
+    public JsonNode addFlag(String courseId, String projectId, String id, ObjectNode flag, String userId, List<PrivilegeEnum> privileges) {
         ObjectMapper objectMapper = new ObjectMapper();
         Project project = projectRepository.findById(new ProjectId(courseId, projectId)).orElse(null);
         if (project == null) {
@@ -386,6 +574,14 @@ public class SubmissionService {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "submission not found"
             );
+        }
+
+        if (privileges != null && privileges.contains(SUBMISSION_EDIT_SINGLE)) {
+            if (submission.getGrader() == null || !submission.getGrader().getUserId().equals(userId)) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "submission not assigned"
+                );
+            }
         }
 
         Grader grader = graderService.getGraderFromGraderId(userId, project);
@@ -409,7 +605,7 @@ public class SubmissionService {
     }
 
     @Transactional(rollbackOn = Exception.class)
-    public JsonNode createFlag(String courseId, String projectId, String id, ObjectNode flag, String userId) {
+    public JsonNode createFlag(String courseId, String projectId, String id, ObjectNode flag, String userId, List<PrivilegeEnum> privileges) {
         ObjectMapper objectMapper = new ObjectMapper();
 
         Project project = projectRepository.findById(new ProjectId(courseId, projectId)).orElse(null);
@@ -425,6 +621,14 @@ public class SubmissionService {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "task not found"
             );
+        }
+
+        if (privileges != null && privileges.contains(SUBMISSION_EDIT_SINGLE)) {
+            if (submission.getGrader() == null || !submission.getGrader().getUserId().equals(userId)) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "submission not assigned"
+                );
+            }
         }
 
         Grader grader = graderService.getGraderFromGraderId(userId, project);
@@ -455,7 +659,7 @@ public class SubmissionService {
     }
 
     @Transactional(rollbackOn = Exception.class)
-    public JsonNode deleteFlag(String courseId, String projectId, String id, String flagId, String userId) {
+    public JsonNode deleteFlag(String courseId, String projectId, String id, String flagId, String userId, List<PrivilegeEnum> privileges) {
         ObjectMapper objectMapper = new ObjectMapper();
 
         Project project = projectRepository.findById(new ProjectId(courseId, projectId)).orElse(null);
@@ -471,6 +675,14 @@ public class SubmissionService {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "task not found"
             );
+        }
+
+        if (privileges != null && privileges.contains(SUBMISSION_EDIT_SINGLE)) {
+            if (submission.getGrader() == null || !submission.getGrader().getUserId().equals(userId)) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "submission not assigned"
+                );
+            }
         }
 
         Grader grader = graderService.getGraderFromGraderId(userId, project);
