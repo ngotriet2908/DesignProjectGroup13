@@ -494,7 +494,7 @@ public class SubmissionService {
 
     @Transactional(rollbackOn = Exception.class)
     public ObjectNode removeParticipantFromSubmission(String courseId, String projectId, String submissionId, String participantId,
-                                                 List<PrivilegeEnum> privileges, String userId) throws JsonProcessingException {
+                                                 List<PrivilegeEnum> privileges, String userId, boolean returnAll) throws JsonProcessingException {
 
         Project project = projectRepository.findById(new ProjectId(courseId, projectId)).orElse(null);
         if (project == null) {
@@ -553,9 +553,23 @@ public class SubmissionService {
         }
 
         assessmentLinkerService.deleteAssessmentLinker(assessmentLinker);
-
-        ObjectNode objectNode = getSubmissionInfo(courseId, projectId, submissionId, userId, privileges);
-        return (ObjectNode) objectNode.get("submission");
+        if (!returnAll) {
+            ObjectNode objectNode = getSubmissionInfo(courseId, projectId, submissionId, userId, privileges);
+            return (ObjectNode) objectNode.get("submission");
+        }
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<AssessmentLinker> assessmentLinkers1 = assessmentLinkerService.findAssessmentLinkersForParticipant(participant);
+        ArrayNode submissionsNode = objectMapper.createArrayNode();
+        for(AssessmentLinker linker: assessmentLinkers1) {
+            Submission submission1 = linker.getSubmission();
+            ObjectNode submissionNode = (ObjectNode) submission1.convertToJson();
+            submissionNode.put("isCurrent", participant.getCurrentAssessmentLinker() != null
+                    && participant.getCurrentAssessmentLinker().getAssessmentId().equals(linker.getAssessmentId()));
+            submissionsNode.add(submissionNode);
+        }
+        ObjectNode resultNode = objectMapper.createObjectNode();
+        resultNode.set("submissions", submissionsNode);
+        return resultNode;
     }
 
     @Transactional(rollbackOn = Exception.class)

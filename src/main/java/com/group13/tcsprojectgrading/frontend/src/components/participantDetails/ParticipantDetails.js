@@ -9,6 +9,7 @@ import classnames from "classnames";
 import store from "../../redux/store";
 import {push} from "connected-react-router";
 import {connect} from "react-redux";
+import {toast} from "react-toastify";
 
 class ParticipantDetails extends Component {
   constructor(props) {
@@ -21,7 +22,33 @@ class ParticipantDetails extends Component {
   }
 
   deleteHandler = (submission) => {
-
+    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${submission.id}/removeParticipant/${this.state.participant.id}?returnAllSubmissions=true`, "DELETE")
+      .then(response => {
+        return response.json()
+      })
+      .then(data => {
+        if (data.hasOwnProperty("error")) {
+          console.log(data.status)
+          console.log(data.message)
+          // alert(data.message)
+          toast.error(data.message, {
+            position: "top-center",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+          return
+        }
+        this.setState({
+          submissions: data.submissions
+        })
+      })
+      .catch(error => {
+        alert(error.message)
+      });
   }
 
   componentDidMount() {

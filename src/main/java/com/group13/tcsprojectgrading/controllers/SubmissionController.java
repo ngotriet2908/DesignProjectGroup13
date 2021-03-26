@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.websocket.server.PathParam;
 import java.security.Principal;
 import java.util.*;
 
@@ -109,20 +110,37 @@ public class SubmissionController {
         return submissionService.addParticipantToSubmission(courseId, projectId, submissionId, participantId, assessmentId, privileges, principal.getName());
     }
 
+//    @DeleteMapping(value = "/{submissionId}/removeParticipant/{participantId}")
+//    protected ObjectNode removeParticipantFromSubmission(@PathVariable String courseId,
+//                                                    @PathVariable String projectId,
+//                                                    @PathVariable String submissionId,
+//                                                    @PathVariable String participantId,
+//                                                    Principal principal) throws JsonProcessingException {
+//        List<PrivilegeEnum> privileges = securityService
+//                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+//        if (!(privileges != null
+//                && (privileges.contains(SUBMISSION_EDIT_ALL) || privileges.contains(SUBMISSION_EDIT_SINGLE)))) {
+//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+//        }
+//
+//        return submissionService.removeParticipantFromSubmission(courseId, projectId, submissionId, participantId, privileges, principal.getName(), false);
+//    }
+
     @DeleteMapping(value = "/{submissionId}/removeParticipant/{participantId}")
     protected ObjectNode removeParticipantFromSubmission(@PathVariable String courseId,
-                                                    @PathVariable String projectId,
-                                                    @PathVariable String submissionId,
-                                                    @PathVariable String participantId,
-                                                    Principal principal) throws JsonProcessingException {
+                                                         @PathVariable String projectId,
+                                                         @PathVariable String submissionId,
+                                                         @PathVariable String participantId,
+                                                         @RequestParam("returnAllSubmissions") boolean returnAll,
+                                                         Principal principal) throws JsonProcessingException {
         List<PrivilegeEnum> privileges = securityService
                 .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
         if (!(privileges != null
                 && (privileges.contains(SUBMISSION_EDIT_ALL) || privileges.contains(SUBMISSION_EDIT_SINGLE)))) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
         }
-
-        return submissionService.removeParticipantFromSubmission(courseId, projectId, submissionId, participantId, privileges, principal.getName());
+        System.out.println("return all: " + returnAll);
+        return submissionService.removeParticipantFromSubmission(courseId, projectId, submissionId, participantId, privileges, principal.getName(), returnAll);
     }
 
     @PostMapping(value = "/{id}/flag")

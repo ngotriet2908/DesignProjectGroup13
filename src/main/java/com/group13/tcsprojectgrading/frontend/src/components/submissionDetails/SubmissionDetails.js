@@ -22,7 +22,7 @@ import classnames from "classnames";
 import AddParticipantModal from "./AddParticipantModal";
 import ParticipantItemEdit from "./ParticipantItemEdit";
 import ParticipantItem from "./ParticipantItem";
-
+import {toast} from 'react-toastify'
 
 class SubmissionDetails extends Component {
   constructor(props) {
@@ -65,7 +65,7 @@ class SubmissionDetails extends Component {
   }
 
   deleteParticipantHandler = (member) => {
-    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/removeParticipant/${member.id}`, "DELETE")
+    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/removeParticipant/${member.id}?returnAllSubmissions=false`, "DELETE")
       .then(response => {
         return response.json()
       })
@@ -73,7 +73,16 @@ class SubmissionDetails extends Component {
         if (data.hasOwnProperty("error")) {
           console.log(data.status)
           console.log(data.message)
-          alert(data.message)
+          // alert(data.message)
+          toast.error(data.message, {
+            position: "top-center",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
           return
         }
         this.setState({
