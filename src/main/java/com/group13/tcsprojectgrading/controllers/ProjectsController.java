@@ -9,6 +9,9 @@ import com.flipkart.zjsonpatch.JsonPatchApplicationException;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.*;
+import com.group13.tcsprojectgrading.models.graders.Grader;
+import com.group13.tcsprojectgrading.models.permissions.RoleEnum;
+import com.group13.tcsprojectgrading.models.submissions.Flag;
 import com.group13.tcsprojectgrading.services.*;
 import com.group13.tcsprojectgrading.services.graders.GraderService;
 import com.group13.tcsprojectgrading.services.grading.AssessmentLinkerService;
@@ -89,7 +92,7 @@ public class ProjectsController {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode courseJson = objectMapper.readTree(courseResponse);
 
-        //create teacher's grader object on first enter project page
+        // create teacher's grader object on first enter project page
         String userResponse = this.canvasApi.getCanvasCoursesApi().getCourseUser(courseId, principal.getName());
         ArrayNode enrolmentsNode = groupPages(objectMapper, this.canvasApi.getCanvasUsersApi().getEnrolments(principal.getName()));
         JsonNode userJson = objectMapper.readTree(userResponse);

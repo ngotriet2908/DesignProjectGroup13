@@ -60,7 +60,7 @@ class Issues extends Component {
         </div>
 
         <div className={classnames(styles.gradeEditorContentContainer, styles.gradeViewerBodyScroll)}>
-          {this.props.issues
+          {this.props.issues && this.props.issues
             .filter((issue) => {
               return this.filterIssueDropDown(issue)
             })

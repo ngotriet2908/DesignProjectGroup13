@@ -1,4 +1,4 @@
-import {SET_CURRENT_LOCATION} from "../actionTypes";
+import {SET_CURRENT_COURSE_AND_PROJECT, SET_CURRENT_LOCATION} from "../actionTypes";
 
 export const LOCATIONS = Object.freeze(
   {
@@ -14,7 +14,9 @@ export const LOCATIONS = Object.freeze(
   })
 
 const initialState = {
-  location: LOCATIONS.home
+  location: LOCATIONS.home,
+  course: null,
+  project: null,
 };
 
 export default function(state = initialState, action) {
@@ -23,6 +25,13 @@ export default function(state = initialState, action) {
     return {
       ...state,
       location: action.payload
+    };
+  }
+  case SET_CURRENT_COURSE_AND_PROJECT: {
+    return {
+      ...state,
+      course: action.payload.courseId,
+      project: action.payload.projectId
     };
   }
   default:

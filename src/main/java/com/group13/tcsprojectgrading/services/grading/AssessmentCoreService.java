@@ -5,11 +5,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.group13.tcsprojectgrading.models.*;
+import com.group13.tcsprojectgrading.models.graders.Grader;
+import com.group13.tcsprojectgrading.models.grading.Assessment;
 import com.group13.tcsprojectgrading.models.grading.CriterionGrade;
 import com.group13.tcsprojectgrading.models.grading.Grade;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
+import com.group13.tcsprojectgrading.models.submissions.Issue;
+import com.group13.tcsprojectgrading.models.submissions.Submission;
 import com.group13.tcsprojectgrading.services.graders.GraderService;
 import com.group13.tcsprojectgrading.services.ProjectService;
+import com.group13.tcsprojectgrading.services.notifications.NotificationsService;
+import com.group13.tcsprojectgrading.services.settings.SettingsService;
 import com.group13.tcsprojectgrading.services.submissions.SubmissionService;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,15 +37,23 @@ public class AssessmentCoreService {
     private final RubricService rubricService;
     private final IssueService issueService;
     private final GraderService graderService;
+    private final NotificationsService notificationsService;
+    private final SettingsService settingsService;
 
     @Autowired
-    public AssessmentCoreService(AssessmentService assessmentService, ProjectService projectService, SubmissionService submissionService, RubricService rubricService, IssueService issueService, GraderService graderService) {
+    public AssessmentCoreService(AssessmentService assessmentService, ProjectService projectService,
+                                 SubmissionService submissionService, RubricService rubricService,
+                                 IssueService issueService, GraderService graderService,
+                                 NotificationsService notificationsService,
+                                 SettingsService settingsService) {
         this.assessmentService = assessmentService;
         this.projectService = projectService;
         this.submissionService = submissionService;
         this.rubricService = rubricService;
         this.issueService = issueService;
         this.graderService = graderService;
+        this.notificationsService = notificationsService;
+        this.settingsService = settingsService;
     }
 
     @Transactional
@@ -198,7 +212,16 @@ public class AssessmentCoreService {
             );
             issue1.setAddressee(addressee);
 
+            // save issue
             issueService.saveIssue(issue1);
+
+            // send notification if addressee has notifications enabled
+            // TODO: we need to save email addresses of users
+            // TODO: the email will be sent if the transaction is rolled back, that's a bit of an issue...
+            if (addressee != null && this.settingsService.getOrCreateSettings(courseId, projectId, addressee.getUserId()).isNotificationsEnabled()) {
+                this.notificationsService.sendIssueNotification("o.khavrona@student.utwente.nl", project.getName());
+            }
+
             List<Issue> issues = issueService.findIssuesByAssessment(submissionAssessment.getId());
             ObjectMapper objectMapper = new ObjectMapper();
             ArrayNode result = objectMapper.createArrayNode();
@@ -229,6 +252,13 @@ public class AssessmentCoreService {
             if (issue1 != null) {
                 issue1.setStatus("resolved");
                 issue1.setSolution(issue.get("solution").asText());
+
+                // send a notification to the author that the issue has been resolved
+                // TODO: we need to save email addresses of users
+                // TODO: the email will be sent if the transaction is rolled back, that's a bit of an issue...
+                if (issue1.getAddressee() != null && this.settingsService.getOrCreateSettings(courseId, projectId, issue1.getAddressee().getUserId()).isNotificationsEnabled()) {
+                    this.notificationsService.sendResolvedNotification("o.khavrona@student.utwente.nl", issue1.getSubject(), project.getName());
+                }
             }
             issueService.saveIssue(issue1);
 

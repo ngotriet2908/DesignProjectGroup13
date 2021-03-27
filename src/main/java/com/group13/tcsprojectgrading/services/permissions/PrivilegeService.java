@@ -1,14 +1,11 @@
 package com.group13.tcsprojectgrading.services.permissions;
 
-import com.group13.tcsprojectgrading.models.Privilege;
-import com.group13.tcsprojectgrading.models.Role;
-import com.group13.tcsprojectgrading.repositories.PrivilegeRepository;
+import com.group13.tcsprojectgrading.models.permissions.Privilege;
+import com.group13.tcsprojectgrading.repositories.permissions.PrivilegeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class PrivilegeService {

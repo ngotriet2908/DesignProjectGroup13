@@ -11,6 +11,7 @@ import SubmissionDetails from "../submissionDetails/SubmissionDetails";
 import NotFound from "../error/NotFound";
 import {URL_PREFIX} from "../../services/config";
 import Participants from "../participants/Participants";
+import Settings from "../settings/Settings";
 
 
 class ProjectRoutes extends Component {
@@ -27,6 +28,7 @@ class ProjectRoutes extends Component {
         <Route exact path={this.props.match.path + "/submissions/:submissionId"} component={SubmissionDetails}/>
         <Route exact path={this.props.match.path + "/submissions"} component={Submissions}/>
         <Route exact path={this.props.match.path + "/feedback"} component={Feedback}/>
+        <Route exact path={this.props.match.path + "/settings"} component={Settings}/>
         <Route exact path={this.props.match.path + ""} component={Project}/>
         <Route>
           <Redirect to={URL_PREFIX + "/404/"}/>

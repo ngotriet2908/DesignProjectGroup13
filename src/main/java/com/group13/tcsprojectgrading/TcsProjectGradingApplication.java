@@ -1,10 +1,10 @@
 package com.group13.tcsprojectgrading;
 
-import com.group13.tcsprojectgrading.models.Privilege;
-import com.group13.tcsprojectgrading.models.Role;
-import com.group13.tcsprojectgrading.models.PrivilegeEnum;
+import com.group13.tcsprojectgrading.models.permissions.Privilege;
+import com.group13.tcsprojectgrading.models.permissions.Role;
+import com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum;
 import com.group13.tcsprojectgrading.services.permissions.PrivilegeService;
-import com.group13.tcsprojectgrading.models.RoleEnum;
+import com.group13.tcsprojectgrading.models.permissions.RoleEnum;
 import com.group13.tcsprojectgrading.services.permissions.RoleService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;

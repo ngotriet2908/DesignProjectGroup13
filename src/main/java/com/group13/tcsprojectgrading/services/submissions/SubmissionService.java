@@ -6,9 +6,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.group13.tcsprojectgrading.models.*;
+import com.group13.tcsprojectgrading.models.graders.Grader;
+import com.group13.tcsprojectgrading.models.grading.Assessment;
+import com.group13.tcsprojectgrading.models.grading.AssessmentLinker;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
+import com.group13.tcsprojectgrading.models.submissions.*;
 import com.group13.tcsprojectgrading.repositories.ProjectRepository;
-import com.group13.tcsprojectgrading.repositories.SubmissionRepository;
+import com.group13.tcsprojectgrading.repositories.submissions.SubmissionRepository;
 import com.group13.tcsprojectgrading.services.graders.GraderService;
 import com.group13.tcsprojectgrading.services.grading.IssueService;
 import com.group13.tcsprojectgrading.services.ParticipantService;
@@ -24,7 +28,7 @@ import javax.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.group13.tcsprojectgrading.models.Submission.createFlagsArrayNode;
+import static com.group13.tcsprojectgrading.models.submissions.Submission.createFlagsArrayNode;
 
 @Service
 public class SubmissionService {

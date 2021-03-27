@@ -3,12 +3,15 @@ package com.group13.tcsprojectgrading.models;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.group13.tcsprojectgrading.models.graders.Grader;
+import com.group13.tcsprojectgrading.models.submissions.Flag;
+import com.group13.tcsprojectgrading.models.submissions.Submission;
 
 import javax.persistence.*;
 import java.util.List;
 import java.util.Objects;
 
-import static com.group13.tcsprojectgrading.models.Submission.createFlagsArrayNode;
+import static com.group13.tcsprojectgrading.models.submissions.Submission.createFlagsArrayNode;
 
 @Entity
 @IdClass(ProjectId.class)

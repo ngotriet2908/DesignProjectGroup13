@@ -3,13 +3,11 @@ package com.group13.tcsprojectgrading.services.grading;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.group13.tcsprojectgrading.models.*;
-import com.group13.tcsprojectgrading.models.grading.CriterionGrade;
-import com.group13.tcsprojectgrading.models.grading.Grade;
+import com.group13.tcsprojectgrading.models.grading.*;
 import com.group13.tcsprojectgrading.models.rubric.Element;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
-import com.group13.tcsprojectgrading.repositories.grading.AssessmentRepository;
-import com.group13.tcsprojectgrading.repositories.AssessmentContainerRepository;
-import com.group13.tcsprojectgrading.services.AssessmentLinkerService;
+import com.group13.tcsprojectgrading.models.submissions.Submission;
+import com.group13.tcsprojectgrading.repositories.grading.AssessmentContainerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

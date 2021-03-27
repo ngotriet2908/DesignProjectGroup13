@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.group13.tcsprojectgrading.models.Grader;
+import com.group13.tcsprojectgrading.models.graders.Grader;
 import com.group13.tcsprojectgrading.models.Project;
-import com.group13.tcsprojectgrading.models.RoleEnum;
-import com.group13.tcsprojectgrading.models.Submission;
+import com.group13.tcsprojectgrading.models.permissions.RoleEnum;
+import com.group13.tcsprojectgrading.models.submissions.Submission;
 import com.group13.tcsprojectgrading.services.ProjectService;
 import com.group13.tcsprojectgrading.services.permissions.ProjectRoleService;
 import com.group13.tcsprojectgrading.services.permissions.RoleService;
@@ -59,14 +59,14 @@ public class ProjectsManagementService {
         List<Grader> graders = graderService.getGraderFromProject(project);
         Map<String, ArrayNode> graderMap = new HashMap<>();
         for (Grader grader: graders) {
-            JsonNode formatNode = objectMapper.createObjectNode();
+            ObjectNode formatNode = objectMapper.createObjectNode();
             ArrayNode tasksArray = objectMapper.createArrayNode();
             graderMap.put(grader.getUserId(), tasksArray);
-            ((ObjectNode) formatNode).put("id", grader.getUserId());
-            ((ObjectNode) formatNode).put("name", grader.getName());
-            ((ObjectNode) formatNode).set("role", grader.getRolesArrayNode());
-            ((ObjectNode) formatNode).set("privileges", grader.getPrivilegesArrayNode());
-            ((ObjectNode) formatNode).set("groups", tasksArray);
+            formatNode.put("id", grader.getUserId());
+            formatNode.put("name", grader.getName());
+            formatNode.set("role", grader.getRolesArrayNode());
+            formatNode.set("privileges", grader.getPrivilegesArrayNode());
+            formatNode.set("groups", tasksArray);
             gradersArray.add(formatNode);
         }
 
@@ -75,11 +75,11 @@ public class ProjectsManagementService {
         List<Submission> submissions = submissionService.findSubmissionWithProject(project);
         for(Submission submission: submissions) {
 
-            JsonNode taskNode = objectMapper.createObjectNode();
-            ((ObjectNode) taskNode).put("id", submission.getId().toString());
+            ObjectNode taskNode = objectMapper.createObjectNode();
+            taskNode.put("id", submission.getId().toString());
 //            ((ObjectNode) taskNode).put("submission_id", submission.getId());
-            ((ObjectNode) taskNode).put("isGroup", submission.getGroupId() != null);
-            ((ObjectNode) taskNode).put("name", submission.getName());
+            taskNode.put("isGroup", submission.getGroupId() != null);
+            taskNode.put("name", submission.getName());
 
             if (submission.getGrader() == null) {
                 notAssignedArray.add(taskNode);
@@ -88,8 +88,8 @@ public class ProjectsManagementService {
             }
         }
 
-        ((ObjectNode)resultNode).set("graders", gradersArray);
-        ((ObjectNode)resultNode).set("notAssigned", notAssignedArray);
+        resultNode.set("graders", gradersArray);
+        resultNode.set("notAssigned", notAssignedArray);
 
         return resultNode;
     }

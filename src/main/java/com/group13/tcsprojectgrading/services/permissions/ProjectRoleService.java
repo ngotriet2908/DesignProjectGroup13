@@ -1,7 +1,8 @@
 package com.group13.tcsprojectgrading.services.permissions;
 
 import com.group13.tcsprojectgrading.models.*;
-import com.group13.tcsprojectgrading.repositories.ProjectRoleRepository;
+import com.group13.tcsprojectgrading.models.permissions.*;
+import com.group13.tcsprojectgrading.repositories.permissions.ProjectRoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

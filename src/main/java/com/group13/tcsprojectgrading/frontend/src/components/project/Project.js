@@ -16,7 +16,7 @@ import {deleteRubric, saveRubric} from "../../redux/rubric/actions";
 
 import testStats from "../stat/testStats.json";
 import Statistic from "../stat/Statistic";
-import {setCurrentLocation} from "../../redux/navigation/actions";
+import {setCurrentCourseAndProject, setCurrentLocation} from "../../redux/navigation/actions";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 import Breadcrumbs from "../helpers/Breadcrumbs";
 
@@ -42,10 +42,11 @@ class Project extends Component {
   }
 
   componentDidMount() {
-    this.props.setCurrentLocation(LOCATIONS.project);
-
     const courseId = this.props.match.params.courseId;
     const projectId = this.props.match.params.projectId;
+
+    this.props.setCurrentLocation(LOCATIONS.project);
+    this.props.setCurrentCourseAndProject(courseId, projectId);
 
     Promise.all([
       request(BASE + "courses/" + courseId + "/projects/" + projectId),
@@ -80,6 +81,10 @@ class Project extends Component {
       .catch(error => {
         console.error(error.message);
       });
+  }
+
+  componentWillUnmount() {
+    this.props.setCurrentCourseAndProject(null, null);
   }
 
   /*
@@ -274,7 +279,8 @@ const mapStateToProps = state => {
 const actionCreators = {
   saveRubric,
   deleteRubric,
-  setCurrentLocation
+  setCurrentLocation,
+  setCurrentCourseAndProject
 }
 
 export default connect(mapStateToProps, actionCreators)(Project)

@@ -1,10 +1,10 @@
 package com.group13.tcsprojectgrading.services.submissions;
 
-import com.group13.tcsprojectgrading.models.Submission;
-import com.group13.tcsprojectgrading.models.SubmissionAttachment;
-import com.group13.tcsprojectgrading.models.SubmissionComment;
-import com.group13.tcsprojectgrading.repositories.SubmissionAttachmentsRepository;
-import com.group13.tcsprojectgrading.repositories.SubmissionCommentsRepository;
+import com.group13.tcsprojectgrading.models.submissions.Submission;
+import com.group13.tcsprojectgrading.models.submissions.SubmissionAttachment;
+import com.group13.tcsprojectgrading.models.submissions.SubmissionComment;
+import com.group13.tcsprojectgrading.repositories.submissions.SubmissionAttachmentsRepository;
+import com.group13.tcsprojectgrading.repositories.submissions.SubmissionCommentsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

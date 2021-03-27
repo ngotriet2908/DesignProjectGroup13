@@ -11,9 +11,20 @@ import com.google.api.services.gmail.Gmail;
 import com.group13.tcsprojectgrading.controllers.PdfRubricUtils;
 import com.group13.tcsprojectgrading.controllers.PdfUtils;
 import com.group13.tcsprojectgrading.models.*;
+import com.group13.tcsprojectgrading.models.graders.Grader;
+import com.group13.tcsprojectgrading.models.grading.Assessment;
+import com.group13.tcsprojectgrading.models.grading.AssessmentLinker;
+import com.group13.tcsprojectgrading.models.permissions.Privilege;
+import com.group13.tcsprojectgrading.models.permissions.Role;
+import com.group13.tcsprojectgrading.models.permissions.RoleEnum;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.models.rubric.RubricHistory;
 import com.group13.tcsprojectgrading.models.rubric.RubricUpdate;
+import com.group13.tcsprojectgrading.models.settings.Settings;
+import com.group13.tcsprojectgrading.models.submissions.Flag;
+import com.group13.tcsprojectgrading.models.submissions.Submission;
+import com.group13.tcsprojectgrading.models.submissions.SubmissionAttachment;
+import com.group13.tcsprojectgrading.models.submissions.SubmissionComment;
 import com.group13.tcsprojectgrading.repositories.ProjectRepository;
 import com.group13.tcsprojectgrading.services.graders.GraderService;
 import com.group13.tcsprojectgrading.services.grading.AssessmentLinkerService;
@@ -21,6 +32,7 @@ import com.group13.tcsprojectgrading.services.grading.AssessmentService;
 import com.group13.tcsprojectgrading.services.permissions.ProjectRoleService;
 import com.group13.tcsprojectgrading.services.permissions.RoleService;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
+import com.group13.tcsprojectgrading.services.settings.SettingsService;
 import com.group13.tcsprojectgrading.services.submissions.FlagService;
 import com.group13.tcsprojectgrading.services.submissions.SubmissionDetailsService;
 import com.group13.tcsprojectgrading.services.submissions.SubmissionService;
@@ -54,7 +66,7 @@ import java.util.*;
 
 import static com.group13.tcsprojectgrading.controllers.EmailUtils.createEmailWithAttachment;
 import static com.group13.tcsprojectgrading.controllers.EmailUtils.sendMessage;
-import static com.group13.tcsprojectgrading.models.Submission.createFlagsArrayNode;
+import static com.group13.tcsprojectgrading.models.submissions.Submission.createFlagsArrayNode;
 
 @Service
 public class ProjectService {
@@ -71,8 +83,14 @@ public class ProjectService {
     private final SubmissionService submissionService;
     private final SubmissionDetailsService submissionDetailsService;
     private final AssessmentService assessmentService;
+    private final SettingsService settingsService;
 
-    public ProjectService(ProjectRepository projectRepository, ProjectRoleService projectRoleService, RoleService roleService, FlagService flagService, ActivityService activityService, RubricService rubricService, GraderService graderService, ParticipantService participantService, AssessmentLinkerService assessmentLinkerService, SubmissionService submissionService, SubmissionDetailsService submissionDetailsService, AssessmentService assessmentService) {
+    public ProjectService(ProjectRepository projectRepository, ProjectRoleService projectRoleService,
+                          RoleService roleService, FlagService flagService, ActivityService activityService,
+                          RubricService rubricService, GraderService graderService, ParticipantService participantService,
+                          AssessmentLinkerService assessmentLinkerService, SubmissionService submissionService,
+                          SubmissionDetailsService submissionDetailsService, AssessmentService assessmentService,
+                          SettingsService settingsService) {
         this.projectRepository = projectRepository;
         this.projectRoleService = projectRoleService;
         this.roleService = roleService;
@@ -85,6 +103,7 @@ public class ProjectService {
         this.submissionService = submissionService;
         this.submissionDetailsService = submissionDetailsService;
         this.assessmentService = assessmentService;
+        this.settingsService = settingsService;
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
@@ -109,11 +128,14 @@ public class ProjectService {
     @Transactional(value = Transactional.TxType.MANDATORY)
     public void addNewProject(Project project) {
         if (projectRepository.existsById(project.getProjectCompositeKey())) {
-            throw new EntityExistsException("Existed");
+            throw new EntityExistsException("Exists");
         }
 
         Project project1 = projectRepository.save(project);
-        flagService.saveNewFlag(new Flag("Required Attention", "for some godforsaken reason, this submission need a flag", "primary", project1));
+        flagService.saveNewFlag(new Flag(
+                "Requires attention",
+                "This project requires attention", "red", project1
+        ));
     }
 
     @Transactional
@@ -222,7 +244,6 @@ public class ProjectService {
         }
 
         Grader grader;
-
         if (roleEnum.equals(RoleEnum.TEACHER)) {
             grader = graderService.addNewGrader(new Grader(
                     project,
@@ -312,6 +333,7 @@ public class ProjectService {
         for (Iterator<JsonNode> it = studentArray.elements(); it.hasNext(); ) {
             JsonNode jsonNode = it.next();
 
+            // create new participant
             participantService.addNewParticipant(new Participant(
                             jsonNode.get("id").asText(),
                             project,
@@ -334,8 +356,6 @@ public class ProjectService {
             Participant participant = participantService.findParticipantWithId(jsonNode.get("user_id").asText(), project);
             if (participant == null) continue;
 
-//            System.out.println(jsonNode.get("submission_comments").toString());
-//            System.out.println(jsonNode.get("attachments").toString());
             List<SubmissionComment> submissionComments = new ArrayList<>();
             for (Iterator<JsonNode> iter = jsonNode.get("submission_comments").elements(); iter.hasNext(); ) {
                 JsonNode node = iter.next();
@@ -346,7 +366,6 @@ public class ProjectService {
                 JsonNode node = iter.next();
                 submissionAttachments.add(new SubmissionAttachment(node.toString()));
             }
-
 
             if (jsonNode.get("group").get("id") == null || jsonNode.get("group").get("id").asText().equals("null")) {
                 TemporalAccessor accessor = DateTimeFormatter.ISO_INSTANT.parse(jsonNode.get("submitted_at").asText());
@@ -408,7 +427,6 @@ public class ProjectService {
         }
 
         for (Map.Entry<String, Submission> entry : groupToSubmissionMap.entrySet()) {
-
             Submission submission = submissionService.addNewSubmission(
                     entry.getValue().getProject(),
                     entry.getValue().getUserId(),
@@ -574,7 +592,6 @@ public class ProjectService {
                     HttpStatus.NOT_FOUND, "entity not found"
             );
         }
-
 
         String fileName = project.getName() + " rubric.pdf";
         HttpHeaders headers = new HttpHeaders();

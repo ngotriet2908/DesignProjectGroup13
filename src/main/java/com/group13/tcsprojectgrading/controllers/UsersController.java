@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.Activity;
 import com.group13.tcsprojectgrading.models.Project;
-import com.group13.tcsprojectgrading.models.Submission;
+import com.group13.tcsprojectgrading.models.submissions.Submission;
 import com.group13.tcsprojectgrading.services.*;
 import com.group13.tcsprojectgrading.services.graders.GraderService;
 import com.group13.tcsprojectgrading.services.grading.AssessmentLinkerService;
@@ -74,21 +74,7 @@ class UsersController {
 
     @GetMapping(value = "/recent")
     protected List<Activity> recentProject(Principal principal) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
-
         List<Activity> activities = activityService.getActivities(principal.getName());
-//        List<JsonNode> nodes = new ArrayList<>();
-//        for(Activity activity: activities) {
-//            ObjectNode node = objectMapper.createObjectNode();
-//
-//            node.put("id", activity.getProjectId());
-//            node.put("course_id", activity.getCourseId());
-//            node.put("name", activity.getProjectName());
-//            node.put("created_at", activity.getProjectCreatedAt().toString());
-//            nodes.add(node);
-//        }
-
-//        return nodes.subList(0, Math.min(3, nodes.size()));
         return activities.subList(0, Math.min(3, activities.size()));
     }
 

@@ -1,9 +1,9 @@
 package com.group13.tcsprojectgrading.services.grading;
 
-import com.group13.tcsprojectgrading.models.AssessmentLinker;
+import com.group13.tcsprojectgrading.models.grading.AssessmentLinker;
 import com.group13.tcsprojectgrading.models.Participant;
-import com.group13.tcsprojectgrading.models.Submission;
-import com.group13.tcsprojectgrading.repositories.AssessmentLinkerRepository;
+import com.group13.tcsprojectgrading.models.submissions.Submission;
+import com.group13.tcsprojectgrading.repositories.grading.AssessmentLinkerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

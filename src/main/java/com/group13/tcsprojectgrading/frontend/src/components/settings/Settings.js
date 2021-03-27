@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import styles from "../project/project.module.css";
+import styles from "./settings.module.css";
 import {URL_PREFIX} from "../../services/config";
 
 import {connect} from "react-redux";
@@ -13,10 +13,59 @@ import Breadcrumbs from "../helpers/Breadcrumbs";
 
 import globalStyles from '../helpers/global.module.css';
 import classnames from "classnames";
+import Card from "react-bootstrap/Card";
+import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
+import {request} from "../../services/request";
 
 class Settings extends Component {
   constructor(props) {
-    super(props)
+    super(props);
+
+    this.state = {
+      isLoaded: false,
+      settings: {}
+    }
+  }
+
+  componentDidMount() {
+    this.props.setCurrentLocation(LOCATIONS.settings);
+
+    request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/settings`)
+      .then(async(response) => {
+        let settings = await response.json();
+
+        this.setState({
+          isLoaded: true,
+          settings: settings
+        });
+
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
+  }
+
+  toggleNotificationsEnabled = () => {
+    let notificationsEnabled = !this.state.settings.notificationsEnabled;
+
+    request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/settings`,
+      "PUT", {...this.state.settings, notificationsEnabled: notificationsEnabled})
+      .then(async(response) => {
+        if (response.status === 200) {
+          this.setState(prevState => ({
+            settings: {
+              ...prevState.settings,
+              notificationsEnabled: notificationsEnabled
+            }
+          }))
+        } else {
+          // TODO: show error
+          console.error("Could not update user settings.")
+        }
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
   }
 
   render () {
@@ -44,15 +93,26 @@ class Settings extends Component {
         </div>
 
         <div className={styles.container}>
-          <div className={classnames(styles.sectionContainer)}>
-            <div className={classnames(styles.sectionTitle, styles.sectionTitleWithButton)}>
-              <h3 className={styles.sectionTitleH}>{this.props.title}</h3>
+          <div className={classnames(globalStyles.sectionContainer)}>
+            <div className={classnames(globalStyles.sectionTitle, styles.sectionTitleWithButton)}>
+              <h3 className={globalStyles.sectionTitleH}>Notifications</h3>
+            </div>
 
-              {this.props.icon &&
-              <div onClick={this.props.onClickIcon} className={classnames(styles.iconButton, styles.sectionTitleButton)}>
-                {this.props.icon}
-              </div>
-              }
+            <div className={classnames(styles.sectionBody)}>
+              <Card>
+                <Card.Body>
+                  <h5>Enable notifications</h5>
+
+                  <label className={styles.switch}>
+                    <input
+                      type="checkbox"
+                      checked={!!this.state.settings.notificationsEnabled}
+                      onChange={this.toggleNotificationsEnabled}
+                    />
+                    <span className={styles.slider}/>
+                  </label>
+                </Card.Body>
+              </Card>
             </div>
           </div>
         </div>

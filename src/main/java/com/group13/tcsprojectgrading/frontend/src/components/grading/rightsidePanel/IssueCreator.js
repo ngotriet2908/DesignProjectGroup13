@@ -60,7 +60,7 @@ class IssueCreator extends Component {
               <option value={this.props.routeParams.assessmentId +"/2/this assessment"}>this assessment</option>
               {this.getAllElements(this.props.rubric).map((element) => {
                 return (
-                  <option value={element.id +"/"+element.type + "/" + element.name}>{element.name}</option>
+                  <option key={element.id} value={element.id +"/"+element.type + "/" + element.name}>{element.name}</option>
                 )
               })}
             </Form.Control>
@@ -72,7 +72,7 @@ class IssueCreator extends Component {
               <option value={"null"}>no reference</option>
               {this.props.issues.map((issue) => {
                 return (
-                  <option value={issue.id}>{issue.subject} on {issue.targetName}</option>
+                  <option key={issue.id} value={issue.id}>{issue.subject} on {issue.targetName}</option>
                 )
               })}
             </Form.Control>
@@ -84,7 +84,7 @@ class IssueCreator extends Component {
               <option value={"null"}>no addressee</option>
               {this.props.graders.map((grader) => {
                 return (
-                  <option value={grader.id}>{grader.name}</option>
+                  <option key={grader.id} value={grader.id}>{grader.name}</option>
                 )
               })}
             </Form.Control>

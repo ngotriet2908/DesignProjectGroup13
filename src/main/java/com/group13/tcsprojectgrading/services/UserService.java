@@ -1,6 +1,6 @@
 package com.group13.tcsprojectgrading.services;
 
-import com.group13.tcsprojectgrading.models.Submission;
+import com.group13.tcsprojectgrading.models.submissions.Submission;
 import com.group13.tcsprojectgrading.services.submissions.SubmissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -15,7 +15,6 @@ import java.security.Principal;
 @RestController
 @RequestMapping("/api/courses/{courseId}/projects/{projectId}/submissions")
 public class SubmissionController {
-
     private final CanvasApi canvasApi;
     private final SubmissionService submissionService;
 
@@ -30,7 +29,6 @@ public class SubmissionController {
         String courseString = this.canvasApi.getCanvasCoursesApi().getUserCourse(courseId);
 
         ObjectMapper objectMapper = new ObjectMapper();
-
         ObjectNode resultNode = submissionService.getSubmission(courseId, projectId, principal.getName());
         resultNode.set("course", objectMapper.readTree(courseString));
 
@@ -42,10 +40,8 @@ public class SubmissionController {
                                          @PathVariable String projectId,
                                          @PathVariable String id,
                                          Principal principal
-//                                   @RequestParam Map<String, String> queryParameters
     ) throws JsonProcessingException {
         String courseString = this.canvasApi.getCanvasCoursesApi().getUserCourse(courseId);
-
 
         ObjectNode resultNode = submissionService.getSubmissionInfo(courseId, projectId, id, principal.getName());
         ObjectMapper objectMapper = new ObjectMapper();
@@ -58,13 +54,9 @@ public class SubmissionController {
     protected ArrayNode createNewAssessment(@PathVariable String courseId,
                                          @PathVariable String projectId,
                                          @PathVariable String submissionId,
-                                         @RequestBody JsonNode object,
-                                         Principal principal
-//                                   @RequestParam Map<String, String> queryParameters
+                                         @RequestBody JsonNode object
     ) throws JsonProcessingException {
-
         return submissionService.assessmentManagement(courseId, projectId, submissionId, object);
-
     }
 
     @PostMapping(value = "/{id}/flag")
@@ -73,8 +65,7 @@ public class SubmissionController {
                                          @PathVariable String id,
                                          @RequestBody ObjectNode flag,
                                          Principal principal
-//                                   @RequestParam Map<String, String> queryParameters
-    ) throws JsonProcessingException {
+    ) {
 
         return submissionService.addFlag(courseId, projectId, id, flag, principal.getName());
     }
@@ -85,8 +76,7 @@ public class SubmissionController {
                                @PathVariable String id,
                                @RequestBody ObjectNode flag,
                                Principal principal
-//                                   @RequestParam Map<String, String> queryParameters
-    ) throws JsonProcessingException {
+    ) {
 
         return submissionService.createFlag(courseId, projectId, id, flag, principal.getName());
     }
@@ -97,8 +87,7 @@ public class SubmissionController {
                                @PathVariable String id,
                                @PathVariable String flagId,
                                Principal principal
-//                                   @RequestParam Map<String, String> queryParameters
-    ) throws JsonProcessingException {
+    ) {
         return submissionService.deleteFlag(courseId, projectId, id, flagId, principal.getName());
     }
 

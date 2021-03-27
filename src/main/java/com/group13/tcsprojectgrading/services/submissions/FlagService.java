@@ -1,9 +1,8 @@
 package com.group13.tcsprojectgrading.services.submissions;
 
-import com.group13.tcsprojectgrading.models.Flag;
-import com.group13.tcsprojectgrading.models.Grader;
+import com.group13.tcsprojectgrading.models.submissions.Flag;
 import com.group13.tcsprojectgrading.models.Project;
-import com.group13.tcsprojectgrading.repositories.FlagRepository;
+import com.group13.tcsprojectgrading.repositories.submissions.FlagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

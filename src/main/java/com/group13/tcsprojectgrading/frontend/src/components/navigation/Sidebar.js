@@ -148,6 +148,21 @@ class Sidebar extends React.Component {
           }
         </div>)
       )
+
+      result.push(
+        <div key="settings" className={`${styles.sidebarBodyItem}`}
+          onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.props.courseId + "/projects/" + this.props.projectId + "/settings"))}
+        >
+          <div className={styles.sidebarBodyItemLeft}>
+            <IoSettingsOutline className={styles.sidebarIcon} size={26}/>
+          </div>
+          {!this.state.isHidden &&
+          <span className={styles.sidebarBodyItemRight}>
+                  Settings
+          </span>
+          }
+        </div>
+      )
     } else if (this.props.location === LOCATIONS.rubric) {
       // rubric
       result.push(
@@ -207,22 +222,22 @@ class Sidebar extends React.Component {
           }
         </div>)
       )
-    }
-
-    result.push(
-      <div key="settings" className={`${styles.sidebarBodyItem}`}
-        onClick={this.onClickLogo}
-      >
-        <div className={styles.sidebarBodyItemLeft}>
-          <IoSettingsOutline className={styles.sidebarIcon} size={26}/>
-        </div>
-        {!this.state.isHidden &&
-        <span className={styles.sidebarBodyItemRight}>
+    } else if (this.props.location === LOCATIONS.settings) {
+      result.push(
+        <div key="settings" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`}
+          onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.props.courseId + "/projects/" + this.props.projectId + "/settings"))}
+        >
+          <div className={styles.sidebarBodyItemLeft}>
+            <IoSettingsOutline className={styles.sidebarIcon} size={26}/>
+          </div>
+          {!this.state.isHidden &&
+          <span className={styles.sidebarBodyItemRight}>
                   Settings
-        </span>
-        }
-      </div>
-    )
+          </span>
+          }
+        </div>
+      )
+    }
 
     return result;
   }
@@ -289,7 +304,9 @@ class Sidebar extends React.Component {
 const mapStateToProps = state => {
   return {
     user: state.users.self,
-    location: state.navigation.location
+    location: state.navigation.location,
+    courseId: state.navigation.course,
+    projectId: state.navigation.project
   };
 };
 
