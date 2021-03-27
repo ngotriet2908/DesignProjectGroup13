@@ -70,6 +70,7 @@ class SubmissionDetailsAssessmentEditingItemContainer extends Component {
         </div>
         <div>
           <p>id: {this.props.assessment.id}</p>
+          <p>progress: {this.props.assessment.progress}%</p>
           <p>issues count: {this.props.assessment.issuesCount}</p>
         </div>
         <div>
@@ -86,6 +87,7 @@ class SubmissionDetailsAssessmentEditingItemContainer extends Component {
                       </div>
                     </div>
                     <p>sid: {participant.sid}</p>
+                    <p>Is current: {participant.isCurrentLinker.toString()}</p>
                   </div>
                 </ListGroupItem>)
             })}

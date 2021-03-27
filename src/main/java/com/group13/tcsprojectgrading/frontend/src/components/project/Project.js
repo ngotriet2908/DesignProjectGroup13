@@ -164,6 +164,10 @@ class Project extends Component {
                       {/*Groups*/}
                       {/*</Button>*/}
 
+                      <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/participants"))}>
+                        Participants
+                      </Button>
+
                       <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/submissions"))}>
                       Submissions
                       </Button>

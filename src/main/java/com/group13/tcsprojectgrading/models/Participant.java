@@ -9,6 +9,7 @@ import com.group13.tcsprojectgrading.models.grading.AssessmentLinker;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.*;
 
 @Entity
 @IdClass(ParticipantId.class)
@@ -26,6 +27,9 @@ public class Participant {
     private String email;
 
     private String sid;
+
+    @ManyToOne
+    private AssessmentLinker currentAssessmentLinker;
 
     @OneToMany(mappedBy = "participant")
     private List<AssessmentLinker> assessmentLinkers = new ArrayList<>();
@@ -84,6 +88,14 @@ public class Participant {
         this.sid = sid;
     }
 
+    public AssessmentLinker getCurrentAssessmentLinker() {
+        return currentAssessmentLinker;
+    }
+
+    public void setCurrentAssessmentLinker(AssessmentLinker currentAssessmentLinker) {
+        this.currentAssessmentLinker = currentAssessmentLinker;
+    }
+
     public List<AssessmentLinker> getAssessmentLinkers() {
         return assessmentLinkers;
     }
@@ -100,6 +112,18 @@ public class Participant {
 //        this.currentAssessmentLinker = currentAssessmentLinker;
 //    }
 
+    public JsonNode convertToJson(UUID assessmentId) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("id", id);
+        objectNode.put("name", name);
+        objectNode.put("sid", sid);
+        objectNode.put("email", email);
+        objectNode.put("isCurrentLinker", currentAssessmentLinker.getAssessmentId().equals(assessmentId));
+//        objectNode.set("project", project.convertToJson());
+        return objectNode;
+    }
+
     public JsonNode convertToJson() {
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode objectNode = objectMapper.createObjectNode();
@@ -107,6 +131,18 @@ public class Participant {
         objectNode.put("name", name);
         objectNode.put("sid", sid);
         objectNode.put("email", email);
+//        objectNode.set("project", project.convertToJson());
+        return objectNode;
+    }
+
+    public JsonNode convertToJson(AssessmentLinker linker) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("id", id);
+        objectNode.put("name", name);
+        objectNode.put("sid", sid);
+        objectNode.put("email", email);
+        objectNode.put("isCurrentLinker", linker.getAssessmentId().equals(currentAssessmentLinker.getAssessmentId()));
 //        objectNode.set("project", project.convertToJson());
         return objectNode;
     }

@@ -1,5 +1,6 @@
 package com.group13.tcsprojectgrading.services;
 
+import com.group13.tcsprojectgrading.models.AssessmentLinker;
 import com.group13.tcsprojectgrading.models.Participant;
 import com.group13.tcsprojectgrading.models.ParticipantId;
 import com.group13.tcsprojectgrading.models.Project;
@@ -24,6 +25,15 @@ public class ParticipantService {
             return repository.getOne(new ParticipantId(participant.getId(), participant.getProject().getProjectCompositeKey()));
         } else {
             return repository.save(participant);
+        }
+    }
+
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public void saveParticipantCurrentAssessmentLinker(Participant participant, AssessmentLinker linker) {
+        if (repository.existsById(new ParticipantId(participant.getId(), participant.getProject().getProjectCompositeKey()))) {
+            Participant participant1 = repository.getOne(new ParticipantId(participant.getId(), participant.getProject().getProjectCompositeKey()));
+            participant1.setCurrentAssessmentLinker(linker);
+            repository.save(participant1);
         }
     }
 

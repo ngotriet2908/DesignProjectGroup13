@@ -154,6 +154,15 @@ public class Submission {
         this.comments = comments;
     }
 
+    public JsonNode convertToJson() {
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode node = mapper.createObjectNode();
+        node.put("id", id.toString());
+        node.put("isGroup", (!groupId.equals(NULL)));
+        node.put("name", name);
+        return node;
+    }
+
     public JsonNode convertToJson(List<AssessmentLinker> assessmentLinkers, List<Issue> issues) {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode node = mapper.createObjectNode();
@@ -213,7 +222,7 @@ public class Submission {
             assessment.put("id", entry.getKey().toString());
             ArrayNode participantsNode = mapper.createArrayNode();
             for(Participant participant: entry.getValue()) {
-                participantsNode.add(participant.convertToJson());
+                participantsNode.add(participant.convertToJson(entry.getKey()));
             }
 
             assessment.set("participants", participantsNode);
@@ -310,7 +319,7 @@ public class Submission {
             assessment.put("id", entry.getKey().toString());
             ArrayNode participantsNode = mapper.createArrayNode();
             for(Participant participant: entry.getValue()) {
-                participantsNode.add(participant.convertToJson());
+                participantsNode.add(participant.convertToJson(entry.getKey()));
             }
 
             assessment.set("participants", participantsNode);

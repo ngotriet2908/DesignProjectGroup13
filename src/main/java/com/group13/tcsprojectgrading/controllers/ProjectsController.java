@@ -39,49 +39,27 @@ import java.util.*;
 import java.util.List;
 
 import static com.group13.tcsprojectgrading.controllers.Utils.groupPages;
+import static com.group13.tcsprojectgrading.models.RoleEnum.*;
+import static com.group13.tcsprojectgrading.models.PrivilegeEnum.*;
 
 @RestController
 @RequestMapping("/api/courses/{courseId}/projects")
 public class ProjectsController {
     private final CanvasApi canvasApi;
-    private final ActivityService activityService;
-    private final RubricService rubricService;
     private final ProjectService projectService;
-    private final RoleService roleService;
-    private final GraderService graderService;
-    private final ProjectRoleService projectRoleService;
-    private final FlagService flagService;
+    private final SecurityService securityService;
+
     private final GoogleAuthorizationCodeFlow flow;
-    private final SubmissionService submissionService;
-    private final ParticipantService participantService;
-    private final AssessmentLinkerService assessmentLinkerService;
-    private final AssessmentService assessmentService;
-    private final SubmissionDetailsService submissionDetailsService;
 
     @Autowired
-    public ProjectsController(CanvasApi canvasApi, ActivityService activityService,
-                              RubricService rubricService, ProjectService projectService,
-                              RoleService roleService, GraderService graderService,
-                              ProjectRoleService projectRoleService,
-                              FlagService flagService,
-                              GoogleAuthorizationCodeFlow flow,
-                              SubmissionService submissionService, ParticipantService participantService,
-                              AssessmentLinkerService assessmentLinkerService, AssessmentService assessmentService, SubmissionDetailsService submissionDetailsService) {
+    public ProjectsController(CanvasApi canvasApi, ProjectService projectService, SecurityService securityService, GoogleAuthorizationCodeFlow flow) {
         this.canvasApi = canvasApi;
-        this.activityService = activityService;
-        this.rubricService = rubricService;
         this.projectService = projectService;
-        this.roleService = roleService;
-        this.graderService = graderService;
-        this.projectRoleService = projectRoleService;
-        this.flagService = flagService;
+        this.securityService = securityService;
         this.flow = flow;
-        this.submissionService = submissionService;
-        this.participantService = participantService;
-        this.assessmentLinkerService = assessmentLinkerService;
-        this.assessmentService = assessmentService;
-        this.submissionDetailsService = submissionDetailsService;
     }
+
+
 
     @RequestMapping(value = "/{projectId}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
@@ -106,22 +84,58 @@ public class ProjectsController {
             }
         }
 
-        ObjectNode resultJson = projectService.getProject(courseId, projectId, roleEnum, userJson, principal.getName());
-        resultJson.set("course", courseJson);
+        List<PrivilegeEnum> privileges = securityService
+                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
 
-        return resultJson;
+        if ((roleEnum != null && roleEnum.equals(TEACHER)) ||
+                (privileges != null && privileges.contains(PROJECT_READ))){
+            ObjectNode resultJson = projectService.getProject(courseId, projectId, roleEnum, userJson, principal.getName());
+            resultJson.set("course", courseJson);
+            return resultJson;
+        } else {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
     }
 
     @RequestMapping(value = "/{projectId}/participants", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     protected ObjectNode getProjectParticipants(@PathVariable String courseId, @PathVariable String projectId, Principal principal) throws JsonProcessingException, ParseException {
 
+        List<PrivilegeEnum> privileges = securityService
+                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+        if (!(privileges != null && privileges.contains(PROJECT_READ))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
+
         return projectService.getProjectParticipants(courseId, projectId);
+    }
+
+    @RequestMapping(value = "/{projectId}/participants/{participantId}", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    protected ObjectNode getProjectParticipant(@PathVariable String courseId,
+                                               @PathVariable String projectId,
+                                               @PathVariable String participantId,
+                                               Principal principal) throws JsonProcessingException, ParseException {
+
+        List<PrivilegeEnum> privileges = securityService
+                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+        if (!(privileges != null && privileges.contains(PROJECT_READ))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
+
+        return projectService.getProjectParticipant(courseId, projectId, participantId);
     }
 
     @RequestMapping(value = "/{projectId}/graders", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     protected ArrayNode getProjectGraders(@PathVariable String courseId, @PathVariable String projectId, Principal principal) throws JsonProcessingException, ParseException {
+
+        List<PrivilegeEnum> privileges = securityService
+                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+        if (!(privileges != null && privileges.contains(PROJECT_READ))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
+
         ObjectMapper objectMapper = new ObjectMapper();
         ArrayNode result = objectMapper.createArrayNode();
         List<Grader> graders = projectService.getProjectsGrader(courseId, projectId);
@@ -136,6 +150,11 @@ public class ProjectsController {
                                   @PathVariable String projectId,
                                   Principal principal) throws JsonProcessingException {
 
+        List<PrivilegeEnum> privileges = securityService
+                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+        if (!(privileges != null && privileges.contains(SUBMISSIONS_SYNC))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
 
         ObjectMapper objectMapper = new ObjectMapper();
         List<String> submissionsString = this.canvasApi.getCanvasCoursesApi().getSubmissionsInfo(courseId, Long.parseLong(projectId));
@@ -160,6 +179,12 @@ public class ProjectsController {
             );
         }
 
+        List<PrivilegeEnum> privileges = securityService
+                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+        if (!(privileges != null && privileges.contains(FEEDBACK_SEND))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
+
         String id = feedback.get("id").asText();
         boolean isGroup = feedback.get("isGroup").asBoolean();
         String body = feedback.get("body").asText();
@@ -180,8 +205,11 @@ public class ProjectsController {
                                                      @PathVariable String projectId,
                                                      @RequestBody ObjectNode feedback,
                                                      Principal principal) throws IOException, ParseException {
-
-
+        List<PrivilegeEnum> privileges = securityService
+                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+        if (!(privileges != null && privileges.contains(FEEDBACK_SEND))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
 //        System.out.println(Arrays.toString(byteArrayOutputStream.toByteArray()));
         return projectService.sendFeedbackPdf(courseId, projectId, feedback);
     }
@@ -191,6 +219,11 @@ public class ProjectsController {
     protected ResponseEntity<byte[]> sendFeedbackPdf(@PathVariable String courseId,
                                                      @PathVariable String projectId,
                                                      Principal principal) throws IOException, ParseException {
+        List<PrivilegeEnum> privileges = securityService
+                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+        if (!(privileges != null && privileges.contains(RUBRIC_DOWNLOAD))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
         return projectService.downloadRubric(courseId, projectId);
     }
 
@@ -200,6 +233,12 @@ public class ProjectsController {
                                         @PathVariable String projectId,
                                         @RequestBody ObjectNode feedback,
                                         Principal principal) throws IOException, ParseException, GeneralSecurityException, MessagingException {
+
+        List<PrivilegeEnum> privileges = securityService
+                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+        if (!(privileges != null && privileges.contains(FEEDBACK_SEND))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
 
         String id = feedback.get("id").asText();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -220,6 +259,13 @@ public class ProjectsController {
                     HttpStatus.NOT_FOUND, "entity not found"
             );
         }
+
+        List<PrivilegeEnum> privileges = securityService
+                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+        if (!(privileges != null && privileges.contains(FEEDBACK_OPEN))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
+
         String projectResponse = this.canvasApi.getCanvasCoursesApi().getCourseProject(courseId, projectId);
         String courseString = this.canvasApi.getCanvasCoursesApi().getUserCourse(courseId);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -233,105 +279,17 @@ public class ProjectsController {
 
     }
 
-//    @GetMapping(value = "/{projectId}/groups")
-//    @ResponseBody
-//    protected JsonNode getProjectGroup(@PathVariable String courseId, @PathVariable String projectId, Principal principal) throws JsonProcessingException, ParseException {
-//        String projectResponse = this.canvasApi.getCanvasCoursesApi().getCourseProject(courseId, projectId);
-//        String courseString = this.canvasApi.getCanvasCoursesApi().getUserCourse(courseId);
-//
-//        Project project = projectService.getProjectById(courseId, projectId);
-//        if (project == null) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.NOT_FOUND, "entity not found"
-//            );
-//        }
-//
-//        List<String> submissionsString = this.canvasApi.getCanvasCoursesApi().getSubmissionsInfo(courseId, Long.parseLong(projectId));
-//        List<String> studentsString = this.canvasApi.getCanvasCoursesApi().getCourseStudents(courseId);
-//
-////        System.out.println(submissionsString);
-//
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        ObjectNode resultNode = objectMapper.createObjectNode();
-//        resultNode.set("project", objectMapper.readTree(projectResponse));
-//        resultNode.set("course", objectMapper.readTree(courseString));
-//
-//        JsonNode projectJson = objectMapper.readTree(projectResponse);
-//        String projectCatId = projectJson.get("group_category_id").asText();
-//        Map<String, String> groupIdToNameMap = new HashMap<>();
-//        Map<String, String> userIdToGroupIdMap = new HashMap<>();
-//        Map<String, List<String>> groupIdToMembership = new HashMap<>();
-//
-//        if (!projectCatId.equals("null")) {
-//            ArrayNode groupsString = groupPages(objectMapper, canvasApi.getCanvasCoursesApi().getCourseGroupCategoryGroup(projectCatId));
-//
-//            for (Iterator<JsonNode> it = groupsString.elements(); it.hasNext(); ) {
-//                JsonNode group = it.next();
-//                if (group.get("members_count").asInt(0) <= 0) continue;
-//
-//                List<String> members = new ArrayList<>();
-//                ArrayNode memberships = groupPages(objectMapper, this.canvasApi.getCanvasCoursesApi().getGroupMemberships(group.get("id").asText()));
-//                groupIdToNameMap.put(group.get("id").asText(), group.get("name").asText());
-//
-//                for (Iterator<JsonNode> iter = memberships.elements(); iter.hasNext(); ) {
-//                    JsonNode membership = iter.next();
-//                    userIdToGroupIdMap.put(membership.get("user_id").asText(), membership.get("group_id").asText());
-//                    members.add(membership.get("user_id").asText());
-//                }
-//                groupIdToMembership.put(group.get("id").asText(), members);
-//            }
-//        }
-//
-//        ArrayNode studentArray = groupPages(objectMapper, studentsString);
-//        Map<String, JsonNode> studentMap = new HashMap<>();
-//        for (Iterator<JsonNode> it = studentArray.elements(); it.hasNext(); ) {
-//            JsonNode jsonNode = it.next();
-//            studentMap.put(jsonNode.get("id").asText(), jsonNode);
-//        }
-//
-//        ArrayNode submissionArray = groupPages(objectMapper, submissionsString);
-//        ArrayNode groupsArray = objectMapper.createArrayNode();
-//        for (Iterator<JsonNode> it = submissionArray.elements(); it.hasNext(); ) {
-//            JsonNode jsonNode = it.next();
-//
-//            if (!studentMap.containsKey(jsonNode.get("user_id").asText())) continue;
-//
-//            boolean isGroup = userIdToGroupIdMap.containsKey(jsonNode.get("user_id").asText());
-//            String id = (isGroup)? userIdToGroupIdMap.get(jsonNode.get("user_id").asText()): jsonNode.get("user_id").asText();
-//            String name = (isGroup)? groupIdToNameMap.get(userIdToGroupIdMap.get(jsonNode.get("user_id").asText())): studentMap.get(id).get("name").asText();
-//
-//            ObjectNode entityNode = objectMapper.createObjectNode();
-//            entityNode.put("id", id);
-//            if (!isGroup) entityNode.put("sid", studentMap.get(jsonNode.get("user_id").asText()).get("login_id").asText());
-//            entityNode.put("name", name);
-//            entityNode.put("isGroup", isGroup);
-//            entityNode.put("status", jsonNode.get("workflow_state").asText());
-//            if (isGroup) {
-//                ArrayNode membersNode = objectMapper.createArrayNode();
-//                if (!groupIdToMembership.containsKey(id)) continue;
-//                for(String userId: groupIdToMembership.get(id)) {
-//                    ObjectNode memberNode = objectMapper.createObjectNode();
-//                    if (!studentMap.containsKey(userId)) continue;
-//                    memberNode.put("name", studentMap.get(userId).get("name").asText());
-//                    memberNode.put("sid", studentMap.get(userId).get("login_id").asText());
-//                    memberNode.put("sortable_name", studentMap.get(userId).get("sortable_name").asText());
-//                    memberNode.put("email", studentMap.get(userId).get("email").asText());
-//                    membersNode.add(memberNode);
-//                }
-//                entityNode.set("members", membersNode);
-//            }
-//            groupsArray.add(entityNode);
-//        }
-//
-//        resultNode.set("groups", groupsArray);
-//
-//        return resultNode;
-//    }
-
     @GetMapping("/{projectId}/rubric")
     public String getRubrics(
             @PathVariable String courseId,
-            @PathVariable String projectId) throws JsonProcessingException {
+            @PathVariable String projectId,
+            Principal principal) throws JsonProcessingException {
+
+        List<PrivilegeEnum> privileges = securityService
+                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+        if (!(privileges != null && privileges.contains(RUBRIC_READ))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
         return projectService.getRubric(courseId, projectId);
     }
 
@@ -379,7 +337,14 @@ public class ProjectsController {
     public String updateRubric(
             @RequestBody JsonNode patch,
             @PathVariable String courseId,
-            @PathVariable String projectId) throws JsonPatchApplicationException, JsonProcessingException {
+            @PathVariable String projectId,
+            Principal principal) throws JsonPatchApplicationException, JsonProcessingException {
+
+        List<PrivilegeEnum> privileges = securityService
+                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+        if (!(privileges != null && privileges.contains(RUBRIC_READ))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
         return projectService.updateRubric(courseId, projectId, patch);
     }
 
@@ -391,6 +356,12 @@ public class ProjectsController {
                                              Principal principal
 //                                   @RequestParam Map<String, String> queryParameters
     ) throws JsonProcessingException {
+
+        List<PrivilegeEnum> privileges = securityService
+                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+        if (!(privileges != null && privileges.contains(FLAG_DELETE))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
 
         return projectService.deleteFlagPermanently(courseId, projectId, flagId, principal.getName());
     }

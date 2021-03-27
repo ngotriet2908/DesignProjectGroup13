@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
+import com.group13.tcsprojectgrading.models.*;
+import com.group13.tcsprojectgrading.services.*;
 import com.group13.tcsprojectgrading.models.permissions.RoleEnum;
 import com.group13.tcsprojectgrading.services.graders.ProjectsManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,22 +19,31 @@ import java.text.ParseException;
 import java.util.*;
 
 import static com.group13.tcsprojectgrading.controllers.Utils.groupPages;
+import static com.group13.tcsprojectgrading.models.PrivilegeEnum.*;
 
 @RestController
 @RequestMapping("/api/courses/{courseId}/projects/{projectId}/management")
 public class ProjectsManagementController {
     private final CanvasApi canvasApi;
     private final ProjectsManagementService projectsManagementService;
+    private final SecurityService securityService;
 
     @Autowired
-    public ProjectsManagementController(CanvasApi canvasApi, ProjectsManagementService projectsManagementService) {
+    public ProjectsManagementController(CanvasApi canvasApi, ProjectsManagementService projectsManagementService, SecurityService securityService) {
         this.canvasApi = canvasApi;
         this.projectsManagementService = projectsManagementService;
+        this.securityService = securityService;
     }
 
     @GetMapping(value = "")
     @ResponseBody
     protected JsonNode getManagementInfo(@PathVariable String courseId, @PathVariable String projectId, Principal principal) throws JsonProcessingException, ParseException {
+        List<PrivilegeEnum> privileges = securityService
+                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+        if (!(privileges != null && privileges.contains(MANAGE_GRADERS_OPEN))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
+
         return projectsManagementService.getManagementInfo(courseId, projectId, principal.getName());
     }
 
@@ -41,6 +52,12 @@ public class ProjectsManagementController {
                                  @PathVariable String projectId,
                                  @RequestBody ArrayNode activeGraders,
                                  Principal principal) throws JsonProcessingException, ParseException {
+        List<PrivilegeEnum> privileges = securityService
+                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+        if (!(privileges != null && privileges.contains(MANAGE_GRADERS_EDIT))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
+
         ObjectMapper objectMapper = new ObjectMapper();
         List<String> gradersResponse = this.canvasApi.getCanvasCoursesApi().getCourseGraders(courseId);
         ArrayNode gradersArrayFromCanvas = groupPages(objectMapper, gradersResponse);
@@ -52,6 +69,12 @@ public class ProjectsManagementController {
     @GetMapping(value = "/addGraders/getAllGraders")
     @ResponseBody
     protected ArrayNode getActiveGrader(@PathVariable String courseId, @PathVariable String projectId, Principal principal) throws JsonProcessingException, ParseException {
+        List<PrivilegeEnum> privileges = securityService
+                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+        if (!(privileges != null && privileges.contains(MANAGE_GRADERS_OPEN))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
+
         List<String> gradersResponse = this.canvasApi.getCanvasCoursesApi().getCourseGraders(courseId);
         ObjectMapper objectMapper = new ObjectMapper();
         ArrayNode results = objectMapper.createArrayNode();
@@ -75,6 +98,12 @@ public class ProjectsManagementController {
 //                                  @PathVariable String fromUserId,
                                         @PathVariable String toUserId,
                                         Principal principal) throws JsonProcessingException, ParseException {
+        List<PrivilegeEnum> privileges = securityService
+                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+        if (!(privileges != null && privileges.contains(MANAGE_GRADERS_EDIT))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
+
         return projectsManagementService.assignSubmission(courseId, projectId, id, toUserId);
     }
 
@@ -84,6 +113,12 @@ public class ProjectsManagementController {
                                    @PathVariable String projectId,
                                    @PathVariable String userId,
                                    Principal principal) throws JsonProcessingException, ParseException {
+        List<PrivilegeEnum> privileges = securityService
+                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+        if (!(privileges != null && privileges.contains(MANAGE_GRADERS_SELF_EDIT))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
+
         return projectsManagementService.returnSubmissions(courseId, projectId, userId);
     }
 
@@ -92,6 +127,12 @@ public class ProjectsManagementController {
                                   @PathVariable String projectId,
                                   @RequestBody ObjectNode object,
                                   Principal principal) throws JsonProcessingException, ParseException {
+        List<PrivilegeEnum> privileges = securityService
+                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+        if (!(privileges != null && privileges.contains(MANAGE_GRADERS_EDIT))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
+
         return projectsManagementService.bulkAssign(courseId, projectId, object);
     }
 

@@ -34,6 +34,7 @@ class CoursesController {
 
     @RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
     protected ResponseEntity<ArrayNode> courses() throws JsonProcessingException {
+
         List<String> response = this.canvasApi.getCanvasCoursesApi().getUserCourseList();
 
         if (response == null) {
@@ -57,11 +58,22 @@ class CoursesController {
 
     @RequestMapping(value = "/{course_id}", method = RequestMethod.GET, produces = "application/json")
     protected JsonNode getCourse(@PathVariable String course_id, Principal principal) throws JsonProcessingException {
+        RoleEnum roleEnum = getCourseRole(course_id, principal.getName());
+        if (!(roleEnum != null && !roleEnum.equals(RoleEnum.STUDENT))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
         return courseServices.getCourse(course_id, this.canvasApi, principal.getName());
     }
 
     @RequestMapping(value = "/{course_id}/participants", method = RequestMethod.GET, produces = "application/json")
-    protected ArrayNode getCourseUser(@PathVariable String course_id, @RequestParam Map<String, String> queryParameters) throws JsonProcessingException {
+    protected ArrayNode getCourseUser(@PathVariable String course_id,
+                                      @RequestParam Map<String, String> queryParameters,
+                                      Principal principal) throws JsonProcessingException {
+        RoleEnum roleEnum = getCourseRole(course_id, principal.getName());
+        if (!(roleEnum != null && !roleEnum.equals(RoleEnum.STUDENT))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
+
         List<String> response;
         if (queryParameters.containsKey("role") && queryParameters.get("role").equals("student"))  {
             response = this.canvasApi.getCanvasCoursesApi().getCourseStudents(course_id);
@@ -76,7 +88,12 @@ class CoursesController {
     Get all projects in  the course (both active and inactive)
      */
     @RequestMapping(value = "/{course_id}/projects", method = RequestMethod.GET, produces = "application/json")
-    protected ResponseEntity<ArrayNode> getCourseCanvas(@PathVariable String course_id) throws JsonProcessingException {
+    protected ResponseEntity<ArrayNode> getCourseCanvas(@PathVariable String course_id, Principal principal) throws JsonProcessingException {
+        //TODO remove if enable student view
+        RoleEnum roleEnum = getCourseRole(course_id, principal.getName());
+        if (!(roleEnum != null && !roleEnum.equals(RoleEnum.STUDENT))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
 
         List<String> responseString = this.canvasApi.getCanvasCoursesApi().getCourseProjects(course_id);
 
@@ -118,7 +135,12 @@ class CoursesController {
      */
     @PostMapping(value = "/{course_id}/projects-active")
     protected void editProjects(@PathVariable String course_id,
-                                     @RequestBody ArrayNode activeProjects) throws Exception {
+                                @RequestBody ArrayNode activeProjects,
+                                Principal principal) throws Exception {
+        RoleEnum roleEnum = getCourseRole(course_id, principal.getName());
+        if (!(roleEnum != null && roleEnum.equals(RoleEnum.TEACHER))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
 
         List<String> responseString = this.canvasApi.getCanvasCoursesApi().getCourseProjects(course_id);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -144,5 +166,22 @@ class CoursesController {
         }
 
         projectService.processActiveProjects(editedActiveProject, availableProjects, course_id);
+    }
+
+    private RoleEnum getCourseRole(String courseId, String userId) throws JsonProcessingException {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        ArrayNode enrolmentsNode = groupPages(objectMapper, this.canvasApi.getCanvasUsersApi().getEnrolments(userId));
+
+        RoleEnum roleEnum = null;
+
+        for (Iterator<JsonNode> it = enrolmentsNode.elements(); it.hasNext(); ) {
+            JsonNode enrolmentNode = it.next();
+            if (enrolmentNode.get("course_id").asText().equals(courseId)) {
+                roleEnum = RoleEnum.getRoleFromEnrolment(enrolmentNode.get("role").asText());
+            }
+        }
+
+        return roleEnum;
     }
 }

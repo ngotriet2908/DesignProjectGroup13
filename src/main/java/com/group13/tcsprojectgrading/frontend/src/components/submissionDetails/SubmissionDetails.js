@@ -10,7 +10,7 @@ import SubmissionDetailsAssessmentsContainer
   from "./SubmissionDetailsAssessmentsContainer/SubmissionDetailsAssessmentsContainer";
 import SubmissionDetailsAssessmentsEditingContainer
   from "./SubmissionDetailsAssessmentsContainer/SubmissionDetailsAssessmentsEditingContainer";
-import {IoFlagOutline,IoAdd,  IoSyncOutline} from "react-icons/io5";
+import {IoFlagOutline,IoAdd,  IoSyncOutline, IoPencilOutline, IoCloseOutline} from "react-icons/io5";
 import FlagModal from "./FlagModal";
 import globalStyles from "../helpers/global.module.css";
 import Breadcrumbs from "../helpers/Breadcrumbs";
@@ -19,7 +19,10 @@ import {deleteCurrentCourse, saveCurrentCourse} from "../../redux/courses/action
 import {setCurrentLocation} from "../../redux/navigation/actions";
 import {connect} from "react-redux";
 import classnames from "classnames";
-
+import AddParticipantModal from "./AddParticipantModal";
+import ParticipantItemEdit from "./ParticipantItemEdit";
+import ParticipantItem from "./ParticipantItem";
+import {toast} from 'react-toastify'
 
 class SubmissionDetails extends Component {
   constructor(props) {
@@ -32,7 +35,10 @@ class SubmissionDetails extends Component {
       submission: {},
       isLoaded: false,
       isAssessmentEditing: false,
-      flagModalShow: false
+      isAddingParticipant: false,
+      flagModalShow: false,
+      participantModalShow: false,
+      allParticipants: []
     }
   }
 
@@ -49,12 +55,72 @@ class SubmissionDetails extends Component {
           project: data.project,
           course: data.course,
           isLoaded: true,
-          flagModalShow: false
+          flagModalShow: false,
+          participantModalShow: false,
         })
       })
       .catch(error => {
         console.error(error.message);
       });
+  }
+
+  deleteParticipantHandler = (member) => {
+    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/removeParticipant/${member.id}?returnAllSubmissions=false`, "DELETE")
+      .then(response => {
+        return response.json()
+      })
+      .then(data => {
+        if (data.hasOwnProperty("error")) {
+          console.log(data.status)
+          console.log(data.message)
+          // alert(data.message)
+          toast.error(data.message, {
+            position: "top-center",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+          return
+        }
+        this.setState({
+          submission: data
+        })
+      })
+      .catch(error => {
+        alert(error.message)
+      });
+  }
+
+  toggleAddingParticipant = () => {
+    this.setState(prev => {
+      return {isAddingParticipant: !prev.isAddingParticipant}
+    })
+  }
+
+  searchArray(participants, participant) {
+    let i;
+    for(i = 0; i < participants.length; i++) {
+      if (participants[i].id === participant.id) return true
+    }
+    return false
+  }
+
+  filterCurrentParticipant(participants) {
+    return participants.filter((participant) => {
+      return !this.searchArray(this.state.submission.participants, participant)
+    })
+  }
+
+  updateSubmission = (submission) => {
+    console.log("update submission")
+    console.log(submission)
+    this.setState({
+      submission: submission,
+      participantModalShow: false
+    })
   }
 
   onFlagModalClose = () => {
@@ -66,6 +132,12 @@ class SubmissionDetails extends Component {
   onFlagModalShow = () => {
     this.setState({
       flagModalShow: true
+    })
+  }
+
+  onAddParticipantModalClose = () => {
+    this.setState({
+      participantModalShow: false,
     })
   }
 
@@ -82,6 +154,23 @@ class SubmissionDetails extends Component {
     this.setState({
       project: projectCopy
     })
+  }
+
+  handleAddParticipant = () => {
+    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/participants`)
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        console.log(data);
+        this.setState({
+          allParticipants: data.participants,
+          participantModalShow: true
+        })
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
   }
 
 
@@ -245,8 +334,24 @@ class SubmissionDetails extends Component {
 
           {(this.state.submission.participants != null) &&
             <div className={styles.section}>
-              <div className={styles.sectionTitle}>
-                <h3 className={styles.sectionTitleH}>Members</h3>
+              <div className={classnames(styles.sectionTitle, styles.sectionTitleWithButton)}>
+                <h3 className={styles.sectionTitleH}>Participants</h3>
+                {(!this.state.isAddingParticipant)?
+                  <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.toggleAddingParticipant}>
+                    <IoPencilOutline size={26}/>
+                  </div>
+                  :
+                  <div className={styles.buttonGroup}>
+                    <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.handleAddParticipant}>
+                    <IoAdd size={26}/>
+                    </div>
+                    <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.toggleAddingParticipant}>
+                    <IoCloseOutline size={26}/>
+                    </div>
+                  </div>
+                }
+
+
               </div>
 
               <div className={styles.sectionContent}>
@@ -254,14 +359,11 @@ class SubmissionDetails extends Component {
                   <Card.Body>
                     <ListGroup>
                       {this.state.submission.participants.map((member) => {
-                        return (
-                          <ListGroupItem key={member.sid}>
-                            <div className={styles.memberItem}>
-                              <h6>name: {member.name}</h6>
-                              <h6>sid: {member.sid}</h6>
-                              <h6>email: {member.email}</h6>
-                            </div>
-                          </ListGroupItem>)
+                        return ((this.state.isAddingParticipant)?
+                            <ParticipantItemEdit member={member} handleDelete={() => this.deleteParticipantHandler(member)}/>
+                            :
+                            <ParticipantItem member={member}/>
+                          )
                       })}
                     </ListGroup>
                   </Card.Body>
@@ -298,6 +400,15 @@ class SubmissionDetails extends Component {
           updateSubmissionFlags = {this.updateSubmissionFlags}
           updateProjectFlags = {this.updateProjectFlags}
           params={this.props.match.params}
+        />
+
+        <AddParticipantModal
+          show={this.state.participantModalShow}
+          onClose={this.onAddParticipantModalClose}
+          participants={this.filterCurrentParticipant(this.state.allParticipants)}
+          assessments={this.state.submission.assessments}
+          params={this.props.match.params}
+          updateSubmission={this.updateSubmission}
         />
       </div>
     );

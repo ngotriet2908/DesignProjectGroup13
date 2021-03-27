@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+import com.google.api.client.json.Json;
 import com.google.api.services.gmail.Gmail;
 import com.group13.tcsprojectgrading.controllers.PdfRubricUtils;
 import com.group13.tcsprojectgrading.controllers.PdfUtils;
@@ -226,6 +227,42 @@ public class ProjectService {
     }
 
     @Transactional
+    public ObjectNode getProjectParticipant(String courseId, String projectId, String participantId) throws ResponseStatusException {
+        Project project = projectRepository.findById(new ProjectId(courseId, projectId)).orElse(null);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "project not found"
+            );
+        }
+
+        Participant participant = participantService.findParticipantWithId(participantId, project);
+        if (participant == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "participant not found"
+            );
+        }
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<AssessmentLinker> assessmentLinkers = assessmentLinkerService.findAssessmentLinkersForParticipant(participant);
+        ArrayNode submissionsNode = objectMapper.createArrayNode();
+        for(AssessmentLinker linker: assessmentLinkers) {
+            Submission submission = linker.getSubmission();
+            ObjectNode submissionNode = (ObjectNode) submission.convertToJson();
+            submissionNode.put("isCurrent", participant.getCurrentAssessmentLinker() != null
+                    && participant.getCurrentAssessmentLinker().getAssessmentId().equals(linker.getAssessmentId()));
+            submissionsNode.add(submissionNode);
+        }
+
+        ObjectNode resultNode = objectMapper.createObjectNode();
+        resultNode.set("project", project.convertToJson());
+        resultNode.set("submissions", submissionsNode);
+        resultNode.set("participant", participant.convertToJson());
+
+        return resultNode;
+    }
+
+
+    @Transactional
     public ObjectNode getProject(String courseId, String projectId, RoleEnum roleEnum, JsonNode userJson, String userId) throws ResponseStatusException, JsonProcessingException, ParseException {
         Project project = projectRepository.findById(new ProjectId(courseId, projectId)).orElse(null);
         if (project == null) {
@@ -399,6 +436,11 @@ public class ProjectService {
                                 assessmentId
                         )
                 );
+
+                if (participant.getCurrentAssessmentLinker() == null) {
+                    participantService.saveParticipantCurrentAssessmentLinker(participant, assessmentLinker);
+                }
+
                 assessmentService.saveAssessment(assessmentLinker);
             } else {
                 if (!groupToSubmissionMap.containsKey(jsonNode.get("group").get("id").asText())) {
@@ -454,6 +496,10 @@ public class ProjectService {
                         participant,
                         assessmentId
                 ));
+
+                if (participant.getCurrentAssessmentLinker() == null) {
+                    participantService.saveParticipantCurrentAssessmentLinker(participant, assessmentLinker);
+                }
 
                 assessmentService.saveAssessment(assessmentLinker);
             }
