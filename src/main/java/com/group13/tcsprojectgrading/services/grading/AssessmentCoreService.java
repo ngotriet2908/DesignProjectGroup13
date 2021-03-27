@@ -9,6 +9,7 @@ import com.group13.tcsprojectgrading.models.graders.Grader;
 import com.group13.tcsprojectgrading.models.grading.Assessment;
 import com.group13.tcsprojectgrading.models.grading.CriterionGrade;
 import com.group13.tcsprojectgrading.models.grading.Grade;
+import com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.models.submissions.Issue;
 import com.group13.tcsprojectgrading.models.submissions.Submission;
@@ -29,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.group13.tcsprojectgrading.models.PrivilegeEnum.*;
+import static com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum.*;
 
 @Service
 public class AssessmentCoreService {

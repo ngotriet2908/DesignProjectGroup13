@@ -10,6 +10,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.*;
 import com.group13.tcsprojectgrading.models.graders.Grader;
+import com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum;
 import com.group13.tcsprojectgrading.models.permissions.RoleEnum;
 import com.group13.tcsprojectgrading.models.submissions.Flag;
 import com.group13.tcsprojectgrading.services.*;
@@ -39,8 +40,8 @@ import java.util.*;
 import java.util.List;
 
 import static com.group13.tcsprojectgrading.controllers.Utils.groupPages;
-import static com.group13.tcsprojectgrading.models.RoleEnum.*;
-import static com.group13.tcsprojectgrading.models.PrivilegeEnum.*;
+import static com.group13.tcsprojectgrading.models.permissions.RoleEnum.*;
+import static com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum.*;
 
 @RestController
 @RequestMapping("/api/courses/{courseId}/projects")
@@ -252,7 +253,8 @@ public class ProjectsController {
     @GetMapping(value = "/{projectId}/feedback")
     @ResponseBody
     protected ObjectNode getFeedbackInfoPage(@PathVariable String courseId,
-                                             @PathVariable String projectId) throws JsonProcessingException {
+                                             @PathVariable String projectId,
+                                             Principal principal) throws JsonProcessingException {
         Project project = projectService.getProject(courseId, projectId);
         if (project == null) {
             throw new ResponseStatusException(

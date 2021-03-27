@@ -13,6 +13,7 @@ import com.group13.tcsprojectgrading.services.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import static com.group13.tcsprojectgrading.controllers.Utils.groupPages;
 

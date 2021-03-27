@@ -4,6 +4,7 @@ import com.group13.tcsprojectgrading.models.Participant;
 import com.group13.tcsprojectgrading.models.submissions.Submission;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.UUID;
 
 @Entity

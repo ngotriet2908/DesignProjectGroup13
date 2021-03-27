@@ -6,12 +6,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
+import com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum;
+import com.group13.tcsprojectgrading.services.SecurityService;
 import com.group13.tcsprojectgrading.services.submissions.SubmissionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.websocket.server.PathParam;
 import java.security.Principal;
+import java.util.List;
+
+import static com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum.*;
 
 @RestController
 @RequestMapping("/api/courses/{courseId}/projects/{projectId}/submissions")
@@ -70,7 +77,8 @@ public class SubmissionController {
     protected ArrayNode createNewAssessment(@PathVariable String courseId,
                                          @PathVariable String projectId,
                                          @PathVariable String submissionId,
-                                         @RequestBody JsonNode object
+                                         @RequestBody JsonNode object,
+                                            Principal principal
     ) throws JsonProcessingException {
         List<PrivilegeEnum> privileges = securityService
                 .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);

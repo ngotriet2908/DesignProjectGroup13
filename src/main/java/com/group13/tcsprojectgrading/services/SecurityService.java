@@ -2,6 +2,13 @@ package com.group13.tcsprojectgrading.services;
 
 
 import com.group13.tcsprojectgrading.models.*;
+import com.group13.tcsprojectgrading.models.graders.Grader;
+import com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum;
+import com.group13.tcsprojectgrading.models.permissions.ProjectRole;
+import com.group13.tcsprojectgrading.models.permissions.RoleEnum;
+import com.group13.tcsprojectgrading.services.graders.GraderService;
+import com.group13.tcsprojectgrading.services.permissions.PrivilegeService;
+import com.group13.tcsprojectgrading.services.permissions.RoleService;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -16,7 +23,8 @@ public class SecurityService {
     private final PrivilegeService privilegeService;
     private final ProjectService projectService;
 
-    public SecurityService(GraderService graderService, RoleService roleService, PrivilegeService privilegeService, ProjectService projectService) {
+    public SecurityService(GraderService graderService, RoleService roleService,
+                           PrivilegeService privilegeService, ProjectService projectService) {
         this.graderService = graderService;
         this.roleService = roleService;
         this.privilegeService = privilegeService;

@@ -1,9 +1,9 @@
 package com.group13.tcsprojectgrading.services;
 
-import com.group13.tcsprojectgrading.models.AssessmentLinker;
 import com.group13.tcsprojectgrading.models.Participant;
 import com.group13.tcsprojectgrading.models.ParticipantId;
 import com.group13.tcsprojectgrading.models.Project;
+import com.group13.tcsprojectgrading.models.grading.AssessmentLinker;
 import com.group13.tcsprojectgrading.repositories.ParticipantRepository;
 import org.springframework.stereotype.Service;
 

@@ -9,6 +9,7 @@ import com.group13.tcsprojectgrading.models.*;
 import com.group13.tcsprojectgrading.models.graders.Grader;
 import com.group13.tcsprojectgrading.models.grading.Assessment;
 import com.group13.tcsprojectgrading.models.grading.AssessmentLinker;
+import com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.models.submissions.*;
 import com.group13.tcsprojectgrading.repositories.ProjectRepository;

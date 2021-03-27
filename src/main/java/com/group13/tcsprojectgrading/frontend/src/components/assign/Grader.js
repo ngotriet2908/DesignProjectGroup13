@@ -16,7 +16,7 @@ class Grader extends Component {
       // filterString: "",
       // hideSearch : true
 
-      collapsed: true,
+      collapsed: false,
     }
   }
 

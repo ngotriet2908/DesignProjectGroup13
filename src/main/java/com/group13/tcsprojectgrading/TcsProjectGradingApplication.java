@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Bean;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.group13.tcsprojectgrading.models.PrivilegeEnum.*;
+import static com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum.*;
 
 @SpringBootApplication
 //public class TcsProjectGradingApplication implements CommandLineRunner {
