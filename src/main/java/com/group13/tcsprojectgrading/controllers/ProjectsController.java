@@ -209,12 +209,14 @@ public class ProjectsController {
         String body = feedback.get("body").asText();
         String subject = feedback.get("subject").asText();
 
-        String fileName = id + "_" + subject + ".pdf";
+        Participant participant = participantService.findParticipantWithId(id, project);
+        Submission submission = submissionService.findSubmissionById(body);
+
+        String fileName = "feedback" + "_" + projectId + "_" + participant.getSid() + ".pdf";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
         headers.setContentDispositionFormData(fileName, fileName);
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-//        response.setContentType("blob");
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
         PdfWriter pdfWriter = new PdfWriter(byteArrayOutputStream);
@@ -223,16 +225,17 @@ public class ProjectsController {
 
         document.getPdfDocument();
 
-        Participant participant = participantService.findParticipantWithId(id, project);
-        Submission submission = submissionService.findSubmissionById(body);
-
         Assessment submissionAssessment = assessmentService.getAssessmentBySubmissionAndParticipant(submission, participant);
-        PdfUtils pdfUtils = new PdfUtils(document, rubricService.getRubricById(projectId), submissionAssessment
-        );
+        PdfUtils pdfUtils = new PdfUtils(document, rubricService.getRubricById(projectId), submissionAssessment, participant);
+        if (body != null && !body.trim().isEmpty()) {
+            pdfUtils.setBody(body);
+        }
+        if (subject != null && !subject.trim().isEmpty()) {
+            pdfUtils.setSubject(subject);
+        }
+
         pdfUtils.generatePdfOfFeedback();
         document.close();
-
-//        System.out.println(Arrays.toString(byteArrayOutputStream.toByteArray()));
 
         return new ResponseEntity<byte[]>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.OK);
     }
@@ -349,7 +352,7 @@ public class ProjectsController {
 
     public static void addEmptyLine(Paragraph paragraph, int number) {
         for (int i = 0; i < number; i++) {
-            paragraph.add(new Paragraph(" "));
+            paragraph.add("\n");
         }
     }
 
