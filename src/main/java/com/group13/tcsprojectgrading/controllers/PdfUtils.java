@@ -1,16 +1,26 @@
 package com.group13.tcsprojectgrading.controllers;
 
 import com.group13.tcsprojectgrading.models.Assessment;
+import com.group13.tcsprojectgrading.models.Participant;
 import com.group13.tcsprojectgrading.models.grading.CriterionGrade;
 import com.group13.tcsprojectgrading.models.grading.Grade;
 import com.group13.tcsprojectgrading.models.rubric.Element;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.models.rubric.RubricContent;
 import com.itextpdf.io.font.FontConstants;
+import com.itextpdf.kernel.color.Color;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
+import com.itextpdf.kernel.geom.Rectangle;
+import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
+import com.itextpdf.kernel.pdf.canvas.draw.ILineDrawer;
+import com.itextpdf.kernel.pdf.canvas.draw.SolidLine;
 import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.LineSeparator;
 import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.property.HorizontalAlignment;
+import com.itextpdf.layout.property.Property;
+import com.itextpdf.layout.property.TextAlignment;
 import org.jsoup.Jsoup;
 
 import java.io.IOException;
@@ -25,22 +35,80 @@ public class PdfUtils {
     private Rubric rubric;
     private Assessment assessment;
     private Map<String, NodeInfo> nodeInfoMap;
+    private Participant participant;
+    private String body;
+    private String subject;
     private int maxLevel;
 
-    public PdfUtils(Document document, Rubric rubric, Assessment assessment) {
+    private static final int FONT_SIZE_TITLE = 22;
+    private static final int FONT_SIZE_CONTENT = 12;
+    private static final int FONT_SIZE_LABEL = 17;
+
+    public PdfUtils(Document document, Rubric rubric, Assessment assessment, Participant participant) {
         this.document = document;
         this.rubric = rubric;
         this.assessment = assessment;
         this.maxLevel = 0;
         nodeInfoMap = new HashMap<>();
+        this.participant = participant;
     }
 
     public void headerGenerator(String title, String body) {
 
     }
 
+    private LineSeparator getLineSeparator()
+    {
+        return new LineSeparator(new SolidLine(1f));
+    }
+
+    public void setBody(String body)
+    {
+        this.body = body;
+    }
+
+    public void setSubject(String subject)
+    {
+        this.subject = subject;
+    }
+
+    private void addTitleParagraphToDocument(String topTitle, String bottomTitle) throws IOException {
+        PdfFont titleFont = PdfFontFactory.createFont(FontConstants.HELVETICA);
+
+        document.add(new Paragraph(topTitle).setFont(titleFont).setFontSize(FONT_SIZE_TITLE).setBold().setTextAlignment(TextAlignment.CENTER));
+        document.add(getLineSeparator());
+
+        if (participant.getName() != null) {
+            Paragraph name = new Paragraph("Student name: " + participant.getName()).setFont(titleFont).setFontSize(FONT_SIZE_CONTENT);
+            addEmptyLine(name, 1);
+            document.add(name);
+        }
+        if (participant.getSid() != null) {
+            Paragraph title = new Paragraph("Student number: " + participant.getSid()).setFont(titleFont).setFontSize(FONT_SIZE_CONTENT);
+            addEmptyLine(title, 1);
+            document.add(title);
+        }
+        if (subject != null) {
+            Paragraph subjectParagraph = new Paragraph("Subject: ").setFont(titleFont).setFontSize(FONT_SIZE_LABEL);
+            addEmptyLine(subjectParagraph, 1);
+            subjectParagraph.add(new Paragraph(subject).setFont(titleFont).setFontSize(FONT_SIZE_CONTENT));
+            addEmptyLine(subjectParagraph, 1);
+            document.add(subjectParagraph);
+        }
+        if (body != null) {
+            Paragraph bodyParagraph = new Paragraph("Overall comment: ").setFont(titleFont).setFontSize(FONT_SIZE_LABEL);
+            addEmptyLine(bodyParagraph, 1);
+            bodyParagraph.add(new Paragraph(body).setFont(titleFont).setFontSize(FONT_SIZE_CONTENT));
+            addEmptyLine(bodyParagraph, 1);
+            document.add(bodyParagraph);
+        }
+
+        document.add(new Paragraph(bottomTitle).setFont(titleFont).setFontSize(FONT_SIZE_TITLE).setBold().setTextAlignment(TextAlignment.CENTER));
+        document.add(getLineSeparator());
+    }
 
     public Document generatePdfOfFeedback() throws IOException {
+        addTitleParagraphToDocument("Feedback sheet", "Assignment feedback");
         if (rubric.getChildren() == null) return null;
         nodeInfoMap.put("-1", new NodeInfo(0, null, 0, "-1","P", 0, 0));
         NodeInfo nodeInfo = nodeInfoMap.get("-1");
