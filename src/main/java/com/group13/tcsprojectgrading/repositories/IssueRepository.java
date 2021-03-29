@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.UUID;
 
 public interface IssueRepository extends JpaRepository<Issue, UUID> {
-    public List<Issue> findIssuesByAssessmentId(UUID assessmentId);
-    public List<Issue> findIssuesByAddressee(Grader addressee);
-    public List<Issue> findIssuesByCreator(Grader creator);
+    List<Issue> findIssuesByAssessmentId(UUID assessmentId);
+    List<Issue> findIssuesByAddressee(Grader addressee);
+    List<Issue> findIssuesByCreator(Grader creator);
 
 }

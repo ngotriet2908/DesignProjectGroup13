@@ -44,7 +44,8 @@ public class Issue {
 
     private String solution;
 
-    public Issue(UUID assessmentId, UUID target, String targetType, String targetName, Issue referentIssue, String subject, String description, Grader creator, String status) {
+    public Issue(UUID assessmentId, UUID target, String targetType, String targetName, Issue referentIssue, String subject,
+                 String description, Grader creator, String status, Grader addressee) {
         this.assessmentId = assessmentId;
         this.target = target;
         this.targetType = targetType;
@@ -54,6 +55,7 @@ public class Issue {
         this.creator = creator;
         this.status = status;
         this.targetName = targetName;
+        this.addressee = addressee;
     }
 
     public Issue() {

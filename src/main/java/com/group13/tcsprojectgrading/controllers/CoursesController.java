@@ -119,9 +119,9 @@ class CoursesController {
             ((ObjectNode) userJson).put("role", "ta");
         }
 
-        ((ObjectNode)resultNode).set("course", jsonCourseNode);
-        ((ObjectNode)resultNode).set("projects", arrayNode);
-        ((ObjectNode)resultNode).set("user", userJson);
+        resultNode.set("course", jsonCourseNode);
+        resultNode.set("projects", arrayNode);
+        resultNode.set("user", userJson);
 
         if (arrayNode == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

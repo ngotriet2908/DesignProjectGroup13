@@ -78,13 +78,13 @@ public class AssessmentService {
             Grade grade = grades.getHistory().get(grades.getActive());
             total += grade.getGrade() * criterion.getContent().getGrade().getWeight();
         }
-
         return total;
     }
 
     public double getProgress(Rubric rubric, Assessment assessment) {
         int graded = assessment.getGradedCount();
         int total = rubric.getCriterionCount();
+        System.out.println(total);
         return graded/(double) total;
     }
 }

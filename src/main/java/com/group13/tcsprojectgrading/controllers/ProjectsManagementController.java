@@ -103,8 +103,8 @@ public class ProjectsManagementController {
             }
         }
 
-        ((ObjectNode)resultNode).set("graders", gradersArray);
-        ((ObjectNode)resultNode).set("notAssigned", notAssignedArray);
+        resultNode.set("graders", gradersArray);
+        resultNode.set("notAssigned", notAssignedArray);
 
         return resultNode;
     }
@@ -307,9 +307,9 @@ public class ProjectsManagementController {
 
         int[] amountOfTasks = new int[gradersNeedToBeAssigned.size()];
 
-        Arrays.fill(amountOfTasks, (int) notAssignNum / amountOfTasks.length);
+        Arrays.fill(amountOfTasks, notAssignNum / amountOfTasks.length);
         Random rand = new Random();
-        notAssignNum -= amountOfTasks.length*((int) notAssignNum / amountOfTasks.length);
+        notAssignNum -= amountOfTasks.length*(notAssignNum / amountOfTasks.length);
 
         while(notAssignNum > 0) {
             int random = rand.nextInt(amountOfTasks.length);

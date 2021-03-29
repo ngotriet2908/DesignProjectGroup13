@@ -9,5 +9,5 @@ import java.util.List;
 
 public interface GraderRepository extends JpaRepository<Grader, GraderId> {
 
-    public List<Grader> findGraderByProject(Project project);
+    List<Grader> findGraderByProject(Project project);
 }

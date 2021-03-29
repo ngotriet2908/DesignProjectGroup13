@@ -21,7 +21,7 @@ import java.util.List;
 public class CanvasOAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     protected Log logger = LogFactory.getLog(this.getClass());
 
-    private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
+    private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {

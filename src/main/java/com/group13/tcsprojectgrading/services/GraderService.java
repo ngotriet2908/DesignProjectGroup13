@@ -12,8 +12,8 @@ import java.util.List;
 
 @Service
 public class GraderService {
-    private GraderRepository repository;
-    private FlagService flagService;
+    private final GraderRepository repository;
+    private final FlagService flagService;
 
     @Autowired
     public GraderService(GraderRepository repository, FlagService flagService) {

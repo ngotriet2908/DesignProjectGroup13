@@ -14,8 +14,8 @@ import java.util.List;
 public class ProjectService {
     private final ProjectRepository repository;
 
-    private ProjectRoleService projectRoleService;
-    private RoleService roleService;
+    private final ProjectRoleService projectRoleService;
+    private final RoleService roleService;
 
     @Autowired
     public ProjectService(ProjectRepository repository, ProjectRoleService projectRoleService, RoleService roleService) {
@@ -57,7 +57,10 @@ public class ProjectService {
     public Project updateProgress(Project project, double assessProgress) {
         double currProgress = project.getProgress();
         int submissionAmount = project.getSubmissions().size();
-        project.setProgress(currProgress + assessProgress / submissionAmount);
+        System.out.println(submissionAmount);
+        if (submissionAmount != 0) project.setProgress(currProgress + assessProgress / submissionAmount);
+        else project.setProgress(0);
+
 
         return repository.save(project);
     }

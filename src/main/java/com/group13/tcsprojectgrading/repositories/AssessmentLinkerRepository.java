@@ -9,8 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface AssessmentLinkerRepository extends JpaRepository<AssessmentLinker, AssessmentLinkerId> {
-    public List<AssessmentLinker> findAssessmentLinkersBySubmission(Submission submission);
-    public List<AssessmentLinker> findAssessmentLinkersByParticipant(Participant participant);
-    public List<AssessmentLinker> findAssessmentsLinkersBySubmissionAndParticipant(Submission submission, Participant participant);
+    List<AssessmentLinker> findAssessmentLinkersBySubmission(Submission submission);
+    List<AssessmentLinker> findAssessmentLinkersByParticipant(Participant participant);
+    List<AssessmentLinker> findAssessmentsLinkersBySubmissionAndParticipant(Submission submission, Participant participant);
 
 }

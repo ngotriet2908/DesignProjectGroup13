@@ -8,5 +8,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface SubmissionAttachmentsRepository extends JpaRepository<SubmissionAttachment, UUID> {
-    public List<SubmissionAttachment> findSubmissionAttachmentsBySubmission(Submission submission);
+    List<SubmissionAttachment> findSubmissionAttachmentsBySubmission(Submission submission);
 }

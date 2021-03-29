@@ -44,6 +44,7 @@ public class Assessment {
     public Assessment(UUID id) {
         this.id = id;
         this.grades = new HashMap<>();
+        this.gradedCount = 0;
         this.progress = 0;
     }
 

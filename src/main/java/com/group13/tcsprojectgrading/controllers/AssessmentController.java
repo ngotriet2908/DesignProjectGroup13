@@ -66,13 +66,11 @@ public class AssessmentController {
 
         Assessment submissionAssessment = assessmentService.getAssessmentById(assessmentId);
 
-        if (!assessmentList.contains(submissionAssessment)) {
-            System.out.println("here");
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
-
         if (submissionAssessment == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else if (!assessmentList.contains(submissionAssessment)) {
+            System.out.println("here");
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         } else {
             ObjectMapper objectMapper = new ObjectMapper();
             String rubricString = objectMapper.writeValueAsString(submissionAssessment);
@@ -93,19 +91,17 @@ public class AssessmentController {
         List<Assessment> assessmentList = assessmentService.getAssessmentBySubmission(submission);
 
         Assessment submissionAssessment = assessmentService.getAssessmentById(assessmentId);
-
-        if (!assessmentList.contains(submissionAssessment)) {
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
-
         if (submissionAssessment == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } else {
-            Map<String, CriterionGrade> grades = submissionAssessment.getGrades();
+        } else if (!assessmentList.contains(submissionAssessment)) {
+            System.out.println(assessmentList);
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        } else {Map<String, CriterionGrade> grades = submissionAssessment.getGrades();
 
             // add the grade to history
             if (grades.containsKey(criterionId)) {
                 grades.get(criterionId).getHistory().add(newGrade);
+                System.out.println(grades.get(criterionId).getHistory());
                 grades.get(criterionId).setActive(grades.get(criterionId).getActive() + 1);
             } else {
                 grades.put(criterionId, new CriterionGrade(
@@ -118,6 +114,7 @@ public class AssessmentController {
             // update graded count and progress of assessment
             submissionAssessment.increaseGradedCount(1);
             double progress = assessmentService.getProgress(rubricService.getRubricById(projectId), submissionAssessment);
+            System.out.println("Progress: " + progress);
             submissionAssessment.setProgress(progress);
             // update progress of project
             Project project = projectService.getProjectById(courseId, projectId);
@@ -187,12 +184,10 @@ public class AssessmentController {
 
         Assessment submissionAssessment = assessmentService.getAssessmentById(assessmentId);
 
-        if (!assessmentList.contains(submissionAssessment)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT);
-        }
-
         if (project == null || submissionAssessment == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        } else if (!assessmentList.contains(submissionAssessment)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT);
         } else {
             UUID target = UUID.fromString(issue.get("target").asText());
             String name = issue.get("targetName").asText();
@@ -221,9 +216,9 @@ public class AssessmentController {
                     subject,
                     description,
                     creator,
-                    "unresolved"
+                    "unresolved",
+                    addressee
             );
-            issue1.setAddressee(addressee);
 
             issueService.saveIssue(issue1);
             List<Issue> issues = issueService.findIssuesByAssessment(submissionAssessment.getId());

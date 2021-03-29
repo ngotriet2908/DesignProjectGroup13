@@ -21,10 +21,10 @@ import java.util.Map;
 import static com.group13.tcsprojectgrading.controllers.ProjectsController.addEmptyLine;
 
 public class PdfUtils {
-    private Document document;
-    private Rubric rubric;
-    private Assessment assessment;
-    private Map<String, NodeInfo> nodeInfoMap;
+    private final Document document;
+    private final Rubric rubric;
+    private final Assessment assessment;
+    private final Map<String, NodeInfo> nodeInfoMap;
     private int maxLevel;
 
     public PdfUtils(Document document, Rubric rubric, Assessment assessment) {

@@ -19,9 +19,9 @@ import java.util.Map;
 import static com.group13.tcsprojectgrading.controllers.ProjectsController.addEmptyLine;
 
 public class PdfRubricUtils {
-    private Document document;
-    private Rubric rubric;
-    private Map<String, NodeInfo> nodeInfoMap;
+    private final Document document;
+    private final Rubric rubric;
+    private final Map<String, NodeInfo> nodeInfoMap;
     private int maxLevel;
 
     public PdfRubricUtils(Document document, Rubric rubric) {

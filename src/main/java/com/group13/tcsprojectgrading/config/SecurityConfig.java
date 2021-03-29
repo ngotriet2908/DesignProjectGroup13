@@ -20,7 +20,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //    @Autowired
 //    private CanvasOAuth2LoginSuccessHandler canvasOAuth2LoginSuccessHandler;
 
-    private GoogleAuthorizationCodeFlow flow;
+    private final GoogleAuthorizationCodeFlow flow;
 
     @Autowired
     public SecurityConfig(GoogleAuthorizationCodeFlow flow) {

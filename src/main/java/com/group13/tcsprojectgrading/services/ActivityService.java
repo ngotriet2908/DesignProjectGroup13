@@ -12,7 +12,7 @@ import java.util.List;
 @Service
 public class ActivityService {
     
-    private ActivityRepository repository;
+    private final ActivityRepository repository;
 
     @Autowired
     public ActivityService(ActivityRepository repository) {

@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface FlagRepository extends JpaRepository<Flag, Long> {
 
-    public Flag findFlagByNameAndGrader(String name, Grader grader);
-    public List<Flag> findFlagsByGrader(Grader grader);
+    Flag findFlagByNameAndGrader(String name, Grader grader);
+    List<Flag> findFlagsByGrader(Grader grader);
 }

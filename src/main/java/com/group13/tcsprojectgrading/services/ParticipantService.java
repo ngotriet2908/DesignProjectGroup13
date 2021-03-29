@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ParticipantService {
 
-    private ParticipantRepository repository;
+    private final ParticipantRepository repository;
 
     public ParticipantService(ParticipantRepository repository) {
         this.repository = repository;

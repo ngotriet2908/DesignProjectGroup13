@@ -8,5 +8,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface SubmissionCommentsRepository extends JpaRepository<SubmissionComment, UUID> {
-    public List<SubmissionComment> findSubmissionCommentsBySubmission(Submission submission);
+    List<SubmissionComment> findSubmissionCommentsBySubmission(Submission submission);
 }

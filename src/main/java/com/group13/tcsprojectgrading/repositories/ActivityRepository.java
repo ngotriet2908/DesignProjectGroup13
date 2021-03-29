@@ -8,6 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ActivityRepository extends JpaRepository<Activity, ActivityId> {
-    public List<Activity> findActivitiesByUserIdOrderByTimestampDesc(String userId);
-    public List<Activity> findActivitiesByProject(Project project);
+    List<Activity> findActivitiesByUserIdOrderByTimestampDesc(String userId);
+    List<Activity> findActivitiesByProject(Project project);
 }
