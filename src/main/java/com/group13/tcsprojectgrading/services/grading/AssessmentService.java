@@ -84,7 +84,6 @@ public class AssessmentService {
     public double getProgress(Rubric rubric, Assessment assessment) {
         int graded = assessment.getGradedCount();
         int total = rubric.getCriterionCount();
-        System.out.println(total);
         return graded/(double) total;
     }
 }

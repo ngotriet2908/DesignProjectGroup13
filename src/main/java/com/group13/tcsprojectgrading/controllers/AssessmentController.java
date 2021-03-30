@@ -114,7 +114,6 @@ public class AssessmentController {
             // update graded count and progress of assessment
             submissionAssessment.increaseGradedCount(1);
             double progress = assessmentService.getProgress(rubricService.getRubricById(projectId), submissionAssessment);
-            System.out.println("Progress: " + progress);
             submissionAssessment.setProgress(progress);
             // update progress of project
             Project project = projectService.getProjectById(courseId, projectId);
@@ -246,12 +245,10 @@ public class AssessmentController {
 
         Assessment submissionAssessment = assessmentService.getAssessmentById(assessmentId);
 
-        if (!assessmentList.contains(submissionAssessment)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT);
-        }
-
         if (project == null || submissionAssessment == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        } else if (!assessmentList.contains(submissionAssessment)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT);
         } else {
             Issue issue1 = issueService.findById(UUID.fromString(issue.get("id").asText()));
             if (issue1 != null) {
@@ -283,14 +280,13 @@ public class AssessmentController {
 
         Assessment submissionAssessment = assessmentService.getAssessmentById(assessmentId);
 
-        if (!assessmentList.contains(submissionAssessment)) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT, "entity not found"
-            );
-        }
         if (project == null || submissionAssessment == null) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "entity not found"
+            );
+        } else if (!assessmentList.contains(submissionAssessment)) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "entity not found"
             );
         } else {
             List<Issue> issues = issueService.findIssuesByAssessment(submissionAssessment.getId());

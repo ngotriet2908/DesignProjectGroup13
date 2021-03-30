@@ -57,7 +57,6 @@ public class ProjectService {
     public Project updateProgress(Project project, double assessProgress) {
         double currProgress = project.getProgress();
         int submissionAmount = project.getSubmissions().size();
-        System.out.println(submissionAmount);
         if (submissionAmount != 0) project.setProgress(currProgress + assessProgress / submissionAmount);
         else project.setProgress(0);
 

@@ -1,6 +1,7 @@
 package com.group13.tcsprojectgrading.models;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -171,12 +172,10 @@ public class Issue {
         if (solution != null)
             ((ObjectNode) node).put("solution", solution);
         ((ObjectNode) node).set("creator", creator.getGraderJson());
-        if (referentIssue != null) {
-            ((ObjectNode) node).set("reference", referentIssue.convertToJson());
-        }
-        if (addressee != null) {
+        if (referentIssue != null)
+            ((ObjectNode) node).put("reference", referentIssue.getId().toString());
+        if (addressee != null)
             ((ObjectNode) node).set("addressee", addressee.getGraderJson());
-        }
         return node;
     }
 }
