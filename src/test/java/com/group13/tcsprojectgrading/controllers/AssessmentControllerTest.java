@@ -47,10 +47,6 @@ public class AssessmentControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private CanvasApi canvasApi;
-    @MockBean
-    private ActivityService activityService;
-    @MockBean
     private RubricService rubricService;
     @MockBean
     private GraderService graderService;
@@ -60,10 +56,6 @@ public class AssessmentControllerTest {
     private SubmissionService submissionService;
     @MockBean
     private AssessmentService assessmentService;
-    @MockBean
-    private AssessmentLinkerService assessmentLinkerService;
-    @MockBean
-    private ParticipantService participantService;
     @MockBean
     private IssueService issueService;
 
@@ -76,7 +68,6 @@ public class AssessmentControllerTest {
     private final String userId = "44";
     Project testProject = new Project(courseId, projectId, "test", "test", "0");
 
-    //TODO: mocked assessmentService.getAsssessmentBySubmission() always returns an empty list, can't figure out why,
     @WithMockUser
     @Test
     public void getAssessmentNotFound() throws Exception {
