@@ -23,9 +23,6 @@
     flex-direction: column;
     justify-content: space-between;
 
-    /*border-top-right-radius: 0.5rem;*/
-    /*border-bottom-right-radius: 0.5rem;*/
-
     box-sizing: content-box;
 }
 

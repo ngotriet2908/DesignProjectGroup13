@@ -16,21 +16,11 @@ class RubricEditor extends Component {
     let element = findById(this.props.rubric, this.props.selectedElement);
 
     return (
-      <div className={styles.editorContainer}>
-        <Card className={styles.editorCard}>
-          <Card.Body>
-            {this.props.rubric != null && this.props.selectedElement != null ?
-              <div>
-                <RubricEditorElement data={element}/>
-              </div>
-              :
-              <div>
-                Open something in the outline panel to the left.
-              </div>
-            }
-          </Card.Body>
-        </Card>
-      </div>
+      <Card className={styles.editorCard}>
+        <Card.Body className={styles.editorCardBody}>
+          <RubricEditorElement data={element}/>
+        </Card.Body>
+      </Card>
     )
   }
 }

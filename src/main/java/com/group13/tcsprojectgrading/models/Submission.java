@@ -156,7 +156,7 @@ public class Submission {
         this.comments = comments;
     }
 
-    public JsonNode convertToJson(List<AssessmentLinker> assessmentLinkers) {
+    public JsonNode convertToJson(List<AssessmentLinker> assessmentLinkers, List<Issue> issues) {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode node = mapper.createObjectNode();
 
@@ -189,7 +189,8 @@ public class Submission {
         ArrayNode participants = mapper.createArrayNode();
 
         for(AssessmentLinker assessmentLinker: assessmentLinkers) {
-            participants.add(assessmentLinker.getParticipant().convertToJson());
+            if (assessmentLinker.getParticipant() != null)
+                participants.add(assessmentLinker.getParticipant().convertToJson());
         }
         node.set("participants", participants);
 
@@ -197,10 +198,14 @@ public class Submission {
         for(AssessmentLinker assessmentLinker: assessmentLinkers) {
             if (!assessmentsMap.containsKey(assessmentLinker.getAssessmentId())) {
                 List<Participant> participants1 = new ArrayList<>();
-                participants1.add(assessmentLinker.getParticipant());
+                if (assessmentLinker.getParticipant() != null) {
+                    participants1.add(assessmentLinker.getParticipant());
+                }
                 assessmentsMap.put(assessmentLinker.getAssessmentId(), participants1);
             } else {
-                assessmentsMap.get(assessmentLinker.getAssessmentId()).add(assessmentLinker.getParticipant());
+                if (assessmentLinker.getParticipant() != null) {
+                    assessmentsMap.get(assessmentLinker.getAssessmentId()).add(assessmentLinker.getParticipant());
+                }
             }
         }
 
@@ -218,6 +223,7 @@ public class Submission {
         }
 
         node.set("assessments", assessments);
+        node.put("issuesCount", issues.size());
 
         if (getGrader() != null) {
             JsonNode graderNode = mapper.createObjectNode();
@@ -257,17 +263,20 @@ public class Submission {
 //        progresses.add(progress);
         node.put("submittedAt", date);
 
-        ArrayNode commentsNode = mapper.createArrayNode();
-        ArrayNode attachmentsNode = mapper.createArrayNode();
-        for(SubmissionComment comment: submissionComments) {
-            commentsNode.add(mapper.readTree(comment.getComment()));
-        }
-        for(SubmissionAttachment attachment: submissionAttachments) {
-            attachmentsNode.add(mapper.readTree(attachment.getAttachment()));
+        if (submissionAttachments != null && submissionComments != null) {
+            ArrayNode commentsNode = mapper.createArrayNode();
+            ArrayNode attachmentsNode = mapper.createArrayNode();
+            for(SubmissionComment comment: submissionComments) {
+                commentsNode.add(mapper.readTree(comment.getComment()));
+            }
+            for(SubmissionAttachment attachment: submissionAttachments) {
+                attachmentsNode.add(mapper.readTree(attachment.getAttachment()));
+            }
+
+            node.set("submission_comments", commentsNode);
+            node.set("attachments", attachmentsNode);
         }
 
-        node.set("submission_comments", commentsNode);
-        node.set("attachments", attachmentsNode);
 
         List<Flag> flags = (List<Flag>) getFlags();
         ArrayNode submissionFlags = createFlagsArrayNode(flags);
@@ -276,7 +285,9 @@ public class Submission {
         ArrayNode participants = mapper.createArrayNode();
 
         for(AssessmentLinker assessmentLinker: assessmentLinkers) {
-            participants.add(assessmentLinker.getParticipant().convertToJson());
+            if (assessmentLinker != null && assessmentLinker.getParticipant() != null) {
+                participants.add(assessmentLinker.getParticipant().convertToJson());
+            }
         }
         node.set("participants", participants);
 
@@ -284,10 +295,14 @@ public class Submission {
         for(AssessmentLinker assessmentLinker: assessmentLinkers) {
             if (!assessmentsMap.containsKey(assessmentLinker.getAssessmentId())) {
                 List<Participant> participants1 = new ArrayList<>();
-                participants1.add(assessmentLinker.getParticipant());
+                if (assessmentLinker.getParticipant() != null) {
+                    participants1.add(assessmentLinker.getParticipant());
+                }
                 assessmentsMap.put(assessmentLinker.getAssessmentId(), participants1);
             } else {
-                assessmentsMap.get(assessmentLinker.getAssessmentId()).add(assessmentLinker.getParticipant());
+                if (assessmentLinker.getParticipant() != null) {
+                    assessmentsMap.get(assessmentLinker.getAssessmentId()).add(assessmentLinker.getParticipant());
+                }
             }
         }
 
@@ -322,12 +337,10 @@ public class Submission {
         ArrayNode arrayNode = objectMapper.createArrayNode();
         for(Flag flag2: flags) {
             ObjectNode flagNode = objectMapper.createObjectNode();
-            flagNode.put("id", flag2.getId());
+            flagNode.put("id", flag2.getId().toString());
             flagNode.put("name", flag2.getName());
             flagNode.put("variant", flag2.getVariant());
             flagNode.put("description", flag2.getDescription());
-            //TODO check flag again
-//            flagNode.put("changeable", flag2.getGrader().getUserId().equals(userId));
             arrayNode.add(flagNode);
         }
         return arrayNode;

@@ -19,7 +19,7 @@ import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 import {setCurrentLocation} from "../../redux/navigation/actions";
 
 import {Can, ability, updateAbility} from "../permissions/ProjectAbility";
-
+import classnames from 'classnames';
 
 class Rubric extends Component {
   constructor (props) {
@@ -125,7 +125,7 @@ class Rubric extends Component {
     }
 
     return (
-      <div className={styles.container}>
+      <div className={classnames(styles.container)}>
         <div className={styles.outline}>
           <RubricOutline courseId={this.props.match.params.courseId} projectId={this.props.match.params.projectId}/>
         </div>
@@ -137,10 +137,6 @@ class Rubric extends Component {
             <RubricViewer downloadRubric={this.downloadRubric}/>
           }
         </div>
-
-        {/*{this.props.isEditing &&*/}
-        {/*  <RubricBottomBar courseId={this.props.match.params.courseId} projectId={this.props.match.params.projectId}/>*/}
-        {/*}*/}
       </div>
     )
   }

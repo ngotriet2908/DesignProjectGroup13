@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.*;
 import com.group13.tcsprojectgrading.models.grading.CriterionGrade;
@@ -30,56 +31,27 @@ import java.util.UUID;
 public class AssessmentController {
     private final CanvasApi canvasApi;
 
-    private final ActivityService activityService;
-    private final RubricService rubricService;
-    private final GraderService graderService;
-    private final ProjectService projectService;
-    private final SubmissionService submissionService;
-    private final AssessmentService assessmentService;
-    private final AssessmentLinkerService assessmentLinkerService;
-    private final ParticipantService participantService;
-    private final IssueService issueService;
+    private final AssessmentCoreService assessmentCoreService;
 
     @Autowired
-    public AssessmentController(CanvasApi canvasApi, ActivityService activityService, RubricService rubricService, GraderService graderService, ProjectService projectService, SubmissionService submissionService, AssessmentService assessmentService, AssessmentLinkerService assessmentLinkerService, ParticipantService participantService, IssueService issueService) {
+    public AssessmentController(CanvasApi canvasApi, AssessmentCoreService assessmentCoreService) {
         this.canvasApi = canvasApi;
-        this.activityService = activityService;
-        this.rubricService = rubricService;
-        this.graderService = graderService;
-        this.projectService = projectService;
-        this.submissionService = submissionService;
-        this.assessmentService = assessmentService;
-        this.assessmentLinkerService = assessmentLinkerService;
-        this.participantService = participantService;
-        this.issueService = issueService;
+        this.assessmentCoreService = assessmentCoreService;
     }
 
+
+
     @RequestMapping(value = "/grading", method = RequestMethod.GET, produces = "application/json")
-    protected ResponseEntity<String> getAssessment(@PathVariable String courseId,
+    protected String getAssessment(@PathVariable String courseId,
                                                    @PathVariable String projectId,
                                                    @PathVariable String submissionId,
                                                    @PathVariable String assessmentId)
             throws JsonProcessingException {
-        Project project = projectService.getProjectById(courseId, projectId);
-        Submission submission = submissionService.findSubmissionById(submissionId);
-        List<Assessment> assessmentList = assessmentService.getAssessmentBySubmission(submission);
-
-        Assessment submissionAssessment = assessmentService.getAssessmentById(assessmentId);
-
-        if (submissionAssessment == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } else if (!assessmentList.contains(submissionAssessment)) {
-            System.out.println("here");
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        } else {
-            ObjectMapper objectMapper = new ObjectMapper();
-            String rubricString = objectMapper.writeValueAsString(submissionAssessment);
-            return new ResponseEntity<>(rubricString, HttpStatus.OK);
-        }
+        return assessmentCoreService.getAssessment(courseId, projectId, submissionId, assessmentId);
     }
 
     @RequestMapping(value = "/grading/{criterionId}", method = RequestMethod.PUT)
-    protected ResponseEntity<String> alterCriterionAssessment(
+    protected String alterCriterionAssessment(
             @PathVariable String courseId,
             @PathVariable String projectId,
             @PathVariable String submissionId,
@@ -87,6 +59,8 @@ public class AssessmentController {
             @PathVariable String criterionId,
             @RequestBody Grade newGrade
     ) {
+        return assessmentCoreService.alterCriterionAssessment(courseId, projectId, submissionId, assessmentId, criterionId, newGrade);
+    }
         Submission submission = submissionService.findSubmissionById(submissionId);
         List<Assessment> assessmentList = assessmentService.getAssessmentBySubmission(submission);
 
@@ -126,14 +100,8 @@ public class AssessmentController {
                 submissionAssessment.setFinalGrade(total);
             }
 
-            this.assessmentService.saveAssessment(submissionAssessment);
-            return new ResponseEntity<>(HttpStatus.OK);
-        }
-    }
-
-    // TODO, doesn't work
     @RequestMapping(value = "/grading/{criterionId}/active/{id}", method = RequestMethod.PUT)
-    protected ResponseEntity<String> updateActiveGrading(
+    protected String updateActiveGrading(
             @PathVariable String courseId,
             @PathVariable String projectId,
             @PathVariable String submissionId,
@@ -141,31 +109,7 @@ public class AssessmentController {
             @PathVariable String criterionId,
             @PathVariable int id
     ) {
-        Project project = projectService.getProjectById(courseId, projectId);
-        Submission submission = submissionService.findSubmissionById(submissionId);
-        List<Assessment> assessmentList = assessmentService.getAssessmentBySubmission(submission);
-
-        Assessment submissionAssessment = assessmentService.getAssessmentById(assessmentId);
-
-        if (!assessmentList.contains(submissionAssessment)) {
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
-
-
-        if (submissionAssessment == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } else {
-            Map<String, CriterionGrade> grades = submissionAssessment.getGrades();
-
-            if (grades.get(criterionId).getHistory().size() > id) {
-                grades.get(criterionId).setActive(id);
-            } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-
-            this.assessmentService.saveAssessment(submissionAssessment);
-            return new ResponseEntity<>(HttpStatus.OK);
-        }
+        return assessmentCoreService.updateActiveGrading(courseId, projectId, submissionId, assessmentId, criterionId, id);
     }
 
     @RequestMapping(value = "/issues", method = RequestMethod.POST)
@@ -177,57 +121,7 @@ public class AssessmentController {
             @RequestBody JsonNode issue,
             Principal principal
     ) {
-        Project project = projectService.getProjectById(courseId, projectId);
-        Submission submission = submissionService.findSubmissionById(submissionId);
-        List<Assessment> assessmentList = assessmentService.getAssessmentBySubmission(submission);
-
-        Assessment submissionAssessment = assessmentService.getAssessmentById(assessmentId);
-
-        if (project == null || submissionAssessment == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        } else if (!assessmentList.contains(submissionAssessment)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT);
-        } else {
-            UUID target = UUID.fromString(issue.get("target").asText());
-            String name = issue.get("targetName").asText();
-            String type = issue.get("targetType").asText();
-            Issue reference = null;
-            if (!issue.get("reference").asText().equals("null"))
-                reference = issueService.findById(UUID.fromString(issue.get("reference").asText()));
-            String subject = issue.get("subject").asText();
-            String description = issue.get("description").asText();
-            Grader creator = graderService.getGraderFromGraderId(principal.getName(), project);
-            String addresseeId = issue.get("addressee").asText();
-            Grader addressee = null;
-            if (!addresseeId.equals("null")) {
-                addressee = graderService.getGraderFromGraderId(addresseeId, project);
-            }
-            if (creator == null) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-            }
-
-            Issue issue1 = new Issue(
-                    submissionAssessment.getId(),
-                    target,
-                    type,
-                    name,
-                    reference,
-                    subject,
-                    description,
-                    creator,
-                    "unresolved",
-                    addressee
-            );
-
-            issueService.saveIssue(issue1);
-            List<Issue> issues = issueService.findIssuesByAssessment(submissionAssessment.getId());
-            ObjectMapper objectMapper = new ObjectMapper();
-            ArrayNode result = objectMapper.createArrayNode();
-            for(Issue issue2: issues) {
-                result.add(issue2.convertToJson());
-            }
-            return result;
-        }
+        return assessmentCoreService.createIssue(courseId, projectId, submissionId, assessmentId, issue, principal.getName());
     }
 
     @RequestMapping(value = "/issues/resolve", method = RequestMethod.POST)
@@ -239,32 +133,7 @@ public class AssessmentController {
             @RequestBody JsonNode issue,
             Principal principal
     ) {
-        Project project = projectService.getProjectById(courseId, projectId);
-        Submission submission = submissionService.findSubmissionById(submissionId);
-        List<Assessment> assessmentList = assessmentService.getAssessmentBySubmission(submission);
-
-        Assessment submissionAssessment = assessmentService.getAssessmentById(assessmentId);
-
-        if (project == null || submissionAssessment == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        } else if (!assessmentList.contains(submissionAssessment)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT);
-        } else {
-            Issue issue1 = issueService.findById(UUID.fromString(issue.get("id").asText()));
-            if (issue1 != null) {
-                issue1.setStatus("resolved");
-                issue1.setSolution(issue.get("solution").asText());
-            }
-            issueService.saveIssue(issue1);
-
-            List<Issue> issues = issueService.findIssuesByAssessment(submissionAssessment.getId());
-            ObjectMapper objectMapper = new ObjectMapper();
-            ArrayNode result = objectMapper.createArrayNode();
-            for(Issue issue2: issues) {
-                result.add(issue2.convertToJson());
-            }
-            return result;
-        }
+        return assessmentCoreService.resolveIssue(courseId, projectId, submissionId, assessmentId, issue, principal.getName());
     }
 
     @RequestMapping(value = "/issues", method = RequestMethod.GET)
@@ -274,28 +143,6 @@ public class AssessmentController {
             @PathVariable String submissionId,
             @PathVariable String assessmentId
     ) {
-        Project project = projectService.getProjectById(courseId, projectId);
-        Submission submission = submissionService.findSubmissionById(submissionId);
-        List<Assessment> assessmentList = assessmentService.getAssessmentBySubmission(submission);
-
-        Assessment submissionAssessment = assessmentService.getAssessmentById(assessmentId);
-
-        if (project == null || submissionAssessment == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "entity not found"
-            );
-        } else if (!assessmentList.contains(submissionAssessment)) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT, "entity not found"
-            );
-        } else {
-            List<Issue> issues = issueService.findIssuesByAssessment(submissionAssessment.getId());
-            ObjectMapper objectMapper = new ObjectMapper();
-            ArrayNode result = objectMapper.createArrayNode();
-            for(Issue issue: issues) {
-                result.add(issue.convertToJson());
-            }
-            return result;
-        }
+        return assessmentCoreService.getIssues(courseId, projectId, submissionId, assessmentId);
     }
 }

@@ -9,6 +9,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+    justify-content: space-between;
 }
 
 .titleContainer svg {
@@ -25,12 +26,20 @@
 }
 
 .titleContainerIconActive svg {
-    color: primary;
+    /*color: primary;*/
     -webkit-animation: rotating 1s linear infinite;
 }
 
-.tasksList {
+.submissionContainer {
     margin-top: 2rem;
+}
+
+.submissionCardLabels {
+    margin-bottom: 1rem;
+}
+
+.submissionCardLabels > * {
+    margin-right: 0.5rem;
 }
 
 .toolbar {
@@ -128,4 +137,10 @@
 
 .goTaskButton {
 
+}
+
+.memberItem {
+    width: 100%;
+    display: inline-grid;
+    grid-template-columns: 50% 50%;
 }

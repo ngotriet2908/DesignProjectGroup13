@@ -8,7 +8,8 @@ export const LOCATIONS = Object.freeze(
     "rubric": 4,
     "grading": 5,
     "graders": 6,
-    "submissions": 7
+    "submissions": 7,
+    "submission": 8
   })
 
 const initialState = {

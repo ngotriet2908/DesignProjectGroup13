@@ -166,9 +166,13 @@ class Submissions extends Component {
 
         <div className={classnames(globalStyles.titleContainer, styles.titleContainer, this.state.syncing && styles.titleContainerIconActive)}>
           <h1>Submissions</h1>
-          <div className={classnames(globalStyles.iconButton)} onClick={this.syncHandler}>
-            <IoSyncOutline size={26}/>
-          </div>
+
+          <Button variant="lightGreen" onClick={this.syncHandler}>
+            <IoSyncOutline size={20}/> Sync
+          </Button>
+          {/*<div className={classnames(globalStyles.iconButton)} onClick={this.syncHandler}>*/}
+          {/*  <IoSyncOutline size={26}/>*/}
+          {/*</div>*/}
         </div>
 
         {/*<div className={styles.overview}>*/}
@@ -179,87 +183,91 @@ class Submissions extends Component {
         {/*  <h6>Overall progress: {this.calculateOverallProgress()}%</h6>*/}
         {/*</div>*/}
 
-        <div className={styles.tasksList}>
-          <Card>
-            <Card.Body>
-              <h3>Submissions List</h3>
+        <div className={styles.submissionContainer}>
+          <div className={classnames(styles.sectionTitle, styles.sectionTitleWithButton)}>
+            <h3 className={styles.sectionTitleH}>Submission List</h3>
+          </div>
 
-              <div className={styles.toolbar}>
-                <FormControl className={styles.groupsSearchBar}
-                  type="text"
-                  placeholder="Search by a group name"
-                  onChange={this.handleSearchChange}/>
+          {/*<Card>*/}
+          {/*  <Card.Body>*/}
+          {/*<h3>Submissions List</h3>*/}
 
-                <DropdownButton
-                  as={ButtonGroup}
-                  key={"primary"}
-                  id={`dropdown-Primary`}
-                  variant={"lightGreen"}
-                  title={"Group Filter"}
-                  onSelect={this.onFilterGroupSelectHandler}
-                >
+          <div className={styles.toolbar}>
+            <FormControl className={styles.groupsSearchBar}
+              type="text"
+              placeholder="Search by a group name"
+              onChange={this.handleSearchChange}/>
 
-                  {["all", "divider", "group", "individual"].map((filterS) => {
-                    if (filterS === "divider") {
-                      return <Dropdown.Divider key={filterS}/>
-                    } else if (filterS === this.state.filterGroupChoice) {
-                      return <Dropdown.Item variant="lightGreen" key={filterS} eventKey={filterS} active>{filterS}</Dropdown.Item>
-                    } else {
-                      return <Dropdown.Item key={filterS} eventKey={filterS}>{filterS}</Dropdown.Item>
-                    }
-                  })}
-                </DropdownButton>
+            <DropdownButton
+              as={ButtonGroup}
+              key={"primary"}
+              id={`dropdown-Primary`}
+              variant={"lightGreen"}
+              title={"Group Filter"}
+              onSelect={this.onFilterGroupSelectHandler}
+            >
 
-                <DropdownButton
-                  as={ButtonGroup}
-                  key={"assigned-primary"}
-                  id={`assigned-dropdown-Primary`}
-                  variant={"lightGreen"}
-                  title={"Assigned Filter"}
-                  onSelect={this.onFilterAssignedSelectHandler}
-                >
+              {["all", "divider", "group", "individual"].map((filterS) => {
+                if (filterS === "divider") {
+                  return <Dropdown.Divider key={filterS}/>
+                } else if (filterS === this.state.filterGroupChoice) {
+                  return <Dropdown.Item variant="lightGreen" key={filterS} eventKey={filterS} active>{filterS}</Dropdown.Item>
+                } else {
+                  return <Dropdown.Item key={filterS} eventKey={filterS}>{filterS}</Dropdown.Item>
+                }
+              })}
+            </DropdownButton>
 
-                  {["all", "divider", "yours", "not yours"].map((filterS) => {
-                    if (filterS === "divider") {
-                      return <Dropdown.Divider key={filterS}/>
-                    } else if (filterS === this.state.filterAssignedChoice) {
-                      return <Dropdown.Item key={filterS} eventKey={filterS} active>{filterS}</Dropdown.Item>
-                    } else {
-                      return <Dropdown.Item key={filterS} eventKey={filterS}>{filterS}</Dropdown.Item>
-                    }
-                  })}
-                </DropdownButton>
-              </div>
+            <DropdownButton
+              as={ButtonGroup}
+              key={"assigned-primary"}
+              id={`assigned-dropdown-Primary`}
+              variant={"lightGreen"}
+              title={"Assigned Filter"}
+              onSelect={this.onFilterAssignedSelectHandler}
+            >
 
-              <div className={styles.tasksContainer}>
-                {
-                  this.state.submissions
-                    .filter((group) => {
-                      return this.filterGroupDropDown(group) &&
+              {["all", "divider", "yours", "not yours"].map((filterS) => {
+                if (filterS === "divider") {
+                  return <Dropdown.Divider key={filterS}/>
+                } else if (filterS === this.state.filterAssignedChoice) {
+                  return <Dropdown.Item key={filterS} eventKey={filterS} active>{filterS}</Dropdown.Item>
+                } else {
+                  return <Dropdown.Item key={filterS} eventKey={filterS}>{filterS}</Dropdown.Item>
+                }
+              })}
+            </DropdownButton>
+          </div>
+
+          <div className={styles.tasksContainer}>
+            {
+              this.state.submissions
+                .filter((group) => {
+                  return this.filterGroupDropDown(group) &&
                       this.filterAssignedDropDown(group) &&
                       this.filterGroupSearchChange(group);
-                    })
-                  // .sort((group1, group2) => {
-                  //   // console.log(this.compareFunction(group1, group2, ["name"]))
-                  //   return this.compareFunction(group1, group2,
-                  //     [{criterion: "isGroup", order: false}, {criterion: "name", order: true}])
-                  // })
-                    .map((submission) => {
-                      return (
-                        // <div key={submission.stringId} className={styles.ul}>
-                        //   {
-                        <SubmissionsOverviewCard
-                          key={submission.stringId}
-                          user={this.state.user}
-                          submission={submission}
-                          route={this.props.match}/>
-                      // }
-                        // </div>
-                      )
-                    })}
-              </div>
-            </Card.Body>
-          </Card>
+                })
+              // .sort((group1, group2) => {
+              //   // console.log(this.compareFunction(group1, group2, ["name"]))
+              //   return this.compareFunction(group1, group2,
+              //     [{criterion: "isGroup", order: false}, {criterion: "name", order: true}])
+              // })
+                .map((submission) => {
+                  return (
+                  // <div key={submission.stringId} className={styles.ul}>
+                  //   {
+                    <SubmissionsOverviewCard
+                      key={submission.id}
+                      user={this.state.user}
+                      submission={submission}
+                      route={this.props.match}/>
+                  // }
+                  // </div>
+                  )
+                })}
+          </div>
+          {/*</Card.Body>*/}
+          {/*</Card>*/}
         </div>
 
       </div>

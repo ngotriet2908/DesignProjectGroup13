@@ -4,12 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.List;
 import java.util.Objects;
+
+import static com.group13.tcsprojectgrading.models.Submission.createFlagsArrayNode;
 
 @Entity
 @IdClass(ProjectId.class)
@@ -32,6 +31,12 @@ public class Project {
 
     @OneToMany(mappedBy = "project")
     private List<Submission> submissions;
+
+    @OneToMany(mappedBy = "project")
+    private List<Flag> flags;
+
+    @Transient
+    private boolean isVolatile;
 
     private String name;
 
@@ -129,6 +134,14 @@ public class Project {
         this.submissions = submissions;
     }
 
+    public List<Flag> getFlags() {
+        return flags;
+    }
+
+    public void setFlags(List<Flag> flags) {
+        this.flags = flags;
+    }
+
     public double getProgress() {
         return progress;
     }
@@ -147,6 +160,26 @@ public class Project {
         objectNode.put("description", description);
         objectNode.put("progress", progress);
         return objectNode;
+    }
+
+    public JsonNode convertToJsonDetails() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("courseId", courseId);
+        objectNode.put("id", projectId);
+        objectNode.put("name", name);
+        objectNode.put("createAt", createAt);
+        objectNode.put("description", description);
+        objectNode.set("flags", createFlagsArrayNode(flags));
+        return objectNode;
+    }
+
+    public boolean isVolatile() {
+        return isVolatile;
+    }
+
+    public void setVolatile(boolean aVolatile) {
+        isVolatile = aVolatile;
     }
 
     @Override

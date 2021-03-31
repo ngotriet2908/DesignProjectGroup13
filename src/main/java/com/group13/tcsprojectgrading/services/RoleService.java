@@ -6,6 +6,7 @@ import com.group13.tcsprojectgrading.repositories.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
@@ -31,6 +32,7 @@ public class RoleService {
         return role;
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public List<Role> findAllRoles() {
         return repository.findAll();
     }

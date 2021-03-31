@@ -17,7 +17,7 @@ class StatsCard extends Component {
         <Card.Body className={styles.cardBodyContainer}>
           <div className={styles.cardContentContainer}>
             <h5>Students</h5>
-            <div>Number of students: 3</div>
+            <div>Number of students: 4</div>
           </div>
           <div className={styles.cardButtonContainer}>
             {/*<div onClick={this.onClickSeeMore}>*/}

@@ -7,13 +7,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.*;
-import com.group13.tcsprojectgrading.models.rubric.Rubric;
-import com.group13.tcsprojectgrading.services.ActivityService;
-import com.group13.tcsprojectgrading.services.GraderService;
 import com.group13.tcsprojectgrading.services.ProjectService;
 import com.group13.tcsprojectgrading.services.*;
-import com.group13.tcsprojectgrading.services.rubric.RubricService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,21 +24,12 @@ import java.util.*;
 @RequestMapping("/api/courses")
 class CoursesController {
     private final CanvasApi canvasApi;
-
-    private final ActivityService activityService;
-    private final RubricService rubricService;
-    private final GraderService graderService;
-    private final SubmissionService submissionService;
+    private final CourseServices courseServices;
     private final ProjectService projectService;
 
-    @Autowired
-    public CoursesController(CanvasApi canvasApi, ActivityService activityService, RubricService rubricService,
-                             GraderService graderService, SubmissionService submissionService, ProjectService projectService) {
+    public CoursesController(CanvasApi canvasApi, CourseServices courseServices, ProjectService projectService) {
         this.canvasApi = canvasApi;
-        this.activityService = activityService;
-        this.rubricService = rubricService;
-        this.graderService = graderService;
-        this.submissionService = submissionService;
+        this.courseServices = courseServices;
         this.projectService = projectService;
     }
 
@@ -73,7 +59,7 @@ class CoursesController {
     @RequestMapping(value = "/{course_id}", method = RequestMethod.GET, produces = "application/json")
     protected ResponseEntity<JsonNode> getCourse(@PathVariable String course_id, Principal principal) throws JsonProcessingException {
         String courseString = this.canvasApi.getCanvasCoursesApi().getUserCourse(course_id);
-        List<Project> projects = projectService.getProjectsByCourseId(course_id);
+        List<Project> projects = courseServices.getProjectsInCourse(course_id);
 
         ObjectMapper objectMapper = new ObjectMapper();
         ArrayNode arrayNode = objectMapper.createArrayNode();
@@ -150,6 +136,8 @@ class CoursesController {
 
         List<String> responseString = this.canvasApi.getCanvasCoursesApi().getCourseProjects(course_id);
 
+
+        List<String> volatileProjectsId = projectService.getVolatileProjectsId(course_id);
         ObjectMapper objectMapper = new ObjectMapper();
         ArrayNode arrayNode = objectMapper.createArrayNode();
         for(String nodeListString: responseString) {
@@ -161,9 +149,7 @@ class CoursesController {
 
                 //TODO check whether needed to check the latter 2 conditions
                 if (project != null) {
-                    isVolatile = (activityService.getActivitiesByProject(project).size() > 0) ||
-                            (graderService.getGraderFromProject(project).size() > 0) ||
-                            (submissionService.findSubmissionWithProject(project).size() > 0);
+                    isVolatile = volatileProjectsId.contains(node.get("id").asText());
                 }
 
                 ObjectNode projectNode = objectMapper.createObjectNode();
@@ -187,8 +173,7 @@ class CoursesController {
      */
     @PostMapping(value = "/{course_id}/projects-active")
     protected void editProjects(@PathVariable String course_id,
-                                     @RequestBody ArrayNode activeProjects) throws JsonProcessingException {
-        List<Project> projectsDatabase = projectService.getProjectsByCourseId(course_id);
+                                     @RequestBody ArrayNode activeProjects) throws Exception {
 
         List<String> responseString = this.canvasApi.getCanvasCoursesApi().getCourseProjects(course_id);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -213,16 +198,6 @@ class CoursesController {
             editedActiveProject.add(project.get("id").asText());
         }
 
-        for (Project project: projectsDatabase) {
-            if (!editedActiveProject.contains(project.getProjectId())) {
-                rubricService.deleteRubric(project.getProjectId());
-                projectService.deleteProject(project);
-            }
-        }
-
-        for(String activeProjectId: editedActiveProject) {
-            projectService.addNewProject(availableProjects.get(activeProjectId));
-            rubricService.saveRubric(new Rubric(activeProjectId))
-;       }
+        projectService.processActiveProjects(editedActiveProject, availableProjects, course_id);
     }
 }

@@ -11,6 +11,7 @@
     padding: 2rem;
     width: 100%;
     background-color: ultraLightGray;
+    height: 100%;
 }
 
 /* section */
@@ -46,6 +47,7 @@
     display: flex;
     flex-direction: row;
     align-items: flex-end;
+    margin-top: 0.5rem;
 }
 
 .titleContainer div {
@@ -112,7 +114,19 @@
     border-radius: 0.5rem;
 }
 
-/* button */
+/* buttons */
+:global(.btn) {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+}
+
+:global(.btn svg) {
+    margin-right: 0.5rem;
+}
+
 .iconButton {
     width: 48px;
     height: 48px;
@@ -143,5 +157,68 @@
 
 .iconButton:hover {
     background-color: primaryShade;
+    color: white;
+}
+
+.iconButtonSmall {
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.iconButtonSmall:hover {
+    background-color: primaryShade;
+    color: white;
+}
+
+
+
+
+
+.label {
+    font-size: 1rem;
+    padding: .375rem .75rem;
+    line-height: 1.5;
+    border-radius: 1rem;
+    border: 2px dashed transparent;
+}
+
+.labelSmall {
+    font-size: 0.8rem;
+    padding: .2rem .5rem;
+    line-height: 1;
+}
+
+:global(.btn-dashed) {
+    background-color: transparent;
+    color: gray;
+    border: 2px dashed rgba(0,0,0,.125);
+    border-radius: 1rem;
+}
+
+:global(.btn-dashed:hover) {
+    background-color: primary;
+    color: white;
+    border: 2px solid primary;
+}
+
+
+:global(.badge-tomato) {
+    background-color: senary;
+    color: white;
+}
+
+:global(.badge-green) {
+    background-color: primary;
+    color: white;
+}
+
+:global(.badge-orange) {
+    background-color: quaternary;
     color: white;
 }

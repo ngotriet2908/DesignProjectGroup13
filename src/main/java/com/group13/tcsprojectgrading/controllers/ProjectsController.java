@@ -18,9 +18,6 @@ import com.group13.tcsprojectgrading.services.grading.AssessmentService;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
 //import com.itextpdf.text.*;
 //import com.itextpdf.text.pdf.PdfWriter;
-import com.itextpdf.io.font.FontConstants;
-import com.itextpdf.kernel.font.PdfFont;
-import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
@@ -50,6 +47,11 @@ import java.security.Principal;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.List;
 
@@ -100,20 +102,12 @@ public class ProjectsController {
 
     @RequestMapping(value = "/{projectId}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    protected ResponseEntity<JsonNode> getProject(@PathVariable String courseId, @PathVariable String projectId, Principal principal) throws JsonProcessingException, ParseException {
-        Project project = projectService.getProjectById(courseId, projectId);
-        if (project == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "entity not found"
-            );
-        }
+    protected JsonNode getProject(@PathVariable String courseId, @PathVariable String projectId, Principal principal) throws JsonProcessingException, ParseException {
 
         String courseResponse = this.canvasApi.getCanvasCoursesApi().getUserCourse(courseId);
 
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode courseJson = objectMapper.readTree(courseResponse);
-
-        projectService.addProjectRoles(project);
 
         //create teacher's grader object on first enter project page
         String userResponse = this.canvasApi.getCanvasCoursesApi().getCourseUser(courseId, principal.getName());
@@ -121,7 +115,6 @@ public class ProjectsController {
         JsonNode userJson = objectMapper.readTree(userResponse);
 
         RoleEnum roleEnum = null;
-        Grader grader;
 
         for (Iterator<JsonNode> it = enrolmentsNode.elements(); it.hasNext(); ) {
             JsonNode enrolmentNode = it.next();
@@ -130,99 +123,25 @@ public class ProjectsController {
             }
         }
 
-        if (roleEnum == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED, "Enrolment not found"
-            );
-        }
-
-        if (roleEnum.equals(RoleEnum.TEACHER)) {
-            grader = graderService.addNewGrader(new Grader(
-                    project,
-                    userJson.get("id").asText(),
-                    userJson.get("name").asText(),
-                    projectRoleService.findByProjectAndRole(project, roleService.findRoleByName(roleEnum.toString()))
-            ));
-        } else {
-            grader = graderService.getGraderFromGraderId(userJson.get("id").asText(), project);
-        }
-
-
-        if (grader == null && !roleEnum.equals(RoleEnum.STUDENT)) {
-            throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED, "Grader not found"
-            );
-        } else if (roleEnum.equals(RoleEnum.STUDENT)) {
-
-            ObjectNode graderNode = objectMapper.createObjectNode();
-            ArrayNode privilegesNode = objectMapper.createArrayNode();
-            List<Privilege> privileges = projectRoleService.findPrivilegesByProjectAndRoleEnum(project, RoleEnum.STUDENT);
-            for (Privilege privilege: privileges) {
-                ObjectNode privilegeNode = objectMapper.createObjectNode();
-                privilegeNode.put("name", privilege.getName());
-                privilegesNode.add(privilegeNode);
-            }
-            graderNode.set("privileges", privilegesNode);
-
-            ObjectNode resultJson = objectMapper.createObjectNode();
-            resultJson.set("course", courseJson);
-            resultJson.set("project", project.convertToJson());
-            resultJson.set("grader", graderNode);
-
-            return new ResponseEntity<>(resultJson, HttpStatus.OK);
-        }
-
-        JsonNode graderNode = grader.getGraderJson();
-
-        // including rubric to the response
-        Rubric rubric = rubricService.getRubricById(projectId);
-        JsonNode rubricJson;
-//        if (rubric == null) {
-//            rubricJson = objectMapper.readTree("null");
-//        } else {
-        String rubricString = objectMapper.writeValueAsString(rubric);
-        rubricJson = objectMapper.readTree(rubricString);
-//        }
-
-        ObjectNode resultJson = objectMapper.createObjectNode();
+        ObjectNode resultJson = projectService.getProject(courseId, projectId, roleEnum, userJson, principal.getName());
         resultJson.set("course", courseJson);
-        resultJson.set("project", project.convertToJson());
-        resultJson.set("rubric", rubricJson);
-        resultJson.set("grader", graderNode);
 
-        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+        return resultJson;
+    }
 
-        SimpleDateFormat format = new SimpleDateFormat(
-                "yyyy-MM-dd'T'HH:mm:ss'Z'");
-        format.setTimeZone(TimeZone.getTimeZone("UTC"));
-        Timestamp createdAt = new Timestamp(format.parse(project.getCreateAt()).getTime());
+    @RequestMapping(value = "/{projectId}/participants", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    protected ObjectNode getProjectParticipants(@PathVariable String courseId, @PathVariable String projectId, Principal principal) throws JsonProcessingException, ParseException {
 
-        Activity activity = new Activity(
-                project,
-                principal.getName(),
-                timestamp,
-                project.getName(),
-                createdAt
-        );
-
-        activityService.addOrUpdateActivity(activity);
-
-        return new ResponseEntity<>(resultJson, HttpStatus.OK);
+        return projectService.getProjectParticipants(courseId, projectId);
     }
 
     @RequestMapping(value = "/{projectId}/graders", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     protected ArrayNode getProjectGraders(@PathVariable String courseId, @PathVariable String projectId, Principal principal) throws JsonProcessingException, ParseException {
-        Project project = projectService.getProjectById(courseId, projectId);
-        if (project == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "project not found"
-            );
-        }
-
-        List<Grader> graders = graderService.getGraderFromProject(project);
         ObjectMapper objectMapper = new ObjectMapper();
         ArrayNode result = objectMapper.createArrayNode();
+        List<Grader> graders = projectService.getProjectsGrader(courseId, projectId);
         for(Grader grader: graders) {
             result.add(grader.getGraderJson());
         }
@@ -234,142 +153,14 @@ public class ProjectsController {
                                   @PathVariable String projectId,
                                   Principal principal) throws JsonProcessingException {
 
-        Project project = projectService.getProjectById(courseId, projectId);
-        if (project == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "project not found"
-            );
-        }
 
         ObjectMapper objectMapper = new ObjectMapper();
-        List<Grader> graders = graderService.getGraderFromProject(project);
         List<String> submissionsString = this.canvasApi.getCanvasCoursesApi().getSubmissionsInfo(courseId, Long.parseLong(projectId));
         List<String> studentsString = this.canvasApi.getCanvasCoursesApi().getCourseStudents(courseId);
 
         ArrayNode studentArray = groupPages(objectMapper, studentsString);
-        for (Iterator<JsonNode> it = studentArray.elements(); it.hasNext(); ) {
-            JsonNode jsonNode = it.next();
-
-            participantService.addNewParticipant(new Participant(
-                            jsonNode.get("id").asText(),
-                            project,
-                            jsonNode.get("name").asText(),
-                            jsonNode.get("email").asText(),
-                            jsonNode.get("login_id").asText()
-                    )
-            );
-        }
-
         ArrayNode submissionArray = groupPages(objectMapper, submissionsString);
-        Map<String, List<Participant>> groupToParticipant = new HashMap<>();
-        Map<String, Submission> groupToSubmissionMap = new HashMap<>();
-        Map<String, List<SubmissionComment>> groupToComments = new HashMap<>();
-        Map<String, List<SubmissionAttachment>> groupToAttachments = new HashMap<>();
-
-        for (Iterator<JsonNode> it = submissionArray.elements(); it.hasNext(); ) {
-            JsonNode jsonNode = it.next();
-
-            if (jsonNode.get("workflow_state").asText().equals("unsubmitted")) continue;
-            Participant participant = participantService.findParticipantWithId(jsonNode.get("user_id").asText(), project);
-            if (participant == null) continue;
-
-//            System.out.println(jsonNode.get("submission_comments").toString());
-//            System.out.println(jsonNode.get("attachments").toString());
-            List<SubmissionComment> submissionComments = new ArrayList<>();
-            for (Iterator<JsonNode> iter = jsonNode.get("submission_comments").elements(); iter.hasNext(); ) {
-                JsonNode node = iter.next();
-                submissionComments.add(new SubmissionComment(node.toString()));
-            }
-            List<SubmissionAttachment> submissionAttachments = new ArrayList<>();
-            for (Iterator<JsonNode> iter = jsonNode.get("attachments").elements(); iter.hasNext(); ) {
-                JsonNode node = iter.next();
-                submissionAttachments.add(new SubmissionAttachment(node.toString()));
-            }
-
-
-            if (jsonNode.get("group").get("id") == null || jsonNode.get("group").get("id").asText().equals("null")) {
-                Submission submission = submissionService.addNewSubmission(
-                        project,
-                        participant.getName(),
-                        Submission.NULL,
-                        jsonNode.get("submitted_at").asText(),
-                        participant.getName() + " on " + jsonNode.get("submitted_at").asText()
-                );
-
-                for(SubmissionComment comment: submissionComments) {
-                    comment.setSubmission(submission);
-                    submissionDetailsService.saveComment(comment);
-                }
-                for(SubmissionAttachment attachment: submissionAttachments) {
-                    attachment.setSubmission(submission);
-                    submissionDetailsService.saveAttachment(attachment);
-                }
-
-                if (submission == null) continue;
-
-                UUID assessmentId = UUID.randomUUID();
-                AssessmentLinker assessmentLinker = assessmentLinkerService.addNewAssessment(
-                        new AssessmentLinker(
-                                submission,
-                                participant,
-                                assessmentId
-                        )
-                );
-                assessmentService.saveAssessment(assessmentLinker);
-            } else {
-                if (!groupToSubmissionMap.containsKey(jsonNode.get("group").get("id").asText())) {
-                    Submission submission = new Submission(
-                            jsonNode.get("submitted_at").asText(),
-                            Submission.NULL,
-                            jsonNode.get("group").get("id").asText(),
-                            project,
-                            jsonNode.get("group").get("name").asText() + " on " + jsonNode.get("submitted_at").asText()
-                    );
-                    groupToSubmissionMap.put(jsonNode.get("group").get("id").asText(), submission);
-                    List<Participant> participants = new ArrayList<>();
-                    participants.add(participant);
-                    groupToParticipant.put(jsonNode.get("group").get("id").asText(), participants);
-                    groupToComments.put(jsonNode.get("group").get("id").asText(), submissionComments);
-                    groupToAttachments.put(jsonNode.get("group").get("id").asText(), submissionAttachments);
-                } else {
-                    groupToParticipant.get(jsonNode.get("group").get("id").asText()).add(participant);
-                }
-            }
-        }
-
-        for(Map.Entry<String, Submission> entry: groupToSubmissionMap.entrySet()) {
-
-            Submission submission = submissionService.addNewSubmission(
-                    entry.getValue().getProject(),
-                    entry.getValue().getUserId(),
-                    entry.getValue().getGroupId(),
-                    entry.getValue().getDate(),
-                    entry.getValue().getName()
-            );
-
-            if (submission == null) continue;
-
-            for(SubmissionComment comment: groupToComments.get(entry.getKey())) {
-                comment.setSubmission(submission);
-                submissionDetailsService.saveComment(comment);
-            }
-            for(SubmissionAttachment attachment: groupToAttachments.get(entry.getKey())) {
-                attachment.setSubmission(submission);
-                submissionDetailsService.saveAttachment(attachment);
-            }
-
-            UUID assessmentId = UUID.randomUUID();
-            System.out.println("size: " + groupToParticipant.get(entry.getValue().getGroupId()).size());
-            for(Participant participant: groupToParticipant.get(entry.getValue().getGroupId())) {
-                AssessmentLinker assessmentLinker = assessmentLinkerService.addNewAssessment(new AssessmentLinker(
-                        submission,
-                        participant,
-                        assessmentId
-                ));
-
-                assessmentService.saveAssessment(assessmentLinker);
-            }
-        }
+        projectService.syncCanvas(courseId, projectId, studentArray, submissionArray);
 
     }
 
@@ -418,12 +209,14 @@ public class ProjectsController {
         String body = feedback.get("body").asText();
         String subject = feedback.get("subject").asText();
 
-        String fileName = id + "_" + subject + ".pdf";
+        Participant participant = participantService.findParticipantWithId(id, project);
+        Submission submission = submissionService.findSubmissionById(body);
+
+        String fileName = "feedback" + "_" + projectId + "_" + participant.getSid() + ".pdf";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
         headers.setContentDispositionFormData(fileName, fileName);
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-//        response.setContentType("blob");
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
         PdfWriter pdfWriter = new PdfWriter(byteArrayOutputStream);
@@ -432,16 +225,17 @@ public class ProjectsController {
 
         document.getPdfDocument();
 
-        Participant participant = participantService.findParticipantWithId(id, project);
-        Submission submission = submissionService.findSubmissionById(body);
-
         Assessment submissionAssessment = assessmentService.getAssessmentBySubmissionAndParticipant(submission, participant);
-        PdfUtils pdfUtils = new PdfUtils(document, rubricService.getRubricById(projectId), submissionAssessment
-        );
+        PdfUtils pdfUtils = new PdfUtils(document, rubricService.getRubricById(projectId), submissionAssessment, participant);
+        if (body != null && !body.trim().isEmpty()) {
+            pdfUtils.setBody(body);
+        }
+        if (subject != null && !subject.trim().isEmpty()) {
+            pdfUtils.setSubject(subject);
+        }
+
         pdfUtils.generatePdfOfFeedback();
         document.close();
-
-//        System.out.println(Arrays.toString(byteArrayOutputStream.toByteArray()));
 
         return new ResponseEntity<byte[]>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.OK);
     }
@@ -554,84 +348,11 @@ public class ProjectsController {
 //        return "something is wrong";
 //    }
 
-    public static MimeMessage createEmailWithAttachment(String to,
-                                                        String from,
-                                                        String subject,
-                                                        String bodyText,
-                                                        File file)
-            throws MessagingException, IOException {
-        Properties props = new Properties();
-        Session session = Session.getDefaultInstance(props, null);
 
-        MimeMessage email = new MimeMessage(session);
-
-        email.setFrom(new InternetAddress(from));
-        email.addRecipient(javax.mail.Message.RecipientType.TO,
-                new InternetAddress(to));
-        email.setSubject(subject);
-
-        MimeBodyPart mimeBodyPart = new MimeBodyPart();
-        mimeBodyPart.setContent(bodyText, "text/plain");
-
-        Multipart multipart = new MimeMultipart();
-        multipart.addBodyPart(mimeBodyPart);
-
-        mimeBodyPart = new MimeBodyPart();
-        DataSource source = new FileDataSource(file);
-
-        mimeBodyPart.setDataHandler(new DataHandler(source));
-        mimeBodyPart.setFileName(file.getName());
-
-        multipart.addBodyPart(mimeBodyPart);
-        email.setContent(multipart);
-
-        return email;
-    }
-
-    public static Message sendMessage(Gmail service,
-                                      String userId,
-                                      MimeMessage emailContent)
-            throws MessagingException, IOException {
-        Message message = createMessageWithEmail(emailContent);
-        message = service.users().messages().send(userId, message).execute();
-
-        System.out.println("Message id: " + message.getId());
-        System.out.println(message.toPrettyString());
-        return message;
-    }
-
-    public static MimeMessage createEmail(String to,
-                                          String from,
-                                          String subject,
-                                          String bodyText)
-            throws MessagingException {
-        Properties props = new Properties();
-        Session session = Session.getDefaultInstance(props, null);
-
-        MimeMessage email = new MimeMessage(session);
-
-        email.setFrom(new InternetAddress(from));
-        email.addRecipient(javax.mail.Message.RecipientType.TO,
-                new InternetAddress(to));
-        email.setSubject(subject);
-        email.setText(bodyText);
-        return email;
-    }
-
-    public static Message createMessageWithEmail(MimeMessage emailContent)
-            throws MessagingException, IOException {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        emailContent.writeTo(buffer);
-        byte[] bytes = buffer.toByteArray();
-        String encodedEmail = Base64.encodeBase64URLSafeString(bytes);
-        Message message = new Message();
-        message.setRaw(encodedEmail);
-        return message;
-    }
 
     public static void addEmptyLine(Paragraph paragraph, int number) {
         for (int i = 0; i < number; i++) {
-            paragraph.add(new Paragraph(" "));
+            paragraph.add("\n");
         }
     }
 
@@ -659,112 +380,106 @@ public class ProjectsController {
 
     }
 
-    @GetMapping(value = "/{projectId}/groups")
-    @ResponseBody
-    protected JsonNode getProjectGroup(@PathVariable String courseId, @PathVariable String projectId, Principal principal) throws JsonProcessingException, ParseException {
-        String projectResponse = this.canvasApi.getCanvasCoursesApi().getCourseProject(courseId, projectId);
-        String courseString = this.canvasApi.getCanvasCoursesApi().getUserCourse(courseId);
-
-        Project project = projectService.getProjectById(courseId, projectId);
-        if (project == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "entity not found"
-            );
-        }
-
-        List<String> submissionsString = this.canvasApi.getCanvasCoursesApi().getSubmissionsInfo(courseId, Long.parseLong(projectId));
-        List<String> studentsString = this.canvasApi.getCanvasCoursesApi().getCourseStudents(courseId);
-
-//        System.out.println(submissionsString);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode resultNode = objectMapper.createObjectNode();
-        resultNode.set("project", objectMapper.readTree(projectResponse));
-        resultNode.set("course", objectMapper.readTree(courseString));
-
-        JsonNode projectJson = objectMapper.readTree(projectResponse);
-        String projectCatId = projectJson.get("group_category_id").asText();
-        Map<String, String> groupIdToNameMap = new HashMap<>();
-        Map<String, String> userIdToGroupIdMap = new HashMap<>();
-        Map<String, List<String>> groupIdToMembership = new HashMap<>();
-
-        if (!projectCatId.equals("null")) {
-            ArrayNode groupsString = groupPages(objectMapper, canvasApi.getCanvasCoursesApi().getCourseGroupCategoryGroup(projectCatId));
-
-            for (Iterator<JsonNode> it = groupsString.elements(); it.hasNext(); ) {
-                JsonNode group = it.next();
-                if (group.get("members_count").asInt(0) <= 0) continue;
-
-                List<String> members = new ArrayList<>();
-                ArrayNode memberships = groupPages(objectMapper, this.canvasApi.getCanvasCoursesApi().getGroupMemberships(group.get("id").asText()));
-                groupIdToNameMap.put(group.get("id").asText(), group.get("name").asText());
-
-                for (Iterator<JsonNode> iter = memberships.elements(); iter.hasNext(); ) {
-                    JsonNode membership = iter.next();
-                    userIdToGroupIdMap.put(membership.get("user_id").asText(), membership.get("group_id").asText());
-                    members.add(membership.get("user_id").asText());
-                }
-                groupIdToMembership.put(group.get("id").asText(), members);
-            }
-        }
-
-        ArrayNode studentArray = groupPages(objectMapper, studentsString);
-        Map<String, JsonNode> studentMap = new HashMap<>();
-        for (Iterator<JsonNode> it = studentArray.elements(); it.hasNext(); ) {
-            JsonNode jsonNode = it.next();
-            studentMap.put(jsonNode.get("id").asText(), jsonNode);
-        }
-
-        ArrayNode submissionArray = groupPages(objectMapper, submissionsString);
-        ArrayNode groupsArray = objectMapper.createArrayNode();
-        for (Iterator<JsonNode> it = submissionArray.elements(); it.hasNext(); ) {
-            JsonNode jsonNode = it.next();
-
-            if (!studentMap.containsKey(jsonNode.get("user_id").asText())) continue;
-
-            boolean isGroup = userIdToGroupIdMap.containsKey(jsonNode.get("user_id").asText());
-            String id = (isGroup)? userIdToGroupIdMap.get(jsonNode.get("user_id").asText()): jsonNode.get("user_id").asText();
-            String name = (isGroup)? groupIdToNameMap.get(userIdToGroupIdMap.get(jsonNode.get("user_id").asText())): studentMap.get(id).get("name").asText();
-
-            ObjectNode entityNode = objectMapper.createObjectNode();
-            entityNode.put("id", id);
-            if (!isGroup) entityNode.put("sid", studentMap.get(jsonNode.get("user_id").asText()).get("login_id").asText());
-            entityNode.put("name", name);
-            entityNode.put("isGroup", isGroup);
-            entityNode.put("status", jsonNode.get("workflow_state").asText());
-            if (isGroup) {
-                ArrayNode membersNode = objectMapper.createArrayNode();
-                if (!groupIdToMembership.containsKey(id)) continue;
-                for(String userId: groupIdToMembership.get(id)) {
-                    ObjectNode memberNode = objectMapper.createObjectNode();
-                    if (!studentMap.containsKey(userId)) continue;
-                    memberNode.put("name", studentMap.get(userId).get("name").asText());
-                    memberNode.put("sid", studentMap.get(userId).get("login_id").asText());
-                    memberNode.put("sortable_name", studentMap.get(userId).get("sortable_name").asText());
-                    memberNode.put("email", studentMap.get(userId).get("email").asText());
-                    membersNode.add(memberNode);
-                }
-                entityNode.set("members", membersNode);
-            }
-            groupsArray.add(entityNode);
-        }
-
-        resultNode.set("groups", groupsArray);
-
-        return resultNode;
-    }
+//    @GetMapping(value = "/{projectId}/groups")
+//    @ResponseBody
+//    protected JsonNode getProjectGroup(@PathVariable String courseId, @PathVariable String projectId, Principal principal) throws JsonProcessingException, ParseException {
+//        String projectResponse = this.canvasApi.getCanvasCoursesApi().getCourseProject(courseId, projectId);
+//        String courseString = this.canvasApi.getCanvasCoursesApi().getUserCourse(courseId);
+//
+//        Project project = projectService.getProjectById(courseId, projectId);
+//        if (project == null) {
+//            throw new ResponseStatusException(
+//                    HttpStatus.NOT_FOUND, "entity not found"
+//            );
+//        }
+//
+//        List<String> submissionsString = this.canvasApi.getCanvasCoursesApi().getSubmissionsInfo(courseId, Long.parseLong(projectId));
+//        List<String> studentsString = this.canvasApi.getCanvasCoursesApi().getCourseStudents(courseId);
+//
+////        System.out.println(submissionsString);
+//
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        ObjectNode resultNode = objectMapper.createObjectNode();
+//        resultNode.set("project", objectMapper.readTree(projectResponse));
+//        resultNode.set("course", objectMapper.readTree(courseString));
+//
+//        JsonNode projectJson = objectMapper.readTree(projectResponse);
+//        String projectCatId = projectJson.get("group_category_id").asText();
+//        Map<String, String> groupIdToNameMap = new HashMap<>();
+//        Map<String, String> userIdToGroupIdMap = new HashMap<>();
+//        Map<String, List<String>> groupIdToMembership = new HashMap<>();
+//
+//        if (!projectCatId.equals("null")) {
+//            ArrayNode groupsString = groupPages(objectMapper, canvasApi.getCanvasCoursesApi().getCourseGroupCategoryGroup(projectCatId));
+//
+//            for (Iterator<JsonNode> it = groupsString.elements(); it.hasNext(); ) {
+//                JsonNode group = it.next();
+//                if (group.get("members_count").asInt(0) <= 0) continue;
+//
+//                List<String> members = new ArrayList<>();
+//                ArrayNode memberships = groupPages(objectMapper, this.canvasApi.getCanvasCoursesApi().getGroupMemberships(group.get("id").asText()));
+//                groupIdToNameMap.put(group.get("id").asText(), group.get("name").asText());
+//
+//                for (Iterator<JsonNode> iter = memberships.elements(); iter.hasNext(); ) {
+//                    JsonNode membership = iter.next();
+//                    userIdToGroupIdMap.put(membership.get("user_id").asText(), membership.get("group_id").asText());
+//                    members.add(membership.get("user_id").asText());
+//                }
+//                groupIdToMembership.put(group.get("id").asText(), members);
+//            }
+//        }
+//
+//        ArrayNode studentArray = groupPages(objectMapper, studentsString);
+//        Map<String, JsonNode> studentMap = new HashMap<>();
+//        for (Iterator<JsonNode> it = studentArray.elements(); it.hasNext(); ) {
+//            JsonNode jsonNode = it.next();
+//            studentMap.put(jsonNode.get("id").asText(), jsonNode);
+//        }
+//
+//        ArrayNode submissionArray = groupPages(objectMapper, submissionsString);
+//        ArrayNode groupsArray = objectMapper.createArrayNode();
+//        for (Iterator<JsonNode> it = submissionArray.elements(); it.hasNext(); ) {
+//            JsonNode jsonNode = it.next();
+//
+//            if (!studentMap.containsKey(jsonNode.get("user_id").asText())) continue;
+//
+//            boolean isGroup = userIdToGroupIdMap.containsKey(jsonNode.get("user_id").asText());
+//            String id = (isGroup)? userIdToGroupIdMap.get(jsonNode.get("user_id").asText()): jsonNode.get("user_id").asText();
+//            String name = (isGroup)? groupIdToNameMap.get(userIdToGroupIdMap.get(jsonNode.get("user_id").asText())): studentMap.get(id).get("name").asText();
+//
+//            ObjectNode entityNode = objectMapper.createObjectNode();
+//            entityNode.put("id", id);
+//            if (!isGroup) entityNode.put("sid", studentMap.get(jsonNode.get("user_id").asText()).get("login_id").asText());
+//            entityNode.put("name", name);
+//            entityNode.put("isGroup", isGroup);
+//            entityNode.put("status", jsonNode.get("workflow_state").asText());
+//            if (isGroup) {
+//                ArrayNode membersNode = objectMapper.createArrayNode();
+//                if (!groupIdToMembership.containsKey(id)) continue;
+//                for(String userId: groupIdToMembership.get(id)) {
+//                    ObjectNode memberNode = objectMapper.createObjectNode();
+//                    if (!studentMap.containsKey(userId)) continue;
+//                    memberNode.put("name", studentMap.get(userId).get("name").asText());
+//                    memberNode.put("sid", studentMap.get(userId).get("login_id").asText());
+//                    memberNode.put("sortable_name", studentMap.get(userId).get("sortable_name").asText());
+//                    memberNode.put("email", studentMap.get(userId).get("email").asText());
+//                    membersNode.add(memberNode);
+//                }
+//                entityNode.set("members", membersNode);
+//            }
+//            groupsArray.add(entityNode);
+//        }
+//
+//        resultNode.set("groups", groupsArray);
+//
+//        return resultNode;
+//    }
 
     @GetMapping("/{projectId}/rubric")
-    public ResponseEntity<String> getProject(@PathVariable String projectId) throws JsonProcessingException {
-        Rubric rubric = rubricService.getRubricById(projectId);
-
-        if (rubric == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } else {
-            ObjectMapper objectMapper = new ObjectMapper();
-            String rubricString = objectMapper.writeValueAsString(rubric);
-            return new ResponseEntity<>(rubricString, HttpStatus.OK);
-        }
+    public String getRubrics(
+            @PathVariable String courseId,
+            @PathVariable String projectId) throws JsonProcessingException {
+        return projectService.getRubric(courseId, projectId);
     }
 
 //    @PostMapping("/{projectId}/rubric")
@@ -808,27 +523,11 @@ public class ProjectsController {
     retrieve rubric history.
      */
     @PatchMapping("/{projectId}/rubric")
-    public ResponseEntity<?> updateRubric(
+    public String updateRubric(
             @RequestBody JsonNode patch,
+            @PathVariable String courseId,
             @PathVariable String projectId) throws JsonPatchApplicationException, JsonProcessingException {
-        System.out.println("Updating the rubric of project " + projectId + ".");
-        Rubric rubric = this.rubricService.getRubricById(projectId);
-
-        // apply update and mark affected submissions
-        Rubric rubricPatched = this.rubricService.applyUpdate(patch, rubric);
-        this.rubricService.saveRubric(rubricPatched);
-
-        // store update
-        RubricHistory history = this.rubricService.getHistory(projectId);
-        if (history == null) {
-            history = new RubricHistory(projectId);
-        }
-
-        history.getHistory().add(new RubricUpdate(patch));
-        this.rubricService.storeHistory(history);
-
-        System.out.println("Updating the rubric of project " + projectId + " finished successfully.");
-        return ResponseEntity.ok("Rubric updated");
+        return projectService.updateRubric(courseId, projectId, patch);
     }
 
 
@@ -840,54 +539,18 @@ public class ProjectsController {
 //                                   @RequestParam Map<String, String> queryParameters
     ) throws JsonProcessingException {
 
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        Project project = projectService.getProjectById(courseId, projectId);
-        if (project == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "project not found"
-            );
-        }
-
-        Grader grader = graderService.getGraderFromGraderId(principal.getName(), project);
-        if (grader == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "task not found"
-            );
-        }
-        //TODO change response to errors
-        Flag flag = flagService.findFlagWithId(Long.parseLong(flagId));
-        ObjectNode result = objectMapper.createObjectNode();
-        if (flag != null) {
-            List<Submission> submissions = submissionService.findSubmissionsByFlags(flag);
-            if (!flag.getGrader().getUserId().equals(principal.getName())) {
-                result.put("error", "This flag is not yours");
-                return result;
-            }
-            if (submissions.size() > 0) {
-                result.put("error", "Flag is current used by some submission");
-                return result;
-            } else {
-                flagService.deleteFlag(flag);
-                result.set("data", createFlagsArrayNode(flagService.findFlagsWithGrader(grader), principal.getName()));
-                return result;
-            }
-
-        }
-        result.put("error", "some weird error");
-        return result;
+        return projectService.deleteFlagPermanently(courseId, projectId, flagId, principal.getName());
     }
 
-    private ArrayNode createFlagsArrayNode(List<Flag> flags, String userId) {
+    private ArrayNode createFlagsArrayNode(List<Flag> flags) {
         ObjectMapper objectMapper = new ObjectMapper();
         ArrayNode arrayNode = objectMapper.createArrayNode();
         for(Flag flag2: flags) {
             ObjectNode flagNode = objectMapper.createObjectNode();
-            flagNode.put("id", flag2.getId());
+            flagNode.put("id", flag2.getId().toString());
             flagNode.put("name", flag2.getName());
             flagNode.put("variant", flag2.getVariant());
             flagNode.put("description", flag2.getDescription());
-            flagNode.put("changeable", flag2.getGrader().getUserId().equals(userId));
             arrayNode.add(flagNode);
         }
         return arrayNode;
