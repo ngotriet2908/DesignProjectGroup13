@@ -24,7 +24,6 @@ class Feedback extends Component {
       isPdfAttached: true,
       isAllRecipientsChecked: false,
     }
-
   }
 
   componentDidMount() {
@@ -51,33 +50,34 @@ class Feedback extends Component {
 
   handleSendFeedback = () => {
     //TODO: add possibility of sending the same email for All course students (there already is a checkbox for that )
-    if (!this.state.isAllRecipientsChecked && (this.state.receiver === 'none' || this.state.receiver === "")) {
-      alert('Recipient needs to be selected for feedback to be sent');
-    } else if (this.state.body.trim() === "" || this.state.subject.trim() === "")  {
-      alert('Subject and body cannot be empty');
-    } else {
-      let object = {
-        "id": this.state.receiver,
-        "isGroup": false,
-        "subject": this.state.subject,
-        "body": this.state.body,
-      }
-      this.setState({
-        isSendingFeedback: true,
-      })
-
-      request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/feedback`, "POST", object)
-          .then(response => {
-            this.setState({
-              isSendingFeedback: false
-            })
-            if (response.status === 200) {
-            }
-          })
-          .catch(error => {
-            console.error(error.message);
-          });
-    }
+    console.log(this.state.isPdfAttached);
+    // if (!this.state.isAllRecipientsChecked && (this.state.receiver === 'none' || this.state.receiver === "")) {
+    //   alert('Recipient needs to be selected for feedback to be sent');
+    // } else if (this.state.body.trim() === "" || this.state.subject.trim() === "")  {
+    //   alert('Subject and body cannot be empty');
+    // } else {
+    //   let object = {
+    //     "id": this.state.receiver,
+    //     "isGroup": false,
+    //     "subject": this.state.subject,
+    //     "body": this.state.body,
+    //   }
+    //   this.setState({
+    //     isSendingFeedback: true,
+    //   })
+    //
+    //   request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/feedback`, "POST", object)
+    //       .then(response => {
+    //         this.setState({
+    //           isSendingFeedback: false
+    //         })
+    //         if (response.status === 200) {
+    //         }
+    //       })
+    //       .catch(error => {
+    //         console.error(error.message);
+    //       });
+    // }
   }
 
   handleGetPdf = (isDownload) => {
@@ -203,6 +203,7 @@ class Feedback extends Component {
     this.setState({
       isAllRecipientsChecked: !this.state.isAllRecipientsChecked,
       receiver: "",
+      isPdfAttached: this.state.isAllRecipientsChecked,
     })
   }
 
@@ -252,11 +253,15 @@ class Feedback extends Component {
               </Form.Group>
 
               <Form.Group controlId="formPdfCheckbox">
-                <Form.Check defaultChecked={this.state.isPdfAttached}
-                            type="checkbox"
-                            label="Generate and attach .pdf"
-                            onChange={this.handlePdfCheckboxChange}
-                />
+                {
+                  this.state.isAllRecipientsChecked
+                    ? <React.Fragment></React.Fragment>
+                    : <Form.Check defaultChecked={this.state.isPdfAttached}
+                                  type="checkbox"
+                                  label="Generate and attach .pdf"
+                                  onChange={this.handlePdfCheckboxChange}
+                      />
+                }
               </Form.Group>
 
               <Form.Group controlId="exampleForm.ControlSelect1">
@@ -277,7 +282,6 @@ class Feedback extends Component {
               </Form.Group>
 
               <Form.Group controlId="formRecipientCheckbox">
-                {/*TODO: implement all recipients = same email text with different pdfs OR if there is no time, remove this :D */}
                 <Form.Check defaultChecked={this.state.isAllRecipientsChecked}
                             type="checkbox"
                             label="Send to all course students"
