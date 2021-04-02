@@ -4,28 +4,25 @@ import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
 import Button from 'react-bootstrap/Button'
 import {URL_PREFIX} from "../../services/config";
-import {Link} from 'react-router-dom'
 
 import {v4 as uuidv4} from "uuid";
 import {connect} from "react-redux";
-import {CardColumns, Spinner} from "react-bootstrap";
+import {Spinner} from "react-bootstrap";
 import store from "../../redux/store";
 import {push} from "connected-react-router";
 import Card from "react-bootstrap/Card";
 import {deleteRubric, saveRubric} from "../../redux/rubric/actions";
 
-import testStats from "../stat/testStats.json";
-import Statistic from "../stat/Statistic";
 import {setCurrentCourseAndProject, setCurrentLocation} from "../../redux/navigation/actions";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 import Breadcrumbs from "../helpers/Breadcrumbs";
 
 import globalStyles from '../helpers/global.module.css';
-import HomeTaskCard from "../home/HomeTaskCard";
-import SectionContainer from "../home/SectionContainer";
-import {IoCheckboxOutline} from "react-icons/io5";
-import TaskContainer from "./TaskContainer";
+import {IoSyncOutline, IoHelpCircleOutline} from "react-icons/io5";
 import {Can, ability, updateAbility} from "../permissions/ProjectAbility";
+import classnames from "classnames";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import Tooltip from "react-bootstrap/Tooltip";
 
 class Project extends Component {
   constructor(props) {
@@ -37,7 +34,9 @@ class Project extends Component {
       rubric: null,
       grader: {},
       stats: [],
-      isLoaded: false
+      isLoaded: false,
+
+      syncing: false
     }
   }
 
@@ -50,32 +49,35 @@ class Project extends Component {
 
     Promise.all([
       request(BASE + "courses/" + courseId + "/projects/" + projectId),
-      request(`${BASE}courses/${courseId}/projects/${projectId}/stats/submissions`),
-      request(`${BASE}courses/${courseId}/projects/${projectId}/stats/grades`),
+      // request(`${BASE}courses/${courseId}/projects/${projectId}/stats/submissions`),
+      // request(`${BASE}courses/${courseId}/projects/${projectId}/stats/grades`),
       // request(`${BASE}courses/${courseId}/projects/${projectId}/stats/groups`),
     ])
       .then(async([res1, res2, res3]) => {
         const project = await res1.json();
-        const statsSubmissions = await res2.json();
-        const statsGrades = await res3.json();
 
-        const stats = [statsSubmissions].concat(statsGrades)//.concat(statsGroups);
+        // console.log(project);
+
+        // const statsSubmissions = await res2.json();
+        // const statsGrades = await res3.json();
+
+        // const stats = [statsSubmissions].concat(statsGrades)//.concat(statsGroups);
 
         this.props.saveRubric(project.rubric);
 
-        if (project.grader !== null && project.grader.privileges !== null) {
-          updateAbility(ability, project.grader.privileges, project.grader)
+        if (project.privileges !== null) {
+          updateAbility(ability, project.privileges, this.props.user)
         } else {
-          console.log("No grader or privileges found.")
+          console.log("No privileges found.")
         }
-        // console.log(ability.rules)
 
         this.setState({
-          project: project.project,
-          course: project.course,
-          stats: stats,
-          grader: project.grader,
-          isLoaded: true
+          project: project,
+          // course: project.course,
+          // stats: stats,
+          // grader: project.grader,
+          isLoaded: true,
+          syncing: false
         });
       })
       .catch(error => {
@@ -120,6 +122,28 @@ class Project extends Component {
       });
   }
 
+  syncHandler = () => {
+    if (this.state.syncing) {
+      return;
+    }
+
+    this.setState({
+      syncing: true
+    })
+
+    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/sync`)
+      .then(response => {
+        if (response.status === 200) {
+          this.setState({
+            syncing: false
+          })
+        }
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
+  }
+
   render () {
     if (!this.state.isLoaded) {
       return (
@@ -135,90 +159,83 @@ class Project extends Component {
       <div className={globalStyles.container}>
         <Breadcrumbs>
           <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumbs.Item>
-          <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id ))}>
-            {this.state.course.name}
+          <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.project.course.id ))}>
+            {this.state.project.course.name}
           </Breadcrumbs.Item>
           <Breadcrumbs.Item active>
             {this.state.project.name}
           </Breadcrumbs.Item>
         </Breadcrumbs>
 
-        <div className={globalStyles.titleContainer}>
+        <div className={classnames(globalStyles.titleContainer, this.state.syncing && globalStyles.titleContainerIconActive)}>
           <h1>{this.state.project.name}</h1>
+
+          <div className={styles.titleContainerButtons}>
+            <Button className={globalStyles.titleActiveButton} variant="lightGreen" onClick={this.syncHandler}>
+              <IoSyncOutline size={20}/> Sync
+            </Button>
+
+            <OverlayTrigger
+              placement={'left'}
+              overlay={
+                <Tooltip className={styles.questionTooltip}>
+                  Click on the sync button to update the course's user list and student's submissions.
+                </Tooltip>
+              }
+            >
+              <div className={styles.questionTooltipContainer}>
+                <IoHelpCircleOutline size={25}/>
+              </div>
+            </OverlayTrigger>
+
+          </div>
         </div>
 
         <div className={styles.container}>
           <div>
-            <Can I="view" a="AdminToolbar">
-              <div className={[globalStyles.sectionContainer, styles.administrationSectionContainer].join(" ")}>
-                <div className={[globalStyles.sectionTitle, globalStyles.sectionTitleWithButton].join(" ")}>
-                  <h3 className={globalStyles.sectionTitleH}>
+            {/*<Can I="view" a="AdminToolbar">*/}
+            <div className={[globalStyles.sectionContainer, styles.administrationSectionContainer].join(" ")}>
+              <div className={[globalStyles.sectionTitle, globalStyles.sectionTitleWithButton].join(" ")}>
+                <h3 className={globalStyles.sectionTitleH}>
                   Administration
-                  </h3>
-                </div>
-
-                <div className={globalStyles.sectionFlexContainer}>
-                  <Card className={styles.card}>
-                    <Card.Body className={[styles.cardBody, styles.administrationSectionContainerBody].join(" ")}>
-                      {/*<Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/groups"))}>*/}
-                      {/*Groups*/}
-                      {/*</Button>*/}
-
-                      <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/participants"))}>
-                        Participants
-                      </Button>
-
-                      <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/submissions"))}>
-                      Submissions
-                      </Button>
-
-                      <Can I="open" a={"ManageGraders"}>
-                        <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/graders"))}>
-                      Graders
-                        </Button>
-                      </Can>
-
-                      <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/feedback"))}>
-                        Feedback
-                      </Button>
-
-                      <Can I="read" a="Rubric">
-                        <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/rubric"))}>
-                          Rubric
-                        </Button>
-                      </Can>
-
-                    </Card.Body>
-                  </Card>
-                </div>
+                </h3>
               </div>
-            </Can>
 
-            {/*<Can I="read" a="Rubric">*/}
-            {/*  <div className={[globalStyles.sectionContainer, styles.rubricSectionContainer].join(" ")}>*/}
-            {/*    <div className={[globalStyles.sectionTitle, globalStyles.sectionTitleWithButton].join(" ")}>*/}
-            {/*      <h3 className={globalStyles.sectionTitleH}>*/}
-            {/*      Rubric*/}
-            {/*      </h3>*/}
-            {/*    </div>*/}
+              <div className={globalStyles.sectionFlexContainer}>
+                <Card className={styles.card}>
+                  <Card.Body className={[styles.cardBody, styles.administrationSectionContainerBody].join(" ")}>
+                    {/*<Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/groups"))}>*/}
+                    {/*Groups*/}
+                    {/*</Button>*/}
 
-            {/*    <div className={globalStyles.sectionFlexContainer}>*/}
-            {/*      <Card>*/}
-            {/*        <Card.Body>*/}
-            {/*          /!*<div>*!/*/}
-            {/*          /!*  Last modified at {this.state.project}*!/*/}
-            {/*          /!*</div>*!/*/}
-            {/*          <div>*/}
-            {/*            <Can I="read" a="Rubric">*/}
-            {/*              <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/rubric"))}>*/}
-            {/*              Open rubric*/}
-            {/*              </Button>*/}
-            {/*            </Can>*/}
-            {/*          </div>*/}
-            {/*        </Card.Body>*/}
-            {/*      </Card>*/}
-            {/*    </div>*/}
-            {/*  </div>*/}
+                    <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/participants"))}>
+                        Participants
+                    </Button>
+
+                    <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/submissions"))}>
+                      Submissions
+                    </Button>
+
+                    {/*<Can I="open" a={"ManageGraders"}>*/}
+                    <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/graders"))}>
+                      Graders
+                    </Button>
+                    {/*</Can>*/}
+
+                    <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/feedback"))}>
+                        Feedback
+                    </Button>
+
+                    {/*<Can I="read" a="Rubric">*/}
+                    <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/rubric"))}>
+                          Rubric
+                    </Button>
+                    {/*</Can>*/}
+
+                  </Card.Body>
+                </Card>
+              </div>
+            </div>
             {/*</Can>*/}
 
             {/*<Can I="read" a="Statistic">*/}
@@ -254,20 +271,6 @@ class Project extends Component {
             {/*  </div>*/}
             {/*</Can>*/}
           </div>
-
-          {/*<div>*/}
-          {/*  <Can I="view" a="TodoList">*/}
-          {/*    <SectionContainer*/}
-          {/*      title={"To-Do list"}*/}
-          {/*      data={[]}*/}
-          {/*      // emptyText={"Your tasks will appear here when they are assigned to you."}*/}
-          {/*      emptyText={"Nothing to do"}*/}
-          {/*      Component={HomeTaskCard}*/}
-          {/*      className={styles.tasksSectionContainer}*/}
-          {/*      EmptyIcon={IoCheckboxOutline}*/}
-          {/*    />*/}
-          {/*  </Can>*/}
-          {/*</div>*/}
         </div>
       </div>
     )
@@ -276,7 +279,8 @@ class Project extends Component {
 
 const mapStateToProps = state => {
   return {
-    rubric: state.rubric.rubric
+    rubric: state.rubric.rubric,
+    user: state.users.self
   };
 };
 

@@ -1,5 +1,6 @@
 package com.group13.tcsprojectgrading.models.permissions;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.group13.tcsprojectgrading.models.permissions.Privilege;
 import com.group13.tcsprojectgrading.models.permissions.ProjectRole;
 
@@ -9,7 +10,6 @@ import java.util.List;
 
 @Entity
 public class Role {
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -17,8 +17,8 @@ public class Role {
     @Column(unique=true)
     private String name;
 
-    @OneToMany(mappedBy = "role")
-    private List<ProjectRole> projectRoles;
+    @ManyToMany
+    private Collection<Privilege> privileges;
 
     public Role(String name) {
         this.name = name;
@@ -29,12 +29,7 @@ public class Role {
         this.privileges = privileges;
     }
 
-    @ManyToMany
-    private Collection<Privilege> privileges;
-
-    public Role() {
-
-    }
+    public Role() { }
 
     public Long getId() {
         return id;
@@ -52,15 +47,7 @@ public class Role {
         this.name = name;
     }
 
-    public List<ProjectRole> getProjectRoles() {
-        return projectRoles;
-    }
-
-    public void setProjectRoles(List<ProjectRole> projectRoles) {
-        this.projectRoles = projectRoles;
-    }
-
-    public Collection<Privilege> getDefaultPrivileges() {
+    public Collection<Privilege> getPrivileges() {
         return privileges;
     }
 

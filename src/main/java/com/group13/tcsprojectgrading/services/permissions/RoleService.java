@@ -20,11 +20,11 @@ public class RoleService {
     }
 
     public Role findRoleByName(String name) {
-        return repository.findRoleByName(name);
+        return repository.findByName(name);
     }
 
     public Role addRoleIfNotExist(String name, List<Privilege> privileges) {
-        Role role = repository.findRoleByName(name);
+        Role role = repository.findByName(name);
         if (role == null) {
             role = new Role(name, privileges);
             repository.save(role);

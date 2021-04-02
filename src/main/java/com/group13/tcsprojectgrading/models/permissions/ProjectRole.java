@@ -1,68 +1,83 @@
 package com.group13.tcsprojectgrading.models.permissions;
 
-import com.group13.tcsprojectgrading.models.graders.Grader;
-import com.group13.tcsprojectgrading.models.Project;
+import com.group13.tcsprojectgrading.models.project.Project;
 
 import javax.persistence.*;
-import java.util.Collection;
+import java.io.Serializable;
 
 @Entity
-@IdClass(ProjectRoleId.class)
 public class ProjectRole {
+    @Embeddable
+    public static class Pk implements Serializable {
+        @ManyToOne
+        @JoinColumn(name="roleId")
+        private Role role;
 
-    @Id
-    @ManyToOne
-    private Project project;
+        @ManyToOne
+        @JoinColumn(name="projectId")
+        private Project project;
 
-    @Id
-    @ManyToOne
-    private Role role;
+        public Pk() {
+        }
 
-    @ManyToMany(mappedBy = "projectRoles")
-    private Collection<Grader> graders;
+        public Pk(Role role, Project project) {
+            this.role = role;
+            this.project = project;
+        }
 
-    @ManyToMany
-    private Collection<Privilege> privileges;
+        public Role getRole() {
+            return role;
+        }
 
-    public ProjectRole(Project project, Role role, Collection<Privilege> privileges) {
-        this.project = project;
-        this.role = role;
-        this.privileges = privileges;
+        public void setRole(Role role) {
+            this.role = role;
+        }
+
+        public Project getProject() {
+            return project;
+        }
+
+        public void setProject(Project project) {
+            this.project = project;
+        }
     }
+
+    @EmbeddedId
+    private ProjectRole.Pk id;
+
+//    @ManyToMany(mappedBy = "projectRoles")
+//    @JsonBackReference
+//    private Collection<GradingParticipation> graders;
+
+//    @ManyToMany
+//    @JsonManagedReference
+//    private Collection<Privilege> privileges;
 
     public ProjectRole() {
 
     }
 
-    public Project getProject() {
-        return project;
+    public ProjectRole(Pk id) {
+        this.id = id;
     }
 
-    public void setProject(Project project) {
-        this.project = project;
+    public ProjectRole(Role role, Project project) {
+        this.id = new Pk(role, project);
     }
 
-    public Role getRole() {
-        return role;
+    public Pk getId() {
+        return id;
     }
 
-    public void setRole(Role role) {
-        this.role = role;
+    public void setId(Pk id) {
+        this.id = id;
     }
 
-    public Collection<Grader> getGraders() {
-        return graders;
-    }
-
-    public void setGraders(Collection<Grader> graders) {
-        this.graders = graders;
-    }
-
-    public Collection<Privilege> getPrivileges() {
-        return privileges;
-    }
-
-    public void setPrivileges(Collection<Privilege> privileges) {
-        this.privileges = privileges;
-    }
+    //    public Collection<GradingParticipation> getGraders() {
+//        return graders;
+//    }
+//
+//    public void setGraders(Collection<GradingParticipation> graders) {
+//        this.graders = graders;
+//    }
 }

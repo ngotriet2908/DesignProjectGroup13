@@ -1,14 +1,16 @@
 package com.group13.tcsprojectgrading.config;
 
-import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.group13.tcsprojectgrading.canvas.oauth.CanvasOAuth2LoginSuccessHandler;
+import com.group13.tcsprojectgrading.services.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
@@ -23,7 +25,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private GoogleAuthorizationCodeFlow flow;
 
-
+    @Autowired
+    private UserService userService;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -32,10 +35,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         .antMatchers("/api/**").authenticated()
                         .anyRequest().permitAll()
                 )
-                .formLogin().disable()
+                .formLogin()
+                .disable()
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                 )
+
                 .csrf(c -> c
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                 )
@@ -50,6 +55,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                 )
-                .oauth2Login();
+                .oauth2Login()
+                .successHandler(canvasAuthenticationSuccessHandler(userService));
+    }
+
+    @Bean
+    public AuthenticationSuccessHandler canvasAuthenticationSuccessHandler(UserService userService){
+        return new CanvasOAuth2LoginSuccessHandler(userService);
     }
 }

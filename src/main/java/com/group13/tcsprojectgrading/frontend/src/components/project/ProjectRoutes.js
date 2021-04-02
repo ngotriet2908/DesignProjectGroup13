@@ -19,14 +19,11 @@ class ProjectRoutes extends Component {
   render () {
     return (
       <Switch>
-        {/*<Route exact path={this.props.match.path + "/groups"} component={Groups}/>*/}
         <Route exact path={this.props.match.path + "/participants/:participantId"} component={ParticipantDetails}/>
         <Route exact path={this.props.match.path + "/participants"} component={Participants}/>
         <Route exact path={this.props.match.path + "/rubric"} component={Rubric}/>
         <Route exact path={this.props.match.path + "/graders"} component={GraderManagement}/>
-        {/*<Route path={this.props.match.path + "/grading"} component={Grading}/>*/}
-        {/*<Route path={this.props.match.path + "/tasks/:taskId/grading"} component={Grading}/>*/}
-        <Route exact path={this.props.match.path + "/submissions/:submissionId/:assessmentId/grading"} component={Grading}/>
+        <Route exact path={this.props.match.path + "/submissions/:submissionId/assessments/:assessmentId/grading"} component={Grading}/>
         <Route exact path={this.props.match.path + "/submissions/:submissionId"} component={SubmissionDetails}/>
         <Route exact path={this.props.match.path + "/submissions"} component={Submissions}/>
         <Route exact path={this.props.match.path + "/feedback"} component={Feedback}/>

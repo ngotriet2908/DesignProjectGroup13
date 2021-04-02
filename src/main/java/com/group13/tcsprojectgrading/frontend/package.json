@@ -2,6 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "sideEffects": false,
   "dependencies": {
     "@casl/ability": "^5.2.2",
     "@casl/react": "^2.2.2",

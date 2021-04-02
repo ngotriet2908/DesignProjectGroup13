@@ -8,7 +8,14 @@ function getCookie(name) {
   if (parts.length === 2) return parts.pop().split(';').shift();
 }
 
-export function request(url, method = "GET", data = {}, accept = 'application/json', catch401 = true) {
+export function request(
+  url,
+  method = "GET",
+  data = {},
+  accept = 'application/json',
+  catch401 = true,
+  catch404 = true
+) {
   let init;
   if (method === "GET") {
     init = {
@@ -46,9 +53,9 @@ export function request(url, method = "GET", data = {}, accept = 'application/js
         throw new Error("Not authenticated: 401")
       }
       // TODO: we should catch 404
-      else if (response.status === 404) {
-        // store.dispatch(push(URL_PREFIX + "/404/"))
-        // throw new Error("Not found: 404")
+      else if (catch404 && response.status === 404) {
+        store.dispatch(push(URL_PREFIX + "/404/"))
+        throw new Error("Not found: 404")
       }
       else {
         return response;

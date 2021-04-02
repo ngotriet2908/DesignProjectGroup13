@@ -18,6 +18,10 @@ import classnames from "classnames";
 import {IoPencilOutline} from "react-icons/io5";
 import Grader from "./Grader";
 import AssignSubmissionModal from "./AssignSubmissionModal";
+import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
+import {deleteCurrentCourse, saveCurrentCourse} from "../../redux/courses/actions";
+import {setCurrentLocation} from "../../redux/navigation/actions";
+import {connect} from "react-redux";
 
 
 class GraderManagement extends Component {
@@ -48,7 +52,7 @@ class GraderManagement extends Component {
       modalAssignTask: null,
       modalAssignGraderChoice: null,
 
-      //edit tasks modal
+      //edit graders modal
       modalEditGradersShow: false,
       modalEditGradersActiveGraders: [],
       modalEditGradersAvailableGraders: [],
@@ -62,6 +66,8 @@ class GraderManagement extends Component {
   }
 
   componentDidMount () {
+    this.props.setCurrentLocation(LOCATIONS.graders);
+
     request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId)
       .then(response => {
         return response.json();
@@ -80,32 +86,32 @@ class GraderManagement extends Component {
     this.projectManagementHandler()
   }
 
-  syncHandler = () => {
-    this.setState({
-      syncing: true
-    })
+  // syncHandler = () => {
+  //   this.setState({
+  //     syncing: true
+  //   })
+  //
+  //   request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/syncCanvas`)
+  //     .then(response => {
+  //       if (response.status === 200) {
+  //         this.projectManagementHandler()
+  //       }
+  //     })
+  //     .catch(error => {
+  //       console.error(error.message);
+  //     });
+  // }
 
-    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/syncCanvas`)
-      .then(response => {
-        if (response.status === 200) {
-          this.projectManagementHandler()
-        }
-      })
-      .catch(error => {
-        console.error(error.message);
-      });
-  }
-
-  hasTasks = (graderId) => {
-    let i;
-    for(i = 0; i < this.state.graders.length; i++) {
-      if (this.state.graders[i].id === graderId
-        && this.state.graders[i].groups !== null && this.state.graders[i].groups.length > 0) {
-        return true;
-      }
-    }
-    return false;
-  }
+  // hasTasks = (graderId) => {
+  //   let i;
+  //   for(i = 0; i < this.state.graders.length; i++) {
+  //     if (this.state.graders[i].id === graderId
+  //       && this.state.graders[i].groups !== null && this.state.graders[i].groups.length > 0) {
+  //       return true;
+  //     }
+  //   }
+  //   return false;
+  // }
 
   projectManagementHandler = () => {
     request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management`)
@@ -128,7 +134,7 @@ class GraderManagement extends Component {
 
   addGradersHandler = () => {
     request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management/addGraders`, "POST")
-      .then(response => {
+      .then(() => {
         this.projectManagementHandler();
       })
       .catch(error => {
@@ -212,7 +218,7 @@ class GraderManagement extends Component {
   }
 
   //Grader modal handlers
-  modalGraderHandleClose = (event) => {
+  modalGraderHandleClose = () => {
     this.setState({
       modalGraderShow: false,
       modalGraderObj: null
@@ -236,7 +242,7 @@ class GraderManagement extends Component {
     })
   }
 
-  handleHideSearch = (event) => {
+  handleHideSearch = () => {
     this.setState((prevState) => {
       return {hideSearch : !prevState.hideSearch}
     })
@@ -286,124 +292,126 @@ class GraderManagement extends Component {
     })
   }
 
-  modalEditGradersHandleClose = (event) => {
-    this.setState({
-      modalEditGradersShow: false,
-      modalEditGradersActiveGraders: [],
-      modalEditGradersAvailableGraders: [],
-      modalEditShowAlert: false,
-      modalEditAlertBody: "",
-    })
+  // modalEditGradersHandleClose = () => {
+  //   this.setState({
+  //     modalEditGradersShow: false,
+  //     modalEditGradersActiveGraders: [],
+  //     modalEditGradersAvailableGraders: [],
+  //     modalEditShowAlert: false,
+  //     modalEditAlertBody: "",
+  //   })
+  // }
+  //
+  // modalEditGradersHandleAccept = () => {
+  //   request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management/addGraders`,
+  //     "POST",
+  //     this.state.modalEditGradersActiveGraders
+  //   )
+  //     .then(response => {
+  //       return response.json();
+  //     })
+  //     .then(data => {
+  //       console.log(data)
+  //
+  //       this.setState({
+  //         modalEditGradersShow: false,
+  //         modalEditShowAlert: false,
+  //         modalEditAlertBody: "",
+  //         graders: data.graders,
+  //         notAssigned: data.notAssigned
+  //       })
+  //     })
+  //     .catch(error => {
+  //       console.error(error.message);
+  //     });
+  // }
+
+  modalEditGradersToggleShow = () => {
+    this.setState(prevState => ({
+      modalEditGradersShow: !prevState.modalEditGradersShow,
+    }))
+
+    // request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management/addGraders/getAllGraders`)
+    //   .then(async response => {
+    //     let data = await response.json();
+    //     let activeGraders = [...data]
+    //     activeGraders = activeGraders.filter((grader) => {
+    //       return this.containsObject(grader, this.state.graders)
+    //     })
+    //
+    //     let availableGraders = [...data]
+    //     availableGraders = availableGraders.filter((grader) => {
+    //       return !this.containsObject(grader, this.state.graders)
+    //     })
+    //     // console.log(availableGraders)
+    //
+    //     this.setState({
+    //       modalEditGradersShow: true,
+    //       modalEditGradersActiveGraders: activeGraders,
+    //       modalEditGradersAvailableGraders: availableGraders,
+    //       modalEditShowAlert: false,
+    //       modalEditAlertBody: "",
+    //     })
+    //   })
+    //   .catch(error => {
+    //     console.error(error.message);
+    //   });
   }
 
-  modalEditGradersHandleAccept = (event) => {
-    request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management/addGraders`,
-      "POST",
-      this.state.modalEditGradersActiveGraders
-    )
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        console.log(data)
-
-        this.setState({
-          modalEditGradersShow: false,
-          modalEditShowAlert: false,
-          modalEditAlertBody: "",
-          graders: data.graders,
-          notAssigned: data.notAssigned
-        })
-      })
-      .catch(error => {
-        console.error(error.message);
-      });
-  }
-
-  modalEditGradersHandleShow = () => {
-    request(`${BASE}${USER_COURSES}/${this.props.match.params.courseId}/${PROJECT}/${this.props.match.params.projectId}/management/addGraders/getAllGraders`)
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        let activeGraders = [...data]
-        activeGraders = activeGraders.filter((grader) => {
-          return this.containsObject(grader, this.state.graders)
-        })
-
-        let availableGraders = [...data]
-        availableGraders = availableGraders.filter((grader) => {
-          return !this.containsObject(grader, this.state.graders)
-        })
-        // console.log(availableGraders)
-
-        this.setState({
-          modalEditGradersShow: true,
-          modalEditGradersActiveGraders: activeGraders,
-          modalEditGradersAvailableGraders: availableGraders,
-          modalEditShowAlert: false,
-          modalEditAlertBody: "",
-        })
-      })
-      .catch(error => {
-        console.error(error.message);
-      });
-  }
-
-  modalEditGradersHandleDeactive = (grader) => {
-    if (this.hasTasks(grader.id)) {
-      this.modalEditGradersHandleShowAlert(`Grader ${grader.name} is holding tasks, can't remove grader`)
-      return
-    }
-
-    if (grader.role === "TEACHER_ROLE") {
-      this.modalEditGradersHandleShowAlert(`${grader.name} is a teacher, can't remove grader`)
-      return
-    }
-
-    let availableGraders = [...this.state.modalEditGradersAvailableGraders]
-    availableGraders.push(grader)
-    let activeGraders = [...this.state.modalEditGradersActiveGraders]
-    activeGraders = activeGraders.filter((grader1) => {
-      return grader1.id !== grader.id
-    })
-    console.log(activeGraders)
-    console.log(availableGraders)
-
-    this.setState({
-      modalEditGradersActiveGraders: activeGraders,
-      modalEditGradersAvailableGraders: availableGraders,
-    })
-  }
-
-  modalEditGradersHandleActive = (grader) => {
-    let activeGraders = [...this.state.modalEditGradersActiveGraders]
-    activeGraders.push(grader)
-    let availableGraders = [...this.state.modalEditGradersAvailableGraders]
-    availableGraders = availableGraders.filter((grader1) => {
-      return grader1.id !== grader.id
-    })
-    console.log(activeGraders)
-    console.log(availableGraders)
-    this.setState({
-      modalEditGradersActiveGraders: activeGraders,
-      modalEditGradersAvailableGraders: availableGraders,
-    })
-  }
-
-  modalEditGradersHandleShowAlert = (body) => {
-    this.setState({
-      modalEditShowAlert: true,
-      modalEditAlertBody: body,
-    })
-  }
-
-  modalEditGradersHandleCloseAlert = () => {
-    this.setState({
-      modalEditShowAlert: false,
-      modalEditAlertBody: "",
-    })
-  }
+  // modalEditGradersHandleDeactive = (grader) => {
+  //   if (this.hasTasks(grader.id)) {
+  //     this.modalEditGradersHandleShowAlert(`Grader ${grader.name} is holding tasks, can't remove grader`)
+  //     return
+  //   }
+  //
+  //   if (grader.role === "TEACHER_ROLE") {
+  //     this.modalEditGradersHandleShowAlert(`${grader.name} is a teacher, can't remove grader`)
+  //     return
+  //   }
+  //
+  //   let availableGraders = [...this.state.modalEditGradersAvailableGraders]
+  //   availableGraders.push(grader)
+  //   let activeGraders = [...this.state.modalEditGradersActiveGraders]
+  //   activeGraders = activeGraders.filter((grader1) => {
+  //     return grader1.id !== grader.id
+  //   })
+  //   console.log(activeGraders)
+  //   console.log(availableGraders)
+  //
+  //   this.setState({
+  //     modalEditGradersActiveGraders: activeGraders,
+  //     modalEditGradersAvailableGraders: availableGraders,
+  //   })
+  // }
+  //
+  // modalEditGradersHandleActive = (grader) => {
+  //   let activeGraders = [...this.state.modalEditGradersActiveGraders]
+  //   activeGraders.push(grader)
+  //   let availableGraders = [...this.state.modalEditGradersAvailableGraders]
+  //   availableGraders = availableGraders.filter((grader1) => {
+  //     return grader1.id !== grader.id
+  //   })
+  //   console.log(activeGraders)
+  //   console.log(availableGraders)
+  //   this.setState({
+  //     modalEditGradersActiveGraders: activeGraders,
+  //     modalEditGradersAvailableGraders: availableGraders,
+  //   })
+  // }
+  //
+  // modalEditGradersHandleShowAlert = (body) => {
+  //   this.setState({
+  //     modalEditShowAlert: true,
+  //     modalEditAlertBody: body,
+  //   })
+  // }
+  //
+  // modalEditGradersHandleCloseAlert = () => {
+  //   this.setState({
+  //     modalEditShowAlert: false,
+  //     modalEditAlertBody: "",
+  //   })
+  // }
 
   modalBulkAssignHandleShow = () => {
     this.setState({
@@ -488,7 +496,7 @@ class GraderManagement extends Component {
           {/*   Sort*/}
           {/*</Button>*/}
 
-          <Button variant="lightGreen" onClick={this.modalEditGradersHandleShow}>
+          <Button variant="lightGreen" onClick={this.modalEditGradersToggleShow}>
             <IoPencilOutline size={20}/> Graders
           </Button>
         </div>
@@ -596,19 +604,29 @@ class GraderManagement extends Component {
           setModalAssignChoice={this.setModalAssignChoice}
         />
 
+        {/* select project graders modal */}
         <EditGradersModal
           show={this.state.modalEditGradersShow}
-          activeGraders={this.state.modalEditGradersActiveGraders}
-          availableGraders={this.state.modalEditGradersAvailableGraders}
-          onClickDeactive={this.modalEditGradersHandleDeactive}
-          onClickActive={this.modalEditGradersHandleActive}
-          onClose={this.modalEditGradersHandleClose}
-          onAccept={this.modalEditGradersHandleAccept}
-          hasTask={this.hasTasks}
-          showAlert={this.state.modalEditShowAlert}
-          alertBody={this.state.modalEditAlertBody}
-          closeAlertHandle={this.modalEditGradersHandleCloseAlert}
+          routeParams={this.props.match.params}
+          toggleShow={this.modalEditGradersToggleShow}
+          activeGraders={this.state.graders}
+          // hasTask={this.hasTasks}
+          // closeAlertHandle={this.modalEditGradersHandleCloseAlert}
         />
+
+        {/*<EditGradersModal*/}
+        {/*  show={this.state.modalEditGradersShow}*/}
+        {/*  activeGraders={this.state.modalEditGradersActiveGraders}*/}
+        {/*  availableGraders={this.state.modalEditGradersAvailableGraders}*/}
+        {/*  onClickDeactive={this.modalEditGradersHandleDeactive}*/}
+        {/*  onClickActive={this.modalEditGradersHandleActive}*/}
+        {/*  onClose={this.modalEditGradersHandleClose}*/}
+        {/*  onAccept={this.modalEditGradersHandleAccept}*/}
+        {/*  hasTask={this.hasTasks}*/}
+        {/*  showAlert={this.state.modalEditShowAlert}*/}
+        {/*  alertBody={this.state.modalEditAlertBody}*/}
+        {/*  closeAlertHandle={this.modalEditGradersHandleCloseAlert}*/}
+        {/*/>*/}
 
         {/*<BulkAssignModal*/}
         {/*  show={this.state.modalBulkAssignShow}*/}
@@ -623,4 +641,8 @@ class GraderManagement extends Component {
   }
 }
 
-export default withRouter(GraderManagement);
+const actionCreators = {
+  setCurrentLocation
+}
+
+export default connect(null, actionCreators)(GraderManagement)

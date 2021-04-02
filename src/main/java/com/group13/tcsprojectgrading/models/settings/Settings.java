@@ -1,74 +1,91 @@
 package com.group13.tcsprojectgrading.models.settings;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.group13.tcsprojectgrading.models.Project;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.ManyToOne;
+import com.group13.tcsprojectgrading.models.project.Project;
+import com.group13.tcsprojectgrading.models.user.User;
+
+import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
-@IdClass(SettingsId.class)
-//@JsonSerialize(using = ActivitySerializer.class)
 public class Settings {
-    @Id
-    private String courseId;
+    @Embeddable
+    public static class Pk implements Serializable {
+        @ManyToOne
+        @JoinColumn(name="userId")
+        private User user;
 
-    @Id
-    private String projectId;
+        @ManyToOne
+        @JoinColumn(name="projectId")
+        private Project project;
 
-    @Id
-    private String userId;
+        public Pk() {
+        }
 
-    private boolean notificationsEnabled;
+        public Pk(User user, Project project) {
+            this.user = user;
+            this.project = project;
+        }
+
+        public User getUser() {
+            return user;
+        }
+
+        public void setUser(User user) {
+            this.user = user;
+        }
+
+        public Project getProject() {
+            return project;
+        }
+
+        public void setProject(Project project) {
+            this.project = project;
+        }
+    }
+
+    @EmbeddedId
+    private Settings.Pk id;
+
+    private boolean rubricNotificationEnabled;
+    private boolean issuesNotificationsEnabled;
 
     public Settings() {
 
     }
 
-    public Settings(String courseId, String projectId, String userId) {
-        this.courseId = courseId;
-        this.projectId = projectId;
-        this.userId = userId;
-        this.notificationsEnabled = false;
+    public Settings(Pk id, boolean rubricNotificationEnabled, boolean issuesNotificationsEnabled) {
+        this.id = id;
+        this.rubricNotificationEnabled = rubricNotificationEnabled;
+        this.issuesNotificationsEnabled = issuesNotificationsEnabled;
     }
 
-    public Settings(String courseId, String projectId, String userId, boolean notificationsEnabled) {
-        this.courseId = courseId;
-        this.projectId = projectId;
-        this.userId = userId;
-        this.notificationsEnabled = notificationsEnabled;
+    public Settings(Long userId, Long projectId) {
+        this.id = new Pk(new User(userId), new Project(projectId));
+        this.rubricNotificationEnabled = false;
+        this.issuesNotificationsEnabled = false;
     }
 
-    public String getCourseId() {
-        return courseId;
+    public Pk getId() {
+        return id;
     }
 
-    public void setCourseId(String courseId) {
-        this.courseId = courseId;
+    public void setId(Pk id) {
+        this.id = id;
     }
 
-    public String getProjectId() {
-        return projectId;
+    public boolean isRubricNotificationEnabled() {
+        return rubricNotificationEnabled;
     }
 
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
+    public void setRubricNotificationEnabled(boolean rubricNotificationEnabled) {
+        this.rubricNotificationEnabled = rubricNotificationEnabled;
     }
 
-    public String getUserId() {
-        return userId;
+    public boolean isIssuesNotificationsEnabled() {
+        return issuesNotificationsEnabled;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public boolean isNotificationsEnabled() {
-        return notificationsEnabled;
-    }
-
-    public void setNotificationsEnabled(boolean notificationsEnabled) {
-        this.notificationsEnabled = notificationsEnabled;
+    public void setIssuesNotificationsEnabled(boolean issuesNotificationsEnabled) {
+        this.issuesNotificationsEnabled = issuesNotificationsEnabled;
     }
 }

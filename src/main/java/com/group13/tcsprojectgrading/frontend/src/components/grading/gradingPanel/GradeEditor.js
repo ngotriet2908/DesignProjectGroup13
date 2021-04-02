@@ -5,10 +5,10 @@ import {connect} from "react-redux";
 import {findById} from "../../../redux/rubric/functions";
 import {isCriterion as isCriterionChecker} from "../../rubric/helpers";
 import Button from "react-bootstrap/Button";
-import {alterGrade, alterTempAssessmentGrade} from "../../../redux/grading/actions";
+import {alterTempAssessmentGrade, saveGrade} from "../../../redux/grading/actions";
 import {findCriterion} from "../../../redux/grading/functions";
 import {request} from "../../../services/request";
-import {IoPencilOutline, IoCloseOutline, IoThumbsUpOutline, IoCheckboxOutline, IoListOutline, IoPencil} from "react-icons/io5";
+import {IoPencilOutline, IoCloseOutline, IoThumbsUpOutline, IoListOutline} from "react-icons/io5";
 import classnames from 'classnames';
 import globalStyles from "../../helpers/global.module.css";
 
@@ -40,12 +40,11 @@ class GradeEditor extends Component {
     this.props.alterTempAssessmentGrade(this.props.selectedElement, newGrade);
   }
 
-  saveGrade = () => {
+  handleSaveGrade = () => {
     let newGrade = {
-      userId: this.props.user.id,
       grade: this.props.criterion.grade === "" ? 0 : this.props.criterion.grade,
-      comment: this.props.criterion.comment === "" ? null : this.props.criterion.comment,
-      created: Date.now()
+      description: this.props.criterion.comment === "" ? null : this.props.criterion.comment,
+      criterionId: this.props.selectedElement
     }
 
     let empty = {
@@ -54,12 +53,13 @@ class GradeEditor extends Component {
     }
 
     // send request
-    request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/${this.props.match.params.assessmentId}/grading/${this.props.selectedElement}`, "PUT",
+    request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/assessments/${this.props.match.params.assessmentId}/grades`, "POST",
       newGrade
     )
-      .then(() => {
+      .then(async (response) => {
+        let grade = await response.json();
         this.props.alterTempAssessmentGrade(this.props.selectedElement, empty);
-        this.props.alterGrade(this.props.selectedElement, newGrade);
+        this.props.saveGrade(grade);
       })
       .catch(error => {
         console.error(error.message)
@@ -83,7 +83,7 @@ class GradeEditor extends Component {
 
   render () {
     let isCriterion = this.props.element.hasOwnProperty("content") && isCriterionChecker(this.props.element.content.type);
-    let isGraded = isCriterion && this.props.grades && this.props.grades.history.length > 0;
+    let isGraded = isCriterion && this.props.grades && this.props.grades.length > 0;
 
     return (
       <div className={styles.gradeEditorContainer}>
@@ -121,7 +121,7 @@ class GradeEditor extends Component {
                   <div className={styles.gradeEditorCardFooter}>
                     <Button className={styles.gradeEditorCardButton} variant="linkLightGray"
                       onClick={this.resetGrade}>Clear</Button>
-                    <Button className={styles.gradeEditorCardButton} variant="lightGreen" onClick={this.saveGrade}>Save</Button>
+                    <Button className={styles.gradeEditorCardButton} variant="lightGreen" onClick={this.handleSaveGrade}>Save</Button>
                   </div>
                 </div>
                 :
@@ -157,7 +157,7 @@ const mapStateToProps = state => {
 };
 
 const actionCreators = {
-  alterGrade,
+  saveGrade,
   alterTempAssessmentGrade
 }
 

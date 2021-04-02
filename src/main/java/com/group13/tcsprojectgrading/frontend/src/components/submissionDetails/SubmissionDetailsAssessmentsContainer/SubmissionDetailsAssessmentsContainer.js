@@ -10,7 +10,6 @@ import {IoPencilOutline} from "react-icons/io5";
 class SubmissionDetailsAssessmentsContainer extends Component {
   constructor(props) {
     super(props);
-
   }
 
   render() {

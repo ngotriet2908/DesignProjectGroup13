@@ -13,7 +13,6 @@ import java.util.List;
 
 @Service
 public class SubmissionDetailsService {
-
     private final SubmissionCommentsRepository commentsRepository;
     private final SubmissionAttachmentsRepository attachmentsRepository;
 

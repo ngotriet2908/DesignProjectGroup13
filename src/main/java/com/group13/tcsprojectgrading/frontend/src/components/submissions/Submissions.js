@@ -1,27 +1,21 @@
 import React, {Component} from "react";
 import store from "../../redux/store";
 import {URL_PREFIX} from "../../services/config";
-import {Button, ListGroup, ListGroupItem, Spinner, ButtonGroup, DropdownButton, Dropdown, FormControl} from "react-bootstrap";
+import {Spinner, ButtonGroup, DropdownButton, Dropdown, FormControl} from "react-bootstrap";
 import {push} from "connected-react-router";
 import styles from "./submissions.module.css"
-import GroupCard from "../groups/GroupCard";
-import TaskCard from "../assign/TaskCard";
-import TaskOverviewCard from "./SubmissionsOverviewCard";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
 import SubmissionsOverviewCard from "./SubmissionsOverviewCard";
-import {Link} from "react-router-dom";
 import Breadcrumbs from "../helpers/Breadcrumbs";
 
 import globalStyles from '../helpers/global.module.css';
-import {IoFileTrayOutline, IoPencil} from "react-icons/io5";
-import {IoSyncOutline} from "react-icons/io5";
 
 import classnames from 'classnames';
-import Card from "react-bootstrap/Card";
 import {setCurrentLocation} from "../../redux/navigation/actions";
 import {connect} from "react-redux";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
+import {saveUserSelf} from "../../redux/user/actions";
 
 class Submissions extends Component {
   constructor(props) {
@@ -30,12 +24,12 @@ class Submissions extends Component {
       isLoaded: false,
 
       course: {},
-      project: {},
-      user: {},
+      // project: {},
+      // user: {},
       submissions: [],
       searchString: "",
-      filterGroupChoice: "",
-      filterAssignedChoice: "",
+      filterGroupChoice: "All",
+      filterAssignedChoice: "All",
       syncing: false
     }
   }
@@ -46,26 +40,31 @@ class Submissions extends Component {
   
   filterGroupSearchChange = (group) => {
     let criteria = this.normalizeLowercase(group.name).includes(this.normalizeLowercase(this.state.searchString))
-    if (criteria) return true
-    return false
+    return !!criteria;
   }
 
   filterGroupDropDown = (group) => {
-    let filter = this.state.filterGroupChoice
-    if (filter === "all") return true;
-    if (filter === "group") return group.isGroup;
-    if (filter === "individual") return !group.isGroup;
-    console.log("dumb filter group error, check immediately")
+    let filter = this.state.filterGroupChoice;
+
+    if (filter === "All") return true;
+    if (filter === "Group") return group.groupId != null;
+    if (filter === "Individual") return group.groupId == null;
     return false
   }
 
   filterAssignedDropDown = (group) => {
-    let filter = this.state.filterAssignedChoice
-    if (filter === "all") return true;
-    if (filter === "yours") return group.hasOwnProperty("grader") && group.grader.id === this.state.user.id;
-    if (filter === "not yours") return !group.hasOwnProperty("grader") || group.grader.id !== this.state.user.id;
-    console.log("dumb filter assigned error, check immediately")
-    return false
+    let filter = this.state.filterAssignedChoice;
+
+    switch (filter) {
+    case "All":
+      return true;
+    case "Yours":
+      return group.grader != null && group.grader.id === this.props.user.id;
+    case "Not yours":
+      return group.grader == null || group.grader.id !== this.props.user.id;
+    default:
+      return false;
+    }
   }
 
   handleSearchChange = (event) => {
@@ -101,43 +100,26 @@ class Submissions extends Component {
   }
 
   loadData() {
-    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions`)
-      .then(async response => {
-        let data = await response.json();
+    Promise.all([
+      request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions`),
+      request(BASE + "courses/" + this.props.match.params.courseId),
+      request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId),
+    ])
+      .then(async([res1, res2, res3]) => {
+        const submissions = await res1.json();
+        const course = await res2.json();
+        const project = await res3.json();
+
+        console.log(submissions);
+        console.log(course);
+        console.log(project);
 
         this.setState({
-          submissions: data.submissions,
-          project: data.project,
-          course: data.course,
-          isLoaded: true,
-          user: data.user,
-          filterGroupChoice: "all",
-          filterAssignedChoice: "all",
-          syncing: false,
-        })
-      })
-      .catch(error => {
-        console.error(error.message);
-        this.setState({
+          course: course,
+          project: project,
+          submissions: submissions,
           isLoaded: true,
         })
-      });
-  }
-
-  syncHandler = () => {
-    if (this.state.syncing) {
-      return;
-    }
-
-    this.setState({
-      syncing: true
-    })
-
-    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/syncCanvas`)
-      .then(response => {
-        if (response.status === 200) {
-          this.loadData()
-        }
       })
       .catch(error => {
         console.error(error.message);
@@ -166,10 +148,6 @@ class Submissions extends Component {
 
         <div className={classnames(globalStyles.titleContainer, styles.titleContainer, this.state.syncing && styles.titleContainerIconActive)}>
           <h1>Submissions</h1>
-
-          <Button variant="lightGreen" onClick={this.syncHandler}>
-            <IoSyncOutline size={20}/> Sync
-          </Button>
         </div>
 
         {/*<div className={styles.overview}>*/}
@@ -200,7 +178,7 @@ class Submissions extends Component {
               onSelect={this.onFilterGroupSelectHandler}
             >
 
-              {["all", "divider", "group", "individual"].map((filterS) => {
+              {["All", "divider", "Group", "Individual"].map((filterS) => {
                 if (filterS === "divider") {
                   return <Dropdown.Divider key={filterS}/>
                 } else if (filterS === this.state.filterGroupChoice) {
@@ -220,7 +198,7 @@ class Submissions extends Component {
               onSelect={this.onFilterAssignedSelectHandler}
             >
 
-              {["all", "divider", "yours", "not yours"].map((filterS) => {
+              {["All", "divider", "Yours", "Not yours"].map((filterS) => {
                 if (filterS === "divider") {
                   return <Dropdown.Divider key={filterS}/>
                 } else if (filterS === this.state.filterAssignedChoice) {
@@ -247,15 +225,12 @@ class Submissions extends Component {
               // })
                 .map((submission) => {
                   return (
-                  // <div key={submission.stringId} className={styles.ul}>
-                  //   {
                     <SubmissionsOverviewCard
                       key={submission.id}
-                      user={this.state.user}
                       submission={submission}
-                      route={this.props.match}/>
-                  // }
-                  // </div>
+                      routeParams={this.props.match.params}
+                      user={this.props.user}
+                    />
                   )
                 })}
           </div>
@@ -271,4 +246,10 @@ const actionCreators = {
   setCurrentLocation
 }
 
-export default connect(null, actionCreators)(Submissions)
+const mapStateToProps = state => {
+  return {
+    user: state.users.self
+  };
+};
+
+export default connect(mapStateToProps, actionCreators)(Submissions)

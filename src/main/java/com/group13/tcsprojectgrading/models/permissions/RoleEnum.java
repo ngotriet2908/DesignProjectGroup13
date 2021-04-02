@@ -3,6 +3,7 @@ package com.group13.tcsprojectgrading.models.permissions;
 public enum RoleEnum {
     TEACHER("TEACHER_ROLE"),
     TA("TA_ROLE"),
+    TA_GRADING("TA_GRADING_ROLE"),
     STUDENT("STUDENT_ROLE"),
     NULL("null");
 
@@ -31,12 +32,15 @@ public enum RoleEnum {
     }
 
     public static RoleEnum getRoleFromEnrolment(String enrolment) {
-        if (enrolment.equals("TeacherEnrollment")) {
-            return TEACHER;
-        } else if (enrolment.equals("TaEnrollment")) {
-            return TA;
-        } else {
-            return STUDENT;
+        switch (enrolment) {
+            case "TeacherEnrollment":
+                return TEACHER;
+            case "TaEnrollment":
+                return TA;
+            case "TaGradingEnrollment":
+                return TA_GRADING;
+            default:
+                return STUDENT;
         }
     }
 }

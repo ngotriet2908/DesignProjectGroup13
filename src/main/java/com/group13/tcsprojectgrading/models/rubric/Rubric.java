@@ -12,21 +12,21 @@ import java.util.Stack;
 
 public class Rubric {
     @Id
-    private String id;
+    private Long id;
     private List<Element> children;
     private int criterionCount;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date lastModified;
 
-    public Rubric(String id, List<Element> children, int criterionCount) {
+    public Rubric(Long id, List<Element> children, int criterionCount) {
         this.id = id;
         this.children = children;
         this.criterionCount = criterionCount;
         this.lastModified = new Date();
     }
 
-    public Rubric(String id) {
+    public Rubric(Long id) {
         this.id = id;
         this.children = new ArrayList<>();
         this.criterionCount = 0;
@@ -44,11 +44,11 @@ public class Rubric {
         this.lastModified = lastModified;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

@@ -27,9 +27,6 @@ class Grading extends Component {
       data: this.props.location.data,
       isLoaded: false,
     }
-
-    // TODO: if submission is undefined, reload it from the server
-    // console.log(this.props.location.data);
   }
 
   componentDidMount() {
@@ -37,63 +34,23 @@ class Grading extends Component {
     this.fetchGradingData();
   }
 
-  getCurrentAssessment = () => {
-    request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/${this.props.match.params.assessmentId}/grading`)
-      .then(async(response) => {
-
-        if (response.status !== 404) {
-          let assessment = await response.json();
-          // initialise (empty) state for input fields
-          this.createGradingSheet();
-
-          // load grading data
-          this.props.saveAssessment(assessment);
-
-          // if submission is missing, fetch it
-          if (!this.props.location.data) {
-            request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}`)
-              .then(async(response) => {
-                let submission = await response.json();
-
-                this.setState({
-                  data: submission,
-                  isLoaded: true
-                });
-              })
-          } else {
-            this.setState({
-              isLoaded: true
-            });
-          }
-        }
-      })
-      .catch(error => {
-        console.error(error.message);
-      });
-  }
-
   fetchGradingData = () => {
     Promise.all([
-      request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/${this.props.match.params.assessmentId}/grading`),
-      request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}`),
+      request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/assessments/${this.props.match.params.assessmentId}`),
       request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/rubric`),
-      // request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/${this.props.match.params.assessmentId}/issues`),
-      // request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/graders`)
+      request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}`),
     ])
-      .then(async([res1, res2, res3, res4, res5]) => {
+      .then(async([res1, res2, res3]) => {
         const assessment = await res1.json();
-        const submission = await res2.json();
-        const rubric = await res3.json();
-        // const issues = await res4.json();
-        // const graders = await res5.json();
+        const rubric = await res2.json();
+        const submission = await res3.json();
 
-        let user = submission.user
-        if (user !== null && user.privileges !== null) {
-          updateAbility(ability, user.privileges, user)
-        } else {
-          console.log("No grader or privileges found.")
-        }
-        // console.log(ability.rules)
+        // let user = submission.grader;
+        // if (user !== null && user.privileges !== null) {
+        //   updateAbility(ability, user.privileges, user)
+        // } else {
+        //   console.log("No grader or privileges found.")
+        // }
 
         // initialise (empty) state for input fields
         this.props.saveTempAssessment(createAssessment(rubric));
@@ -107,10 +64,8 @@ class Grading extends Component {
 
         // load submission
         this.setState({
-          data: submission,
+          submission: submission,
           isLoaded: true,
-          // issues: issues,
-          // graders: graders
         });
       })
       .catch(error => {
@@ -131,17 +86,19 @@ class Grading extends Component {
 
     return (
       <>
-        <ControlBar data={this.state.data}
-          flagSubmission={null}
-          addFlag={this.handleAddFlag}
-          removeFlag={this.handleRemoveFlag}
-          createFlagHandler={this.createFlagHandler}
-          removeFlagHandler={this.removeFlagHandler}/>
+        <ControlBar
+          submission={this.state.submission}
+          // flagSubmission={null}
+          // addFlag={this.handleAddFlag}
+          // removeFlag={this.handleRemoveFlag}
+          // createFlagHandler={this.createFlagHandler}
+          // removeFlagHandler={this.removeFlagHandler}
+        />
 
         <div className={styles.container}>
           <RubricPanel match={this.props.match}/>
           <GradingPanel match={this.props.match}/>
-          <RightsidePanel routeParams={this.props.match.params}/>
+          {/*<RightsidePanel routeParams={this.props.match.params}/>*/}
           {/*<IssuesPanel graders={this.state.graders} updateIssues={this.updateIssues} issues={this.state.issues} params={this.props.match.params} createIssue={this.createIssue}/>*/}
         </div>
 

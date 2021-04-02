@@ -3,7 +3,6 @@ import { Pie } from 'react-chartjs-2';
 import Card from 'react-bootstrap/Card';
 import styles from './stat.module.css';
 import 'chartjs-plugin-colorschemes';
-import Can from '../permissions/Can';
 
 class Statistic extends Component {
   constructor(props) {
@@ -21,29 +20,29 @@ class Statistic extends Component {
     switch (this.state.type) {
     case 'number':
       return (
-        <Can I="view" a={this.state.category}>
-          <Card className={styles.stat}>
-            <Card.Body>
-              <Card.Title className={styles.statTitle}>{this.state.title}</Card.Title>
-              <Card.Text className={styles.statNumber}>{this.state.data}</Card.Text>
-              <Card.Text className={styles.statUnit}>{this.state.unit}</Card.Text>
-            </Card.Body>
-          </Card>
-        </Can>
+        // <Can I="view" a={this.state.category}>
+        <Card className={styles.stat}>
+          <Card.Body>
+            <Card.Title className={styles.statTitle}>{this.state.title}</Card.Title>
+            <Card.Text className={styles.statNumber}>{this.state.data}</Card.Text>
+            <Card.Text className={styles.statUnit}>{this.state.unit}</Card.Text>
+          </Card.Body>
+        </Card>
+        // </Can>
       );
     case 'piechart':
       console.log(generatePieData(this.state.data));
       return (
-        <Can I="view" a={this.state.category}>
-          <Card className={styles.stat}>
-            <Card.Body>
-              <Card.Title className={styles.statTitle}>{this.state.title}</Card.Title>
-              <Pie data={generatePieData(this.state.data)} options={{ legend: { display: false } }} style = {styles.piechart}/>
-              <p className={styles.statText}> Total: {Object.values(this.state.data).reduce(
-                (acc,cur) => acc + cur)}</p>
-            </Card.Body>
-          </Card>
-        </Can>
+        // <Can I="view" a={this.state.category}>
+        <Card className={styles.stat}>
+          <Card.Body>
+            <Card.Title className={styles.statTitle}>{this.state.title}</Card.Title>
+            <Pie data={generatePieData(this.state.data)} options={{ legend: { display: false } }} style = {styles.piechart}/>
+            <p className={styles.statText}> Total: {Object.values(this.state.data).reduce(
+              (acc,cur) => acc + cur)}</p>
+          </Card.Body>
+        </Card>
+        // </Can>
       );
     default:
       console.error("Invalid statistic type.");

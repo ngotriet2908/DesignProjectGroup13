@@ -2,10 +2,8 @@ import React, { Component } from 'react'
 import styles from '../grading.module.css'
 import {connect} from "react-redux";
 
-import globalStyles from '../../helpers/global.module.css';
 import Card from "react-bootstrap/Card";
 import {isCriterion as isCriterionChecker} from "../../rubric/helpers";
-import Button from "react-bootstrap/Button";
 import {findById} from "../../../redux/rubric/functions";
 import {findCriterion} from "../../../redux/grading/functions";
 import {setActive} from "../../../redux/grading/actions";
@@ -23,10 +21,6 @@ class GradeViewer extends Component {
     this.state = {
       isLoaded: false
     }
-  }
-
-  componentDidMount() {
-
   }
 
   makeActive = (key) => {
@@ -68,12 +62,12 @@ class GradeViewer extends Component {
             {isCriterion ?
               (isGraded ?
                 <div className={styles.gradeViewerBodyScroll}>
-                  {this.props.grades.history.map((grade, index) => {
+                  {this.props.grades.map((grade, index) => {
                     return (
                       <div key={index} onClick={() => this.makeActive(index)}
-                        className={classnames(styles.gradeViewerRow, (index === this.props.grades.active) && styles.gradeViewerRowActive)}>
+                        className={classnames(styles.gradeViewerRow, grade.isActive && styles.gradeViewerRowActive)}>
                         <div className={styles.gradeViewerRowIcon}>
-                          {index === this.props.grades.active ?
+                          {grade.isActive ?
                             <IoCheckboxOutline size={26}/>
                             :
                             <IoSquareOutline size={26}/>
@@ -81,12 +75,12 @@ class GradeViewer extends Component {
                         </div>
                         <div className={styles.gradeViewerRowContent}>
                           <div>
-                              Graded by {grade.userId} on {new Date(grade.created).toDateString()}
+                              Graded by {grade.grader.name} on {new Date(grade.gradedAt).toDateString()}
                           </div>
                           <div>
                               Grade {grade.grade}
-                            {grade.comment != null &&
-                              <span> with a note: {grade.comment}
+                            {grade.description != null &&
+                              <span> with a note: {grade.description}
                               </span>
                             }
                           </div>
@@ -124,6 +118,7 @@ const mapStateToProps = state => {
 
     element: findById(state.rubric.rubric, state.rubric.selectedElement),
     grades: findCriterion(state.grading.assessment.grades, state.rubric.selectedElement)
+    // grades: findGrades(state.grading.assessment.grades, state.rubric.selectedElement),
   };
 };
 

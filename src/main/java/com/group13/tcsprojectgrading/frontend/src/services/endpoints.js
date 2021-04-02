@@ -7,7 +7,7 @@ export const USER_COURSES = "courses";
 export const USER_INFO = "users/self";
 
 export const USER_RECENT = "users/recent";
-export const USER_TASKS = "users/submissions";
+export const USER_TASKS = "users/to-do";
 export const COURSES = "courses";
 
 // export const RUBRIC = "rubrics"

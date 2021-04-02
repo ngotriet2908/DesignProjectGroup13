@@ -18,7 +18,8 @@ import {
   IoPencilSharp,
   IoListOutline,
   IoReaderOutline,
-  IoSettingsOutline
+  IoSettingsOutline,
+  IoPersonOutline
 } from "react-icons/io5";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 import classnames from 'classnames';
@@ -47,7 +48,7 @@ class Sidebar extends React.Component {
 
   onClickSignOut = () => {
     request( "/logout", "POST", {})
-      .then(data => {
+      .then(() => {
         // redirect to login and remove user's info
         store.dispatch(push(URL_PREFIX + "/login"));
         this.props.removeUser();
@@ -236,6 +237,19 @@ class Sidebar extends React.Component {
           </span>
           }
         </div>
+      );
+    } else if (this.props.location === LOCATIONS.graders) {
+      result.push(
+        <div key="graders" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {}}>
+          <div className={styles.sidebarBodyItemLeft}>
+            <IoPersonOutline className={styles.sidebarIcon} size={26}/>
+          </div>
+          {!this.state.isHidden &&
+            <span className={styles.sidebarBodyItemRight}>
+                  Graders
+            </span>
+          }
+        </div>
       )
     }
 
@@ -281,7 +295,7 @@ class Sidebar extends React.Component {
             <div className={styles.sidebarBodyItem}>
               <div className={styles.sidebarBodyItemLeft}>
                 {this.props.user &&
-                <img height="40" width="40" src={this.props.user.avatar_url} alt={"profile picture"}/>
+                <img height="40" width="40" src={this.props.user.avatar} alt={"profile picture"}/>
                 }
               </div>
               {!this.state.isHidden &&

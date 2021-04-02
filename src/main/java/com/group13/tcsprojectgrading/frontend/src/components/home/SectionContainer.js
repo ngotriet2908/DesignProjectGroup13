@@ -11,8 +11,14 @@ class SectionContainer extends Component {
   render() {
     return(
       <div className={classnames(styles.sectionContainer, this.props.className)}>
-        <div className={classnames(styles.sectionTitle, styles.sectionTitleWithButton)}>
+        <div className={classnames(styles.sectionTitle, styles.sectionTitleWithButton, this.props.spreadButton && styles.sectionTitleWithButtonSpread)}>
           <h3 className={styles.sectionTitleH}>{this.props.title}</h3>
+
+          {this.props.button &&
+            <div className={classnames(styles.sectionTitleButton)}>
+              {this.props.button}
+            </div>
+          }
 
           {this.props.icon &&
             <div onClick={this.props.onClickIcon} className={classnames(styles.iconButton, styles.sectionTitleButton)}>
@@ -23,6 +29,8 @@ class SectionContainer extends Component {
 
         {this.props.data.length > 0 ?
           (this.props.data.map((item, index) => {
+            console.log(item);
+
             return (
               <this.props.Component key={index} data={item}/>
             )

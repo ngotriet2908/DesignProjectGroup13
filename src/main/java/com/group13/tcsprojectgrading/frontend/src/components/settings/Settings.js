@@ -45,17 +45,40 @@ class Settings extends Component {
       });
   }
 
-  toggleNotificationsEnabled = () => {
-    let notificationsEnabled = !this.state.settings.notificationsEnabled;
+  toggleIssuesNotificationsEnabled = () => {
+    let issuesNotificationsEnabled = !this.state.settings.issuesNotificationsEnabled;
 
     request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/settings`,
-      "PUT", {...this.state.settings, notificationsEnabled: notificationsEnabled})
+      "PUT", {...this.state.settings, issuesNotificationsEnabled: issuesNotificationsEnabled})
       .then(async(response) => {
         if (response.status === 200) {
           this.setState(prevState => ({
             settings: {
               ...prevState.settings,
-              notificationsEnabled: notificationsEnabled
+              issuesNotificationsEnabled: issuesNotificationsEnabled
+            }
+          }))
+        } else {
+          // TODO: show error
+          console.error("Could not update user settings.")
+        }
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
+  }
+
+  toggleRubricNotificationsEnabled = () => {
+    let rubricNotificationsEnabled = !this.state.settings.rubricNotificationsEnabled;
+
+    request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/settings`,
+      "PUT", {...this.state.settings, rubricNotificationsEnabled: rubricNotificationsEnabled})
+      .then(async(response) => {
+        if (response.status === 200) {
+          this.setState(prevState => ({
+            settings: {
+              ...prevState.settings,
+              rubricNotificationsEnabled: rubricNotificationsEnabled
             }
           }))
         } else {
@@ -101,16 +124,28 @@ class Settings extends Component {
             <div className={classnames(styles.sectionBody)}>
               <Card>
                 <Card.Body>
-                  <h5>Enable notifications</h5>
-
-                  <label className={styles.switch}>
-                    <input
-                      type="checkbox"
-                      checked={!!this.state.settings.notificationsEnabled}
-                      onChange={this.toggleNotificationsEnabled}
-                    />
-                    <span className={styles.slider}/>
-                  </label>
+                  <div className={styles.notificationsRow}>
+                    <h5>Rubric</h5>
+                    <label className={styles.switch}>
+                      <input
+                        type="checkbox"
+                        checked={!!this.state.settings.rubricNotificationsEnabled}
+                        onChange={this.toggleRubricNotificationsEnabled}
+                      />
+                      <span className={styles.slider}/>
+                    </label>
+                  </div>
+                  <div className={styles.notificationsRow}>
+                    <h5>Issues</h5>
+                    <label className={styles.switch}>
+                      <input
+                        type="checkbox"
+                        checked={!!this.state.settings.issuesNotificationsEnabled}
+                        onChange={this.toggleIssuesNotificationsEnabled}
+                      />
+                      <span className={styles.slider}/>
+                    </label>
+                  </div>
                 </Card.Body>
               </Card>
             </div>

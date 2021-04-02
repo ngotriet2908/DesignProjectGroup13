@@ -34,7 +34,7 @@ public class CanvasUsersApi {
         }
     }
 
-    public String getAccountWithId(String userId) {
+    public String getAccountWithId(Long userId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
         if (authorizedClient == null) {
@@ -50,7 +50,7 @@ public class CanvasUsersApi {
         }
     }
 
-    public List<String> getEnrolments(String userId) {
+    public List<String> getEnrolments(Long userId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
         if (authorizedClient == null) {
@@ -66,16 +66,17 @@ public class CanvasUsersApi {
         }
     }
 
-    public void sendMessageWithId(String userId, String groupId, String subject, String body) {
+    public void sendMessageWithId(Long userId, Long groupId, String subject, String body) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
         if (authorizedClient == null) {
+
         } else {
             String rep = "";
             if (userId == null) {
                 rep = "group_" + groupId;
             } else {
-                rep = userId;
+                rep = userId.toString();
             }
 
             URI uri = UriComponentsBuilder.newInstance()

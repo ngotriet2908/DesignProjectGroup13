@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.UUID;
 
-public interface SubmissionAttachmentsRepository extends JpaRepository<SubmissionAttachment, UUID> {
-    public List<SubmissionAttachment> findSubmissionAttachmentsBySubmission(Submission submission);
+public interface SubmissionAttachmentsRepository extends JpaRepository<SubmissionAttachment, Long> {
+    List<SubmissionAttachment> findSubmissionAttachmentsBySubmission(Submission submission);
 }

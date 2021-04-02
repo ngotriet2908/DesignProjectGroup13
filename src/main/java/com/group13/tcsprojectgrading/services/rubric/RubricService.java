@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.flipkart.zjsonpatch.JsonPatch;
+import com.group13.tcsprojectgrading.models.project.Project;
 import com.group13.tcsprojectgrading.models.rubric.RubricHistoryLinker;
 import com.group13.tcsprojectgrading.models.rubric.RubricLinker;
 import com.group13.tcsprojectgrading.models.rubric.*;
@@ -17,6 +18,7 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Stack;
 
 @Service
 public class RubricService {
@@ -30,8 +32,8 @@ public class RubricService {
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
-    public Rubric getRubricById(String id) {
-        return getRubricFromLinker(rubricLinkerRepository.findById(id).orElse(null));
+    public Rubric getRubricById(Long id) {
+        return getRubricFromLinker(rubricLinkerRepository.findById(new RubricLinker.Pk(new Project(id))).orElse(null));
     }
 
     private Rubric getRubricFromLinker(RubricLinker linker) {
@@ -62,23 +64,36 @@ public class RubricService {
     public Rubric saveRubric(Rubric rubric) throws JsonProcessingException {
         updateCriterionCount(rubric);
         updateLastModified(rubric);
-        RubricLinker linker = rubricLinkerRepository.findById(rubric.getId()).orElse(null);
-        if (linker == null) return null;
+        RubricLinker linker = this.rubricLinkerRepository.findById(new RubricLinker.Pk(new Project(rubric.getId()))).orElse(null);
+
+        if (linker == null) {
+            return null;
+        }
+
         ObjectMapper mapper = new ObjectMapper();
         linker.setRubric(mapper.writeValueAsString(rubric));
 
-        return getRubricFromLinker(rubricLinkerRepository.save(linker));
+        return getRubricFromLinker(this.rubricLinkerRepository.save(linker));
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Rubric addNewRubric(Rubric rubric) throws JsonProcessingException {
         updateCriterionCount(rubric);
         updateLastModified(rubric);
-        RubricLinker linker = rubricLinkerRepository.findById(rubric.getId()).orElse(null);
-        if (linker != null) return null;
+        RubricLinker linker = this.rubricLinkerRepository.findById(new RubricLinker.Pk(new Project(rubric.getId()))).orElse(null);
+
+        if (linker != null) {
+            return null;
+        }
+
         ObjectMapper mapper = new ObjectMapper();
         linker = new RubricLinker(rubric.getId(), mapper.writeValueAsString(rubric));
-        return getRubricFromLinker(rubricLinkerRepository.save(linker));
+        return getRubricFromLinker(this.rubricLinkerRepository.save(linker));
+    }
+
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public Rubric addNewRubric(Long projectId) throws JsonProcessingException {
+        return this.addNewRubric(new Rubric(projectId));
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
@@ -112,8 +127,8 @@ public class RubricService {
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
-    public void deleteRubric(String projectId) {
-        rubricLinkerRepository.deleteById(projectId);
+    public void deleteRubric(Long projectId) {
+        rubricLinkerRepository.deleteById(new RubricLinker.Pk(new Project(projectId)));
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
@@ -130,7 +145,7 @@ public class RubricService {
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
-    public RubricHistory getHistory(String projectId) {
+    public RubricHistory getHistory(Long projectId) {
         RubricHistoryLinker linker = rubricHistoryLinkerRepository.findById(projectId).orElse(null);
         return getRubricHistoryFromLinker(linker);
     }
@@ -185,15 +200,21 @@ public class RubricService {
                     JsonNode element = findInRubric(rubricJson, path);
 
                     if (element.get("content").get("type").asText().equals(Type.SECTION.toString())) {
-                        // it was a title with non-empty subtree
-                        // TODO it might have been a hierarchy of headers, too tired to check
+                        // the code below is very inefficient
 
                         // recursively get all criteria
+                        List<JsonNode> criteria = this.findAllCriteria(element);
 
+                        if (criteria.isEmpty()) {
+                            // no criterion was removed, so skip
+                            continue;
+                        }
 
+                        System.out.println("A section with criteria has been removed. Mark all submissions.");
 
-                        if (element.get("children").size() > 0) {
-                            System.out.println("A section with criteria has been removed (well, not necessarily, but hey). Mark all submissions.");
+                        // for each criterion
+                        for (JsonNode criterion: criteria) {
+                            // for each assessment in the project check if the criterion is in it
                         }
                     } else {
                         // it was a criterion
@@ -227,6 +248,46 @@ public class RubricService {
         }
 
         return currentElement;
+    }
+
+    public List<Element> findAllCriteria(Element element) {
+        List<Element> criteria = new ArrayList<>();
+        Stack<Element> fringe = new Stack<>();
+        fringe.push(element);
+
+        while (!fringe.isEmpty()) {
+            Element currentElement = fringe.pop();
+
+            if (currentElement.getContent().getType().equals(Type.SECTION.toString())) {
+                for (Element e: currentElement.getChildren()) {
+                    fringe.push(e);
+                }
+            } else {
+                criteria.add(currentElement);
+            }
+        }
+
+        return criteria;
+    }
+
+    public List<JsonNode> findAllCriteria(JsonNode element) {
+        List<JsonNode> criteria = new ArrayList<>();
+        Stack<JsonNode> fringe = new Stack<>();
+        fringe.push(element);
+
+        while (!fringe.isEmpty()) {
+            JsonNode currentElement = fringe.pop();
+
+            if (currentElement.get("content").get("type").asText().equals(Type.SECTION.toString())) {
+                for (JsonNode e: currentElement.get("children")) {
+                    fringe.push(e);
+                }
+            } else {
+                criteria.add(currentElement);
+            }
+        }
+
+        return criteria;
     }
 
     private enum Operation {

@@ -108,22 +108,22 @@ class RubricOutline extends Component {
             <h3>Rubric</h3>
             {!this.props.isEditing ?
               (<div className={styles.outlineHeaderButtonContainer}>
-                <Can I="write" a="Rubric">
-                  <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.onClickEdit}>
-                    <IoPencil size={26}/>
-                  </div>
-                </Can>
+                {/*<Can I="write" a="Rubric">*/}
+                <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.onClickEdit}>
+                  <IoPencil size={26}/>
+                </div>
+                {/*</Can>*/}
                 <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.downloadRubric}>
                   <IoCodeDownloadOutline size={34}/>
                 </div>
               </div>)
               :
               (<div className={styles.outlineHeaderButtonContainer}>
-                <Can I="write" a="Rubric">
-                  <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.onClickSaveButton}>
-                    <IoSaveOutline size={26}/>
-                  </div>
-                </Can>
+                {/*<Can I="write" a="Rubric">*/}
+                <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.onClickSaveButton}>
+                  <IoSaveOutline size={26}/>
+                </div>
+                {/*</Can>*/}
                 <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGray)} onClick={this.onClickCancelButton}>
                   <IoCloseOutline size={34}/>
                 </div>

@@ -12,6 +12,8 @@ import Sidebar from "./navigation/Sidebar";
 import {Spinner} from "react-bootstrap";
 
 import globalStyles from './helpers/global.module.css';
+import store from "../redux/store";
+import {push} from "connected-react-router";
 
 
 class Main extends React.Component {
@@ -70,6 +72,7 @@ class Main extends React.Component {
                 </Route>
                 <Route>
                   <Redirect to={URL_PREFIX + "/404/"}/>
+                  {/*{store.dispatch(push(URL_PREFIX + "/404/"))}*/}
                   <NotFound/>
                 </Route>
               </Switch>

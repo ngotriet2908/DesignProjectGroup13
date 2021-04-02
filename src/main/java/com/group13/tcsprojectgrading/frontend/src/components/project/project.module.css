@@ -8,10 +8,48 @@
     justify-items: flex-start;
 }
 
+.titleContainerButtons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    position: relative;
+}
+
+.questionTooltipContainer {
+    margin: 0 0 0 0.5rem;
+    /*align-items: center;*/
+    height: 100%;
+}
+
+.questionTooltip {
+    /*opacity: 1 !important;*/
+}
+
+.questionTooltip > :global(.tooltip-inner) {
+    background-color: white;
+    /*opacity: 1 !important;*/
+    color: inherit;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: .25rem;
+}
+
+/*.questionTooltip :global(.bs-tooltip-auto[x-placement^="left"] span.arrow::before),*/
+/*.questionTooltip :global(.bs-tooltip-right .arrow::before) {*/
+/*    border-right-color: #4a7efa;*/
+/*}*/
+
+/*.questionTooltip > :global(div.arrow::before) {*/
+/*    border-bottom-color: white !important;*/
+/*    color: white !important;*/
+/*}*/
+
+
 .container > div {
     /*flex: 47%;*/
     width: 100%;
 }
+
 
 .administrationSectionContainer {
 

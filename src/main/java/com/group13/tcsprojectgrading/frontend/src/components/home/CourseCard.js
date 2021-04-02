@@ -32,7 +32,7 @@ class CourseCard extends Component {
             </div>
           </div>
           <div className={styles.cardBodyContent}>
-            <div>Active in year {(new Date(this.props.data.start_at)).getFullYear()}</div>
+            <div>Active in year {(new Date(this.props.data.startAt)).getFullYear()}</div>
             {/*<div className={styles.cardButtonContainer}>*/}
             {/*  <div onClick={this.onClickSeeMore}>*/}
             {/*    <IoArrowForward size={26}/>*/}

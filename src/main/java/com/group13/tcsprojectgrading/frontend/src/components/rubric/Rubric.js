@@ -43,26 +43,26 @@ class Rubric extends Component {
         request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/rubric")
       ])
         .then(async([res1, res2]) => {
-          const permissions = await res1.json();
+          const project = await res1.json();
           const rubric = await res2.json();
-
-          // get permissions
-          if (permissions.grader !== null && permissions.grader.privileges !== null) {
-            updateAbility(ability, permissions.grader.privileges, permissions.grader)
-            this.setState({
-              project: permissions
-            })
-          } else {
-            console.log("No grader or privileges found.")
-          }
 
           // get rubric
           this.props.saveRubric(rubric);
           this.props.setSelectedElement(rubric.id);
 
-          this.setState({
-            isLoaded: true
-          });
+          // get permissions
+          if (project.privileges !== null) {
+            updateAbility(ability, project.privileges, this.props.user)
+            this.setState({
+              project: project,
+              isLoaded: true
+            })
+          } else {
+            console.log("No privileges found.")
+            this.setState({
+              isLoaded: true
+            });
+          }
         })
         .catch(error => {
           console.error(error.message);
@@ -146,6 +146,7 @@ const mapStateToProps = state => {
   return {
     rubric: state.rubric.rubric,
     isEditing: state.rubric.isEditing,
+    user: state.users.self,
   };
 };
 

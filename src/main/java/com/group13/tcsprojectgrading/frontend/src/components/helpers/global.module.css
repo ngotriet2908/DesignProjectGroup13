@@ -46,21 +46,49 @@
 .titleContainer {
     display: flex;
     flex-direction: row;
-    align-items: flex-end;
+    align-items: center;
     margin-top: 0.5rem;
+    justify-content: space-between;
 }
 
-.titleContainer div {
-    margin-left: 1rem;
-    font-size: 1.6rem;
-    color: primary;
-    /*color: #a2a1a1;*/
+.titleContainerLeft {
+    /*margin-left: 1rem;*/
+    /*font-size: 1.6rem;*/
+    /*color: primary;*/
+
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+}
+
+.titleContainer svg {
+    cursor: pointer;
+}
+
+@-webkit-keyframes rotating {
+    from{
+        -webkit-transform: rotate(0deg);
+    }
+    to{
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+.titleContainerIconActive .titleActiveButton svg {
+    -webkit-animation: rotating 1s linear infinite;
 }
 
 .sectionTitleWithButton {
     display: flex;
     flex-direction: row;
     align-items: center;
+}
+
+.sectionTitleWithButtonSpread {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .sectionFlexContainer {
@@ -221,4 +249,105 @@
 :global(.badge-orange) {
     background-color: quaternary;
     color: white;
+}
+
+
+
+/* modal */
+.modalContainer {
+    padding: 2rem 2rem 1rem 2rem;
+    max-height: calc(100vh - 3.5rem);
+}
+
+.modalHeaderContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.modalHeaderContainer h2 {
+    margin: 0;
+}
+
+.modalHeaderContainerButton {
+    cursor: pointer;
+    color: darkishGray
+}
+
+.modalDescriptionContainer {
+    margin: 1rem 0;
+}
+
+.modalBodyContainer {
+    overflow: scroll;
+    max-height: 30rem;
+}
+
+.modalBodyContainerRow {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 0.5rem 0;
+
+    border: 1px solid moderateGray;
+
+    cursor: pointer;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.modalBodyContainerRow span {
+    margin-left: 0.5rem;
+}
+
+.modalBodyContainerRowActive {
+    border: 1px solid primary;
+}
+
+.modalBodyContainerRowActiveDisabled {
+    background-color: lightGray;
+}
+
+.modalBodyContainerRowActive > *:first-child {
+    color: primary;
+}
+
+.modalBodyContainerRowEmpty {
+    cursor: default;
+    border: 1px dashed moderateGray;
+}
+
+.modalFooterContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+
+    padding-top: 1rem;
+    margin-top: 1rem;
+
+    border-top: 1px solid lightGray;
+}
+
+.modalFooterContainerButtonGroup {
+
+}
+
+.modalFooterContainerButtonGroup > *:first-child {
+    margin-right: 0.5rem;
+}
+
+.modalSpinnerContainer {
+    min-height: 10rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.modalSpinner {
+    color: primary;
 }

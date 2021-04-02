@@ -10,15 +10,15 @@ import java.util.List;
 public class RubricHistory {
     // project id
     @Id
-    private String id;
+    private Long id;
     private List<RubricUpdate> history;
 
-    public RubricHistory(String id, List<RubricUpdate> history) {
+    public RubricHistory(Long id, List<RubricUpdate> history) {
         this.id = id;
         this.history = history;
     }
 
-    public RubricHistory(String id) {
+    public RubricHistory(Long id) {
         this.id = id;
         this.history = new ArrayList<>();
     }
@@ -27,11 +27,11 @@ public class RubricHistory {
         this.history = new ArrayList<>();
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

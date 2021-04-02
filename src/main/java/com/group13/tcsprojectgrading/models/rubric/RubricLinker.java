@@ -1,33 +1,58 @@
 package com.group13.tcsprojectgrading.models.rubric;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Lob;
+import com.group13.tcsprojectgrading.models.project.Project;
+
+import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 public class RubricLinker {
+    @Embeddable
+    public static class Pk implements Serializable {
+        @ManyToOne
+        @JoinColumn(name="projectId")
+        private Project project;
 
-    @Id
-    private String id;
+        public Pk() {
+        }
 
-//    @Lob
+        public Pk(Project project) {
+            this.project = project;
+        }
+
+        public Project getProject() {
+            return project;
+        }
+
+        public void setProject(Project project) {
+            this.project = project;
+        }
+    }
+
+    @EmbeddedId
+    private RubricLinker.Pk id;
+
     @Column(columnDefinition="TEXT")
     private String rubric;
-
-    public RubricLinker(String id, String rubric) {
-        this.id = id;
-        this.rubric = rubric;
-    }
 
     public RubricLinker() {
     }
 
-    public String getId() {
+    public RubricLinker(Pk id, String rubric) {
+        this.id = id;
+        this.rubric = rubric;
+    }
+
+    public RubricLinker(Long projectId, String rubric) {
+        this.id = new Pk(new Project(projectId));
+        this.rubric = rubric;
+    }
+
+    public Pk getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Pk id) {
         this.id = id;
     }
 

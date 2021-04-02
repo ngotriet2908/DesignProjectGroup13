@@ -32,7 +32,7 @@ public class StatsController {
     */
     @GetMapping(value = "/{courseId}/stats/count", produces = "application/json")
     @ResponseBody
-    protected ResponseEntity<ArrayNode> getCount(@PathVariable String courseId) throws JsonProcessingException {
+    protected ResponseEntity<ArrayNode> getCount(@PathVariable Long courseId) throws JsonProcessingException {
         List<String> students = this.canvasApi.getCanvasCoursesApi().getCourseStudents(courseId);
 //        System.out.println(students);
         int studentCount = 0;
@@ -56,7 +56,7 @@ public class StatsController {
 
     @GetMapping(value="/{courseId}/projects/{projectId}/stats/groups", produces = "application/json")
     @ResponseBody
-    protected ResponseEntity<ObjectNode> getGroupStats(@PathVariable String courseId, @PathVariable String projectId) throws JsonProcessingException {
+    protected ResponseEntity<ObjectNode> getGroupStats(@PathVariable Long courseId, @PathVariable Long projectId) throws JsonProcessingException {
 //        String groupsString = this.canvasApi.getCanvasCoursesApi().getAssignmentGroups(courseId, Long.parseLong(projectId));
 //        ArrayNode groups = mapper.readValue(groupsString, ArrayNode.class);
 //        int groupCount = groups.size();
@@ -74,7 +74,7 @@ public class StatsController {
 
     @GetMapping(value="/{courseId}/projects/{projectId}/stats/submissions", produces = "application/json")
     @ResponseBody
-    protected ResponseEntity<ObjectNode> getSubmissionStats(@PathVariable String courseId, @PathVariable String projectId) throws JsonProcessingException {
+    protected ResponseEntity<ObjectNode> getSubmissionStats(@PathVariable Long courseId, @PathVariable Long projectId) throws JsonProcessingException {
 //        String summary = this.canvasApi.getCanvasCoursesApi().getSubmissionsSummary(courseId, Long.parseLong(projectId));
 //
 //        ObjectNode summaryNode = mapper.createObjectNode();
@@ -99,7 +99,7 @@ public class StatsController {
 
     @GetMapping(value = "/{courseId}/projects/{projectId}/stats/grades", produces = "application/json")
     @ResponseBody
-    protected ResponseEntity<ArrayNode> getGradeStats(@PathVariable String courseId, @PathVariable String projectId) {
+    protected ResponseEntity<ArrayNode> getGradeStats(@PathVariable Long courseId, @PathVariable Long projectId) {
         double mean = 6.7;
         double median = 6.9;
         double min = 3.2;

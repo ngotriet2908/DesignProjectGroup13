@@ -10,12 +10,11 @@ import SubmissionDetailsAssessmentsContainer
   from "./SubmissionDetailsAssessmentsContainer/SubmissionDetailsAssessmentsContainer";
 import SubmissionDetailsAssessmentsEditingContainer
   from "./SubmissionDetailsAssessmentsContainer/SubmissionDetailsAssessmentsEditingContainer";
-import {IoFlagOutline,IoAdd,  IoSyncOutline, IoPencilOutline, IoCloseOutline} from "react-icons/io5";
+import {IoAdd, IoPencilOutline, IoCloseOutline} from "react-icons/io5";
 import FlagModal from "./FlagModal";
 import globalStyles from "../helpers/global.module.css";
 import Breadcrumbs from "../helpers/Breadcrumbs";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
-import {deleteCurrentCourse, saveCurrentCourse} from "../../redux/courses/actions";
 import {setCurrentLocation} from "../../redux/navigation/actions";
 import {connect} from "react-redux";
 import classnames from "classnames";
@@ -28,16 +27,18 @@ class SubmissionDetails extends Component {
   constructor(props) {
     super(props);
 
-    // TODO: don't save in state entities that won't be changed
     this.state = {
       course: {},
       project: {},
       submission: {},
+
       isLoaded: false,
       isAssessmentEditing: false,
       isAddingParticipant: false,
+
       flagModalShow: false,
       participantModalShow: false,
+
       allParticipants: []
     }
   }
@@ -46,22 +47,47 @@ class SubmissionDetails extends Component {
   componentDidMount() {
     this.props.setCurrentLocation(LOCATIONS.submission);
 
-    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}`)
-      .then(async response => {
-        let data = await response.json();
-        // console.log(data);
+    Promise.all([
+      request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}`),
+      request(BASE + "courses/" + this.props.match.params.courseId),
+      request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId),
+    ])
+      .then(async([res1, res2, res3]) => {
+        const submission = await res1.json();
+        const course = await res2.json();
+        const project = await res3.json();
+
+        console.log(submission);
+        console.log(course);
+        console.log(project);
+
         this.setState({
-          submission: data.submission,
-          project: data.project,
-          course: data.course,
+          course: course,
+          project: project,
+          submission: submission,
           isLoaded: true,
-          flagModalShow: false,
-          participantModalShow: false,
         })
       })
       .catch(error => {
         console.error(error.message);
       });
+
+    // request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}`)
+    //   .then(async response => {
+    //     let data = await response.json();
+    //     // console.log(data);
+    //     this.setState({
+    //       submission: data.submission,
+    //       project: data.project,
+    //       course: data.course,
+    //       isLoaded: true,
+    //       flagModalShow: false,
+    //       participantModalShow: false,
+    //     })
+    //   })
+    //   .catch(error => {
+    //     console.error(error.message);
+    //   });
   }
 
   deleteParticipantHandler = (member) => {
@@ -223,34 +249,33 @@ class SubmissionDetails extends Component {
           <h1>{this.state.submission.name}</h1>
         </div>
 
-        <div className={styles.labelsContainer}>
-          {this.state.submission.flags.map((flag) => {
-            return (
-              <OverlayTrigger
-                key={flag.id}
-                placement="bottom"
-                delay={{ show: 250, hide: 400 }}
-                overlay={(props) => (
-                  <Tooltip id={flag.id} {...props}>
-                    {flag.description}
-                  </Tooltip>)
-                }>
-                <Badge className={globalStyles.label} variant={flag.variant}>{flag.name}</Badge>
-              </OverlayTrigger>
+        {/*<div className={styles.labelsContainer}>*/}
+        {/*  {this.state.submission.flags.map((flag) => {*/}
+        {/*    return (*/}
+        {/*      <OverlayTrigger*/}
+        {/*        key={flag.id}*/}
+        {/*        placement="bottom"*/}
+        {/*        delay={{ show: 250, hide: 400 }}*/}
+        {/*        overlay={(props) => (*/}
+        {/*          <Tooltip id={flag.id} {...props}>*/}
+        {/*            {flag.description}*/}
+        {/*          </Tooltip>)*/}
+        {/*        }>*/}
+        {/*        <Badge className={globalStyles.label} variant={flag.variant}>{flag.name}</Badge>*/}
+        {/*      </OverlayTrigger>*/}
 
-            )
-          })}
+        {/*    )*/}
+        {/*  })}*/}
 
-          <Button variant="dashed" onClick={this.onFlagModalShow}>
-            <IoAdd/> Add label
-          </Button>
-        </div>
+        {/*  <Button variant="dashed" onClick={this.onFlagModalShow}>*/}
+        {/*    <IoAdd/> Add label*/}
+        {/*  </Button>*/}
+        {/*</div>*/}
 
         <div className={classnames(styles.container)}>
-
           <div className={styles.section}>
             <div className={styles.sectionTitle}>
-              <h3 className={styles.sectionTitleH}>Submission Info</h3>
+              <h3 className={styles.sectionTitleH}>Submission Details</h3>
             </div>
 
             <div className={styles.sectionContent}>
@@ -259,8 +284,8 @@ class SubmissionDetails extends Component {
                   <h6>Id: {this.state.submission.id}</h6>
                   <h6>name: {this.state.submission.name}</h6>
                   <h6>Submitted at: {this.state.submission.submittedAt}</h6>
-                  <h6>Progress: {this.state.submission.progress}</h6>
-                  {(this.state.submission.grader == null)? null : <h6>Assigned to: {this.state.submission.grader.name}</h6>}
+                  {/*<h6>Progress: {this.state.submission.progress}</h6>*/}
+                  {this.state.submission.grader != null && <h6>Assigned to: {this.state.submission.grader.name}</h6>}
                 </Card.Body>
               </Card>
             </div>
@@ -275,7 +300,7 @@ class SubmissionDetails extends Component {
               <Card>
                 <Card.Body>
                   <ListGroup>
-                    {this.state.submission.submission_comments.map((comment) => {
+                    {this.state.submission.comments.map((comment) => {
                       return (
                         <ListGroupItem key={comment.id}>
                           <div>
@@ -291,8 +316,6 @@ class SubmissionDetails extends Component {
               </Card>
             </div>
           </div>
-
-
 
           <div className={styles.section}>
             <div className={styles.sectionTitle}>
@@ -319,20 +342,7 @@ class SubmissionDetails extends Component {
             </div>
           </div>
 
-
-          {/*<div className={styles.discussionContainer}>*/}
-          {/*  <Card>*/}
-          {/*    <Card.Body>*/}
-          {/*      <Card.Title>*/}
-          {/*          Discussion*/}
-          {/*      </Card.Title>*/}
-          {/*        Working progress*/}
-          {/*    </Card.Body>*/}
-          {/*  </Card>*/}
-          {/*</div>*/}
-
-
-          {(this.state.submission.participants != null) &&
+          {(this.state.submission.members != null) &&
             <div className={styles.section}>
               <div className={classnames(styles.sectionTitle, styles.sectionTitleWithButton)}>
                 <h3 className={styles.sectionTitleH}>Participants</h3>
@@ -343,27 +353,25 @@ class SubmissionDetails extends Component {
                   :
                   <div className={styles.buttonGroup}>
                     <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.handleAddParticipant}>
-                    <IoAdd size={26}/>
+                      <IoAdd size={26}/>
                     </div>
                     <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.toggleAddingParticipant}>
-                    <IoCloseOutline size={26}/>
+                      <IoCloseOutline size={26}/>
                     </div>
                   </div>
                 }
-
-
               </div>
 
               <div className={styles.sectionContent}>
                 <Card>
                   <Card.Body>
                     <ListGroup>
-                      {this.state.submission.participants.map((member) => {
+                      {this.state.submission.members.map((member) => {
                         return ((this.state.isAddingParticipant)?
-                            <ParticipantItemEdit member={member} handleDelete={() => this.deleteParticipantHandler(member)}/>
-                            :
-                            <ParticipantItem member={member}/>
-                          )
+                          <ParticipantItemEdit key={member.id} member={member} handleDelete={() => this.deleteParticipantHandler(member)}/>
+                          :
+                          <ParticipantItem key={member.id} member={member}/>
+                        )
                       })}
                     </ListGroup>
                   </Card.Body>
@@ -372,44 +380,44 @@ class SubmissionDetails extends Component {
             </div>
           }
 
-
-          {(this.state.submission.assessments != null) &&
-            (this.state.isAssessmentEditing) ?
-            <SubmissionDetailsAssessmentsEditingContainer
-              setAssessment={this.setAssessment}
-              isEditing={this.state.isAssessmentEditing}
-              toggleEditing={this.toggleEditing}
-              submission={this.state.submission}
-              params={this.props.match.params}
-            />
-            :
-            <SubmissionDetailsAssessmentsContainer
-              isEditing={this.state.isAssessmentEditing}
-              toggleEditing={this.toggleEditing}
-              submission={this.state.submission}
-              params={this.props.match.params}
-            />
+          {this.state.submission.assessments != null &&
+            (this.state.isAssessmentEditing ?
+              <SubmissionDetailsAssessmentsEditingContainer
+                setAssessment={this.setAssessment}
+                isEditing={this.state.isAssessmentEditing}
+                toggleEditing={this.toggleEditing}
+                submission={this.state.submission}
+                params={this.props.match.params}
+              />
+              :
+              <SubmissionDetailsAssessmentsContainer
+                isEditing={this.state.isAssessmentEditing}
+                toggleEditing={this.toggleEditing}
+                submission={this.state.submission}
+                params={this.props.match.params}
+              />
+            )
           }
         </div>
 
 
-        <FlagModal show={this.state.flagModalShow}
-          onClose = {this.onFlagModalClose}
-          flags = {this.state.submission.flags}
-          availableFlags = {this.state.project.flags}
-          updateSubmissionFlags = {this.updateSubmissionFlags}
-          updateProjectFlags = {this.updateProjectFlags}
-          params={this.props.match.params}
-        />
+        {/*<FlagModal show={this.state.flagModalShow}*/}
+        {/*  onClose = {this.onFlagModalClose}*/}
+        {/*  flags = {this.state.submission.flags}*/}
+        {/*  availableFlags = {this.state.project.flags}*/}
+        {/*  updateSubmissionFlags = {this.updateSubmissionFlags}*/}
+        {/*  updateProjectFlags = {this.updateProjectFlags}*/}
+        {/*  params={this.props.match.params}*/}
+        {/*/>*/}
 
-        <AddParticipantModal
-          show={this.state.participantModalShow}
-          onClose={this.onAddParticipantModalClose}
-          participants={this.filterCurrentParticipant(this.state.allParticipants)}
-          assessments={this.state.submission.assessments}
-          params={this.props.match.params}
-          updateSubmission={this.updateSubmission}
-        />
+        {/*<AddParticipantModal*/}
+        {/*  show={this.state.participantModalShow}*/}
+        {/*  onClose={this.onAddParticipantModalClose}*/}
+        {/*  participants={this.filterCurrentParticipant(this.state.allParticipants)}*/}
+        {/*  assessments={this.state.submission.assessments}*/}
+        {/*  params={this.props.match.params}*/}
+        {/*  updateSubmission={this.updateSubmission}*/}
+        {/*/>*/}
       </div>
     );
   }

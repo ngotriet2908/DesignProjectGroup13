@@ -7,31 +7,29 @@ import javax.persistence.Lob;
 
 @Entity
 public class RubricHistoryLinker {
-
     @Id
-    public String id;
+    public Long id;
 
-//    @Lob
     @Column(columnDefinition="TEXT")
     public String rubricHistory;
 
-    public RubricHistoryLinker(String id, String rubricHistory) {
+    public RubricHistoryLinker(Long id, String rubricHistory) {
         this.id = id;
         this.rubricHistory = rubricHistory;
     }
 
-    public RubricHistoryLinker(String id) {
+    public RubricHistoryLinker(Long id) {
         this.id = id;
     }
 
     public RubricHistoryLinker() {
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

@@ -24,25 +24,9 @@ public class TcsProjectGradingApplication {
         SpringApplication.run(TcsProjectGradingApplication.class, args);
     }
 
-
-//    @Override
-//    public void run(String... args) {
-//        repository.deleteAll();
-////        repository.save(new Rubric("v1", new ArrayList<>()));
-//
-//        // fetch all customers
-////        System.out.println("Rubrics found with findAll():");
-////        System.out.println("-------------------------------");
-////        for (Rubric rubric : repository.findAll()) {
-////            System.out.println(rubric);
-////        }
-////        System.out.println();
-//    }
-
     @Bean
     public CommandLineRunner demoData(RoleService roleService, PrivilegeService privilegeService) {
         return args -> {
-
             List<PrivilegeEnum> teacherPrivilegesEnum = List.of(
                     MANAGE_GRADERS_OPEN, MANAGE_GRADERS_EDIT, MANAGE_GRADERS_SELF_EDIT,
                     RUBRIC_READ, RUBRIC_WRITE, RUBRIC_DOWNLOAD,
@@ -58,6 +42,19 @@ public class TcsProjectGradingApplication {
             );
 
             List<PrivilegeEnum> taPrivilegesEnum = List.of(
+//                    MANAGE_GRADERS_OPEN, MANAGE_GRADERS_SELF_EDIT,
+//                    RUBRIC_READ, RUBRIC_DOWNLOAD,
+//                    STATISTIC_READ,
+//                    ADMIN_TOOLBAR_VIEW,
+//                    TODO_LIST_VIEW,
+//                    GRADING_WRITE_SINGLE, GRADING_READ_ALL,
+//                    PROJECT_READ,
+//                    SUBMISSIONS_READ,
+//                    SUBMISSION_READ_ALL, SUBMISSION_EDIT_SINGLE,
+//                    FLAG_CREATE, FLAG_ASSIGN
+            );
+
+            List<PrivilegeEnum> taGradingPrivilegesEnum = List.of(
                     MANAGE_GRADERS_OPEN, MANAGE_GRADERS_SELF_EDIT,
                     RUBRIC_READ, RUBRIC_DOWNLOAD,
                     STATISTIC_READ,
@@ -76,20 +73,28 @@ public class TcsProjectGradingApplication {
             List<Privilege> taPrivileges = new ArrayList<>();
             taPrivilegesEnum.forEach(privilegeEnum -> taPrivileges.add(privilegeService.addPrivilegeIfNotExist(privilegeEnum.toString())));
 
-            Role teacherRole = roleService.addRoleIfNotExist(
+            List<Privilege> taGradingPrivileges = new ArrayList<>();
+            taGradingPrivilegesEnum.forEach(privilegeEnum -> taGradingPrivileges.add(privilegeService.addPrivilegeIfNotExist(privilegeEnum.toString())));
+
+            roleService.addRoleIfNotExist(
                     RoleEnum.TEACHER.toString(),
                     teacherPrivileges
             );
 
-            Role taRole = roleService.addRoleIfNotExist(
+            roleService.addRoleIfNotExist(
                     RoleEnum.TA.toString(),
                     taPrivileges
             );
 
-//            Role studentRole = roleService.addRoleIfNotExist(
-//                    RoleEnum.STUDENT.toString(),
-//
-//            );
+            roleService.addRoleIfNotExist(
+                    RoleEnum.STUDENT.toString(),
+                    new ArrayList<>()
+            );
+
+            roleService.addRoleIfNotExist(
+                    RoleEnum.TA_GRADING.toString(),
+                    taGradingPrivileges
+            );
         };
     }
 }
