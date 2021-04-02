@@ -50,34 +50,33 @@ class Feedback extends Component {
 
   handleSendFeedback = () => {
     //TODO: add possibility of sending the same email for All course students (there already is a checkbox for that )
-    console.log(this.state.isPdfAttached);
-    // if (!this.state.isAllRecipientsChecked && (this.state.receiver === 'none' || this.state.receiver === "")) {
-    //   alert('Recipient needs to be selected for feedback to be sent');
-    // } else if (this.state.body.trim() === "" || this.state.subject.trim() === "")  {
-    //   alert('Subject and body cannot be empty');
-    // } else {
-    //   let object = {
-    //     "id": this.state.receiver,
-    //     "isGroup": false,
-    //     "subject": this.state.subject,
-    //     "body": this.state.body,
-    //   }
-    //   this.setState({
-    //     isSendingFeedback: true,
-    //   })
-    //
-    //   request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/feedback`, "POST", object)
-    //       .then(response => {
-    //         this.setState({
-    //           isSendingFeedback: false
-    //         })
-    //         if (response.status === 200) {
-    //         }
-    //       })
-    //       .catch(error => {
-    //         console.error(error.message);
-    //       });
-    // }
+    if (!this.state.isAllRecipientsChecked && (this.state.receiver === 'none' || this.state.receiver === "")) {
+      alert('Recipient needs to be selected for feedback to be sent');
+    } else if (this.state.body.trim() === "" || this.state.subject.trim() === "")  {
+      alert('Subject and body cannot be empty');
+    } else {
+      let object = {
+        "id": this.state.receiver,
+        "isGroup": false,
+        "subject": this.state.subject,
+        "body": this.state.body,
+      }
+      this.setState({
+        isSendingFeedback: true,
+      })
+
+      request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/feedback`, "POST", object)
+          .then(response => {
+            this.setState({
+              isSendingFeedback: false
+            })
+            if (response.status === 200) {
+            }
+          })
+          .catch(error => {
+            console.error(error.message);
+          });
+    }
   }
 
   handleGetPdf = (isDownload) => {
