@@ -36,6 +36,11 @@ class IssueCard extends Component {
       .then(async (response) => {
         let data = await response.json();
 
+        this.setState({
+          isSolving: false,
+          isExpanded: false,
+        })
+
         this.props.updateIssue(data);
       })
   }
@@ -86,10 +91,11 @@ class IssueCard extends Component {
           (
             <div>
               <div>
-                Opened by <b>{this.props.issue.creator.name}</b> about <b>{this.props.issue.subject}</b>.
+                Opened by <b>{this.props.issue.creator.name}</b>
+                {/*about <b>{this.props.issue.subject}</b>.*/}
               </div>
 
-              <div>Subject: {this.props.issue.subject}</div>
+              {/*<div>Subject: {this.props.issue.subject}</div>*/}
               <div>Description: {this.props.issue.description}</div>
 
               {(this.props.issue.hasOwnProperty("reference")) &&
@@ -109,7 +115,8 @@ class IssueCard extends Component {
             <div>
               <div>
                 {/* todo: target vs subject */}
-                Opened by <b>{this.props.issue.creator.name}</b> about <b>{this.props.issue.subject}</b>.
+                Opened by <b>{this.props.issue.creator.name}</b>
+                {/*about <b>{this.props.issue.subject}</b>.*/}
               </div>
             </div>
           )

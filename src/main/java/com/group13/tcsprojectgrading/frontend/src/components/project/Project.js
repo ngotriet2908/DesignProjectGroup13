@@ -250,7 +250,7 @@ class Project extends Component {
                     {/*</Can>*/}
 
                     <Button variant="lightGreen" onClick={this.handleExcel}>
-                      Export Result
+                      Export Results
                     </Button>
 
                   </Card.Body>

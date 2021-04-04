@@ -1,12 +1,6 @@
 import React, {Component} from "react";
 import {Breadcrumb, Button, Spinner, InputGroup, Form, Card, Modal, ListGroup} from "react-bootstrap";
 import styles from "../submissionDetails/submissionDetails.module.css";
-import globalStyles from "../helpers/global.module.css";
-import SubmissionDetailsAssessmentItemContainer
-  from "../submissionDetails/SubmissionDetailsAssessmentsContainer/SubmissionDetailsAssessmentItemContainer";
-import classnames from 'classnames';
-import {IoPencilOutline, IoAdd, IoCloseOutline} from "react-icons/io5";
-import TemplateContainer from "./TemplateContainer";
 import {request} from "../../services/request";
 import {toast} from 'react-toastify'
 import TemplateEditContainer from "./TemplateEditContainer";
@@ -56,7 +50,7 @@ class TemplatesEditContainer extends Component {
           draggable: true,
           progress: undefined,
         });
-    })
+      })
   }
 
   render() {
@@ -92,7 +86,7 @@ class TemplatesEditContainer extends Component {
                 </Form>
               </Card.Body>
             </Card>
-          :
+            :
             <ListGroup>
               {this.props.templates.map((template) => {
                 return (

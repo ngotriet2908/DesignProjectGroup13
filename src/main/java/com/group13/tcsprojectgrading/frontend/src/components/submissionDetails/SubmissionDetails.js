@@ -299,6 +299,7 @@ class SubmissionDetails extends Component {
             )
             }
 
+            {this.state.submission.comments.length > 0 &&
             <div className={styles.section}>
               <div className={styles.sectionTitle}>
                 <h3 className={styles.sectionTitleH}>Submission Comments</h3>
@@ -320,7 +321,9 @@ class SubmissionDetails extends Component {
                 })}
               </div>
             </div>
+            }
 
+            {this.state.submission.attachments.length > 0 &&
             <div className={styles.section}>
               <div className={styles.sectionTitle}>
                 <h3 className={styles.sectionTitleH}>Attachments</h3>
@@ -342,6 +345,7 @@ class SubmissionDetails extends Component {
                 })}
               </div>
             </div>
+            }
 
             {(this.state.submission.members != null) &&
             <div className={styles.section}>

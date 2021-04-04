@@ -3,11 +3,8 @@ package com.group13.tcsprojectgrading.services.project;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-//import com.group13.tcsprojectgrading.controllers.PdfRubricUtils;
-//import com.group13.tcsprojectgrading.controllers.PdfUtils;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.group13.tcsprojectgrading.models.graders.GradingParticipation;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
@@ -44,7 +41,6 @@ import com.group13.tcsprojectgrading.services.permissions.ProjectRoleService;
 import com.group13.tcsprojectgrading.services.permissions.RoleService;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
 import com.group13.tcsprojectgrading.services.settings.SettingsService;
-//import com.group13.tcsprojectgrading.services.submissions.LabelService;
 import com.group13.tcsprojectgrading.services.submissions.SubmissionDetailsService;
 import com.group13.tcsprojectgrading.services.submissions.SubmissionService;
 import com.itextpdf.kernel.geom.PageSize;
@@ -104,13 +100,11 @@ public class ProjectService {
                           @Lazy SubmissionService submissionService, SubmissionDetailsService submissionDetailsService,
                           @Lazy AssessmentService assessmentService, @Lazy CourseService courseService,
                           @Lazy SettingsService settingsService,
-                          CourseParticipationRepository courseParticipationRepository,
-                          LabelRepository labelRepository) {
+                          LabelRepository labelRepository,
                           CourseParticipationRepository courseParticipationRepository, FeedbackService feedbackService) {
         this.projectRepository = projectRepository;
         this.projectRoleService = projectRoleService;
         this.roleService = roleService;
-//        this.labelService = labelService;
         this.activityService = activityService;
         this.rubricService = rubricService;
         this.gradingParticipationService = gradingParticipationService;

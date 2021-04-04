@@ -55,6 +55,13 @@ class LabelModal extends Component {
   }
 
   onClose = () => {
+    this.setState({
+      labels: [],
+      isLoaded: false,
+      selected: [],
+      isCreating: false,
+    })
+
     this.props.toggleShow();
   }
 
@@ -65,8 +72,14 @@ class LabelModal extends Component {
       "PUT",
       this.state.selected)
       .then(async () => {
-        // save data
         this.props.replaceLabels(this.state.selected);
+
+        this.setState({
+          labels: [],
+          isLoaded: false,
+          selected: [],
+        })
+
         this.props.toggleShow();
       })
   }
