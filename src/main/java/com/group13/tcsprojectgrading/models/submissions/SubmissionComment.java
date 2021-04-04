@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
 import javax.persistence.*;
@@ -68,7 +69,8 @@ public class SubmissionComment {
         @Override
         public void serialize(SubmissionComment comment, JsonGenerator jsonGenerator,
                               SerializerProvider serializerProvider) throws IOException {
-            jsonGenerator.writeRaw(comment.getComment());
+            ObjectMapper objectMapper = new ObjectMapper();
+            jsonGenerator.writeObject(objectMapper.readTree(comment.getComment()));
         }
     }
 }

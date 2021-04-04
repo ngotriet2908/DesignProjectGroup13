@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import StudentList from "./StudentList";
-import {Breadcrumb, Button, Spinner, InputGroup, Form, Card, Modal} from "react-bootstrap";
+import {Breadcrumb, Button, Spinner, InputGroup, Form, Card, Modal, ListGroup} from "react-bootstrap";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
 import styles from "./feedback.module.css";
@@ -8,37 +8,48 @@ import store from "../../redux/store";
 import {URL_PREFIX} from "../../services/config";
 import { saveAs } from 'file-saver';
 import globalStyles from "../helpers/global.module.css";
+import TemplatesContainer from "./TemplatesContainer";
+import classnames from "classnames";
+import TemplatesEditContainer from "./TemplatesEditContainer";
+import {IoPencilOutline, IoAdd, IoCloseOutline} from "react-icons/io5";
+import FeedbackSendingForm from "./FeedbackSendingForm";
 
 class Feedback extends Component {
   constructor(props) {
     super(props);
     this.state = {
       users: [],
+      participantsNotSent: [],
+      participantsAll: [],
       course: {},
       project: {},
-      subject: "",
-      body: "",
-      receiver: {},
+      templates: [],
+      isCreatingTemplate: false,
       isLoaded: false,
-      isSendingFeedback: false,
-      isSendingPdf: false,
-      gmailModalShow: false,
+      isEditingTemplates: false,
     }
 
   }
 
   componentDidMount() {
-    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/feedback`)
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        console.log(data);
+    Promise.all([
+      request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}`),
+      request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/feedback/templates`),
+      request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/feedback/participants/notSent`),
+      request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/feedback/participants/all`)
+    ])
+      .then(async([res1, res2, res3, res4]) => {
+        const project = await res1.json();
+        const templates = await res2.json();
+        const participantsNotSent = await res3.json();
+        const participantsAll = await res4.json();
+
         this.setState({
-          users: data.users,
-          course: data.course,
-          project: data.project,
+          templates: templates,
+          project: project,
           isLoaded: true,
+          participantsNotSent: participantsNotSent,
+          participantsAll: participantsAll
         })
       })
       .catch(error => {
@@ -46,133 +57,32 @@ class Feedback extends Component {
       });
   }
 
-  handleSendFeedback = () => {
-    let object = {
-      "id": this.state.receiver,
-      "isGroup": false,
-      "subject": this.state.subject,
-      "body": this.state.body,
-    }
-    this.setState({
-      isSendingFeedback: true,
-    })
 
-    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/feedback`, "POST", object)
-      .then(response => {
-        this.setState({
-          isSendingFeedback: false
-        })
-        if (response.status === 200) {
 
-        }
-      })
-      .catch(error => {
-        console.error(error.message);
-      });
-  }
-
-  handleGetPdf = (isDownload) => {
-    let object = {
-      "id": this.state.receiver,
-      "isGroup": false,
-      "subject": this.state.subject,
-      "body": this.state.body,
-    }
-    this.setState({
-      isSendingPdf: true
-    })
-
-    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/feedbackPdf`, "POST", object, 'application/pdf')
-      .then(response => {
-        this.setState({
-          isSendingPdf: false
-        })
-        if (response.status === 200) {
-          //Create a Blob from the PDF Stream
-          // console.log(response.blob())
-          // // console.log(response.formData())
-          // console.log(response.type)
-          //
-          // const file = new Blob([response.blob().]);
-          // //Build a URL from the file
-          // const fileURL = URL.createObjectURL(file);
-          // //Open the URL on new Window
-          // window.open(fileURL);
-          // // saveAs(file, 'fileName.pdf');
-          return response.blob()
-        }
-      })
-      .then((blob) => {
-        console.log(blob)
-        const file = new Blob([blob], {
-          type: 'application/pdf',
-        });
-
-        if (isDownload) {
-          saveAs(file, 'feedback.pdf');
-        } else {
-          const fileURL = URL.createObjectURL(file);
-          window.open(fileURL);
-        }
-      })
-      .catch(error => {
-        console.error(error.message);
-      });
-  }
-
-  sendEmailHandler = () => {
-    let object = {
-      "id": this.state.receiver,
-      "isGroup": false,
-      "subject": this.state.subject,
-      "body": this.state.body,
-    }
-
-    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/feedbackEmail`, "POST", object, undefined, false)
-      .then((response) => {
-        if (response.status === 401) {
-          this.setState({
-            gmailModalShow: true
-          })
-          return null
-        } else {
-          return response.text();
-        }
-      })
-      .then((result) => {
-        if (result !== null) {
-          console.log(result)
-        }
-      })
-      .catch(error => {
-        console.error(error.message);
-      });
-  }
-
-  handleSubjectChange = (event) => {
-    this.setState({
-      subject: event.target.value
+  handleToggleEditingTemplates = () => {
+    this.setState(prev => {
+      return {
+        isEditingTemplates: !prev.isEditingTemplates
+      }
     })
   }
 
-  handleReceiverChange = (event) => {
-    console.log(event.target.value)
-    this.setState({
-      receiver: event.target.value
+
+
+  handleToggleCreatingTemplates = () => {
+    this.setState(prev => {
+      return {
+        isCreatingTemplate: !prev.isCreatingTemplate
+      }
     })
   }
 
-  handleBodyChange = (event) => {
+  updateTemplatesHandler = (data) => {
     this.setState({
-      body: event.target.value
+      templates: data
     })
   }
 
-  handleGmailModalClose = () => {
-    this.setState({
-      gmailModalShow: false,
-    })
-  }
 
   render() {
     if (!this.state.isLoaded) {
@@ -184,86 +94,67 @@ class Feedback extends Component {
         </div>
       )
     }
-
-
     return (
-      <div className={styles.container}>
-        <Breadcrumb>
-          <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumb.Item>
-          <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id ))}>
-            {this.state.course.name}
-          </Breadcrumb.Item>
-          <Breadcrumb.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id + "/projects/"+this.state.project.id))}>
-            {this.state.project.name}
-          </Breadcrumb.Item>
-          <Breadcrumb.Item active>
-              Feedback
-          </Breadcrumb.Item>
-        </Breadcrumb>
+      <div className={globalStyles.container}>
 
-        <div className={styles.header}>
-          <h2>Feedback Form</h2>
-          {/*<Button href={"/api/gmail"}>*/}
-          {/*  activate gmail*/}
-          {/*</Button>*/}
+        <div className={classnames(styles.container)}>
+          <div className={styles.section}>
+            <div className={classnames(styles.sectionTitle, styles.sectionTitleWithButton)}>
+              <h3 className={styles.sectionTitleH}>Templates</h3>
+              {(!this.state.isEditingTemplates) ?
+                <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.handleToggleEditingTemplates}>
+                  <IoPencilOutline size={26}/>
+                </div>
+                :
+                <div className={styles.buttonGroup}>
+                  <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.handleToggleCreatingTemplates}>
+                    <IoAdd size={26}/>
+                  </div>
+                  <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.handleToggleEditingTemplates}>
+                    <IoCloseOutline size={26}/>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <div className={styles.sectionContent}>
+              <Card>
+                <Card.Body>
+                  {(this.state.isEditingTemplates)?
+                    <TemplatesEditContainer params={this.props.match.params} isCreating={this.state.isCreatingTemplate} updateTemplates={this.updateTemplatesHandler} toggleCreating={this.handleToggleCreatingTemplates} toggleEditing={this.handleToggleEditingTemplates} templates={this.state.templates}/>
+                    :
+                    <TemplatesContainer templates={this.state.templates}/>
+                  }
+                </Card.Body>
+              </Card>
+            </div>
+
+          </div>
+
         </div>
 
-        <Card className={styles.feedbackCard}>
-          <Form>
-            <Form.Group controlId="formSubject">
-              <Form.Label>Subject</Form.Label>
-              <Form.Control type="text" placeholder="Enter subject" onChange={this.handleSubjectChange}/>
-            </Form.Group>
 
-            <Form.Group controlId="formBody">
-              <Form.Label>Body</Form.Label>
-              <Form.Control as="textarea" rows={3} onChange={this.handleBodyChange}/>
-            </Form.Group>
+        <div className={classnames(styles.container)}>
+          <div className={styles.section}>
+            <div className={classnames(styles.sectionTitle, styles.sectionTitleWithButton)}>
+              <h3 className={styles.sectionTitleH}>Send feedback</h3>
+            </div>
 
-            <Form.Group controlId="exampleForm.ControlSelect1">
-              <Form.Label>Select recipient</Form.Label>
-              <Form.Control as="select" onChange={this.handleReceiverChange}>
-                <option value={"none"}>None</option>
-                {this.state.users.map((user) => {
-                  return <option key={user.id} value={user.id}>{user.name}</option>
-                })}
-              </Form.Control>
-            </Form.Group>
+            <div className={styles.sectionContent}>
+              <Card>
+                <Card.Body>
+                  <FeedbackSendingForm
+                    params={this.props.match.params}
+                    templates={this.state.templates}
+                    pAll={this.state.participantsAll}
+                    pNotSent={this.state.participantsNotSent}
+                  />
+                </Card.Body>
+              </Card>
+            </div>
 
-            <Button
-              disabled={this.state.isSendingFeedback}
-              onClick={this.handleSendFeedback} variant="primary">
-              {this.state.isSendingFeedback ? 'Sending...' : 'Send feedback'}
-            </Button>
-
-            <Button
-              disabled={this.state.isSendingPdf}
-              onClick={() => this.handleGetPdf(true)} variant="primary">
-              {this.state.isSendingPdf ? 'Sending...' : 'Download Pdf'}
-            </Button>
-
-            <Button
-              onClick={this.sendEmailHandler} variant="primary">
-                Send email
-            </Button>
-
-          </Form>
-        </Card>
-
-        <Modal show={this.state.gmailModalShow} onHide={this.handleGmailModalClose}>
-          <Modal.Header closeButton>
-            <Modal.Title>Gmail authentication needed</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>This step requires Gmail authentication, Do you want to continue?</Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={this.handleGmailModalClose}>
-                Close
-            </Button>
-            <Button href={"/api/gmail/auth"}>
-                Continue
-            </Button>
-          </Modal.Footer>
-        </Modal>
+          </div>
+        </div>
       </div>
     )
   }
