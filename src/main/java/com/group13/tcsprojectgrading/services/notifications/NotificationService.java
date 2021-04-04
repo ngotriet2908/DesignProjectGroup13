@@ -4,10 +4,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.mail.SimpleMailMessage;
 
 @Service
-public class NotificationsService {
+public class NotificationService {
     private final EmailSender emailSender;
 
-    public NotificationsService(EmailSender emailSender) {
+    public NotificationService(EmailSender emailSender) {
         this.emailSender = emailSender;
     }
 

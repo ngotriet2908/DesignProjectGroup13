@@ -1,4 +1,4 @@
-@value primary, secondary, ternary, quaternary, quinary, senary, senaryShade, ultraLightGray, primaryShade, lightGray, darkishGray, moderateGray from './colors.css';
+@value primary, secondary, ternary, quaternary, quinary, senary, senaryShade, secondaryShade, ultraLightGray, primaryShade, lightGray, darkishGray, moderateGray from './colors.css';
 
 .spinner {
     position: fixed;
@@ -101,12 +101,64 @@
     color: white;
 }
 
-
-
-
 :global(.modal-content) {
     border-radius: 0.5rem;
     border: 1px solid lightGray;
+}
+
+:global(.alert-custom) {
+    background: quinary;
+    color: white;
+    border-radius: 0.5rem;
+}
+
+
+/* labels and badges */
+
+.label {
+    font-size: 1rem;
+    padding: .375rem .75rem;
+    line-height: 1.5;
+    /*border-radius: 1rem;*/
+    border-radius: 0.25rem;
+    border: 2px solid transparent;
+    /*height: 40px;*/
+    color: white;
+}
+
+.labelSmall {
+    font-size: 0.8rem;
+    padding: .2rem .5rem;
+    line-height: 1;
+}
+
+/*:global(.badge-tomato) {*/
+/*    background-color: senary;*/
+/*    color: white;*/
+/*}*/
+
+/*:global(.badge-green) {*/
+/*    background-color: primary;*/
+/*    color: white;*/
+/*}*/
+
+/*:global(.badge-orange) {*/
+/*    background-color: quaternary;*/
+/*    color: white;*/
+/*}*/
+
+
+/* buttons */
+:global(.btn) {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+}
+
+:global(.btn svg) {
+    margin-right: 0.5rem;
 }
 
 :global(.btn-lightGreen) {
@@ -136,32 +188,13 @@
     color: darkishGray;
 }
 
-:global(.alert-custom) {
-    background: quinary;
-    color: white;
-    border-radius: 0.5rem;
-}
-
-/* buttons */
-:global(.btn) {
-    display: inline-flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    width: auto;
-}
-
-:global(.btn svg) {
-    margin-right: 0.5rem;
-}
-
 .iconButton {
     width: 48px;
     height: 48px;
     font-size: 26px;
     border-radius: 5px;
     cursor: pointer;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
 }
@@ -204,29 +237,12 @@
     color: white;
 }
 
-
-
-
-
-.label {
-    font-size: 1rem;
-    padding: .375rem .75rem;
-    line-height: 1.5;
-    border-radius: 1rem;
-    border: 2px dashed transparent;
-}
-
-.labelSmall {
-    font-size: 0.8rem;
-    padding: .2rem .5rem;
-    line-height: 1;
-}
-
 :global(.btn-dashed) {
     background-color: transparent;
     color: gray;
     border: 2px dashed rgba(0,0,0,.125);
-    border-radius: 1rem;
+    /*border-radius: 1rem;*/
+    border-radius: 0.25rem;
 }
 
 :global(.btn-dashed:hover) {
@@ -235,22 +251,16 @@
     border: 2px solid primary;
 }
 
-
-:global(.badge-tomato) {
-    background-color: senary;
+:global(.btn-yellow) {
+    background-color: secondary;
     color: white;
 }
 
-:global(.badge-green) {
-    background-color: primary;
+:global(.btn-yellow:hover) {
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    background-color: secondaryShade;
     color: white;
 }
-
-:global(.badge-orange) {
-    background-color: quaternary;
-    color: white;
-}
-
 
 
 /* modal */
@@ -267,13 +277,36 @@
     margin-bottom: 1rem;
 }
 
+.modalHeaderContainer > div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.modalHeaderContainer > div > *:nth-child(1) {
+    /*margin-right: 0.5rem;*/
+}
+
 .modalHeaderContainer h2 {
     margin: 0;
 }
 
 .modalHeaderContainerButton {
     cursor: pointer;
-    color: darkishGray
+    color: darkishGray;
+
+    width: 48px;
+    height: 48px;
+    font-size: 26px;
+    border-radius: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modalHeaderContainerButton:hover {
+    background-color: moderateGray;
+    color: white;
 }
 
 .modalDescriptionContainer {
@@ -330,6 +363,10 @@
     margin-top: 1rem;
 
     border-top: 1px solid lightGray;
+}
+
+.modalFooterContainerSpaceBetween {
+    justify-content: space-between;
 }
 
 .modalFooterContainerButtonGroup {

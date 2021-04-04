@@ -68,7 +68,7 @@ public class SubmissionComment {
         @Override
         public void serialize(SubmissionComment comment, JsonGenerator jsonGenerator,
                               SerializerProvider serializerProvider) throws IOException {
-            jsonGenerator.writeRaw(comment.getComment());
+            jsonGenerator.writeRawValue(comment.getComment());
         }
     }
 }

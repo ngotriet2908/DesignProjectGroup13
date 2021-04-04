@@ -19,7 +19,7 @@ class SubmissionDetailsAssessmentItemContainer extends Component {
       <div className={styles.memberAssessmentItem}>
         <div className={styles.memberAssessmentHeader}>
           <h4>
-            Assessment
+            Assessment #{this.props.assessment.id}
           </h4>
 
           <Link
@@ -37,7 +37,7 @@ class SubmissionDetailsAssessmentItemContainer extends Component {
           </Link>
         </div>
         <div>
-          <p>id: {this.props.assessment.id}</p>
+          {/*<p>id: {this.props.assessment.id}</p>*/}
           {/*<p>progress: {this.props.assessment.progress}%</p>*/}
           {/*<p>issues count: {this.props.assessment.issuesCount}</p>*/}
         </div>

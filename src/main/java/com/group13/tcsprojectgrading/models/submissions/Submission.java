@@ -34,7 +34,10 @@ public class Submission {
     private Project project;
 
     // labels
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name ="submission_label",
+            joinColumns = @JoinColumn(name ="submission_id"),
+            inverseJoinColumns = @JoinColumn(name ="label_id"))
     private Set<Label> labels = new HashSet<>();
 
     // assessments links
@@ -200,182 +203,16 @@ public class Submission {
         this.assessments = assessments;
     }
 
-    //    public JsonNode convertToJson() {
-//        ObjectMapper mapper = new ObjectMapper();
-//        ObjectNode node = mapper.createObjectNode();
-//        node.put("id", id.toString());
-//        node.put("isGroup", (!groupId.equals(NULL)));
-//        node.put("name", name);
-//        return node;
-//    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Submission that = (Submission) o;
+        return id.equals(that.id);
+    }
 
-//    public JsonNode convertToJson(List<AssessmentLinker> assessmentLinkers, List<Issue> issues) {
-//        ObjectMapper mapper = new ObjectMapper();
-//        ObjectNode node = mapper.createObjectNode();
-//
-//        node.put("id", id.toString());
-//        node.put("isGroup", (!groupId.equals(NULL)));
-//        node.put("name", name);
-//
-//        int progress = 0;
-//        node.put("progress", progress);
-//        node.put("submittedAt", date);
-//
-//        List<Flag> flags = (List<Flag>) getFlags();
-//        ArrayNode submissionFlags = createFlagsArrayNode(flags);
-//        node.set("flags", submissionFlags);
-//
-//        ArrayNode participants = mapper.createArrayNode();
-//
-//        for(AssessmentLinker assessmentLinker: assessmentLinkers) {
-////            if (assessmentLinker.getId().getUser() != null)
-//                participants.add(mapper.valueToTree(assessmentLinker.getId().getUser()));
-//        }
-//        node.set("participants", participants);
-//
-//        Map<Long, List<User>> assessmentsMap = new HashMap<>();
-//        for(AssessmentLinker assessmentLinker: assessmentLinkers) {
-//            if (!assessmentsMap.containsKey(assessmentLinker.getId().getAssessment().getId())) {
-//                List<User> participants1 = new ArrayList<>();
-////                if (assessmentLinker.get() != null) {
-////                    participants1.add(assessmentLinker.getParticipant());
-////                }
-//                participants1.add(assessmentLinker.getId().getUser());
-//                assessmentsMap.put(assessmentLinker.getId().getAssessment().getId(), participants1);
-//            } else {
-////                if (assessmentLinker.getParticipant() != null) {
-////                    assessmentsMap.get(assessmentLinker.getAssessmentId()).add(assessmentLinker.getParticipant());
-////                }
-//                assessmentsMap.get(assessmentLinker.getId().getAssessment().getId()).add(assessmentLinker.getId().getUser());
-//            }
-//        }
-//
-//        ArrayNode assessments = mapper.createArrayNode();
-//        for(Map.Entry<Long, List<User>> entry: assessmentsMap.entrySet()) {
-//            ObjectNode assessment = mapper.createObjectNode();
-//            assessment.put("id", entry.getKey().toString());
-//            ArrayNode participantsNode = mapper.createArrayNode();
-//            for(User participant: entry.getValue()) {
-//                participantsNode.add(mapper.valueToTree(participant));
-//            }
-//
-//            assessment.set("participants", participantsNode);
-//            assessments.add(assessment);
-//        }
-//
-//        node.set("assessments", assessments);
-//        node.put("issuesCount", issues.size());
-//
-//        if (getGrader() != null) {
-//            ObjectNode graderNode = mapper.createObjectNode();
-//            graderNode.put("id", getGrader().getUserId());
-//            graderNode.put("name", getGrader().getName());
-//            node.set("grader", graderNode);
-//        }
-//        return node;
-//    }
-//
-//    public JsonNode convertToJsonWithDetails(List<AssessmentLinker> assessmentLinkers,
-//                                             List<SubmissionAttachment> submissionAttachments,
-//                                             List<SubmissionComment> submissionComments,
-//                                             Map<Long, List<Issue>> issuesMap) throws JsonProcessingException {
-//        ObjectMapper mapper = new ObjectMapper();
-//        ObjectNode node = mapper.createObjectNode();
-//
-//        node.put("id", id.toString());
-//        node.put("isGroup", (!groupId.equals(NULL)));
-//        node.put("name", name);
-//
-//        int progress = 0;
-//        node.put("progress", progress);
-//        node.put("submittedAt", date);
-//
-//        if (submissionAttachments != null && submissionComments != null) {
-//            ArrayNode commentsNode = mapper.createArrayNode();
-//            ArrayNode attachmentsNode = mapper.createArrayNode();
-//            for(SubmissionComment comment: submissionComments) {
-//                commentsNode.add(mapper.readTree(comment.getComment()));
-//            }
-//            for(SubmissionAttachment attachment: submissionAttachments) {
-//                attachmentsNode.add(mapper.readTree(attachment.getAttachment()));
-//            }
-//
-//            node.set("submission_comments", commentsNode);
-//            node.set("attachments", attachmentsNode);
-//        }
-//
-//
-//        List<Flag> flags = (List<Flag>) getFlags();
-//        ArrayNode submissionFlags = createFlagsArrayNode(flags);
-//        node.set("flags", submissionFlags);
-//
-//        ArrayNode participants = mapper.createArrayNode();
-//
-//        for(AssessmentLinker assessmentLinker: assessmentLinkers) {
-//            if (assessmentLinker != null && assessmentLinker.getId().getUser() != null) {
-//                participants.add(mapper.valueToTree(assessmentLinker.getId().getUser()));
-//            }
-//        }
-//        node.set("participants", participants);
-//
-//        Map<Long, List<User>> assessmentsMap = new HashMap<>();
-//        for(AssessmentLinker assessmentLinker: assessmentLinkers) {
-//            if (!assessmentsMap.containsKey(assessmentLinker.getId().getAssessment().getId())) {
-//                List<User> participants1 = new ArrayList<>();
-//                if (assessmentLinker.getId().getUser() != null) {
-//                    participants1.add(assessmentLinker.getId().getUser());
-//                }
-//                assessmentsMap.put(assessmentLinker.getId().getAssessment().getId(), participants1);
-//            } else {
-//                if (assessmentLinker.getId().getUser() != null) {
-//                    assessmentsMap.get(assessmentLinker.getId().getAssessment().getId()).add(assessmentLinker.getId().getUser());
-//                }
-//            }
-//        }
-//
-////        ArrayNode assessments = mapper.createArrayNode();
-////        for(Map.Entry<Long, List<User>> entry: assessmentsMap.entrySet()) {
-////            ObjectNode assessment = mapper.createObjectNode();
-////            assessment.put("id", entry.getKey().toString());
-////            ArrayNode participantsNode = mapper.createArrayNode();
-////            for(User participant: entry.getValue()) {
-////                ObjectNode participantNode = mapper.valueToTree(participant);
-////                participantNode.put(
-////                        "isCurrentAssessment",
-////                        this.
-////                        linker.getAssessmentId().equals(currentAssessmentLinker.getAssessmentId())
-////                );
-////                participantsNode.add(participantNode);
-////            }
-////
-////            assessment.set("participants", participantsNode);
-////            assessment.put("issuesCount", issuesMap.get(entry.getKey()).size());
-////            assessments.add(assessment);
-////        }
-//
-////        node.set("assessments", assessments);
-//
-//        if (getGrader() != null) {
-//            ObjectNode graderNode = mapper.createObjectNode();
-//            graderNode.put("id", getGrader().getUserId());
-//            graderNode.put("name", getGrader().getName());
-//            node.set("grader", graderNode);
-//        }
-//        return node;
-//    }
-//
-//
-//    public static ArrayNode createFlagsArrayNode(List<Flag> flags) {
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        ArrayNode arrayNode = objectMapper.createArrayNode();
-//        for(Flag flag2: flags) {
-//            ObjectNode flagNode = objectMapper.createObjectNode();
-//            flagNode.put("id", flag2.getId().toString());
-//            flagNode.put("name", flag2.getName());
-//            flagNode.put("variant", flag2.getVariant());
-//            flagNode.put("description", flag2.getDescription());
-//            arrayNode.add(flagNode);
-//        }
-//        return arrayNode;
-//    }
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

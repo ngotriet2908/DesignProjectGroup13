@@ -19,6 +19,14 @@ public class IssueStatus {
         this.name = name;
     }
 
+    public IssueStatus(String name) {
+        this.name = name;
+    }
+
+    public IssueStatus(IssueStatusEnum status) {
+        this.name = status.toString();
+    }
+
     public Long getId() {
         return id;
     }

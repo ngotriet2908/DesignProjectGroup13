@@ -1,6 +1,7 @@
 package com.group13.tcsprojectgrading.models.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Table(name = "user", schema = "public")
 public class User {
     @Id
@@ -48,6 +50,11 @@ public class User {
         this.sNumber = sNumber;
         this.courses = courses;
         this.assessments = assessments;
+    }
+
+    public User(Long id, String name) {
+        this.id = id;
+        this.name = name;
     }
 
     public User(Long id) {

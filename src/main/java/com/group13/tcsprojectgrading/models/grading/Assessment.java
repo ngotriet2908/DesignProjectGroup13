@@ -1,6 +1,7 @@
 package com.group13.tcsprojectgrading.models.grading;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -20,6 +21,12 @@ public class Assessment {
     private Integer finalGrade = null;
     private Boolean finalGradeManual = false;
 
+    // issues
+    @JsonIgnore
+    @JsonManagedReference(value="assessment-issues")
+    @OneToMany(mappedBy="assessment")
+    private List<Issue> issues;
+
     @ManyToOne
     @JsonBackReference(value="project-assessments")
     private Project project;
@@ -30,6 +37,7 @@ public class Assessment {
     @JsonSerialize(contentUsing= User.UserShortSerialiser.class)
     private Set<User> members;
 
+    // grades
     @JsonManagedReference(value="assessment-grades")
     @OneToMany(mappedBy="assessment")
     private Set<Grade> grades;
@@ -38,8 +46,12 @@ public class Assessment {
 
     }
 
+    public Assessment(Long id) {
+        this.id = id;
+    }
+
     public Assessment(Long id, Integer gradedCount, Integer finalGrade, Boolean finalGradeManual, Project project
-            , Set<Grade> grades
+            , Set<Grade> grades, List<Issue> issues
     ) {
         this.id = id;
         this.gradedCount = gradedCount;
@@ -47,6 +59,7 @@ public class Assessment {
         this.finalGradeManual = finalGradeManual;
         this.project = project;
         this.grades = grades;
+        this.issues = issues;
     }
 
     public Long getId() {
@@ -103,6 +116,14 @@ public class Assessment {
 
     public void setProject(Project project) {
         this.project = project;
+    }
+
+    public List<Issue> getIssues() {
+        return issues;
+    }
+
+    public void setIssues(List<Issue> issues) {
+        this.issues = issues;
     }
 
     @Override

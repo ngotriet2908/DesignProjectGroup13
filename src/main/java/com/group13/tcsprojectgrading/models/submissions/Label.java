@@ -5,6 +5,7 @@ import com.group13.tcsprojectgrading.models.project.Project;
 
 import javax.persistence.*;
 import java.util.Collection;
+import java.util.Objects;
 
 @Entity
 public class Label {
@@ -13,23 +14,22 @@ public class Label {
     private Long id;
 
     private String name;
-
     private String description;
 
-    private String variant;
+    private String color;
 
     @JsonIgnore
     @ManyToOne
     private Project project;
 
     @JsonIgnore
-    @ManyToMany
+    @ManyToMany(mappedBy="labels")
     private Collection<Submission> submissions;
 
-    public Label(String name, String description, String variant, Project project) {
+    public Label(String name, String description, String color, Project project) {
         this.name = name;
         this.description = description;
-        this.variant = variant;
+        this.color = color;
         this.project = project;
     }
 
@@ -76,11 +76,24 @@ public class Label {
         this.submissions = submissions;
     }
 
-    public String getVariant() {
-        return variant;
+    public String getColor() {
+        return color;
     }
 
-    public void setVariant(String variant) {
-        this.variant = variant;
+    public void setColor(String variant) {
+        this.color = variant;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Label label = (Label) o;
+        return id.equals(label.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

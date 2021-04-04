@@ -23,29 +23,15 @@ class GradeViewer extends Component {
     }
   }
 
-  makeActive = (key) => {
-    // send request
-    request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/${this.props.match.params.assessmentId}/grading/${this.props.selectedElement}/active/${key}`, "PUT")
+  makeActive = (id) => {
+    request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/assessments/${this.props.match.params.assessmentId}/grades/${id}/activate`, "POST")
       .then(() => {
-        this.props.setActive(this.props.selectedElement, key)
+        this.props.setActive(this.props.selectedElement, id)
       })
       .catch(error => {
         console.error(error.message)
       });
   }
-
-  getUnknownUsers = (userIds) =>  {
-    let unknownUsers = []
-
-    userIds.forEach((userId) => {
-      if (!findUserById(userId, this.props.users)) {
-        unknownUsers.push(userId)
-      }
-    })
-
-    return unknownUsers;
-  }
-
 
   render () {
     let isCriterion = this.props.element.hasOwnProperty("content") && isCriterionChecker(this.props.element.content.type);
@@ -64,10 +50,10 @@ class GradeViewer extends Component {
                 <div className={styles.gradeViewerBodyScroll}>
                   {this.props.grades.map((grade, index) => {
                     return (
-                      <div key={index} onClick={() => this.makeActive(index)}
-                        className={classnames(styles.gradeViewerRow, grade.isActive && styles.gradeViewerRowActive)}>
+                      <div key={index} onClick={() => this.makeActive(grade.id)}
+                        className={classnames(styles.gradeViewerRow, grade.active && styles.gradeViewerRowActive)}>
                         <div className={styles.gradeViewerRowIcon}>
-                          {grade.isActive ?
+                          {grade.active ?
                             <IoCheckboxOutline size={26}/>
                             :
                             <IoSquareOutline size={26}/>
@@ -118,7 +104,6 @@ const mapStateToProps = state => {
 
     element: findById(state.rubric.rubric, state.rubric.selectedElement),
     grades: findCriterion(state.grading.assessment.grades, state.rubric.selectedElement)
-    // grades: findGrades(state.grading.assessment.grades, state.rubric.selectedElement),
   };
 };
 

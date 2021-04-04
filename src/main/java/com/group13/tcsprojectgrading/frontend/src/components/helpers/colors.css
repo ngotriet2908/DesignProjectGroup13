@@ -4,6 +4,7 @@
 
 /* yellow */
 @value secondary: #e9c46a;
+@value secondaryShade: #d7b761;
 
 /* dark green */
 @value ternary: #264653;
@@ -37,5 +38,5 @@
 
 /* just a colour picker for intellij */
 .iAmASimpleColourPickerThatIsHereOnlyForEasyColourPicking {
-    color: #efeae9;
+    color: #d7b761;
 }

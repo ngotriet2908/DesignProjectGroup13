@@ -10,6 +10,10 @@ export function saveGrade(oldGrades, criterionId, newGrade) {
   let newGrades = cloneDeep(oldGrades);
 
   if (newGrades[criterionId]) {
+    newGrades[criterionId].forEach(grade => {
+      grade.active = false;
+    })
+
     newGrades[criterionId].push(
       newGrade
     )
@@ -22,9 +26,13 @@ export function saveGrade(oldGrades, criterionId, newGrade) {
   return newGrades;
 }
 
-export function setActive(oldGrades, criterionId, key) {
+export function setActive(oldGrades, criterionId, gradeId) {
   let newGrades = cloneDeep(oldGrades);
-  newGrades[criterionId].active = key;
+
+  newGrades[criterionId].forEach(grade => {
+    grade.active = grade.id === gradeId;
+  })
+
   return newGrades;
 }
 

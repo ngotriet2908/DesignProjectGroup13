@@ -7,7 +7,6 @@ import com.group13.tcsprojectgrading.services.graders.GradingParticipationServic
 import com.group13.tcsprojectgrading.services.permissions.ProjectRoleService;
 import com.group13.tcsprojectgrading.services.permissions.RoleService;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
-import com.group13.tcsprojectgrading.services.submissions.LabelService;
 import com.group13.tcsprojectgrading.services.submissions.SubmissionDetailsService;
 import com.group13.tcsprojectgrading.services.submissions.SubmissionService;
 import org.springframework.context.annotation.Lazy;
@@ -24,7 +23,7 @@ public class SettingsService {
 
     private final ProjectRoleService projectRoleService;
     private final RoleService roleService;
-    private final LabelService labelService;
+//    private final LabelService labelService;
     private final ActivityService activityService;
     private final RubricService rubricService;
     private final GradingParticipationService gradingParticipationService;
@@ -33,14 +32,13 @@ public class SettingsService {
     private final ProjectService projectService;
 
     public SettingsService(SettingsRepository settingsRepository, ProjectRoleService projectRoleService,
-                           RoleService roleService, LabelService labelService, ActivityService activityService,
+                           RoleService roleService, ActivityService activityService,
                            RubricService rubricService, GradingParticipationService gradingParticipationService,
                            SubmissionService submissionService, SubmissionDetailsService submissionDetailsService,
                            @Lazy ProjectService projectService) {
         this.settingsRepository = settingsRepository;
         this.projectRoleService = projectRoleService;
         this.roleService = roleService;
-        this.labelService = labelService;
         this.activityService = activityService;
         this.rubricService = rubricService;
         this.gradingParticipationService = gradingParticipationService;
@@ -58,7 +56,7 @@ public class SettingsService {
         }
 
         return this.settingsRepository.findById_User_IdAndId_Project_Id(
-                projectId, userId
+                userId, projectId
         );
     }
 

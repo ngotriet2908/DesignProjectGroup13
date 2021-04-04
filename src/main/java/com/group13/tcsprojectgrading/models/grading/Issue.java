@@ -1,23 +1,30 @@
 package com.group13.tcsprojectgrading.models.grading;
 
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.group13.tcsprojectgrading.models.user.User;
 
 import javax.persistence.*;
+import java.io.IOException;
 
 @Entity
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Issue {
     @Id
     @GeneratedValue(strategy=GenerationType.SEQUENCE)
     private Long id;
 
     @ManyToOne
+    @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id")
     private Assessment assessment;
 
-//    private UUID target;
-//    private String targetName;
-//    private String targetType;
+    private String target;
 
     @ManyToOne
+    @JsonSerialize(using = Issue.IssueShortSerialiser.class)
     private Issue referentIssue;
 
     private String subject;
@@ -26,12 +33,16 @@ public class Issue {
     private String description;
 
     @ManyToOne
+    @JsonSerialize(using = User.UserShortSerialiser.class)
     private User creator;
 
     @ManyToOne
+    @JsonSerialize(using = User.UserShortSerialiser.class)
     private User addressee;
 
     @ManyToOne
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "name")
+    @JsonIdentityReference(alwaysAsId = true)
     private IssueStatus status;
 
     private String solution;
@@ -40,7 +51,7 @@ public class Issue {
     }
 
     public Issue(Long id, Assessment assessment, Issue referentIssue, String subject, String description, User creator,
-                 User addressee, IssueStatus status, String solution) {
+                 User addressee, IssueStatus status, String solution, String target) {
         this.id = id;
         this.assessment = assessment;
         this.referentIssue = referentIssue;
@@ -50,6 +61,7 @@ public class Issue {
         this.addressee = addressee;
         this.status = status;
         this.solution = solution;
+        this.target = target;
     }
 
     public Long getId() {
@@ -122,6 +134,27 @@ public class Issue {
 
     public void setSolution(String solution) {
         this.solution = solution;
+    }
+
+    public String getTarget() {
+        return target;
+    }
+
+    public void setTarget(String target) {
+        this.target = target;
+    }
+
+    /*
+    Serialiser for the brief information about the issue.
+     */
+    public static class IssueShortSerialiser extends JsonSerializer<Issue> {
+        @Override
+        public void serialize(Issue issue, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+            jsonGenerator.writeStartObject();
+            jsonGenerator.writeNumberField("id", issue.getId());
+            jsonGenerator.writeStringField("subject", issue.getSubject());
+            jsonGenerator.writeEndObject();
+        }
     }
 
     //    public JsonNode convertToJson() {

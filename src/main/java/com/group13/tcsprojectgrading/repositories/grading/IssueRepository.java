@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.UUID;
 
-public interface IssueRepository extends JpaRepository<Issue, UUID> {
+public interface IssueRepository extends JpaRepository<Issue, Long> {
     List<Issue> findIssuesByAssessmentId(Long assessmentId);
     List<Issue> findIssuesByAddressee(User addressee);
     List<Issue> findIssuesByCreator(User creator);

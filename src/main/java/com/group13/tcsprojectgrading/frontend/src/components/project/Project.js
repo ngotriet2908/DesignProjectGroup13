@@ -93,8 +93,6 @@ class Project extends Component {
   Creates a new rubric object and saves it to the store
   */
   onClickCreateRubric = () => {
-    // console.log("Creating rubric for project " + parseInt(this.props.match.params.projectId));
-
     let rubric = {
       id: uuidv4(),
       projectId: this.props.match.params.projectId,
@@ -175,18 +173,18 @@ class Project extends Component {
               <IoSyncOutline size={20}/> Sync
             </Button>
 
-            <OverlayTrigger
-              placement={'left'}
-              overlay={
-                <Tooltip className={styles.questionTooltip}>
-                  Click on the sync button to update the course's user list and student's submissions.
-                </Tooltip>
-              }
-            >
-              <div className={styles.questionTooltipContainer}>
-                <IoHelpCircleOutline size={25}/>
-              </div>
-            </OverlayTrigger>
+            {/*<OverlayTrigger*/}
+            {/*  placement={'left'}*/}
+            {/*  overlay={*/}
+            {/*    <Tooltip className={styles.questionTooltip}>*/}
+            {/*      Click on the sync button to update the course's user list and students' submissions.*/}
+            {/*    </Tooltip>*/}
+            {/*  }*/}
+            {/*>*/}
+            {/*  <div className={styles.questionTooltipContainer}>*/}
+            {/*    <IoHelpCircleOutline size={25}/>*/}
+            {/*  </div>*/}
+            {/*</OverlayTrigger>*/}
 
           </div>
         </div>

@@ -6,6 +6,7 @@ import {IoArrowForward} from "react-icons/io5";
 import store from "../../redux/store";
 import classnames from "classnames";
 import globalStyles from "../helpers/global.module.css";
+import {colorToStyles} from "../submissionDetails/labels/LabelRow";
 
 class SubmissionsOverviewCard extends Component {
   render() {
@@ -32,7 +33,6 @@ class SubmissionsOverviewCard extends Component {
                 <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant="tomato">Individual</Badge>
             }
 
-            {/* TODO doesn't work*/}
             {/*{*/}
             {/*  (this.props.submission.progress <= 0)?*/}
             {/*    <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant="tomato">Not started</Badge> :*/}
@@ -52,22 +52,21 @@ class SubmissionsOverviewCard extends Component {
             {/*    <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant="tomato">Has issues</Badge>*/}
             {/*}*/}
 
-            {/*{(this.props.submission.flags.map((flag) => {*/}
-            {/*  return (*/}
-            {/*    <OverlayTrigger*/}
-            {/*      key={flag.id}*/}
-            {/*      placement="bottom"*/}
-            {/*      delay={{ show: 250, hide: 400 }}*/}
-            {/*      overlay={(props) => (*/}
-            {/*        <Tooltip id={flag.id} {...props}>*/}
-            {/*          {flag.description}*/}
-            {/*        </Tooltip>)*/}
-            {/*      }>*/}
-            {/*      <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant={flag.variant}>{flag.name}</Badge>*/}
-            {/*    </OverlayTrigger>*/}
-
-            {/*  )*/}
-            {/*}))}*/}
+            {(this.props.submission.labels.map((label) => {
+              return (
+                // <OverlayTrigger
+                //   key={flag.id}
+                //   placement="bottom"
+                //   delay={{ show: 250, hide: 400 }}
+                //   overlay={(props) => (
+                //     <Tooltip id={flag.id} {...props}>
+                //       {flag.description}
+                //     </Tooltip>)
+                //   }>
+                // <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant={label.variant}>{label.name}</Badge>
+                <Badge key={label.id} className={classnames(globalStyles.label, globalStyles.labelSmall, colorToStyles[label.color])} variant={label.color}>{label.name}</Badge>
+                // </OverlayTrigger>
+              )}))}
           </div>
 
           <div className={styles.submissionCardBody}>

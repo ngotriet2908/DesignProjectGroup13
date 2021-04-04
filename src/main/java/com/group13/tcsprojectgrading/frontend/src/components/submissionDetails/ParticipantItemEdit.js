@@ -8,22 +8,20 @@ import {IoCopyOutline, IoTrashOutline, IoSwapHorizontal} from "react-icons/io5";
 class ParticipantItemEdit extends Component {
   render() {
     return (
-      <ListGroupItem key={this.props.member.sid}>
-        <div className={styles.memberItem}>
+      <div className={styles.memberItem}>
 
-          <div className={styles.memberAssessmentHeader}>
-            <h5>
-              {this.props.member.name}
-            </h5>
-            <div className={classnames(globalStyles.iconButtonSmall, styles.dangerButton)}
-                 onClick={this.props.handleDelete}>
-              <IoTrashOutline size={26}/>
-            </div>
+        <div className={styles.memberAssessmentHeader}>
+          <h5>
+            {this.props.member.name}
+          </h5>
+          <div className={classnames(globalStyles.iconButtonSmall, styles.dangerButton)}
+            onClick={this.props.handleDelete}>
+            <IoTrashOutline size={26}/>
           </div>
-          <h6>sid: {this.props.member.sid}</h6>
-          <h6>email: {this.props.member.email}</h6>
         </div>
-      </ListGroupItem>
+        <h6>sid: {this.props.member.sid}</h6>
+        <h6>email: {this.props.member.email}</h6>
+      </div>
     );
   }
 }

@@ -7,18 +7,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 //import com.group13.tcsprojectgrading.controllers.PdfUtils;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.group13.tcsprojectgrading.models.graders.GradingParticipation;
 import com.group13.tcsprojectgrading.models.grading.Assessment;
 import com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum;
 import com.group13.tcsprojectgrading.models.project.Project;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.models.rubric.RubricHistory;
 import com.group13.tcsprojectgrading.models.rubric.RubricUpdate;
+import com.group13.tcsprojectgrading.models.submissions.Label;
 import com.group13.tcsprojectgrading.models.submissions.Submission;
 import com.group13.tcsprojectgrading.models.submissions.SubmissionAttachment;
 import com.group13.tcsprojectgrading.models.submissions.SubmissionComment;
 import com.group13.tcsprojectgrading.models.user.User;
 import com.group13.tcsprojectgrading.repositories.project.ProjectRepository;
 import com.group13.tcsprojectgrading.repositories.course.CourseParticipationRepository;
+import com.group13.tcsprojectgrading.repositories.submissions.LabelRepository;
 import com.group13.tcsprojectgrading.services.Json;
 import com.group13.tcsprojectgrading.services.user.ActivityService;
 import com.group13.tcsprojectgrading.services.user.UserService;
@@ -29,7 +32,7 @@ import com.group13.tcsprojectgrading.services.permissions.ProjectRoleService;
 import com.group13.tcsprojectgrading.services.permissions.RoleService;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
 import com.group13.tcsprojectgrading.services.settings.SettingsService;
-import com.group13.tcsprojectgrading.services.submissions.LabelService;
+//import com.group13.tcsprojectgrading.services.submissions.LabelService;
 import com.group13.tcsprojectgrading.services.submissions.SubmissionDetailsService;
 import com.group13.tcsprojectgrading.services.submissions.SubmissionService;
 import org.springframework.context.annotation.Lazy;
@@ -51,7 +54,7 @@ public class ProjectService {
 
     private final ProjectRoleService projectRoleService;
     private final RoleService roleService;
-    private final LabelService labelService;
+//    private final LabelService labelService;
     private final ActivityService activityService;
     private final RubricService rubricService;
     private final GradingParticipationService gradingParticipationService;
@@ -60,20 +63,25 @@ public class ProjectService {
     private final SubmissionDetailsService submissionDetailsService;
     private final AssessmentService assessmentService;
     private final SettingsService settingsService;
-    private final CourseParticipationRepository courseParticipationRepository;
     private final CourseService courseService;
 
+    private final CourseParticipationRepository courseParticipationRepository;
+    private final LabelRepository labelRepository;
+
     public ProjectService(ProjectRepository projectRepository, ProjectRoleService projectRoleService,
-                          RoleService roleService, LabelService labelService, ActivityService activityService,
+                          RoleService roleService,
+//                          LabelService labelService,
+                          ActivityService activityService,
                           RubricService rubricService, GradingParticipationService gradingParticipationService, @Lazy UserService userService,
                           @Lazy SubmissionService submissionService, SubmissionDetailsService submissionDetailsService,
                           @Lazy AssessmentService assessmentService, @Lazy CourseService courseService,
                           @Lazy SettingsService settingsService,
-                          CourseParticipationRepository courseParticipationRepository) {
+                          CourseParticipationRepository courseParticipationRepository,
+                          LabelRepository labelRepository) {
         this.projectRepository = projectRepository;
         this.projectRoleService = projectRoleService;
         this.roleService = roleService;
-        this.labelService = labelService;
+//        this.labelService = labelService;
         this.activityService = activityService;
         this.rubricService = rubricService;
         this.gradingParticipationService = gradingParticipationService;
@@ -84,6 +92,7 @@ public class ProjectService {
         this.settingsService = settingsService;
         this.courseParticipationRepository = courseParticipationRepository;
         this.courseService = courseService;
+        this.labelRepository = labelRepository;
     }
 
     /*
@@ -94,7 +103,7 @@ public class ProjectService {
         return projectRepository.findProjectsByCourse_Id(courseId);
     }
 
-////    /*
+    ////    /*
 ////    Removes the project from the database (including all labels).
 ////    TODO: should clean up more
 ////     */
@@ -126,7 +135,7 @@ public class ProjectService {
     public List<Project> getToDoList(Long userId) {
         return this.projectRepository.getToDoList(userId);
     }
-//
+
 ////    @Transactional
 ////    public ObjectNode getProjectParticipants(String courseId, String projectId) throws ResponseStatusException {
 ////        Project project = projectRepository.findById(new ProjectId(courseId, projectId)).orElse(null);
@@ -336,7 +345,7 @@ public class ProjectService {
         Map<Long, List<SubmissionAttachment>> groupToAttachments = new HashMap<>();
 
         // for each submission
-        for (JsonNode submissionNode: submissionsArray) {
+        for (JsonNode submissionNode : submissionsArray) {
             // 'unsubmitted' submission
             if (submissionNode.get("workflow_state").asText().equals("unsubmitted")) {
                 continue;
@@ -358,7 +367,7 @@ public class ProjectService {
 
             // get all submission attachments
             List<SubmissionAttachment> submissionAttachments = new ArrayList<>();
-            for (JsonNode node :  submissionNode.get("attachments")) {
+            for (JsonNode node : submissionNode.get("attachments")) {
                 submissionAttachments.add(new SubmissionAttachment(node.toString()));
             }
 
@@ -395,12 +404,6 @@ public class ProjectService {
 
                 // create an association between the submission, user and assessment
                 this.assessmentService.createNewAssessmentWithLink(submission, submitter, project);
-//                CurrentAssessment currentAssessment = this.assessmentService.getCurrentAssessment(submitter, project);
-//
-//                // set this assessment as active if no active assessment exists
-//                if (currentAssessment == null) {
-//                    this.assessmentService.setCurrentAssessment(submitter, project, assessmentLink.getId().getAssessment());
-//                }
             } else {
                 if (!groupToSubmission.containsKey(submissionNode.get("group").get("id").asLong())) {
                     TemporalAccessor accessor = DateTimeFormatter.ISO_INSTANT.parse(submissionNode.get("submitted_at").asText());
@@ -451,56 +454,35 @@ public class ProjectService {
 
             Assessment assessment = this.assessmentService.createNewAssessment(project);
 
-            for (User member: groupToUsers.get(entry.getValue().getGroupId())) {
-                // create an association between the submission, user and assessment
+            for (User member : groupToUsers.get(entry.getValue().getGroupId())) {
                 this.assessmentService.createNewAssessmentWithLink(submission, member, project, assessment);
-//                this.assessmentService.createNewAssessmentLink(submission, member, assessment);
-//                CurrentAssessment currentAssessment = this.assessmentService.getCurrentAssessment(member, project);
-
-                // set this assessment as active if no active assessment exists
-//                if (currentAssessment == null) {
-//                    this.assessmentService.setCurrentAssessment(member, project, assessment);
-//                }
             }
         }
     }
+
+    @Transactional
+    public List<User> getProjectGraders(Long projectId) throws IOException {
+        Project project = this.projectRepository.findById(projectId).orElse(null);
+
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Project not found"
+            );
+        }
+
+//        // TODO just check if grader?
+//        List<PrivilegeEnum> privileges = this.gradingParticipationService.getPrivilegesFromUserIdAndProject(userId, projectId);
 //
-//    @Transactional
-//    public JsonNode deleteLabelPermanently(String projectId, String labelId, Long userId) {
-//        ObjectMapper objectMapper = new ObjectMapper();
-//
-//        Project project = getProject(projectId);
-//        if (project == null) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.NOT_FOUND, "Project not found"
-//            );
+//        if (privileges == null) {
+//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorised");
 //        }
-//
-//        GradingParticipation grader = graderService.getGraderFromGraderId(userId, projectId);
-//        if (grader == null) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.NOT_FOUND, "Task not found"
-//            );
-//        }
-//        //TODO change response to errors
-//        Label label = this.labelService.findLabelWithId(Long.valueOf(labelId));
-//        ObjectNode result = objectMapper.createObjectNode();
-//        if (label != null) {
-//            List<Submission> submissions = submissionService.findSubmissionsByLabels(label);
-//            if (submissions.size() > 0) {
-//                result.put("error", "Flag is current used by some submission");
-//            } else {
-//                labelService.deleteLabel(label);
-//                // TODO
-////                result.set("data", createFlagsArrayNode(labelService.findLabelsWithProject(project)));
-//            }
-//            return result;
-//
-//        }
-//        result.put("error", "some weird error");
-//        return result;
-//    }
-//
+
+        return this.gradingParticipationService.getProjectUsers(projectId);
+    }
+
+    /*
+    Update the rubric with patches (patches are applied sequentially).
+     */
     @Transactional(rollbackOn = Exception.class)
     public String updateRubric(Long projectId, JsonNode patch) throws JsonProcessingException {
         Project project = getProject(projectId);
@@ -550,6 +532,70 @@ public class ProjectService {
             return objectMapper.writeValueAsString(rubric);
         }
     }
+
+    @Transactional
+    public List<Label> getProjectLabels(Long projectId) {
+        Project project = getProject(projectId);
+
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Project not found"
+            );
+        }
+
+        return this.labelRepository.findByProjectId(projectId);
+    }
+
+    @Transactional
+    public Label saveProjectLabel(Label label, Long projectId) {
+        Project project = getProject(projectId);
+
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Project not found"
+            );
+        }
+
+        label.setProject(project);
+        return this.labelRepository.save(label);
+    }
+
+    //    @Transactional
+//    public JsonNode deleteLabelPermanently(String projectId, String labelId, Long userId) {
+//        ObjectMapper objectMapper = new ObjectMapper();
+//
+//        Project project = getProject(projectId);
+//        if (project == null) {
+//            throw new ResponseStatusException(
+//                    HttpStatus.NOT_FOUND, "Project not found"
+//            );
+//        }
+//
+//        GradingParticipation grader = graderService.getGraderFromGraderId(userId, projectId);
+//        if (grader == null) {
+//            throw new ResponseStatusException(
+//                    HttpStatus.NOT_FOUND, "Task not found"
+//            );
+//        }
+//        //TODO change response to errors
+//        Label label = this.labelService.findLabelWithId(Long.valueOf(labelId));
+//        ObjectNode result = objectMapper.createObjectNode();
+//        if (label != null) {
+//            List<Submission> submissions = submissionService.findSubmissionsByLabels(label);
+//            if (submissions.size() > 0) {
+//                result.put("error", "Flag is current used by some submission");
+//            } else {
+//                labelService.deleteLabel(label);
+//                // TODO
+////                result.set("data", createFlagsArrayNode(labelService.findLabelsWithProject(project)));
+//            }
+//            return result;
+//
+//        }
+//        result.put("error", "some weird error");
+//        return result;
+//    }
+
 
 //    @Transactional
 //    public ResponseEntity<byte[]> sendFeedbackPdf(String courseId, String projectId, ObjectNode feedback) throws IOException {

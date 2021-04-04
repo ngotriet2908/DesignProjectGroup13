@@ -4,8 +4,8 @@ import {connect} from "react-redux";
 import Card from "react-bootstrap/Card";
 import {request} from "../../../services/request";
 import Issues from "./Issues";
-import IssueCreator from "./IssueCreator";
 import classnames from 'classnames';
+import CreateIssueModal from "./CreateIssueModal";
 
 
 class IssuesViewer extends Component {
@@ -17,6 +17,8 @@ class IssuesViewer extends Component {
       graders: [],
       isCreating: false,
       isLoaded: false,
+
+      showModal: false,
     }
   }
 
@@ -26,17 +28,14 @@ class IssuesViewer extends Component {
 
   fetchIssues = () => {
     Promise.all([
-      request(`/api/courses/${this.props.routeParams.courseId}/projects/${this.props.routeParams.projectId}/submissions/${this.props.routeParams.submissionId}/${this.props.routeParams.assessmentId}/issues`),
-      request(`/api/courses/${this.props.routeParams.courseId}/projects/${this.props.routeParams.projectId}/graders`)
+      request(`/api/courses/${this.props.routeParams.courseId}/projects/${this.props.routeParams.projectId}/submissions/${this.props.routeParams.submissionId}/assessments/${this.props.routeParams.assessmentId}/issues`),
     ])
-      .then(async([res1, res2]) => {
+      .then(async([res1]) => {
         const issues = await res1.json();
-        const graders = await res2.json();
 
         // load submission
         this.setState({
           issues: issues,
-          graders: graders,
           isLoaded: true,
         });
       })
@@ -45,28 +44,24 @@ class IssuesViewer extends Component {
       });
   }
 
-  createIssue = (obj) => {
-    request(`/api/courses/${this.props.routeParams.courseId}/projects/${this.props.routeParams.projectId}/submissions/${this.props.routeParams.submissionId}/${this.props.routeParams.assessmentId}/issues`, "POST", obj)
-      .then(async (response) => {
-        let data = await response.json();
-
-        this.setState({
-          issues: data,
-          isCreating: false
-        })
-      })
-  }
-
-  updateIsCreating = () => {
+  toggleShowModal = () => {
     this.setState(prevState => ({
-      isCreating: !prevState.isCreating
+      showModal: !prevState.showModal
     }))
   }
 
-  updateIssues = (issues) => {
-    this.setState({
-      issues: issues
-    })
+  appendIssue = (issue) => {
+    this.setState(prevState => ({
+      issues: [...prevState.issues, issue]
+    }))
+  }
+
+  updateIssue = (updatedIssue) => {
+    this.setState(prevState => ({
+      issues: prevState.issues.map(issue => {
+        return issue.id === updatedIssue.id ? updatedIssue : issue;
+      })
+    }))
   }
 
   render () {
@@ -78,15 +73,23 @@ class IssuesViewer extends Component {
       <div className={styles.issuesContainer}>
         <Card className={styles.panelCard}>
           <Card.Body className={classnames(styles.gradeViewerBody)}>
-            {
-              (!this.state.isCreating)
-                ?
-                <Issues updateIssues={this.updateIssues} issues={this.state.issues} routeParams={this.props.routeParams} toggleCreatingState={this.updateIsCreating}/>
-                :
-                <IssueCreator graders={this.state.graders} issues={this.state.issues} routeParams={this.props.routeParams} toggleCreatingState={this.updateIsCreating} createIssue={this.createIssue}/>
-            }
+            <Issues
+              updateIssue={this.updateIssue}
+              issues={this.state.issues}
+              routeParams={this.props.routeParams}
+              toggleCreatingState={this.updateIsCreating}
+              toggleShow={this.toggleShowModal}
+            />
           </Card.Body>
         </Card>
+
+        <CreateIssueModal
+          show={this.state.showModal}
+          toggleShow={this.toggleShowModal}
+          routeParams={this.props.routeParams}
+          issues={this.state.issues}
+          appendIssue={this.appendIssue}
+        />
       </div>
     )
   }

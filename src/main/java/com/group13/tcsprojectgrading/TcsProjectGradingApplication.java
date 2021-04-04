@@ -1,8 +1,11 @@
 package com.group13.tcsprojectgrading;
 
+import com.group13.tcsprojectgrading.models.grading.IssueStatusEnum;
 import com.group13.tcsprojectgrading.models.permissions.Privilege;
 import com.group13.tcsprojectgrading.models.permissions.Role;
 import com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum;
+import com.group13.tcsprojectgrading.services.grading.AssessmentService;
+//import com.group13.tcsprojectgrading.services.grading.IssueService;
 import com.group13.tcsprojectgrading.services.permissions.PrivilegeService;
 import com.group13.tcsprojectgrading.models.permissions.RoleEnum;
 import com.group13.tcsprojectgrading.services.permissions.RoleService;
@@ -25,8 +28,9 @@ public class TcsProjectGradingApplication {
     }
 
     @Bean
-    public CommandLineRunner demoData(RoleService roleService, PrivilegeService privilegeService) {
+    public CommandLineRunner demoData(RoleService roleService, AssessmentService assessmentService, PrivilegeService privilegeService) {
         return args -> {
+            // assign privileges to roles
             List<PrivilegeEnum> teacherPrivilegesEnum = List.of(
                     MANAGE_GRADERS_OPEN, MANAGE_GRADERS_EDIT, MANAGE_GRADERS_SELF_EDIT,
                     RUBRIC_READ, RUBRIC_WRITE, RUBRIC_DOWNLOAD,
@@ -76,6 +80,7 @@ public class TcsProjectGradingApplication {
             List<Privilege> taGradingPrivileges = new ArrayList<>();
             taGradingPrivilegesEnum.forEach(privilegeEnum -> taGradingPrivileges.add(privilegeService.addPrivilegeIfNotExist(privilegeEnum.toString())));
 
+            // store default roles to db
             roleService.addRoleIfNotExist(
                     RoleEnum.TEACHER.toString(),
                     teacherPrivileges
@@ -94,6 +99,15 @@ public class TcsProjectGradingApplication {
             roleService.addRoleIfNotExist(
                     RoleEnum.TA_GRADING.toString(),
                     taGradingPrivileges
+            );
+
+            // store default issue statuses to db
+            assessmentService.saveIssueStatus(
+                IssueStatusEnum.OPEN
+            );
+
+            assessmentService.saveIssueStatus(
+                    IssueStatusEnum.RESOLVED
             );
         };
     }

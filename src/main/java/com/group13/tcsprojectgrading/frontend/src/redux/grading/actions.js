@@ -24,11 +24,6 @@ export const alterTempAssessmentGrade = (criterionId, newGrade) => ({
 // stored assessment actions
 
 export const saveAssessment = (assessment) => {
-
-  // assessment.grades = assessment.grades.filter(grade => {
-  //   return grade.criterionId === criterionId;
-  // });
-
   assessment.grades = groupBy(assessment.grades, (grade) => {
     return grade.criterionId;
   });
@@ -44,9 +39,9 @@ export const saveGrade = (newGrade) => ({
   payload: {newGrade}
 })
 
-export const setActive = (criterionId, key) => ({
+export const setActive = (criterionId, gradeId) => ({
   type: SET_ACTIVE,
-  payload: {criterionId, key}
+  payload: {criterionId, gradeId}
 })
 
 

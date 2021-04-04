@@ -1,12 +1,12 @@
 package com.group13.tcsprojectgrading.models.grading;
 
-public enum IssueEnum {
-    TEACHER("resolved"),
-    TA("open");
+public enum IssueStatusEnum {
+    RESOLVED("Resolved"),
+    OPEN("Open");
 
     private final String name;
 
-    IssueEnum(String name) {
+    IssueStatusEnum(String name) {
         this.name = name;
     }
 

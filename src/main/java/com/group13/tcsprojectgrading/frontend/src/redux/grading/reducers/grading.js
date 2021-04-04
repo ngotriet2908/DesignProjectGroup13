@@ -34,17 +34,6 @@ export default function(state = initialState, action) {
       assessment: action.payload
     };
   }
-  // case ALTER_GRADE: {
-  //   const grades = alterGrade(state.assessment.grades, action.payload.criterionId, action.payload.newGrade)
-  //
-  //   return {
-  //     ...state,
-  //     assessment: {
-  //       ...state.assessment,
-  //       grades: grades
-  //     }
-  //   };
-  // }
   case SAVE_GRADE: {
     const grades = saveGrade(state.assessment.grades, action.payload.newGrade.criterionId, action.payload.newGrade)
 
@@ -57,7 +46,7 @@ export default function(state = initialState, action) {
     };
   }
   case SET_ACTIVE: {
-    const grades = setActive(state.assessment.grades, action.payload.criterionId, action.payload.key)
+    const grades = setActive(state.assessment.grades, action.payload.criterionId, action.payload.gradeId)
 
     return {
       ...state,

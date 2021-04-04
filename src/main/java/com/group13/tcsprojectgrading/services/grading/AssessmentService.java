@@ -1,23 +1,25 @@
 package com.group13.tcsprojectgrading.services.grading;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.group13.tcsprojectgrading.models.grading.*;
 import com.group13.tcsprojectgrading.models.project.Project;
 import com.group13.tcsprojectgrading.models.user.User;
-import com.group13.tcsprojectgrading.models.grading.Assessment;
-import com.group13.tcsprojectgrading.models.grading.AssessmentLink;
-import com.group13.tcsprojectgrading.models.grading.Grade;
 import com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum;
 import com.group13.tcsprojectgrading.models.submissions.Submission;
-import com.group13.tcsprojectgrading.repositories.grading.AssessmentLinkRepository;
-import com.group13.tcsprojectgrading.repositories.grading.AssessmentRepository;
-import com.group13.tcsprojectgrading.repositories.grading.GradeRepository;
+import com.group13.tcsprojectgrading.repositories.grading.*;
+import com.group13.tcsprojectgrading.services.notifications.NotificationService;
 import com.group13.tcsprojectgrading.services.project.ProjectService;
+import com.group13.tcsprojectgrading.services.settings.SettingsService;
 import com.group13.tcsprojectgrading.services.submissions.SubmissionService;
 import com.group13.tcsprojectgrading.services.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
@@ -29,22 +31,37 @@ public class AssessmentService {
     private final AssessmentRepository assessmentRepository;
     private final GradeRepository gradeRepository;
     private final AssessmentLinkRepository assessmentLinkRepository;
-    private final UserService userService;
+    private final IssueRepository issueRepository;
+    private final IssueStatusRepository issueStatusRepository;
 
+    private final UserService userService;
+    private final SettingsService settingsService;
     private final ProjectService projectService;
     private final SubmissionService submissionService;
+    private final NotificationService notificationService;
+
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Autowired
     public AssessmentService(AssessmentLinkRepository assessmentLinkRepository, AssessmentRepository assessmentRepository,
                              @Lazy ProjectService projectService, @Lazy SubmissionService submissionService,
-                             GradeRepository gradeRepository, @Lazy UserService userService) {
+                             GradeRepository gradeRepository, @Lazy UserService userService,
+                             @Lazy IssueRepository issueRepository, IssueStatusRepository issueStatusRepository,
+                             SettingsService settingsService,
+                             ApplicationEventPublisher applicationEventPublisher, NotificationService notificationService) {
         this.assessmentLinkRepository = assessmentLinkRepository;
         this.assessmentRepository = assessmentRepository;
         this.gradeRepository = gradeRepository;
+        this.issueRepository = issueRepository;
+        this.issueStatusRepository = issueStatusRepository;
 
         this.projectService = projectService;
         this.submissionService = submissionService;
         this.userService = userService;
+        this.notificationService = notificationService;
+        this.settingsService = settingsService;
+
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     /*
@@ -210,6 +227,61 @@ public class AssessmentService {
         return this.gradeRepository.save(grade);
     }
 
+    /*
+    Stores an issue status in the db.
+     */
+    public void saveIssueStatus(IssueStatusEnum status) {
+        this.issueStatusRepository.save(new IssueStatus(status));
+    }
+
+    /*
+    Returns issues associated with the assessment.
+     */
+    public List<Issue> getIssues(Long assessmentId) {
+        return this.issueRepository.findIssuesByAssessmentId(assessmentId);
+    }
+
+    /*
+    Creates an issue and sends an email notification to the recipient.
+     */
+    @Transactional
+    public Issue createIssue(Issue issue, Long assessmentId, Long userId) {
+        Assessment assessment = this.getAssessment(assessmentId);
+        User creator = this.userService.findById(userId);
+        User addressee = this.userService.findById(issue.getAddressee().getId());
+
+        issue.setAssessment(assessment);
+        issue.setSolution(null);
+        issue.setStatus(this.issueStatusRepository.findByName(IssueStatusEnum.OPEN.toString()));
+        issue.setCreator(creator);
+        // TODO, can the addressee be null?
+        issue.setAddressee(addressee);
+        issue = this.issueRepository.save(issue);
+
+        // send an email if user has notifications enabled (if transaction successful)
+        if (this.settingsService.getSettings(assessment.getProject().getId(), userId).isIssuesNotificationsEnabled()) {
+            this.applicationEventPublisher.publishEvent(new IssueCreatedEvent(addressee, assessment.getProject().getName()));
+        }
+
+        return issue;
+    }
+
+    /*
+    Changes the status of the issue from "open" to "resolved".
+    TODO send email
+     */
+    public Issue resolveIssue(Long issueId, IssueSolution solution) {
+        Issue issue = this.issueRepository.findById(issueId).orElse(null);
+
+        if (issue == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Issue not found");
+        }
+
+        issue.setSolution(solution.getSolution());
+        issue.setStatus(this.issueStatusRepository.findByName(IssueStatusEnum.RESOLVED.toString()));
+        issue = this.issueRepository.save(issue);
+        return issue;
+    }
 
 
 
@@ -252,4 +324,34 @@ public class AssessmentService {
 //
 //        return total;
 //    }
+
+    /*
+    A custom even that should fire when an issue is created.
+    TODO can be changed to catch any email-related events
+     */
+    public static class IssueCreatedEvent extends ApplicationEvent {
+        private final String projectName;
+
+        public IssueCreatedEvent(Object source, String projectName) {
+            super(source);
+            this.projectName = projectName;
+        }
+
+        public String getProjectName() {
+            return projectName;
+        }
+    }
+
+    /*
+    Catches IssueCreatedEvent and sends a notification email if issue was created successfully.
+     */
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handle(IssueCreatedEvent event) {
+        try {
+            this.notificationService.sendIssueNotification(((User) event.getSource()).getEmail(), event.getProjectName());
+            System.out.println("Sending an email.");
+        } catch(Exception exception){
+            System.out.println("Transaction failed, email won't be sent.");
+        }
+    }
 }

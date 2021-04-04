@@ -34,8 +34,6 @@ class CourseController {
         this.projectService = projectService;
     }
 
-    // ((User) principal).getId()
-//    Long.valueOf(principal.getName())
     /*
     Returns the list of courses that were imported and are available in the app's database
      */

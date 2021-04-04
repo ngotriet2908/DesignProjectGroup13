@@ -13,7 +13,6 @@ import {BASE} from "../../services/endpoints";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 import {setCurrentLocation} from "../../redux/navigation/actions";
 import {Can, ability, updateAbility} from "../permissions/ProjectAbility";
-import FlagModal from "../submissionDetails/FlagModal";
 import RubricPanel from "./rubricPanel/RubricPanel";
 import GradingPanel from "./gradingPanel/GradingPanel";
 import RightsidePanel from "./rightsidePanel/RightsidePanel";
@@ -98,8 +97,7 @@ class Grading extends Component {
         <div className={styles.container}>
           <RubricPanel match={this.props.match}/>
           <GradingPanel match={this.props.match}/>
-          {/*<RightsidePanel routeParams={this.props.match.params}/>*/}
-          {/*<IssuesPanel graders={this.state.graders} updateIssues={this.updateIssues} issues={this.state.issues} params={this.props.match.params} createIssue={this.createIssue}/>*/}
+          <RightsidePanel routeParams={this.props.match.params}/>
         </div>
 
       </>

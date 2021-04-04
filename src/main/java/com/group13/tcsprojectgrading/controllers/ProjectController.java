@@ -10,6 +10,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum;
 import com.group13.tcsprojectgrading.models.submissions.Label;
+import com.group13.tcsprojectgrading.models.user.User;
 import com.group13.tcsprojectgrading.services.course.CourseService;
 import com.group13.tcsprojectgrading.services.graders.GradingParticipationService;
 import com.group13.tcsprojectgrading.services.project.ProjectService;
@@ -107,24 +108,21 @@ public class ProjectController {
 //        return (new ObjectMapper()).createObjectNode();
 //    }
 
-//    @RequestMapping(value = "/{projectId}/graders", method = RequestMethod.GET, produces = "application/json")
-//    @ResponseBody
-//    protected ArrayNode getProjectGraders(@PathVariable Long courseId, @PathVariable Long projectId, Principal principal) throws JsonProcessingException, ParseException {
-//
+    @RequestMapping(value = "/{projectId}/graders", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    protected List<User> getProjectGraders(
+            @PathVariable Long courseId,
+            @PathVariable Long projectId,
+            Principal principal) throws IOException, ParseException {
+
 //        List<PrivilegeEnum> privileges = this.gradingParticipationService
 //                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
 //        if (!(privileges != null && privileges.contains(PROJECT_READ))) {
 //            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
 //        }
-//
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        ArrayNode result = objectMapper.createArrayNode();
-////        List<GradingParticipation> graders = projectService.getProjectsGrader(courseId, projectId);
-////        for(GradingParticipation grader: graders) {
-////            result.add(grader.getGraderJson());
-////        }
-//        return result;
-//    }
+
+        return this.projectService.getProjectGraders(projectId);
+    }
 
     @GetMapping(value = "/{projectId}/sync")
     protected void syncWithCanvas(@PathVariable Long courseId,
@@ -147,6 +145,44 @@ public class ProjectController {
         // sync project's submissions
         this.projectService.syncProject(projectId, submissionsArray);
     }
+
+    /*
+    Returns all existing labels in the project.
+     */
+    @GetMapping(value = "/{projectId}/labels")
+    protected List<Label> getProjectLabels(@PathVariable Long courseId,
+                                             @PathVariable Long projectId,
+                                             Principal principal
+    ) {
+
+//        List<PrivilegeEnum> privileges = this.gradingParticipationService
+//                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
+//        if (!(privileges != null && privileges.contains(FLAG_DELETE))) {
+//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+//        }
+
+        return this.projectService.getProjectLabels(projectId);
+    }
+
+    /*
+    Creates a new label and associates it with the project.
+     */
+    @PostMapping(value = "/{projectId}/labels")
+    protected Label createProjectLabel(@PathVariable Long courseId,
+                                                @PathVariable Long projectId,
+                                                @RequestBody Label label,
+                                                Principal principal
+    ) {
+
+//        List<PrivilegeEnum> privileges = this.gradingParticipationService
+//                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
+//        if (!(privileges != null && privileges.contains(FLAG_DELETE))) {
+//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+//        }
+
+        return this.projectService.saveProjectLabel(label, projectId);
+    }
+
 
 //    @PostMapping(value = "/{projectId}/feedback")
 //    @ResponseBody
@@ -294,35 +330,4 @@ public class ProjectController {
         }
         return projectService.updateRubric(projectId, patch);
     }
-
-
-//    @DeleteMapping(value = "/{projectId}/labels/{labelId}")
-//    protected void deleteFlagPermanently(@PathVariable Long courseId,
-//                                             @PathVariable Long projectId,
-//                                             @PathVariable String labelId,
-//                                             Principal principal
-//    ) {
-//
-//        List<PrivilegeEnum> privileges = this.gradingParticipationService
-//                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
-//        if (!(privileges != null && privileges.contains(FLAG_DELETE))) {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
-//        }
-//
-////        return projectService.deleteLabelPermanently(projectId, labelId, Long.valueOf(principal.getName()));
-//    }
-
-//    private ArrayNode createLabelsArrayNode(List<Label> labels) {
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        ArrayNode arrayNode = objectMapper.createArrayNode();
-//        for(Label label2 : labels) {
-//            ObjectNode flagNode = objectMapper.createObjectNode();
-//            flagNode.put("id", label2.getId().toString());
-//            flagNode.put("name", label2.getName());
-//            flagNode.put("variant", label2.getVariant());
-//            flagNode.put("description", label2.getDescription());
-//            arrayNode.add(flagNode);
-//        }
-//        return arrayNode;
-//    }
 }

@@ -18,19 +18,18 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    @Transactional
+//    @Transactional
     public void saveUser(User user) {
         this.userRepository.save(user);
     }
 
-    @Transactional
+//    @Transactional
     public User findById(Long userId) {
-        Optional<User> userOptional = userRepository.findById(userId);
+        return userRepository.findById(userId).orElse(null);
+    }
 
-        if (userOptional.isEmpty()) {
-            return null;
-        } else {
-            return userOptional.get();
-        }
+    @Transactional
+    public User getOne(Long userId) {
+        return userRepository.getOne(userId);
     }
 }
