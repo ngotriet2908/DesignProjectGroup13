@@ -8,8 +8,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.group13.tcsprojectgrading.models.graders.GradingParticipation;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+import com.google.api.services.gmail.Gmail;
+import com.group13.tcsprojectgrading.controllers.ExcelUtils;
+import com.group13.tcsprojectgrading.controllers.PdfUtils;
+import com.group13.tcsprojectgrading.models.course.CourseParticipation;
+import com.group13.tcsprojectgrading.models.feedback.FeedbackLog;
+import com.group13.tcsprojectgrading.models.feedback.FeedbackTemplate;
 import com.group13.tcsprojectgrading.models.grading.Assessment;
+import com.group13.tcsprojectgrading.models.grading.AssessmentLink;
 import com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum;
+import com.group13.tcsprojectgrading.models.permissions.RoleEnum;
 import com.group13.tcsprojectgrading.models.project.Project;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.models.rubric.RubricHistory;
@@ -23,6 +34,7 @@ import com.group13.tcsprojectgrading.repositories.project.ProjectRepository;
 import com.group13.tcsprojectgrading.repositories.course.CourseParticipationRepository;
 import com.group13.tcsprojectgrading.repositories.submissions.LabelRepository;
 import com.group13.tcsprojectgrading.services.Json;
+import com.group13.tcsprojectgrading.services.feedback.FeedbackService;
 import com.group13.tcsprojectgrading.services.user.ActivityService;
 import com.group13.tcsprojectgrading.services.user.UserService;
 import com.group13.tcsprojectgrading.services.course.CourseService;
@@ -35,17 +47,32 @@ import com.group13.tcsprojectgrading.services.settings.SettingsService;
 //import com.group13.tcsprojectgrading.services.submissions.LabelService;
 import com.group13.tcsprojectgrading.services.submissions.SubmissionDetailsService;
 import com.group13.tcsprojectgrading.services.submissions.SubmissionService;
+import com.itextpdf.kernel.geom.PageSize;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.mail.MessagingException;
 import javax.transaction.Transactional;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.Principal;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.group13.tcsprojectgrading.controllers.EmailUtils.createEmailWithAttachment;
+import static com.group13.tcsprojectgrading.controllers.EmailUtils.sendMessage;
 
 
 @Service
@@ -64,6 +91,7 @@ public class ProjectService {
     private final AssessmentService assessmentService;
     private final SettingsService settingsService;
     private final CourseService courseService;
+    private final FeedbackService feedbackService;
 
     private final CourseParticipationRepository courseParticipationRepository;
     private final LabelRepository labelRepository;
@@ -78,6 +106,7 @@ public class ProjectService {
                           @Lazy SettingsService settingsService,
                           CourseParticipationRepository courseParticipationRepository,
                           LabelRepository labelRepository) {
+                          CourseParticipationRepository courseParticipationRepository, FeedbackService feedbackService) {
         this.projectRepository = projectRepository;
         this.projectRoleService = projectRoleService;
         this.roleService = roleService;
@@ -93,6 +122,7 @@ public class ProjectService {
         this.courseParticipationRepository = courseParticipationRepository;
         this.courseService = courseService;
         this.labelRepository = labelRepository;
+        this.feedbackService = feedbackService;
     }
 
     /*
@@ -597,6 +627,183 @@ public class ProjectService {
 //    }
 
 
+    @Transactional
+    public byte[] getProjectExcel(Long projectId) throws IOException {
+        Project project = getProject(projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "project not found"
+            );
+        }
+
+        Rubric rubric = rubricService.getRubricById(projectId);
+
+        if (rubric == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "rubric not found"
+            );
+        }
+        Map<User, AssessmentLink> userAssessmentLinkMap = new HashMap<>();
+
+        courseParticipationRepository
+                .findById_Course_IdAndRole_Name(
+                        project.getCourse().getId(),
+                        RoleEnum.STUDENT.getName()
+                )
+                .stream()
+                .map(courseParticipation -> courseParticipation.getId().getUser())
+                .forEach(user -> userAssessmentLinkMap.put(user, assessmentService.findCurrentAssessmentUser(project, user)));
+
+//        String FILE_NAME = "src/main/resources/excel.xlsx";
+//        File targetFile = new File(FILE_NAME);
+//        targetFile.delete();
+//        Path newFilePath = Paths.get(FILE_NAME);
+//        Files.createFile(newFilePath);
+//        FileOutputStream out = new FileOutputStream(targetFile);
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        ExcelUtils excelUtils = new ExcelUtils(userAssessmentLinkMap, rubric);
+        excelUtils.addParticipantsGradePage();
+//        excelUtils.getWorkbook().write(out);
+//                out.close();
+        excelUtils.getWorkbook().write(byteArrayOutputStream);
+        byteArrayOutputStream.close();
+
+        return byteArrayOutputStream.toByteArray();
+    }
+
+    @Transactional
+    public List<FeedbackTemplate> getFeedbackTemplates(Long projectId) {
+        Project project = getProject(projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "project not found"
+            );
+        }
+
+        return feedbackService.getTemplatesFromProject(project);
+    }
+
+    @Transactional
+    public List<FeedbackTemplate> createFeedbackTemplate(Long projectId, ObjectNode objectNode) {
+        Project project = getProject(projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "project not found"
+            );
+        }
+
+        FeedbackTemplate template = new FeedbackTemplate(
+                objectNode.get("name").asText(),
+                objectNode.get("subject").asText(),
+                objectNode.get("body").asText(),
+                project
+        );
+        feedbackService.addTemplate(template);
+
+        return feedbackService.getTemplatesFromProject(project);
+    }
+
+    @Transactional
+    public List<FeedbackTemplate> updateFeedbackTemplate(Long projectId, Long templateId, ObjectNode objectNode) {
+        Project project = getProject(projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "project not found"
+            );
+        }
+
+        FeedbackTemplate template = new FeedbackTemplate(
+                objectNode.get("name").asText(),
+                objectNode.get("subject").asText(),
+                objectNode.get("body").asText(),
+                project
+        );
+        template.setId(templateId);
+        feedbackService.addTemplate(template);
+
+        return feedbackService.getTemplatesFromProject(project);
+    }
+
+    @Transactional
+    public List<FeedbackTemplate> deleteUpdateTemplate(Long projectId, Long templateId) {
+        Project project = getProject(projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "project not found"
+            );
+        }
+
+        feedbackService.deleteTemplate(templateId);
+
+        return feedbackService.getTemplatesFromProject(project);
+    }
+
+    @Transactional
+    public List<CourseParticipation> allFinishedGradedUser(Long projectId) {
+        Project project = getProject(projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "project not found"
+            );
+        }
+
+        Rubric rubric = rubricService.getRubricById(projectId);
+        if (rubric == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "rubric not found"
+            );
+        }
+
+        return courseParticipationRepository
+                .findById_Course_IdAndRole_Name(
+                        project.getCourse().getId(),
+                        RoleEnum.STUDENT.getName()
+                )
+                .stream()
+                .filter(student -> {
+                    AssessmentLink assessment = assessmentService
+                            .findCurrentAssessmentUser(project, student.getId().getUser());
+                    return (assessment != null)
+                            && (assessmentService.findActiveGradesForAssignment(assessment.getId().getAssessment()).size() == rubric.getCriterionCount());
+
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public List<CourseParticipation> allFinishedGradedUserNotSent(Long projectId) {
+        Project project = getProject(projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "project not found"
+            );
+        }
+
+        Rubric rubric = rubricService.getRubricById(projectId);
+        if (rubric == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "rubric not found"
+            );
+        }
+
+        return courseParticipationRepository
+                .findById_Course_IdAndRole_Name(
+                        project.getCourse().getId(),
+                        RoleEnum.STUDENT.getName()
+                )
+                .stream()
+                .filter(student -> {
+                    AssessmentLink assessment = assessmentService
+                            .findCurrentAssessmentUser(project, student.getId().getUser());
+                    return (assessment != null)
+                            && (assessmentService.findActiveGradesForAssignment(assessment.getId().getAssessment()).size() == rubric.getCriterionCount())
+                            && (feedbackService.findLogFromLink(assessment).size() == 0)
+                            ;
+                })
+                .collect(Collectors.toList());
+    }
+
 //    @Transactional
 //    public ResponseEntity<byte[]> sendFeedbackPdf(String courseId, String projectId, ObjectNode feedback) throws IOException {
 //        Project project = getProjectById(courseId, projectId);
@@ -664,71 +871,117 @@ public class ProjectService {
 //        return new ResponseEntity<>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.OK);
 //    }
 
-//    @Transactional
-//    public boolean sendFeedbackEmail(String courseId, String projectId,
-//                                    ObjectNode feedback, Long userId,
-//                                    GoogleAuthorizationCodeFlow flow, String email
-//                                    ) throws IOException, MessagingException {
-//        Project project = getProjectById(courseId, projectId);
-//        if (project == null) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.NOT_FOUND, "entity not found"
-//            );
-//        }
-//
-//        String id = feedback.get("id").asText();
-//        boolean isGroup = feedback.get("isGroup").asBoolean();
-//        String body = feedback.get("body").asText();
-//        String subject = feedback.get("subject").asText();
-//
-//        System.out.println("getting credential for " + userId);
-//        Credential credential = flow.loadCredential(userId);
-//        if (credential == null) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.UNAUTHORIZED, "token not found"
-//            );
-//        }
-//
-//        System.out.println("Access token of " + userId + ": " + credential.getAccessToken());
-//
-//        Gmail service = new Gmail.Builder(flow.getTransport(), flow.getJsonFactory(), credential)
-//                .setApplicationName("Pro Grading")
-//                .build();
-//
-//        String FILE_NAME = "src/main/resources/fileToCreate.pdf";
-//        File targetFile = new File(FILE_NAME);
-//        targetFile.delete();
-//        Path newFilePath = Paths.get(FILE_NAME);
-//        Files.createFile(newFilePath);
-//
-//        OutputStream out = new FileOutputStream(FILE_NAME);
-//
-//        PdfWriter pdfWriter = new PdfWriter(out);
-//        PdfDocument pdfDocument = new PdfDocument(pdfWriter);
-//        Document document = new Document(pdfDocument, PageSize.A4);
-//
-//        document.getPdfDocument();
-//
-//        User participant = this.courseService.getCourseParticipant(id, courseId);
-//        Submission submission = submissionService.findSubmissionById(body);
-//
-//        Assessment submissionAssessment = assessmentService.getAssessmentBySubmissionAndParticipant(submission, participant);
-//        PdfUtils pdfUtils = new PdfUtils(document, rubricService.getRubricById(projectId), submissionAssessment
-//        );
-//        pdfUtils.generatePdfOfFeedback();
-//        document.close();
-//
-//        if (email != null) {
-//            sendMessage(service, "me", createEmailWithAttachment(
-//                    email,
-//                    "me",
-//                    subject,
-//                    body,
-//                    new File(FILE_NAME)
-//            ));
-//            return true;
-//        }
-//
-//        return false;
-//    }
+    @Transactional
+    public List<FeedbackLog> sendFeedback(Long projectId, Long templateId, boolean isAll,
+                                          GoogleAuthorizationCodeFlow flow, Principal principal) throws ResponseStatusException{
+        Project project = getProject(projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "project not found"
+            );
+        }
+
+        FeedbackTemplate template = feedbackService.findTemplateFromId(templateId);
+
+        if (template == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "template not found"
+            );
+        }
+
+        Rubric rubric = rubricService.getRubricById(projectId);
+        if (rubric == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "rubric not found"
+            );
+        }
+
+
+        List<CourseParticipation> participations;
+        if (!isAll) {
+            participations = allFinishedGradedUserNotSent(projectId);
+        } else {
+            participations = allFinishedGradedUser(projectId);
+        }
+        Date date = new Date();
+
+        participations.forEach(courseParticipation -> {
+            AssessmentLink link = assessmentService.findCurrentAssessmentUser(project, courseParticipation.getId().getUser());
+
+            try {
+                if (sendFeedback(project, link, courseParticipation, template, flow, rubric, principal.getName())) {
+                    feedbackService.addLog(new FeedbackLog(
+                            date,
+                            link,
+                            template
+                    ));
+                }
+            } catch (Exception e) {
+                if (e instanceof ResponseStatusException) {
+                    try {
+                        throw e;
+                    } catch (IOException | MessagingException ignored) { }
+                }
+            }
+        });
+
+        return feedbackService.getLogs(project);
+    }
+
+    @Transactional
+    public boolean sendFeedback(Project project, AssessmentLink link, CourseParticipation participation,
+                                FeedbackTemplate template,
+                                GoogleAuthorizationCodeFlow flow,
+                                Rubric rubric,
+                                String teacherId
+                                    ) throws IOException, MessagingException {
+        System.out.println("getting credential for " + teacherId);
+        Credential credential = flow.loadCredential(teacherId);
+        if (credential == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "token not found"
+            );
+        }
+
+        System.out.println("Access token of " + teacherId + ": " + credential.getAccessToken());
+
+        Gmail service = new Gmail.Builder(flow.getTransport(), flow.getJsonFactory(), credential)
+                .setApplicationName("Pro Grading")
+                .build();
+
+        String FILE_NAME = "src/main/resources/feedback.pdf";
+        File targetFile = new File(FILE_NAME);
+        targetFile.delete();
+        Path newFilePath = Paths.get(FILE_NAME);
+        Files.createFile(newFilePath);
+
+        OutputStream out = new FileOutputStream(FILE_NAME);
+
+        PdfWriter pdfWriter = new PdfWriter(out);
+        PdfDocument pdfDocument = new PdfDocument(pdfWriter);
+        Document document = new Document(pdfDocument, PageSize.A4);
+
+        document.getPdfDocument();
+
+        User participant = participation.getId().getUser();
+        Assessment assessment = link.getId().getAssessment();
+
+        PdfUtils pdfUtils = new PdfUtils(document, rubric, assessment, participation);
+
+        pdfUtils.generatePdfOfFeedback();
+        document.close();
+
+        if (participant.getEmail() != null) {
+            sendMessage(service, "me", createEmailWithAttachment(
+                    participant.getEmail(),
+                    "me",
+                    template.getSubject(),
+                    template.getBody(),
+                    new File(FILE_NAME)
+            ));
+            return true;
+        }
+
+        return false;
+    }
 }

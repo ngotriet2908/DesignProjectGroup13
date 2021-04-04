@@ -1,0 +1,108 @@
+@value primary, secondary, ternary, quaternary, quinary, senary, senaryShade, pinkishGray, ultraLightGray, primaryShade, lightGray, darkishGray, moderateGray from '../helpers/colors.css';
+
+
+.titleContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.titleContainer svg {
+    cursor: pointer;
+}
+
+
+.labelsContainer {
+    width: 100%;
+    margin: 0.5rem 0 1.5rem 0;
+}
+
+.labelsContainer > * {
+    margin-right: 0.5rem;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+}
+
+.section {
+    width: 50%;
+    margin-top: 1rem;
+}
+
+.section :global(.card) {
+    min-height: 10rem;
+}
+
+.section:nth-child(odd) {
+    padding-right: 2rem;
+}
+
+.sectionTitle {
+    min-height: 48px;
+    margin: 1rem 0 0.5rem 0;
+}
+
+.sectionTitleWithButton {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+.containerInfo {
+
+}
+
+.assessmentSection {
+    /*width: 100%;*/
+    /*padding-right: 0 !important;*/
+}
+
+
+
+
+
+
+
+.memberAssessmentHeader {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.memberEditingItemHeader {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.buttonGroup {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.buttonGroup > *:not(:last-child) {
+    margin-right: 0.5rem;
+}
+
+.primaryButton {
+    color: primary;
+}
+
+.dangerButton {
+    color: senary;
+}
+
+.neuterButton {
+    color: quaternary;
+}

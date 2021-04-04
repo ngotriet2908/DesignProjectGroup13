@@ -282,8 +282,18 @@ public class AssessmentService {
         issue = this.issueRepository.save(issue);
         return issue;
     }
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public AssessmentLink findCurrentAssessmentUser(Project project, User user) {
+        return assessmentLinkRepository.findById_UserAndId_Submission_ProjectAndCurrentIsTrue(
+                user,
+                project
+        );
+    }
 
-
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public List<Grade> findActiveGradesForAssignment(Assessment assessment) {
+        return gradeRepository.findGradesByAssessmentAndIsActiveIsTrue(assessment);
+    }
 
 //    @Transactional(value = Transactional.TxType.MANDATORY)
 //    public void saveAssessment(Assessment assessment) {

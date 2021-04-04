@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.group13.tcsprojectgrading.models.feedback.FeedbackLog;
+import com.group13.tcsprojectgrading.models.feedback.FeedbackTemplate;
 import com.group13.tcsprojectgrading.models.user.Activity;
 import com.group13.tcsprojectgrading.models.course.Course;
 import com.group13.tcsprojectgrading.models.graders.GradingParticipation;
@@ -32,17 +34,25 @@ public class Project {
     @JsonSerialize(using= Course.CourseShortSerialiser.class)
     private Course course;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "id.project")
     private List<Activity> activities;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "id.project")
     private List<GradingParticipation> graders;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "project")
     private List<Submission> submissions;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "project")
     private List<Label> labels;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "project")
+    private List<FeedbackTemplate> feedbackTemplates;
 
     public Project() {
     }
@@ -143,9 +153,17 @@ public class Project {
         this.labels = labels;
     }
 
+    public List<FeedbackTemplate> getFeedbackTemplates() {
+        return feedbackTemplates;
+    }
+
+    public void setFeedbackTemplates(List<FeedbackTemplate> feedbackTemplates) {
+        this.feedbackTemplates = feedbackTemplates;
+    }
+
     /*
-   Serialiser for the main information of the course (without details).
-    */
+       Serialiser for the main information of the course (without details).
+        */
     public static class ProjectShortSerialiser extends JsonSerializer<Project> {
         @Override
         public void serialize(Project project, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {

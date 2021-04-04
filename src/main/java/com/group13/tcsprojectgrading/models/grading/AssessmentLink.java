@@ -1,11 +1,15 @@
 package com.group13.tcsprojectgrading.models.grading;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.group13.tcsprojectgrading.models.course.CourseParticipation;
+import com.group13.tcsprojectgrading.models.feedback.FeedbackLog;
 import com.group13.tcsprojectgrading.models.user.User;
 import com.group13.tcsprojectgrading.models.submissions.Submission;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -68,6 +72,10 @@ public class AssessmentLink {
         }
     }
 
+    @JsonIgnore
+    @OneToMany(mappedBy="link")
+    private List<FeedbackLog> feedbackLogs;
+
     @EmbeddedId
     private AssessmentLink.Pk id;
 
@@ -97,7 +105,15 @@ public class AssessmentLink {
         this.current = active;
     }
 
-//    /*
+    public List<FeedbackLog> getFeedbackLogs() {
+        return feedbackLogs;
+    }
+
+    public void setFeedbackLogs(List<FeedbackLog> feedbackLogs) {
+        this.feedbackLogs = feedbackLogs;
+    }
+
+    //    /*
 //    Serialises
 //    */
 //    public static class MembersSerialiser extends JsonSerializer<AssessmentLink> {

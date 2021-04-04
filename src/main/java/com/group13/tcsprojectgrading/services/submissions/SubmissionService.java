@@ -1,6 +1,7 @@
 package com.group13.tcsprojectgrading.services.submissions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.group13.tcsprojectgrading.models.grading.AssessmentLink;
 import com.group13.tcsprojectgrading.models.project.Project;
 import com.group13.tcsprojectgrading.models.submissions.Label;
 import com.group13.tcsprojectgrading.models.user.User;

@@ -23,6 +23,7 @@ import {Can, ability, updateAbility} from "../permissions/ProjectAbility";
 import classnames from "classnames";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Tooltip from "react-bootstrap/Tooltip";
+import * as FileSaver from 'file-saver';
 
 class Project extends Component {
   constructor(props) {
@@ -142,6 +143,24 @@ class Project extends Component {
       });
   }
 
+  handleExcel = () => {
+    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/excel`, "GET", null ,"application/octet-stream")
+      .then(response => {
+        if (response.status === 200) {
+          return response.blob()
+        }
+      })
+      .then((data) => {
+        const file = new Blob([data], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'});
+        let file_name = this.state.project.name + ", " + Date().toLocaleString();
+        FileSaver.saveAs(file, file_name + ".xlsx");
+
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
+  }
+
   render () {
     if (!this.state.isLoaded) {
       return (
@@ -229,6 +248,10 @@ class Project extends Component {
                           Rubric
                     </Button>
                     {/*</Can>*/}
+
+                    <Button variant="lightGreen" onClick={this.handleExcel}>
+                      Export Result
+                    </Button>
 
                   </Card.Body>
                 </Card>
