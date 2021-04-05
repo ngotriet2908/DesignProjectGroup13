@@ -73,6 +73,7 @@ public class AssessmentService {
     /*
     Creates a new (empty) assessment for the project and links it to the submission and user.
      */
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public AssessmentLink createNewAssessmentWithLink(Submission submission, User user, Project project) {
         Assessment assessment = new Assessment();
         assessment.setProject(project);
@@ -84,6 +85,7 @@ public class AssessmentService {
     /*
     Links the assessments to the submission, user and project.
      */
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public AssessmentLink createNewAssessmentWithLink(Submission submission, User user, Project project, Assessment assessment) {
         // TODO this check can actually be simplified
         boolean currentExists = this.assessmentLinkRepository.existsById_UserAndId_Submission_ProjectAndCurrentIsTrue(user, project);
@@ -98,16 +100,19 @@ public class AssessmentService {
     /*
     Creates a new (empty) assessment for the project.
      */
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public Assessment createNewAssessment(Project project) {
         Assessment assessment = new Assessment();
         assessment.setProject(project);
         return this.assessmentRepository.save(assessment);
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public Assessment createNewAssessment(Assessment assessment) {
         return this.assessmentRepository.save(assessment);
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public AssessmentLink cloneAssessment(Submission submission, Assessment assessment, CourseParticipation participation) throws JsonProcessingException {
         AssessmentLink link = getAssessmentLinkForUser(submission.getId(), participation.getId().getUser().getId());
 
@@ -123,6 +128,7 @@ public class AssessmentService {
         return assessmentLinkRepository.save(link1);
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public AssessmentLink moveAssessment(AssessmentLink link, Assessment assessment, Set<AssessmentLink> assessmentLinks) throws JsonProcessingException {
 
         Assessment assessment1 = link.getId().getAssessment();
@@ -164,6 +170,7 @@ public class AssessmentService {
     /*
     Returns the list of people associated with a submission.
      */
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public Set<User> getSubmissionMembers(Submission submission) {
         Set<AssessmentLink> links = this.assessmentLinkRepository.findDistinctUserById_Submission(submission);
 
@@ -248,7 +255,7 @@ public class AssessmentService {
     /*
     Checks if the user has permissions to retrieve the assessment and returns it if so.
      */
-    @Transactional(value = Transactional.TxType.MANDATORY)
+    @Transactional
     public Assessment getAssessment(Long assessmentId, Long submissionId, Long userId, List<PrivilegeEnum> privileges) throws JsonProcessingException {
         Submission submission = this.submissionService.getSubmission(submissionId);
 
@@ -277,7 +284,7 @@ public class AssessmentService {
     Populates all fields of Grade, saves it, deactivates all existing grades for the criterion and set the new grade
     as active.
      */
-    @Transactional
+    @Transactional(rollbackOn = Exception.class)
     public Grade addGrade(Long assessmentId, Grade grade, Long userId) {
         Assessment assessment = getAssessment(assessmentId);
 
@@ -302,7 +309,7 @@ public class AssessmentService {
         return this.gradeRepository.save(grade);
     }
 
-    @Transactional
+    @Transactional(rollbackOn = Exception.class)
     public Grade saveGrade(Grade grade) {
         return this.gradeRepository.save(grade);
     }
@@ -310,7 +317,7 @@ public class AssessmentService {
     /*
     Activates grade and deactivates all other grades for the criterion.
      */
-    @Transactional
+    @Transactional(rollbackOn = Exception.class)
     public Grade activateGrade(Long gradeId) {
         Grade grade = this.gradeRepository.findById(gradeId).orElse(null);
 
@@ -328,6 +335,7 @@ public class AssessmentService {
     /*
     Stores an issue status in the db.
      */
+    @Transactional(rollbackOn = Exception.class)
     public void saveIssueStatus(IssueStatusEnum status) {
         if (this.issueStatusRepository.findByName(status.toString()) == null)
             this.issueStatusRepository.save(new IssueStatus(status));
@@ -336,6 +344,7 @@ public class AssessmentService {
     /*
     Returns issues associated with the assessment.
      */
+    @Transactional
     public List<Issue> getIssues(Long assessmentId) {
         return this.issueRepository.findIssuesByAssessmentId(assessmentId);
     }
@@ -343,7 +352,7 @@ public class AssessmentService {
     /*
     Creates an issue and sends an email notification to the recipient.
      */
-    @Transactional
+    @Transactional(rollbackOn = Exception.class)
     public Issue createIssue(Issue issue, Long assessmentId, Long userId) {
         Assessment assessment = this.getAssessment(assessmentId);
         User creator = this.userService.findById(userId);
@@ -369,6 +378,7 @@ public class AssessmentService {
     Changes the status of the issue from "open" to "resolved".
     TODO send email
      */
+    @Transactional(rollbackOn = Exception.class)
     public Issue resolveIssue(Long issueId, IssueSolution solution) {
         Issue issue = this.issueRepository.findById(issueId).orElse(null);
 

@@ -19,10 +19,12 @@ public class RoleService {
         this.repository = repository;
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public Role findRoleByName(String name) {
         return repository.findByName(name);
     }
 
+    @Transactional(rollbackOn = Exception.class)
     public Role addRoleIfNotExist(String name, List<Privilege> privileges) {
         Role role = repository.findByName(name);
         if (role == null) {

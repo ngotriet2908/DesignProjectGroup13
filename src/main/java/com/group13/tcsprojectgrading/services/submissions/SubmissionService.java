@@ -66,13 +66,12 @@ public class SubmissionService {
      */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Submission addNewSubmission(Project project, User userId, Long groupId,
-                                       Date date, String name) {
+                                       Date date, String name) throws ResponseStatusException {
         Submission currentSubmission = this.submissionRepository.findByProject_IdAndSubmitterId_IdAndSubmittedAtAndGroupId(
                 project.getId(), userId.getId(), date, groupId
         );
-
         if (currentSubmission != null) {
-            return null;
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "submission exist");
         } else {
             // update submission
             return this.submissionRepository.save(new Submission(
@@ -87,13 +86,13 @@ public class SubmissionService {
     already stored.
      */
     @Transactional(value = Transactional.TxType.MANDATORY)
-    public Submission addNewSubmission(Submission submission) {
+    public Submission addNewSubmission(Submission submission) throws ResponseStatusException {
         Submission existingSubmission = this.submissionRepository.findByProject_IdAndSubmitterId_IdAndSubmittedAtAndGroupId(
                 submission.getProject().getId(), submission.getSubmitter().getId(), submission.getSubmittedAt(), submission.getGroupId()
         );
 
         if (existingSubmission != null) {
-            return null;
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "submission exist");
         } else {
             return this.submissionRepository.save(submission);
         }
@@ -158,7 +157,7 @@ public class SubmissionService {
     Returns all submissions in the project (if the user is a grader inside that project).
      */
     @Transactional
-    public List<Submission> getSubmissions(Long courseId, Long projectId, Long userId) {
+    public List<Submission> getSubmissions(Long courseId, Long projectId, Long userId) throws ResponseStatusException {
         Project project = this.projectRepository.findById(projectId).orElse(null);
 
         if (project == null) {
@@ -218,7 +217,7 @@ public class SubmissionService {
     Returns a single submission.
      */
     @Transactional
-    public Submission getSubmission(Long submissionId) throws JsonProcessingException {
+    public Submission getSubmission(Long submissionId) throws JsonProcessingException, ResponseStatusException {
 //        Project project = this.projectRepository.findById(projectId).orElse(null);
 //
 //        if (project == null) {
@@ -277,7 +276,7 @@ public class SubmissionService {
     Saves the list of labels for the submission.
      */
     @Transactional
-    public void saveLabels(Set<Label> labels, Long submissionId) throws JsonProcessingException {
+    public void saveLabels(Set<Label> labels, Long submissionId) throws JsonProcessingException, ResponseStatusException {
         Submission submission = this.getSubmission(submissionId);
 
         if (submission == null) {
@@ -335,7 +334,7 @@ public class SubmissionService {
 
     @Transactional(rollbackOn = Exception.class)
     public void assessmentManagement(Long courseId, Long projectId, Long submissionId,
-                                     JsonNode object, List<PrivilegeEnum> privileges, Long userId) throws JsonProcessingException {
+                                                 JsonNode object, List<PrivilegeEnum> privileges, Long userId) throws JsonProcessingException, ResponseStatusException {
 
         Submission submission = getSubmission(submissionId);
         if (submission == null) {
@@ -482,7 +481,7 @@ public class SubmissionService {
     @Transactional(rollbackOn = Exception.class)
     public Submission addParticipantToSubmission(Long courseId, Long projectId, Long submissionId,
                                                  Long participantId, Long assessmentId,
-                                                 List<PrivilegeEnum> privileges, Long userId) throws JsonProcessingException {
+                                          List<PrivilegeEnum> privileges, Long userId) throws JsonProcessingException, ResponseStatusException {
 
         Project project = this.projectRepository.findById(projectId).orElse(null);
         if (project == null) {
@@ -536,7 +535,7 @@ public class SubmissionService {
 
     @Transactional(rollbackOn = Exception.class)
     public Object removeParticipantFromSubmission(Long courseId, Long projectId, Long submissionId, Long participantId,
-                                                  List<PrivilegeEnum> privileges, Long userId, boolean returnAll) throws JsonProcessingException {
+                                                 List<PrivilegeEnum> privileges, Long userId, boolean returnAll) throws JsonProcessingException, ResponseStatusException {
 
         Project project = this.projectRepository.findById(projectId).orElse(null);
         if (project == null) {
@@ -603,7 +602,7 @@ public class SubmissionService {
     }
 
     @Transactional
-    public List<Submission> getSubmissionFromParticipants(Long projectId, User user) {
+    public List<Submission> getSubmissionFromParticipants(Long projectId, User user) throws ResponseStatusException {
         Set<AssessmentLink> links = assessmentService.getAssessmentsByProjectAndUser(projectId, user);
         System.out.println(links.size());
         List<Submission> submissions = new ArrayList<>();

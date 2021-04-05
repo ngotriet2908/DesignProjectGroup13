@@ -1,20 +1,36 @@
 import React, {Component} from "react";
 import styles from "./assign.module.css";
+import {ListGroup, ListGroupItem} from "react-bootstrap";
+import TaskCard from "./TaskCard";
 import {Button, Card, FormControl} from 'react-bootstrap'
-import {IoEllipsisVerticalOutline, IoChevronDownOutline, IoArrowBackOutline} from "react-icons/io5";
+import {IoEllipsisVerticalOutline, IoChevronDownOutline} from "react-icons/io5";
 import classnames from 'classnames';
 import {isTeacher} from "../permissions/functions";
-import globalStyles from "../helpers/global.module.css";
-
 
 class Grader extends Component {
   constructor (props) {
     super(props)
 
     this.state = {
+      // groupsFiltered : props.grader.groups,
+      // filterString: "",
+      // hideSearch : true
+
       collapsed: false,
     }
   }
+
+  // handleHideSearch = (event) => {
+  //   this.setState((prevState) => {
+  //     return {hideSearch : !prevState.hideSearch}
+  //   })
+  // }
+  //
+  // handleSearchChange = (event) => {
+  //   this.setState({
+  //     filterString: event.target.value
+  //   })
+  // }
 
   toggleCollapsed = () => {
     this.setState(prevState => ({
@@ -27,9 +43,7 @@ class Grader extends Component {
       <Card className={styles.graderContainer}>
         <Card.Body className={classnames(styles.graderBodyContainer, this.state.collapsed && styles.graderBodyContainerCollapsed)}>
           <div className={styles.graderHeader}>
-            <h4>{this.props.name}
-              {/*{this.props.grader != null && (isTeacher(this.props.grader.role[0].name) ? "(Teacher)" : "(TA)")}*/}
-            </h4>
+            <h4>{this.props.name} {this.props.grader && (isTeacher(this.props.grader.role[0].name) ? "(Teacher)" : "(TA)")}</h4>
             <div className={styles.graderHeaderButtonContainer}>
               <div className={classnames(styles.outlineButton, styles.collapseButton)} onClick={this.toggleCollapsed}>
                 <IoChevronDownOutline/>
@@ -37,31 +51,48 @@ class Grader extends Component {
             </div>
           </div>
 
-          <div className={styles.graderContent}>
-            {this.props.submissions.length === 0 &&
-              <div className={classnames(globalStyles.modalBodyContainerRow, globalStyles.modalBodyContainerRowEmpty)}>
-                {this.props.grader != null ? "No submissions assigned to the grader" : "No unassigned submissions"}
-              </div>
-            }
+          {/*<Button className={styles.graderToolBarButton}*/}
+          {/*        variant="primary"*/}
+          {/*        size="sm"*/}
+          {/*        onClick={this.handleHideSearch}>*/}
+          {/*  search*/}
+          {/*</Button>*/}
+          {/*{(this.state.hideSearch) ? null :*/}
+          {/*  <FormControl className={styles.graderToolBarSearch}*/}
+          {/*               size="sm"*/}
+          {/*               type="text"*/}
+          {/*               placeholder="Normal text"*/}
+          {/*               onChange={this.handleSearchChange}/>*/}
+          {/*}*/}
+          {/*<Button className={styles.graderToolBarButton}*/}
+          {/*        variant="primary"*/}
+          {/*        size="sm"*/}
+          {/*        onClick={this.props.onReturnClicked}>*/}
+          {/*  return tasks*/}
+          {/*</Button>*/}
 
-            {this.props.submissions.map(submission => {
-              return (
-                <div key={submission.id}
-                  className={styles.graderSubmissionContainer}
-                >
-                  <div>{submission.name}</div>
-                  <div>
-                    <div className={styles.outlineButton}
-                      onClick={() => this.props.toggleShow(
-                        submission,
+          <div className={styles.graderContent}>
+            {this.props.submissions
+              // .filter((group) => {
+              //   return group.name.toLowerCase().includes(this.state.filterString.toLowerCase())
+              // })
+              .map(group => {
+                return (
+                  <div key={group.id}
+                    className={styles.graderSubmissionContainer}
+                  >
+                    <div>{group.name}</div>
+                    <div>
+                      <div className={styles.outlineButton} onClick={() => this.props.openAssignModal(
                         this.props.grader,
+                        group
                       )}>
-                      <IoEllipsisVerticalOutline/>
+                        <IoEllipsisVerticalOutline/>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )
-            })}
+                )
+              })}
           </div>
         </Card.Body>
       </Card>

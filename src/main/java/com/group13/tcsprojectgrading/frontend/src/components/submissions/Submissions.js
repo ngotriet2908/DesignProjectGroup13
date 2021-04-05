@@ -15,6 +15,7 @@ import classnames from 'classnames';
 import {setCurrentLocation} from "../../redux/navigation/actions";
 import {connect} from "react-redux";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
+import {saveUserSelf} from "../../redux/user/actions";
 
 class Submissions extends Component {
   constructor(props) {
@@ -23,6 +24,8 @@ class Submissions extends Component {
       isLoaded: false,
 
       course: {},
+      // project: {},
+      // user: {},
       submissions: [],
       searchString: "",
       filterGroupChoice: "All",
@@ -42,6 +45,7 @@ class Submissions extends Component {
 
   filterGroupDropDown = (group) => {
     let filter = this.state.filterGroupChoice;
+
     if (filter === "All") return true;
     if (filter === "Group") return group.groupId != null;
     if (filter === "Individual") return group.groupId == null;
@@ -106,6 +110,10 @@ class Submissions extends Component {
         const course = await res2.json();
         const project = await res3.json();
 
+        console.log(submissions);
+        console.log(course);
+        console.log(project);
+
         this.setState({
           course: course,
           project: project,
@@ -151,8 +159,8 @@ class Submissions extends Component {
         {/*</div>*/}
 
         <div className={styles.submissionContainer}>
-          <div>
-            <h3>Submission List</h3>
+          <div className={classnames(styles.sectionTitle, styles.sectionTitleWithButton)}>
+            <h3 className={styles.sectionTitleH}>Submission List</h3>
           </div>
 
           <div className={styles.toolbar}>
