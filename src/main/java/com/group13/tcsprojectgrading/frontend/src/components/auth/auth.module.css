@@ -1,13 +1,9 @@
-@value primary, secondary, ternary, quaternary, quinary, ultraLightGray, primaryShade, lightGray, darkishGray, moderateGray from '../helpers/colors.css';
-
 .container {
     display: grid;
     grid-template-rows: auto;
     grid-template-columns: auto;
     height: 100vh;
     width: 100vw;
-
-    background-color: ultraLightGray;
 }
 
 .stripesContainer {
@@ -29,8 +25,7 @@
             rgba(244,162,97,1) 40%,
             rgba(231,111,81,1) 40%,
             rgba(231,111,81,1) 50%,
-            ultraLightGray 50%
-            /*rgba(255, 255 ,255, 1) 50%*/
+            rgba(255, 255 ,255, 1) 50%
     );
 }
 

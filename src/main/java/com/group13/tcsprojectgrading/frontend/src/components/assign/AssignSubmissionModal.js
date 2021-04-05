@@ -1,76 +1,25 @@
 import {Button, Spinner, Modal, Alert} from 'react-bootstrap'
 import React, {Component} from "react";
+import styles from "./assign.module.css";
 import {request} from "../../services/request";
 import {BASE, PROJECT, USER_COURSES} from "../../services/endpoints";
 import {connect} from "react-redux";
-import {IoCloseOutline, IoCheckboxOutline, IoSquareOutline, IoReturnUpBack, IoAddOutline} from "react-icons/io5";
+import {IoCloseOutline, IoCheckboxOutline, IoSquareOutline} from "react-icons/io5";
 import classnames from 'classnames';
-import globalStyles from "../helpers/global.module.css";
 
 
 class AssignSubmissionModal extends Component {
   constructor(props) {
     super(props);
+  }
 
-    this.state = {
-      isLoaded: false,
-      selected: null,
+  onSave = () => {
+    // determine choice (unassign vs assign)
+    if (this.props.choice == null) {
+      this.props.onReturnTask(this.props.taskGroup)
+    } else {
+      this.props.onAccept(this.props.taskGroup, this.props.choice)
     }
-  }
-
-  onShow = () => {
-    // set the selected grader
-    this.setState({
-      selected: this.props.currentGrader,
-    })
-  }
-
-  onClose = () => {
-    this.setState({
-      isLoaded: false,
-      selected: {},
-    })
-
-    this.props.toggleShow();
-  }
-
-  onAccept = () => {
-    let body = this.state.selected.id;
-
-    request(`${BASE}courses/${this.props.routeParams.courseId}/projects/${this.props.routeParams.projectId}/submissions/${this.props.submission.id}/assign`,
-      "POST",
-      body
-    ).then(async () => {
-      // let data = await response.json();
-
-      this.setState({
-        isLoaded: false,
-        selected: null,
-      })
-
-      this.props.toggleShow();
-      this.props.reloadPage();
-    })
-  }
-
-  disassociateSubmission = () => {
-    request(`${BASE}courses/${this.props.routeParams.courseId}/projects/${this.props.routeParams.projectId}/submissions/${this.props.submission.id}/dissociate`,
-      "POST",
-    ).then(async () => {
-      this.setState({
-        isLoaded: false,
-        selected: null,
-      })
-
-      this.props.toggleShow();
-      this.props.reloadPage();
-    })
-  }
-
-  handleGraderClick = (grader) => {
-    this.setState(prevState => ({
-      selected: grader,
-    }))
   }
 
   createFirstRow = () => {
@@ -78,8 +27,8 @@ class AssignSubmissionModal extends Component {
 
     result.push(
       <div className={
-        classnames(globalStyles.modalBodyContainerRow,
-          this.props.choice == null && globalStyles.modalBodyContainerRowActive)
+        classnames(styles.modalBodyContainerRow,
+          this.props.choice == null && styles.modalBodyContainerRowActive)
       } onClick={() => this.props.setModalAssignChoice(null)}
       key="unassigned">
         {this.props.choice == null ?
@@ -92,21 +41,21 @@ class AssignSubmissionModal extends Component {
     )
 
     if (this.props.currentGrader != null) {
-      // const eq = this.props.choice != null && this.props.choice.id === this.props.currentGrader.id;
-      //
-      // result.push(
-      //   <div className={classnames(globalStyles.modalBodyContainerRow,
-      //     eq && globalStyles.modalBodyContainerRowActive)}
-      //   onClick={() => this.props.setModalAssignChoice(this.props.currentGrader)}
-      //   key="current">
-      //     {eq ?
-      //       <IoCheckboxOutline size={16}/>
-      //       :
-      //       <IoSquareOutline size={16}/>
-      //     }
-      //     <span>{this.props.currentGrader.name} - {this.props.currentGrader.groups.length} task(s)</span>
-      //   </div>
-      // )
+      const eq = this.props.choice != null && this.props.choice.id === this.props.currentGrader.id;
+
+      result.push(
+        <div className={classnames(styles.modalBodyContainerRow,
+          eq && styles.modalBodyContainerRowActive)}
+        onClick={() => this.props.setModalAssignChoice(this.props.currentGrader)}
+        key="current">
+          {eq ?
+            <IoCheckboxOutline size={16}/>
+            :
+            <IoSquareOutline size={16}/>
+          }
+          <span>{this.props.currentGrader.name} - {this.props.currentGrader.groups.length} task(s)</span>
+        </div>
+      )
     }
 
     return result;
@@ -118,69 +67,61 @@ class AssignSubmissionModal extends Component {
         centered
         backdrop="static"
         size="lg"
-        onShow={this.onShow}
         show={this.props.show}
-        onHide={this.onClose}
+        onHide={this.props.onClose}
         animation={false}
       >
-        <div className={globalStyles.modalContainer}>
-          <div className={globalStyles.modalHeaderContainer}>
+        <div className={styles.modalContainer}>
+          <div className={styles.modalHeaderContainer}>
             <h2>Assign</h2>
-            <div className={classnames(globalStyles.modalHeaderContainerButton)} onClick={this.onClose}>
+            <div className={styles.modalHeaderContainerButton} onClick={() => this.props.onClose()}>
               <IoCloseOutline size={30}/>
             </div>
           </div>
 
-          <div className={globalStyles.modalDescriptionContainer}>
+          <div className={styles.modalDescriptionContainer}>
             <div>
-              Choose a person who will be responsible for grading the submission <b>'{(this.props.submission != null)? this.props.submission.name : null}'</b> or leave the submission unassigned.
+              Choose a person who will be responsible for grading the submission of <b>'{(this.props.taskGroup != null)? this.props.taskGroup.name : null}'</b> or leave the submission unassigned.
             </div>
           </div>
 
-
           {/* body */}
-          <div className={globalStyles.modalBodyContainer}>
-            {/*{this.createFirstRow()}*/}
+          <div className={styles.modalBodyContainer}>
 
-            {this.props.graders.length === 0 &&
-            <div className={classnames(globalStyles.modalBodyContainerRow, globalStyles.modalBodyContainerRowEmpty)}>
-              No graders available in this project
-            </div>
-            }
+            {this.createFirstRow()}
 
-            {this.props.graders
-              // .filter((grader) => {
-              // return (this.props.currentGrader == null) || (grader.id !== this.props.currentGrader.id)
-            // })
-              .map((grader) => {
-                const eq = this.state.selected != null && this.state.selected.id === grader.id;
+            {this.props.graders.filter((grader) => {
+              return (this.props.currentGrader == null) || (grader.id !== this.props.currentGrader.id)
+            }).map((grader) => {
+              const eq = this.props.choice != null && this.props.choice.id === grader.id;
 
-                return (
-                  <div className={classnames(globalStyles.modalBodyContainerRow, eq && globalStyles.modalBodyContainerRowActive)}
-                    key={grader.id}
-                    onClick={() => this.handleGraderClick(grader)}>
-                    {eq ?
-                      <IoCheckboxOutline size={16}/>
-                      :
-                      <IoSquareOutline size={16}/>
-                    }
-                    <span>{grader.name} - {grader.submissions.length} submission(s)</span>
-                  </div>
-                )
-              })
+              return (
+                <div className={classnames(styles.modalBodyContainerRow, eq && styles.modalBodyContainerRowActive)}
+                  key={grader.id}
+                  onClick={() => this.props.setModalAssignChoice(grader)}>
+                  {eq ?
+                    <IoCheckboxOutline size={16}/>
+                    :
+                    <IoSquareOutline size={16}/>
+                  }
+                  <span>{grader.name} - {grader.groups.length} task(s)</span>
+                </div>
+              )
+            })
             }
           </div>
 
           {/* footer */}
-          <div className={classnames(globalStyles.modalFooterContainer, this.props.currentGrader && globalStyles.modalFooterContainerSpaceBetween)}>
-            {this.props.currentGrader &&
-              <div>
-                <Button variant="red" onClick={this.disassociateSubmission}><IoReturnUpBack size={20}/> Return submission</Button>
-              </div>
-            }
-            <div className={globalStyles.modalFooterContainerButtonGroup}>
-              <Button variant="linkLightGray" onClick={this.onClose}>Cancel</Button>
-              <Button variant="lightGreen" onClick={this.onAccept}>Save</Button>
+          <div className={styles.modalFooterContainer}>
+            <div className={styles.modalFooterContainerButtonGroup}>
+              <Button variant="linkLightGray" onClick={() => this.props.onClose()}>
+                Cancel
+              </Button>
+
+              <Button variant="lightGreen"
+                onClick={() => this.onSave()}>
+                Save
+              </Button>
             </div>
           </div>
         </div>

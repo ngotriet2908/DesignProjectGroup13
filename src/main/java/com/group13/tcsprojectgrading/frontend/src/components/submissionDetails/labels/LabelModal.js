@@ -1,5 +1,6 @@
 import {Button, Modal, Form, InputGroup, FormControl, Card, Alert, ListGroup, Spinner} from 'react-bootstrap'
 import React, {Component} from "react";
+import FlagModalFlagView from "../FlagModalFlagView";
 import {request} from "../../../services/request";
 import globalStyles from "../../helpers/global.module.css";
 import {IoCheckmark, IoCheckmarkSharp, IoCloseOutline, IoAddOutline} from "react-icons/io5";
@@ -148,8 +149,7 @@ class LabelModal extends Component {
                   })
 
                   return(
-                    <div key={label.id} className={classnames(styles.labelModalColorRow, colorToStyles[label.color])}
-                      onClick={() => this.handleColorClick(label, isSelected)}>
+                    <div key={label.id} className={classnames(styles.labelModalColorRow, colorToStyles[label.color])} onClick={() => this.handleColorClick(label, isSelected)}>
                       <span>{label.name}</span>
                       {isSelected &&
                         <IoCheckmarkSharp size={20}/>

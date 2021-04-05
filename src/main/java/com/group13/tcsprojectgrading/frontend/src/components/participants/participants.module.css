@@ -30,15 +30,15 @@
     -webkit-animation: rotating 1s linear infinite;
 }
 
-.submissionContainer {
+.participantContainer {
     margin-top: 2rem;
 }
 
-.submissionCardLabels {
+.participantCardLabels {
     margin-bottom: 1rem;
 }
 
-.submissionCardLabels > * {
+.participantCardLabels > * {
     margin-right: 0.5rem;
 }
 
@@ -74,30 +74,30 @@
 
 /* list */
 
-.submissionCard {
+.participantCard {
     width: 100%;
 }
 
-.submissionCard:not(:last-child) {
+.participantCard:not(:last-child) {
     margin-bottom: 0.5rem;
 }
 
-.submissionCardTitle {
+.participantCardTitle {
     display: flex;
     flex-direction: row;
     align-items: center;
     /*margin-bottom: 0.5rem;*/
 }
 
-.submissionCardTitle h5 {
+.participantCardTitle h5 {
     margin: 0;
 }
 
-.submissionCardHeaderButtonContainer {
+.participantCardHeaderButtonContainer {
     flex: 1;
 }
 
-.submissionCardHeaderButtonContainer div {
+.participantCardHeaderButtonContainer div {
     float: right;
     color: primary;
 }
@@ -131,7 +131,7 @@
     background-color: senary;
 }
 
-.submissionCardBody {
+.participantCardBody {
 
 }
 
