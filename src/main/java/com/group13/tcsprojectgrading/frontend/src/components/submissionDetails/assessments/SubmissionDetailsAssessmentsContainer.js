@@ -21,26 +21,10 @@ class SubmissionDetailsAssessmentsContainer extends Component {
           {/*<div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.props.toggleEditing}>*/}
           {/*  <IoPencilOutline size={26}/>*/}
           {/*</div>*/}
-          <Button variant="lightGreen"><IoPencilOutline size={20} onClick={this.props.toggleEditing}/> Edit</Button>
+          <Button variant="lightGreen" onClick={this.props.toggleEditing}><IoPencilOutline size={20}/> Edit</Button>
         </div>
 
         <div className={styles.sectionContent}>
-          {/*<Card>*/}
-          {/*  <Card.Body>*/}
-          {/*<ListGroup>*/}
-          {/*  {this.props.submission.assessments.map((assessment) => {*/}
-          {/*    return (*/}
-          {/*      <ListGroupItem key={assessment.id}>*/}
-          {/*        <SubmissionDetailsAssessmentItemContainer*/}
-          {/*          params={this.props.params}*/}
-          {/*          submission={this.props.submission}*/}
-          {/*          assessment={assessment}/>*/}
-          {/*      </ListGroupItem>)*/}
-          {/*  })}*/}
-          {/*</ListGroup>*/}
-          {/*</Card.Body>*/}
-          {/*</Card>*/}
-
           {this.props.submission.assessments.map((assessment) => {
             return (
               <Card key={assessment.id}>

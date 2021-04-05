@@ -25,7 +25,7 @@ public class Assessment {
     @JsonIgnore
     @JsonManagedReference(value="assessment-issues")
     @OneToMany(mappedBy="assessment")
-    private List<Issue> issues;
+    private List<Issue> issues = new ArrayList<>();
 
     @ManyToOne
     @JsonBackReference(value="project-assessments")
@@ -34,8 +34,11 @@ public class Assessment {
     // members (not persisted)
     @Transient
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonSerialize(contentUsing= User.UserShortSerialiser.class)
+    @JsonSerialize(contentUsing= User.UserAssessmentSerialiser.class)
     private Set<User> members;
+
+    @Transient
+    private int progress;
 
     // grades
     @JsonManagedReference(value="assessment-grades")
@@ -60,6 +63,14 @@ public class Assessment {
         this.project = project;
         this.grades = grades;
         this.issues = issues;
+    }
+
+    public Assessment(Integer gradedCount, Integer finalGrade, Boolean finalGradeManual, Project project, Set<Grade> grades) {
+        this.gradedCount = gradedCount;
+        this.finalGrade = finalGrade;
+        this.finalGradeManual = finalGradeManual;
+        this.project = project;
+        this.grades = grades;
     }
 
     public Long getId() {
@@ -124,6 +135,14 @@ public class Assessment {
 
     public void setIssues(List<Issue> issues) {
         this.issues = issues;
+    }
+
+    public int getProgress() {
+        return progress;
+    }
+
+    public void setProgress(int progress) {
+        this.progress = progress;
     }
 
     @Override

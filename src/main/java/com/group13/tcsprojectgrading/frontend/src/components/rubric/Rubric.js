@@ -9,6 +9,7 @@ import RubricBottomBar from "./RubricBottomBar";
 
 import {request} from "../../services/request";
 import {BASE } from "../../services/endpoints";
+import {Form} from 'react-bootstrap'
 
 import {resetUpdates, saveRubric, saveRubricTemp, setCurrentPath, setSelectedElement} from "../../redux/rubric/actions";
 import {Spinner} from "react-bootstrap";
@@ -20,6 +21,7 @@ import {setCurrentLocation} from "../../redux/navigation/actions";
 
 import {Can, ability, updateAbility} from "../permissions/ProjectAbility";
 import classnames from 'classnames';
+import * as FileSaver from 'file-saver';
 
 class Rubric extends Component {
   constructor (props) {
@@ -113,6 +115,25 @@ class Rubric extends Component {
       });
   }
 
+  exportRubricFile = () => {
+    console.log("download")
+    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/rubric/downloadFile`, "GET", null ,"application/octet-stream")
+      .then(response => {
+        if (response.status === 200) {
+          return response.blob()
+        }
+      })
+      .then((blob) => {
+        const file = new Blob([blob], {type: "text/plain;charset=utf-8"});
+        let file_name = "Rubric " + this.state.project.name + ", " + Date().toLocaleString();
+        FileSaver.saveAs(file, file_name + ".txt");
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
+  }
+  
+  
   render () {
     if (!this.state.isLoaded) {
       return(
@@ -127,7 +148,7 @@ class Rubric extends Component {
     return (
       <div className={classnames(styles.container)}>
         <div className={styles.outline}>
-          <RubricOutline downloadRubric={this.downloadRubric} courseId={this.props.match.params.courseId} projectId={this.props.match.params.projectId}/>
+          <RubricOutline exportRubricFile={this.exportRubricFile} downloadRubric={this.downloadRubric} courseId={this.props.match.params.courseId} projectId={this.props.match.params.projectId}/>
         </div>
 
         <div className={styles.editor}>

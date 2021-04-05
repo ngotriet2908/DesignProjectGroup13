@@ -19,8 +19,8 @@ class ParticipantItemEdit extends Component {
             <IoTrashOutline size={26}/>
           </div>
         </div>
-        <h6>sid: {this.props.member.sid}</h6>
-        <h6>email: {this.props.member.email}</h6>
+        <h6>sid: {this.props.member.sNumber}</h6>
+        {/*<h6>email: {this.props.member.email}</h6>*/}
       </div>
     );
   }

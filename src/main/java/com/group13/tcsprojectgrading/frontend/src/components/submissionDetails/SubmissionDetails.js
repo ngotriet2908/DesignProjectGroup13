@@ -48,7 +48,8 @@ class SubmissionDetails extends Component {
 
       showLabelModal: false,
 
-      allParticipants: []
+      // allParticipants: [],
+      students: []
     }
   }
 
@@ -125,7 +126,7 @@ class SubmissionDetails extends Component {
 
   filterCurrentParticipant(participants) {
     return participants.filter((participant) => {
-      return !this.searchArray(this.state.submission.participants, participant)
+      return !this.searchArray(this.state.submission.members, participant)
     })
   }
 
@@ -166,14 +167,14 @@ class SubmissionDetails extends Component {
   }
 
   handleAddParticipant = () => {
-    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/participants`)
+    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/participants/students`)
       .then(response => {
         return response.json();
       })
       .then(data => {
         console.log(data);
         this.setState({
-          allParticipants: data.participants,
+          students: data,
           participantModalShow: true
         })
       })
@@ -355,7 +356,7 @@ class SubmissionDetails extends Component {
                   // <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.toggleAddingParticipant}>
                   //   <IoPencilOutline size={26}/>
                   // </div>
-                  <Button variant="lightGreen"><IoPencilOutline size={20} onClick={this.toggleAddingParticipant}/> Edit</Button>
+                  <Button variant="lightGreen" onClick={this.toggleAddingParticipant}><IoPencilOutline size={20}/> Edit</Button>
                   :
                   <div className={styles.buttonGroup}>
                     <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.handleAddParticipant}>
@@ -398,14 +399,14 @@ class SubmissionDetails extends Component {
           replaceLabels={this.replaceLabels}
         />
 
-        {/*<AddParticipantModal*/}
-        {/*  show={this.state.participantModalShow}*/}
-        {/*  onClose={this.onAddParticipantModalClose}*/}
-        {/*  participants={this.filterCurrentParticipant(this.state.allParticipants)}*/}
-        {/*  assessments={this.state.submission.assessments}*/}
-        {/*  params={this.props.match.params}*/}
-        {/*  updateSubmission={this.updateSubmission}*/}
-        {/*/>*/}
+        <AddParticipantModal
+          show={this.state.participantModalShow}
+          onClose={this.onAddParticipantModalClose}
+          participants={this.filterCurrentParticipant(this.state.students)}
+          assessments={this.state.submission.assessments}
+          params={this.props.match.params}
+          updateSubmission={this.updateSubmission}
+        />
       </div>
     );
   }

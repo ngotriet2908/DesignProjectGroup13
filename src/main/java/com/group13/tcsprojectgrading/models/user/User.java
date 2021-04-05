@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.group13.tcsprojectgrading.models.graders.GradingParticipation;
 import com.group13.tcsprojectgrading.models.grading.AssessmentLink;
@@ -28,6 +29,9 @@ public class User {
     private String email;
     private String sNumber;
     private String avatar;
+
+    @Transient
+    private boolean isCurrent;
 
     @JsonIgnore
     @OneToMany(mappedBy="id.user")
@@ -173,9 +177,17 @@ public class User {
         this.toGrade = toGrade;
     }
 
+    public boolean isCurrent() {
+        return isCurrent;
+    }
+
+    public void setCurrent(boolean current) {
+        isCurrent = current;
+    }
+
     /*
-        Serialiser for the main information of the user (without details).
-        */
+    Serialiser for the main information of the user (without details).
+    */
     public static class UserShortSerialiser extends JsonSerializer<User> {
         @Override
         public void serialize(User user, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
@@ -198,5 +210,17 @@ public class User {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public static class UserAssessmentSerialiser extends JsonSerializer<User> {
+        @Override
+        public void serialize(User user, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+            jsonGenerator.writeStartObject();
+            jsonGenerator.writeNumberField("id", user.getId());
+            jsonGenerator.writeStringField("name", user.getName());
+            jsonGenerator.writeStringField("sNumber", user.getsNumber());
+            jsonGenerator.writeBooleanField("isCurrentAssessment", user.isCurrent());
+            jsonGenerator.writeEndObject();
+        }
     }
 }

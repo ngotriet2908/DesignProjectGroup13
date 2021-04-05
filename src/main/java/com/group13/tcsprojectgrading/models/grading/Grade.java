@@ -41,6 +41,16 @@ public class Grade {
         this.isActive = isActive;
     }
 
+    public Grade(float grade, String description, boolean isActive, String criterionId, Assessment assessment, User grader, Date gradedAt) {
+        this.grade = grade;
+        this.description = description;
+        this.isActive = isActive;
+        this.criterionId = criterionId;
+        this.assessment = assessment;
+        this.grader = grader;
+        this.gradedAt = gradedAt;
+    }
+
     public Grade() {
     }
 

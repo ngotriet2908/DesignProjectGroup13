@@ -16,16 +16,17 @@ class ParticipantCard extends Component {
         <Card.Body>
           <Card.Title>
             <h5>
-              {this.props.participant.name}
+              {this.props.participant.id.user.name}
             </h5>
           </Card.Title>
           <div>
             <div className={styles.groupInfo}>
-              <h6>Status: {this.props.participant.status}</h6>
+              <h6>email: {this.props.participant.id.user.email}</h6>
+              <h6>sNumber: {this.props.participant.id.user.sNumber}</h6>
             </div>
               <div>
                 <h6>Submissions: {this.props.participant.submissions.length}</h6>
-                <Button onClick={() => store.dispatch(push(this.props.match.url +"/"+ this.props.participant.id))}>
+                <Button onClick={() => store.dispatch(push(this.props.match.url +"/"+ this.props.participant.id.user.id))}>
                   open </Button>
                 {/*<h6>Members List</h6>*/}
                 <ListGroup>

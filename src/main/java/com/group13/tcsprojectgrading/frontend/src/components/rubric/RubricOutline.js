@@ -11,7 +11,7 @@ import {
   saveRubricTemp,
   setCurrentPath,
   setEditingRubric,
-  setSelectedElement
+  setSelectedElement,
 } from "../../redux/rubric/actions";
 import {Can} from "../permissions/ProjectAbility";
 import {
@@ -19,14 +19,18 @@ import {
   IoCloseOutline,
   IoCodeDownloadOutline,
   IoPencil,
-  IoEllipsisVerticalOutline
+  IoEllipsisVerticalOutline,
+  IoCloudDownload,
+  IoCloudUploadSharp
+
 } from "react-icons/io5";
 import globalStyles from "../helpers/global.module.css";
 import classnames from "classnames";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
-import Dropdown from "react-bootstrap/Dropdown";
+import {Dropdown, Modal, Button} from "react-bootstrap";
 import {createNewBlock, createNewCriterion, removeAll} from "./helpers";
+import {Form} from 'react-bootstrap'
 
 
 class RubricOutline extends Component {
@@ -42,11 +46,29 @@ class RubricOutline extends Component {
       },
       children: this.props.rubric.children
     }
+
+    this.state = {
+      show: false,
+    }
+
+    this.fileUploaderRef = React.createRef()
   }
 
   onClickElement = (id, path) => {
     this.props.setSelectedElement(id);
     this.props.setCurrentPath(path);
+  }
+
+  openUploadModal = () => {
+    this.setState({
+      show: true
+    })
+  }
+
+  handleClose = () => {
+    this.setState({
+      show: false
+    })
   }
 
   onClickEdit = () => {
@@ -58,6 +80,28 @@ class RubricOutline extends Component {
 
   downloadRubric = () => {
     this.props.downloadRubric();
+  }
+
+  handleImportRubric = () => {
+    console.log(this.fileUploaderRef.current.files[0])
+    let formData = new FormData();
+    console.log(this.fileUploaderRef.current.files[0].size)
+    formData.append("rubric", this.fileUploaderRef.current.files[0]);
+
+    request(BASE + "courses/" + this.props.courseId + "/projects/" + this.props.projectId + "/rubric/uploadFile", "POST",
+      undefined, undefined, undefined, undefined, formData)
+      .then(response => {
+          return response.json()
+      })
+      .then((data) => {
+        this.props.saveRubric(data);
+        this.setState({
+          show: false
+        })
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
   }
 
   onClickCancelButton = () => {
@@ -115,6 +159,12 @@ class RubricOutline extends Component {
                 {/*</Can>*/}
                 <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.downloadRubric}>
                   <IoCodeDownloadOutline size={34}/>
+                </div>
+                <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.openUploadModal}>
+                  <IoCloudUploadSharp size={34}/>
+                </div>
+                <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.props.exportRubricFile}>
+                  <IoCloudDownload size={34}/>
                 </div>
               </div>)
               :
@@ -174,6 +224,31 @@ class RubricOutline extends Component {
             Empty
           </div>
         }
+
+        <Modal show={this.state.show} onHide={this.handleClose}>
+          <Modal.Header closeButton>
+            <Modal.Title>Import rubric</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form>
+              <Form.Group>
+                <Form.File ref={this.fileUploaderRef}
+                  name="file"
+                  label="Upload your rubric to avoid spending time creating them"
+                  id="fileUploadForm"
+                />
+              </Form.Group>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={this.handleClose}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={this.handleImportRubric}>
+              Upload
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     )
   }

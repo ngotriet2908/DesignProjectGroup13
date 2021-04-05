@@ -42,7 +42,6 @@ import static com.group13.tcsprojectgrading.controllers.Utils.groupPages;
 
 @Service
 public class CourseService {
-    private final SubmissionService submissionService;
     private final ProjectService projectService;
     private final RubricService rubricService;
     private final SettingsService settingsService;
@@ -58,7 +57,7 @@ public class CourseService {
     private final CanvasApi canvasApi;
 
     @Autowired
-    public CourseService(CanvasApi canvasApi, SubmissionService submissionService,
+    public CourseService(CanvasApi canvasApi,
                          CourseRepository courseRepository, UserRepository userRepository,
                          CourseParticipationRepository courseParticipationRepository,
                          ProjectRepository projectRepository, RubricService rubricService,
@@ -66,7 +65,6 @@ public class CourseService {
                          GradingParticipationRepository gradingParticipationRepository,
                          ProjectRoleService projectRoleService, ProjectService projectService
                          ) {
-        this.submissionService = submissionService;
         this.courseRepository = courseRepository;
         this.canvasApi = canvasApi;
         this.userRepository = userRepository;
@@ -320,6 +318,18 @@ public class CourseService {
         }
 
         return users;
+    }
+
+    public List<CourseParticipation> getCourseStudents(Long courseId) {
+        Optional<Course> courseOptional = this.courseRepository.findById(courseId);
+
+        if (courseOptional.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Course not found"
+            );
+        }
+
+        return this.courseParticipationRepository.findById_Course_IdAndRole_Name(courseId, RoleEnum.STUDENT.toString());
     }
 
     public List<CourseParticipation> getCourseTeachers(Long courseId) {

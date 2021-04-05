@@ -1,10 +1,15 @@
 package com.group13.tcsprojectgrading.models.course;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.group13.tcsprojectgrading.models.grading.AssessmentLink;
+import com.group13.tcsprojectgrading.models.submissions.Submission;
 import com.group13.tcsprojectgrading.models.user.User;
 import com.group13.tcsprojectgrading.models.permissions.Role;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class CourseParticipation {
@@ -48,6 +53,10 @@ public class CourseParticipation {
     @ManyToOne
     private Role role;
 
+    @Transient
+//    @JsonSerialize(contentUsing= Submission.SubmissionShortSerializer.class)
+    private List<Submission> submissions;
+
     public CourseParticipation() {
     }
 
@@ -70,5 +79,13 @@ public class CourseParticipation {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public List<Submission> getSubmissions() {
+        return submissions;
+    }
+
+    public void setSubmissions(List<Submission> submissions) {
+        this.submissions = submissions;
     }
 }
