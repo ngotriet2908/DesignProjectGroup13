@@ -10,15 +10,17 @@ import Submissions from "../submissions/Submissions";
 import SubmissionDetails from "../submissionDetails/SubmissionDetails";
 import NotFound from "../error/NotFound";
 import {URL_PREFIX} from "../../services/config";
+import Students from "../students/Students";
 import Settings from "../settings/Settings";
+import StudentDetails from "../studentDetails/StudentDetails";
 
 
 class ProjectRoutes extends Component {
   render () {
     return (
       <Switch>
-        <Route exact path={this.props.match.path + "/participants/:participantId"} component={ParticipantDetails}/>
-        <Route exact path={this.props.match.path + "/participants"} component={Participants}/>
+        <Route exact path={this.props.match.path + "/students/:studentId"} component={StudentDetails}/>
+        <Route exact path={this.props.match.path + "/students"} component={Students}/>
         <Route exact path={this.props.match.path + "/rubric"} component={Rubric}/>
         <Route exact path={this.props.match.path + "/graders"} component={GraderManagement}/>
         <Route exact path={this.props.match.path + "/submissions/:submissionId/assessments/:assessmentId/grading"} component={Grading}/>

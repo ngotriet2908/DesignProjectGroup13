@@ -1,6 +1,5 @@
 import {Button, Modal, Form, InputGroup, FormControl, Card, Alert, ListGroup} from 'react-bootstrap'
 import React, {Component} from "react";
-import FlagModalFlagView from "./FlagModalFlagView";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
 
@@ -29,7 +28,7 @@ class AddParticipantModal extends Component {
         }
       })
       .then(data => {
-          this.props.updateSubmission(data)
+        this.props.updateSubmission(data)
       })
       .catch(error => {
         this.setState({
@@ -43,11 +42,11 @@ class AddParticipantModal extends Component {
   render() {
     return (
       <Modal centered
-             backdrop="static"
-             size="lg"
-             show={this.props.show}
-             onHide={this.props.onClose}
-             // animation={false}
+        backdrop="static"
+        size="lg"
+        show={this.props.show}
+        onHide={this.props.onClose}
+        // animation={false}
         // onEnter={this.onShowHandle}
         // onExited={this.onExitHandle}
       >

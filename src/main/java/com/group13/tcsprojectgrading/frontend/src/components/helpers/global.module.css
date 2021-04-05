@@ -342,6 +342,11 @@
 
 .modalBodyContainerRowActiveDisabled {
     background-color: lightGray;
+    border: 1px solid lightGray;
+}
+
+.modalBodyContainerRowActive.modalBodyContainerRowActiveDisabled > *:first-child {
+    color: inherit;
 }
 
 .modalBodyContainerRowActive > *:first-child {
@@ -387,4 +392,15 @@
 
 .modalSpinner {
     color: primary;
+}
+
+/* list groups */
+:global(.list-group-item:first-of-type) {
+    border-top-right-radius: 0.5rem;
+    border-top-left-radius: 0.5rem;
+}
+
+:global(.list-group-item:last-of-type) {
+    border-bottom-right-radius: 0.5rem;
+    border-bottom-left-radius: 0.5rem;
 }
