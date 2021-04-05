@@ -1,33 +1,23 @@
+@value primary, secondary, ternary, quaternary, quinary, ultraLightGray, primaryShade, lightGray, senary, darkishGray, moderateGray from '../helpers/colors.css';
+
 .container {
-    padding: 2rem;
-    width: 100%;
-}
-
-.spinner{
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    color: dodgerblue;
-}
-
-.header {
-
-}
-.badge {
-    margin-left: 0.5rem;
+    margin-top: 2rem;
 }
 
 .toolbar {
     display: flex;
+    padding-top: 1rem;
     padding-bottom: 1rem;
     margin-bottom: 1rem;
-    border-bottom:1px solid gray;
+    border-bottom: 1px solid lightGray;
+}
 
+.toolbar > *:last-child {
+    margin-left: 0.5rem;
 }
 
 .groupsSearchBar {
-    display: flex;
-    margin-right: 1rem;
+    margin-right: 0.5rem;
     width: 100%;
 }
 
@@ -36,25 +26,41 @@
     display: flex;
 }
 
-.groupsContainer {
-    display: block;
-    list-style-type: none;
-    padding-right: 1rem;
-}
 
-.groupInfo {
+/* list */
 
-}
-
-.ul {
-    margin-top: 1rem;
-    padding-inline-start: 0;
-    display: block;
-}
-
-.userInfo {
+.studentCard {
     width: 100%;
-    display: inline-grid;
-    grid-template-columns: 47% 47% auto;
 }
 
+.studentCard:not(:last-child) {
+    /*margin-bottom: 0.5rem;*/
+    margin-bottom: 1rem;
+}
+
+.studentCardTitle {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    /*margin-bottom: 0.5rem;*/
+}
+
+.studentCardTitle h5 {
+    margin: 0;
+}
+
+.studentCardHeaderButtonContainer {
+    flex: 1;
+}
+
+.studentCardHeaderButtonContainer div {
+    float: right;
+    color: primary;
+}
+
+.submissionItemHeader {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}

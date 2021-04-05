@@ -2,11 +2,14 @@ import React, {Component} from "react";
 import styles from "./students.module.css";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
-import {ListGroup, ListGroupItem, Spinner, ButtonGroup, DropdownButton, Dropdown, FormControl} from "react-bootstrap";
-import ParticipantCard from "./StudentCard";
+import {Spinner, ButtonGroup, DropdownButton, Dropdown, FormControl} from "react-bootstrap";
+import StudentCard from "./StudentCard";
 import {setCurrentLocation} from "../../redux/navigation/actions";
 import {connect} from "react-redux";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
+import globalStyles from "../helpers/global.module.css";
+import Breadcrumbs from "../helpers/Breadcrumbs";
+import classnames from "classnames";
 class Students extends Component {
 
   constructor(props) {
@@ -15,7 +18,7 @@ class Students extends Component {
       participants: [],
       project: {},
       isLoaded: false,
-      filterChoice: "all",
+      filterChoice: "All",
       searchString: "",
     }
   }
@@ -25,15 +28,19 @@ class Students extends Component {
 
     Promise.all([
       request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/participants`),
-      request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}`)]
-    )
-      .then(async ([res1, res2]) =>  {
-        const participants = await res1.json();
+      request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}`),
+      request(BASE + "courses/" + this.props.match.params.courseId),
+    ])
+      .then(async ([res1, res2, res3]) =>  {
+        const students = await res1.json();
         const project = await res2.json();
+        const course = await res3.json();
+
         this.setState({
+          course: course,
           project: project,
-          participants: participants,
-          isLoading: false
+          students: students,
+          isLoaded: true,
         })
       })
       .catch(error => {
@@ -41,27 +48,26 @@ class Students extends Component {
       });
   }
 
-  onFilterSelectHandler = (eventKey, event) => {
+  onFilterSelectHandler = (eventKey) => {
     this.setState({
       filterChoice: eventKey
     })
   }
 
-  filterParticipantDropDown = (participant) => {
+  filterParticipantDropDown = () => {
     let filter = this.state.filterChoice
-    if (filter === "all") return true;
+    if (filter === "All") return true;
     // if (filter === "group") return group.isGroup;
     // if (filter === "individual") return !group.isGroup;
-    console.log("dumb filter error, check immediately")
     return false
   }
 
-  filterParticipantSearchChange = (participant) => {
-    let criteria = participant.name.toLowerCase().includes(this.state.searchString.toLowerCase())
+  filterParticipantSearchChange = (student) => {
+    let criteria = student.name.toLowerCase().includes(this.state.searchString.toLowerCase())
     if (criteria) return true
 
-    if (participant.hasOwnProperty("sid")) {
-      criteria = participant.sid.toLowerCase().includes(this.state.searchString.toLowerCase())
+    if (student.hasOwnProperty("sid")) {
+      criteria = student.sid.toLowerCase().includes(this.state.searchString.toLowerCase())
       if (criteria) return true
     }
 
@@ -75,16 +81,34 @@ class Students extends Component {
   }
 
   render () {
-    return (
-      (this.state.isLoading)?
-        <Spinner className={styles.spinner} animation="border" role="status">
-          <span className="sr-only">Loading...</span>
-        </Spinner>
-        :
+    if (!this.state.isLoaded) {
+      return(
+        <div className={globalStyles.container}>
+          <Spinner className={globalStyles.spinner} animation="border" role="status">
+            <span className="sr-only">Loading...</span>
+          </Spinner>
+        </div>
+      )
+    }
+
+    return(
+      <div className={globalStyles.container}>
+        <Breadcrumbs>
+          <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumbs.Item>
+          <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id ))}>{this.state.course.name}</Breadcrumbs.Item>
+          <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id + "/projects/"+this.state.project.id))}>{this.state.project.name}</Breadcrumbs.Item>
+          <Breadcrumbs.Item active>Students</Breadcrumbs.Item>
+        </Breadcrumbs>
+
+        <div className={classnames(globalStyles.titleContainer, styles.titleContainer, this.state.syncing && styles.titleContainerIconActive)}>
+          <h1>Students</h1>
+        </div>
+
         <div className={styles.container}>
-          <div className={styles.header}>
-            <h2>Students</h2>
+          <div>
+            <h3>Student List</h3>
           </div>
+
           <div className={styles.toolbar}>
             <FormControl className={styles.groupsSearchBar}
               type="text"
@@ -95,45 +119,40 @@ class Students extends Component {
               as={ButtonGroup}
               key={"primary"}
               id={`dropdown-Primary`}
-              variant={"primary"}
-              title={"Filter"}
-              onSelect={this.onFilterSelectHandler}
+              variant={"lightGreen"}
+              title={"Group Filter"}
+              onSelect={this.handleSearchChange}
             >
 
-              {["all", "divider", "group", "individual"].map((filterS) => {
+              {["All", "divider", "Group", "Individual"].map((filterS) => {
                 if (filterS === "divider") {
                   return <Dropdown.Divider key={filterS}/>
-                } else if (filterS === this.state.filterChoice) {
-                  return <Dropdown.Item key={filterS} eventKey={filterS} active>{filterS}</Dropdown.Item>
+                } else if (filterS === this.state.filterGroupChoice) {
+                  return <Dropdown.Item variant="lightGreen" key={filterS} eventKey={filterS} active>{filterS}</Dropdown.Item>
                 } else {
                   return <Dropdown.Item key={filterS} eventKey={filterS}>{filterS}</Dropdown.Item>
                 }
               })}
             </DropdownButton>
           </div>
-          <ListGroup className={styles.participantsContainer}>
+
+          <div>
             {
-              this.state.participants
-                .filter((participant) => {
-                  return this.filterParticipantDropDown(participant.id.user) && this.filterParticipantSearchChange(participant.id.user);
+              this.state.students
+                .filter((student) => {
+                  return this.filterParticipantDropDown(student.id.user) && this.filterParticipantSearchChange(student.id.user);
                 })
-                // .sort((group1, group2) => {
-                //   // console.log(this.compareFunction(group1, group2, ["name"]))
-                //   return this.compareFunction(group1, group2,
-                //     [{criterion: "isGroup", order: false}, {criterion: "name", order: true}])
-                // })
-                .map((participant) => {
+                .map((student) => {
                   return (
-                    <ListGroupItem key={participant.id.user.id} className={styles.ul}>
-                      {<ParticipantCard match={this.props.match} participant={participant}/>}
-                    </ListGroupItem>
+                    <StudentCard key={student.id.user.id} match={this.props.match} participant={student}/>
                   )
                 })}
-          </ListGroup>
+          </div>
         </div>
+
+      </div>
     )
   }
-
 }
 
 const actionCreators = {

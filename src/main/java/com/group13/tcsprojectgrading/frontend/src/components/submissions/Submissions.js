@@ -231,7 +231,6 @@ class Submissions extends Component {
       </div>
     )
   }
-
 }
 
 const actionCreators = {

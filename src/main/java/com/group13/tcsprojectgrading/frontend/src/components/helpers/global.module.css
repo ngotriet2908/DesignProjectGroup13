@@ -155,6 +155,7 @@
     align-items: center;
     justify-content: center;
     width: auto;
+    min-height: 48px;
 }
 
 :global(.btn svg) {

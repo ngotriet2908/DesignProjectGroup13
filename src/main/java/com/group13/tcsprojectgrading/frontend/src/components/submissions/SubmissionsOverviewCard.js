@@ -8,15 +8,16 @@ import classnames from "classnames";
 import globalStyles from "../helpers/global.module.css";
 import {colorToStyles} from "../submissionDetails/labels/LabelRow";
 
+
 class SubmissionsOverviewCard extends Component {
   render() {
     return (
       <Card className={styles.submissionCard}>
         <Card.Body>
           <div className={styles.submissionCardTitle}>
-            <h5>
+            <h4>
               {this.props.submission.name}
-            </h5>
+            </h4>
 
             <div className={styles.submissionCardHeaderButtonContainer}>
               <div className={classnames(globalStyles.iconButton)}
@@ -73,7 +74,7 @@ class SubmissionsOverviewCard extends Component {
             <p>Submitted on {(new Date(this.props.submission.submittedAt)).toDateString()}</p>
             {/*<p>Progress: {this.props.submission.progress}%</p>*/}
             <ListGroup>
-              <p>Members:</p>
+              {/*<p>Members:</p>*/}
               {this.props.submission.members.map((member) => {
                 return (
                   <ListGroup.Item key={member.id}>

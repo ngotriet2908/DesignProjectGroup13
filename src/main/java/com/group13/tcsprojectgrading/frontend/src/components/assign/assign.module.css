@@ -18,15 +18,12 @@
 /*}*/
 
 .groupsSearchBar {
-    /*margin-right: 0.5rem;*/
     width: 100%;
 }
-
 
 /* grader card */
 .graderContainer {
     margin-bottom: 1rem;
-    /*margin-bottom: 0.5rem;*/
 }
 
 .graderBodyContainer {
@@ -46,7 +43,18 @@
 }
 
 .graderHeaderButtonContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
 
+.graderHeaderButtonContainer > button {
+    margin-right: 0.5rem;
+}
+
+.collapseButton:hover {
+    color: inherit;
+    background-color: ultraLightGray;
 }
 
 .graderContent {
@@ -82,21 +90,6 @@
 
 .graderSubmissionContainer > div:nth-child(1) {
     padding: 0.7rem 0;
-}
-
-.outlineButton {
-    padding: 0.5rem;
-    font-size: 1.3rem;
-    border-radius: 5px;
-
-    cursor: pointer;
-    transition: all .1s ease-out;
-
-    /*margin: 1rem 0;*/
-}
-
-.outlineButton:hover {
-    background-color: ultraLightGray;
 }
 
 
