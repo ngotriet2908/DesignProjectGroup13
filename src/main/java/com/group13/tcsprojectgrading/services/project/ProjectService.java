@@ -122,7 +122,7 @@ public class ProjectService {
     Returns a list of projects belonging to the course.
      */
     @Transactional(value = Transactional.TxType.MANDATORY)
-    public List<Project> getProjectsByCourseId(Long courseId) {
+    public List<Project> getProjectsByCourseId(Long courseId) throws ResponseStatusException{
         return projectRepository.findProjectsByCourse_Id(courseId);
     }
 
@@ -130,7 +130,8 @@ public class ProjectService {
     Returns user's to-do list (list of projects in which the user has assigned grading tasks).
      */
     // TODO, disabled
-    public List<Project> getToDoList(Long userId) {
+    @Transactional
+    public List<Project> getToDoList(Long userId) throws ResponseStatusException {
         return this.projectRepository.getToDoList(userId);
     }
 
@@ -162,7 +163,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public CourseParticipation getProjectParticipant(Long courseId, Long projectId, Long participantId) {
+    public CourseParticipation getProjectParticipant(Long courseId, Long projectId, Long participantId) throws ResponseStatusException{
         CourseParticipation courseParticipation = courseParticipationRepository.findById_User_IdAndId_Course_Id(participantId, courseId);
         User user = userService.findById(participantId);
 
@@ -188,8 +189,13 @@ public class ProjectService {
         return this.projectRepository.findById(projectId).orElse(null);
     }
 
+    @Transactional(Transactional.TxType.MANDATORY)
+    public Project getProjectWithLock(Long projectId) {
+        return this.projectRepository.findProjectById(projectId).orElse(null);
+    }
+
     @Transactional
-    public String getProject(Long projectId, Long userId) throws IOException {
+    public String getProject(Long projectId, Long userId) throws IOException, ResponseStatusException {
         Project project = this.projectRepository.findById(projectId).orElse(null);
 
         if (project == null) {
@@ -207,10 +213,10 @@ public class ProjectService {
         }
     }
 
-    @Transactional
+    @Transactional(rollbackOn = Exception.class)
     public void syncProject(Long projectId, ArrayNode submissionsArray) throws ResponseStatusException {
         // retrieve project
-        Project project = getProject(projectId);
+        Project project = getProjectWithLock(projectId);
 
         // throw error if project does not exist
         if (project == null) {
@@ -226,6 +232,11 @@ public class ProjectService {
 
         // for each submission
         for (JsonNode submissionNode : submissionsArray) {
+//            try {
+//                Thread.sleep(1000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
             // 'unsubmitted' submission
             if (submissionNode.get("workflow_state").asText().equals("unsubmitted")) {
                 continue;
@@ -344,7 +355,7 @@ public class ProjectService {
     Returns the list of people who participate in the project as graders.
      */
     @Transactional
-    public List<User> getProjectGraders(Long projectId) throws IOException {
+    public List<User> getProjectGraders(Long projectId) throws IOException, ResponseStatusException {
         Project project = this.projectRepository.findById(projectId).orElse(null);
 
         if (project == null) {
@@ -399,7 +410,7 @@ public class ProjectService {
     Update the rubric with patches (patches are applied sequentially).
      */
     @Transactional(rollbackOn = Exception.class)
-    public String updateRubric(Long projectId, JsonNode patch) throws JsonProcessingException {
+    public String updateRubric(Long projectId, JsonNode patch) throws JsonProcessingException, ResponseStatusException {
         Project project = getProject(projectId);
         if (project == null) {
             throw new ResponseStatusException(
@@ -408,7 +419,7 @@ public class ProjectService {
         }
 
         System.out.println("Updating the rubric of project " + projectId + ".");
-        Rubric rubric = this.rubricService.getRubricById(projectId);
+        Rubric rubric = this.rubricService.getRubricAndLock(projectId);
 
         // apply update and mark affected submissions
         Rubric rubricPatched = this.rubricService.applyUpdate(patch, rubric);
@@ -431,7 +442,7 @@ public class ProjectService {
     Returns the rubric of the project.
      */
     @Transactional
-    public String getRubric(Long projectId) throws JsonProcessingException {
+    public String getRubric(Long projectId) throws JsonProcessingException, ResponseStatusException {
         Project project = getProject(projectId);
         if (project == null) {
             throw new ResponseStatusException(
@@ -455,7 +466,7 @@ public class ProjectService {
     Returns a list of labels that were created within the project.
      */
     @Transactional(rollbackOn = Exception.class)
-    public String importRubric(Long projectId, String rubricJson) {
+    public String importRubric(Long projectId, String rubricJson) throws ResponseStatusException {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             Rubric rubric = objectMapper.readValue(rubricJson, Rubric.class);
@@ -469,7 +480,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public byte[] getRubricFile(Long projectId) throws JsonProcessingException {
+    public byte[] getRubricFile(Long projectId) throws JsonProcessingException, ResponseStatusException {
         Project project = getProject(projectId);
         if (project == null) {
             throw new ResponseStatusException(
@@ -490,7 +501,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public List<Label> getProjectLabels(Long projectId) {
+    public List<Label> getProjectLabels(Long projectId) throws ResponseStatusException {
         Project project = getProject(projectId);
 
         if (project == null) {
@@ -502,11 +513,8 @@ public class ProjectService {
         return this.labelRepository.findByProjectId(projectId);
     }
 
-    /*
-    Saves a new label in the project.
-     */
-    @Transactional
-    public Label saveProjectLabel(Label label, Long projectId) {
+    @Transactional(rollbackOn = Exception.class)
+    public Label saveProjectLabel(Label label, Long projectId) throws ResponseStatusException {
         Project project = getProject(projectId);
 
         if (project == null) {
@@ -557,7 +565,7 @@ public class ProjectService {
 
 
     @Transactional
-    public byte[] getProjectExcel(Long projectId) throws IOException {
+    public byte[] getProjectExcel(Long projectId) throws IOException, ResponseStatusException {
         Project project = getProject(projectId);
         if (project == null) {
             throw new ResponseStatusException(
@@ -602,7 +610,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public List<FeedbackTemplate> getFeedbackTemplates(Long projectId) {
+    public List<FeedbackTemplate> getFeedbackTemplates(Long projectId) throws ResponseStatusException {
         Project project = getProject(projectId);
         if (project == null) {
             throw new ResponseStatusException(
@@ -613,8 +621,8 @@ public class ProjectService {
         return feedbackService.getTemplatesFromProject(project);
     }
 
-    @Transactional
-    public List<FeedbackTemplate> createFeedbackTemplate(Long projectId, ObjectNode objectNode) {
+    @Transactional(rollbackOn = Exception.class)
+    public List<FeedbackTemplate> createFeedbackTemplate(Long projectId, ObjectNode objectNode) throws ResponseStatusException {
         Project project = getProject(projectId);
         if (project == null) {
             throw new ResponseStatusException(
@@ -633,8 +641,8 @@ public class ProjectService {
         return feedbackService.getTemplatesFromProject(project);
     }
 
-    @Transactional
-    public List<FeedbackTemplate> updateFeedbackTemplate(Long projectId, Long templateId, ObjectNode objectNode) {
+    @Transactional(rollbackOn = Exception.class)
+    public List<FeedbackTemplate> updateFeedbackTemplate(Long projectId, Long templateId, ObjectNode objectNode) throws ResponseStatusException {
         Project project = getProject(projectId);
         if (project == null) {
             throw new ResponseStatusException(
@@ -654,8 +662,8 @@ public class ProjectService {
         return feedbackService.getTemplatesFromProject(project);
     }
 
-    @Transactional
-    public List<FeedbackTemplate> deleteUpdateTemplate(Long projectId, Long templateId) {
+    @Transactional(rollbackOn = Exception.class)
+    public List<FeedbackTemplate> deleteUpdateTemplate(Long projectId, Long templateId) throws ResponseStatusException {
         Project project = getProject(projectId);
         if (project == null) {
             throw new ResponseStatusException(
@@ -669,7 +677,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public List<CourseParticipation> allFinishedGradedUser(Long projectId) {
+    public List<CourseParticipation> allFinishedGradedUser(Long projectId) throws ResponseStatusException {
         Project project = getProject(projectId);
         if (project == null) {
             throw new ResponseStatusException(
@@ -701,7 +709,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public List<CourseParticipation> allFinishedGradedUserNotSent(Long projectId) {
+    public List<CourseParticipation> allFinishedGradedUserNotSent(Long projectId) throws ResponseStatusException {
         Project project = getProject(projectId);
         if (project == null) {
             throw new ResponseStatusException(
@@ -863,7 +871,7 @@ public class ProjectService {
                                 GoogleAuthorizationCodeFlow flow,
                                 Rubric rubric,
                                 String teacherId
-                                    ) throws IOException, MessagingException {
+                                    ) throws IOException, MessagingException, ResponseStatusException {
         System.out.println("getting credential for " + teacherId);
         Credential credential = flow.loadCredential(teacherId);
         if (credential == null) {

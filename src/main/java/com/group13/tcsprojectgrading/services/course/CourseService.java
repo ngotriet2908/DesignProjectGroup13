@@ -24,7 +24,7 @@ import com.group13.tcsprojectgrading.services.permissions.RoleService;
 import com.group13.tcsprojectgrading.services.project.ProjectService;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
 import com.group13.tcsprojectgrading.services.settings.SettingsService;
-import com.group13.tcsprojectgrading.services.submissions.SubmissionService;
+import com.group13.tcsprojectgrading.services.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -51,8 +51,8 @@ public class CourseService {
     private final CourseRepository courseRepository;
     private final GradingParticipationRepository gradingParticipationRepository;
     private final ProjectRepository projectRepository;
-    private final UserRepository userRepository;
     private final CourseParticipationRepository courseParticipationRepository;
+    private final UserService userService;
 
     private final CanvasApi canvasApi;
 
@@ -63,11 +63,10 @@ public class CourseService {
                          ProjectRepository projectRepository, RubricService rubricService,
                          SettingsService settingsService, RoleService roleService,
                          GradingParticipationRepository gradingParticipationRepository,
-                         ProjectRoleService projectRoleService, ProjectService projectService
-                         ) {
+                         ProjectRoleService projectRoleService, ProjectService projectService,
+                         UserService userService) {
         this.courseRepository = courseRepository;
         this.canvasApi = canvasApi;
-        this.userRepository = userRepository;
         this.courseParticipationRepository = courseParticipationRepository;
         this.projectRepository = projectRepository;
         this.rubricService = rubricService;
@@ -76,13 +75,14 @@ public class CourseService {
         this.gradingParticipationRepository = gradingParticipationRepository;
         this.projectRoleService = projectRoleService;
         this.projectService = projectService;
+        this.userService = userService;
     }
 
     /*
     Imports selected courses into the app
      */
-    @Transactional
-    public void importCourses(ArrayNode courses) throws IOException, ParseException {
+    @Transactional(rollbackOn = Exception.class)
+    public void importCourses(ArrayNode courses) throws IOException, ResponseStatusException {
         // for each course that was added
         for (JsonNode courseToImport: courses) {
             // TODO: users should submit only course ids, rest info should be fetched here directly
@@ -97,6 +97,11 @@ public class CourseService {
 
             // create course
             Course course = new Course(id, name, startAt);
+            if (courseRepository.existsById(course.getId())) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT, "Course exist"
+                );
+            }
             this.courseRepository.save(course);
 
             // fetch users and for each create a) User b) Participation
@@ -131,7 +136,7 @@ public class CourseService {
                     continue;
                 }
 
-                this.userRepository.save(user);
+                this.userService.saveUser(user);
 
                 // save user's participation to db
                 CourseParticipation participation = new CourseParticipation(user, course, this.roleService.findRoleByName(role.toString()));
@@ -140,10 +145,15 @@ public class CourseService {
         }
     }
 
-    @Transactional
-    public void syncCourse(Long courseId) throws JsonProcessingException {
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public Course getCourseWithLock(Long courseId) throws ResponseStatusException {
+        return this.courseRepository.findCourseById(courseId).orElse(null);
+    }
+
+    @Transactional(rollbackOn = Exception.class)
+    public void syncCourse(Long courseId) throws JsonProcessingException, ResponseStatusException{
         // get course (can also be used to update it if required)
-        Course course = this.courseRepository.findById(courseId).orElse(null);
+        Course course = getCourseWithLock(courseId);
 
         if (course == null) {
              throw new ResponseStatusException(
@@ -183,7 +193,7 @@ public class CourseService {
                 continue;
             }
 
-            this.userRepository.save(user);
+            this.userService.saveUser(user);
 
             // save user's participation to db
             CourseParticipation participation = new CourseParticipation(user, course, this.roleService.findRoleByName(role.toString()));
@@ -195,12 +205,12 @@ public class CourseService {
     Returns all imported courses that the user participates in.
      */
     @Transactional
-    public List<Course> getCourses(Long userId) throws JsonProcessingException {
-        Optional<User> user = this.userRepository.findById(userId);
+    public List<Course> getCourses(Long userId) throws JsonProcessingException, ResponseStatusException{
+        User user = this.userService.findById(userId);
 
         List<Course> courses = new ArrayList<>();
-        if (user.isPresent()) {
-            List<CourseParticipation> userCourseParticipations = user.get().getCourses();
+        if (user != null) {
+            List<CourseParticipation> userCourseParticipations = user.getCourses();
 
             for (CourseParticipation course: userCourseParticipations) {
                 courses.add(course.getId().getCourse());
@@ -213,7 +223,7 @@ public class CourseService {
     }
 
     @Transactional
-    public String getCourse(Long courseId, Long userId) throws IOException {
+    public String getCourse(Long courseId, Long userId) throws IOException, ResponseStatusException{
         Course course = this.courseRepository.findById(courseId).orElse(null);
 
         if (course == null) {
@@ -231,17 +241,15 @@ public class CourseService {
     /*
     Imports selected projects into the app
      */
-    @Transactional
-    public void importProjects(ArrayNode projects, Long courseId, Long userId) throws JsonProcessingException {
-        Optional<Course> courseOptional = this.courseRepository.findById(courseId);
+    @Transactional(rollbackOn = Exception.class)
+    public void importProjects(ArrayNode projects, Long courseId, Long userId) throws JsonProcessingException, ResponseStatusException {
+        Course course = getCourseWithLock(courseId);
 
-        if (courseOptional.isEmpty()) {
+        if (course == null) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Course not found"
             );
         }
-
-        Course course = courseOptional.get();
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -262,6 +270,12 @@ public class CourseService {
             // TODO fetch submissions here (i.e. do the initial sync)
 
             // save project
+            Project project1 = projectRepository.findProjectsById(projectId);
+            if (project1 != null) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT, "project existed"
+                );
+            }
             this.projectRepository.save(project);
 
             // create rubric
@@ -300,7 +314,8 @@ public class CourseService {
         }
     }
 
-    public List<User> getCourseParticipants(Long courseId) {
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public List<User> getCourseParticipants(Long courseId) throws ResponseStatusException {
         Optional<Course> courseOptional = this.courseRepository.findById(courseId);
 
         if (courseOptional.isEmpty()) {
@@ -320,7 +335,8 @@ public class CourseService {
         return users;
     }
 
-    public List<CourseParticipation> getCourseStudents(Long courseId) {
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public List<CourseParticipation> getCourseStudents(Long courseId) throws ResponseStatusException {
         Optional<Course> courseOptional = this.courseRepository.findById(courseId);
 
         if (courseOptional.isEmpty()) {
@@ -332,7 +348,8 @@ public class CourseService {
         return this.courseParticipationRepository.findById_Course_IdAndRole_Name(courseId, RoleEnum.STUDENT.toString());
     }
 
-    public List<CourseParticipation> getCourseTeachers(Long courseId) {
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public List<CourseParticipation> getCourseTeachers(Long courseId) throws ResponseStatusException {
         Optional<Course> courseOptional = this.courseRepository.findById(courseId);
 
         if (courseOptional.isEmpty()) {
@@ -344,7 +361,8 @@ public class CourseService {
         return this.courseParticipationRepository.findById_Course_IdAndRole_Name(courseId, RoleEnum.TEACHER.toString());
     }
 
-    public List<CourseParticipation> getCourseTeachersAndTAs(Long courseId) {
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public List<CourseParticipation> getCourseTeachersAndTAs(Long courseId) throws ResponseStatusException {
         Optional<Course> courseOptional = this.courseRepository.findById(courseId);
 
         if (courseOptional.isEmpty()) {
@@ -360,6 +378,7 @@ public class CourseService {
         return this.courseParticipationRepository.findById_Course_IdAndRole_NameIsIn(courseId, roles);
     }
 
+    @Transactional
     public List<User> getCourseTeachersAsUsers(Long courseId) {
         Optional<Course> courseOptional = this.courseRepository.findById(courseId);
 
@@ -379,6 +398,7 @@ public class CourseService {
         return users;
     }
 
+    @Transactional
     public List<User> getCourseTeachersAndTAsAsUsers(Long courseId) {
         Course course = this.courseRepository.findById(courseId).orElse(null);
 
@@ -402,7 +422,8 @@ public class CourseService {
         return users;
     }
 
-    public User getCourseParticipant(Long courseId, Long userId) {
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public User getCourseParticipant(Long courseId, Long userId) throws ResponseStatusException {
         Optional<Course> courseOptional = this.courseRepository.findById(courseId);
 
         if (courseOptional.isEmpty()) {
@@ -415,13 +436,19 @@ public class CourseService {
 
         CourseParticipation courseParticipation = this.courseParticipationRepository.findById(
                 new CourseParticipation.Pk(new User(userId), course)
-        );
+        ).orElse(null);
 
+        if (courseParticipation == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Course not found"
+            );
+        }
         return courseParticipation.getId().getUser();
     }
 
-    public RoleEnum getCourseRole(Long courseId, Long userId) {
-        if (!(this.userRepository.existsById(userId) && this.courseRepository.existsById(courseId))) {
+    @Transactional
+    public RoleEnum getCourseRole(Long courseId, Long userId) throws ResponseStatusException {
+        if (!((this.userService.findById(userId) != null) && this.courseRepository.existsById(courseId))) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Course or user not found"
             );

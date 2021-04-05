@@ -144,7 +144,10 @@ class Students extends Component {
                 })
                 .map((student) => {
                   return (
-                    <StudentCard key={student.id.user.id} match={this.props.match} participant={student}/>
+                    <StudentCard
+                      key={student.id.user.id}
+                      match={this.props.match}
+                      participant={student}/>
                   )
                 })}
           </div>
@@ -161,7 +164,7 @@ const actionCreators = {
 
 const mapStateToProps = state => {
   return {
-    user: state.users.self
+
   };
 };
 
