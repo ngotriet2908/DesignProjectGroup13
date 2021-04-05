@@ -334,7 +334,23 @@ public class CourseService {
         return this.courseParticipationRepository.findById_Course_IdAndRole_Name(courseId, RoleEnum.TEACHER.toString());
     }
 
-    public List<User> getCourseTeachersUsers(Long courseId) {
+    public List<CourseParticipation> getCourseTeachersAndTAs(Long courseId) {
+        Optional<Course> courseOptional = this.courseRepository.findById(courseId);
+
+        if (courseOptional.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Course not found"
+            );
+        }
+
+        Collection<String> roles = new HashSet<>();
+        roles.add(RoleEnum.TEACHER.toString());
+        roles.add(RoleEnum.TA.toString());
+
+        return this.courseParticipationRepository.findById_Course_IdAndRole_NameIsIn(courseId, roles);
+    }
+
+    public List<User> getCourseTeachersAsUsers(Long courseId) {
         Optional<Course> courseOptional = this.courseRepository.findById(courseId);
 
         if (courseOptional.isEmpty()) {
@@ -345,6 +361,29 @@ public class CourseService {
 
         List<CourseParticipation> courseParticipationList =
                 this.courseParticipationRepository.findById_Course_IdAndRole_Name(courseId, RoleEnum.TEACHER.toString());
+        List<User> users = new ArrayList<>();
+        for (CourseParticipation courseParticipation : courseParticipationList) {
+            users.add(courseParticipation.getId().getUser());
+        }
+
+        return users;
+    }
+
+    public List<User> getCourseTeachersAndTAsAsUsers(Long courseId) {
+        Course course = this.courseRepository.findById(courseId).orElse(null);
+
+        if (course == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Course not found"
+            );
+        }
+
+        Collection<String> roles = new HashSet<>();
+        roles.add(RoleEnum.TEACHER.toString());
+        roles.add(RoleEnum.TA.toString());
+
+        List<CourseParticipation> courseParticipationList = this.courseParticipationRepository.findById_Course_IdAndRole_NameIsIn(courseId, roles);
+
         List<User> users = new ArrayList<>();
         for (CourseParticipation courseParticipation : courseParticipationList) {
             users.add(courseParticipation.getId().getUser());

@@ -2,16 +2,20 @@ package com.group13.tcsprojectgrading.models.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.group13.tcsprojectgrading.models.graders.GradingParticipation;
 import com.group13.tcsprojectgrading.models.grading.AssessmentLink;
 import com.group13.tcsprojectgrading.models.course.CourseParticipation;
+import com.group13.tcsprojectgrading.models.submissions.Label;
+import com.group13.tcsprojectgrading.models.submissions.Submission;
 
 import javax.persistence.*;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -33,23 +37,51 @@ public class User {
     @OneToMany(mappedBy="id.user")
     private List<AssessmentLink> assessments;
 
+    @JsonIgnore
+    @OneToMany(mappedBy="id.user")
+    private List<GradingParticipation> projects;
+
+    // submissions to grade
+//    @Transient
+    @JsonProperty("submissions")
+    @OneToMany(mappedBy="grader", fetch = FetchType.LAZY)
+    private Set<Submission> toGrade; // = new HashSet<>();
+
     public User(Long id, String name, String email, String sNumber, String avatar) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.courses = new ArrayList<>();
         this.assessments = new ArrayList<>();
+        this.projects = new ArrayList<>();
+        this.toGrade = new HashSet<>();
         this.sNumber = sNumber;
         this.avatar = avatar;
     }
 
-    public User(Long id, String name, String email, String sNumber, List<CourseParticipation> courses, List<AssessmentLink> assessments) {
+    public User(Long id, String name, String email, String sNumber, String avatar, List<CourseParticipation> courses,
+                List<AssessmentLink> assessments, List<GradingParticipation> projects) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.sNumber = sNumber;
+        this.avatar = avatar;
         this.courses = courses;
         this.assessments = assessments;
+        this.projects = projects;
+    }
+
+    public User(Long id, String name, String email, String sNumber, String avatar, List<CourseParticipation> courses,
+                List<AssessmentLink> assessments, List<GradingParticipation> projects, Set<Submission> toGrade) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.sNumber = sNumber;
+        this.avatar = avatar;
+        this.courses = courses;
+        this.assessments = assessments;
+        this.projects = projects;
+        this.toGrade = toGrade;
     }
 
     public User(Long id, String name) {
@@ -57,12 +89,17 @@ public class User {
         this.name = name;
     }
 
+    public User(Long id, String name, Set<Submission> toGrade) {
+        this.id = id;
+        this.name = name;
+        this.toGrade = toGrade;
+    }
+
     public User(Long id) {
         this.id = id;
     }
 
-    public User() {
-    }
+    public User() { }
 
     public String getAvatar() {
         return avatar;
@@ -120,9 +157,25 @@ public class User {
         this.sNumber = sNumber;
     }
 
+    public List<GradingParticipation> getProjects() {
+        return projects;
+    }
+
+    public void setProjects(List<GradingParticipation> projects) {
+        this.projects = projects;
+    }
+
+    public Set<Submission> getToGrade() {
+        return toGrade;
+    }
+
+    public void setToGrade(Set<Submission> toGrade) {
+        this.toGrade = toGrade;
+    }
+
     /*
-    Serialiser for the main information of the user (without details).
-     */
+        Serialiser for the main information of the user (without details).
+        */
     public static class UserShortSerialiser extends JsonSerializer<User> {
         @Override
         public void serialize(User user, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
@@ -132,5 +185,18 @@ public class User {
             jsonGenerator.writeStringField("sNumber", user.getsNumber());
             jsonGenerator.writeEndObject();
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return id.equals(user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

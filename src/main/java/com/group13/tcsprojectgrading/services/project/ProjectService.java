@@ -60,8 +60,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Principal;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.*;
@@ -484,6 +482,9 @@ public class ProjectService {
         }
     }
 
+    /*
+    Returns the list of people who participate in the project as graders.
+     */
     @Transactional
     public List<User> getProjectGraders(Long projectId) throws IOException {
         Project project = this.projectRepository.findById(projectId).orElse(null);
@@ -494,14 +495,46 @@ public class ProjectService {
             );
         }
 
-//        // TODO just check if grader?
 //        List<PrivilegeEnum> privileges = this.gradingParticipationService.getPrivilegesFromUserIdAndProject(userId, projectId);
 //
 //        if (privileges == null) {
 //            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorised");
 //        }
 
-        return this.gradingParticipationService.getProjectUsers(projectId);
+        return this.gradingParticipationService.getProjectGradersWithSubmissions(projectId);
+    }
+
+    /*
+    Saves the passed list of users as graders for the project.
+    (can be replaced by a more efficient version)
+     */
+    @Transactional
+    public List<User> saveProjectGraders(Long projectId, List<User> graders, Long userId) throws IOException {
+        Project project = this.projectRepository.findById(projectId).orElse(null);
+
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Project not found"
+            );
+        }
+
+        if  (!graders.contains(new User(userId))) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Self must be explicitly included as a grader"
+            );
+        }
+
+        // move all submissions of the removed graders to 'unassigned' (i.e. all graders that are not in the selected list)
+        // for all submissions, if submission's grader is NOT in USERS, set grader to null
+        this.submissionService.dissociateSubmissionsFromUsers(graders);
+
+        // remove all graders
+        this.gradingParticipationService.deleteAllGradingParticipationByProject(projectId);
+
+        // add new graders
+        this.gradingParticipationService.addUsersAsGraders(graders, project);
+
+        return this.getProjectGraders(projectId);
     }
 
     /*
@@ -536,6 +569,9 @@ public class ProjectService {
         return "Rubric updated";
     }
 
+    /*
+    Returns the rubric of the project.
+     */
     @Transactional
     public String getRubric(Long projectId) throws JsonProcessingException {
         Project project = getProject(projectId);
@@ -557,6 +593,9 @@ public class ProjectService {
         }
     }
 
+    /*
+    Returns a list of labels that were created within the project.
+     */
     @Transactional
     public List<Label> getProjectLabels(Long projectId) {
         Project project = getProject(projectId);
@@ -570,6 +609,9 @@ public class ProjectService {
         return this.labelRepository.findByProjectId(projectId);
     }
 
+    /*
+    Saves a new label in the project.
+     */
     @Transactional
     public Label saveProjectLabel(Label label, Long projectId) {
         Project project = getProject(projectId);

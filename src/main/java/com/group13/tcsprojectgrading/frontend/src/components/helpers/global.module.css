@@ -342,6 +342,11 @@
 
 .modalBodyContainerRowActiveDisabled {
     background-color: lightGray;
+    border: 1px solid lightGray;
+}
+
+.modalBodyContainerRowActive.modalBodyContainerRowActiveDisabled > *:first-child {
+    color: inherit;
 }
 
 .modalBodyContainerRowActive > *:first-child {

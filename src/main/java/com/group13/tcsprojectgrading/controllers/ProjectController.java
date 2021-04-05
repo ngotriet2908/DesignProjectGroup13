@@ -114,6 +114,9 @@ public class ProjectController {
 //        return (new ObjectMapper()).createObjectNode();
 //    }
 
+    /*
+    Returns the list of people who are assigned to grade submissions in the project.
+     */
     @RequestMapping(value = "/{projectId}/graders", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     protected List<User> getProjectGraders(
@@ -130,6 +133,29 @@ public class ProjectController {
         return this.projectService.getProjectGraders(projectId);
     }
 
+    /*
+    Saves specified users as graders in the project.
+     */
+    @RequestMapping(value = "/{projectId}/graders", method = RequestMethod.PUT, produces = "application/json")
+    @ResponseBody
+    protected List<User> saveProjectGraders(
+            @PathVariable Long courseId,
+            @PathVariable Long projectId,
+            @RequestBody List<User> graders,
+            Principal principal) throws IOException, ParseException {
+
+//        List<PrivilegeEnum> privileges = this.gradingParticipationService
+//                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
+//        if (!(privileges != null && privileges.contains(PROJECT_READ))) {
+//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+//        }
+
+        return this.projectService.saveProjectGraders(projectId, graders, Long.valueOf(principal.getName()));
+    }
+
+    /*
+    Synchronises the project's state with (new) data obtained from Canvas (updates the user list and the submission list).
+     */
     @GetMapping(value = "/{projectId}/sync")
     protected void syncWithCanvas(@PathVariable Long courseId,
                                   @PathVariable Long projectId,
@@ -396,6 +422,24 @@ public class ProjectController {
         return projectService.getRubric(projectId);
     }
 
+    /*
+    Updates the rubric with update patches. Patches are applied in order they come and are stored in the database to
+    retrieve rubric history.
+     */
+    @PatchMapping("/{projectId}/rubric")
+    public String updateRubric(
+            @RequestBody JsonNode patch,
+            @PathVariable Long projectId,
+            Principal principal) throws JsonPatchApplicationException, JsonProcessingException {
+
+        List<PrivilegeEnum> privileges = this.gradingParticipationService
+                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
+        if (!(privileges != null && privileges.contains(RUBRIC_READ))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+        }
+        return projectService.updateRubric(projectId, patch);
+    }
+
     @GetMapping(
             value =  "/{projectId}/excel",
             produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
@@ -415,23 +459,5 @@ public class ProjectController {
                     HttpStatus.NOT_FOUND, "project not found"
             );
         }
-    }
-
-    /*
-    Updates the rubric with update patches. Patches are applied in order they come and are stored in the database to
-    retrieve rubric history.
-     */
-    @PatchMapping("/{projectId}/rubric")
-    public String updateRubric(
-            @RequestBody JsonNode patch,
-            @PathVariable Long projectId,
-            Principal principal) throws JsonPatchApplicationException, JsonProcessingException {
-
-        List<PrivilegeEnum> privileges = this.gradingParticipationService
-                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
-        if (!(privileges != null && privileges.contains(RUBRIC_READ))) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
-        }
-        return projectService.updateRubric(projectId, patch);
     }
 }

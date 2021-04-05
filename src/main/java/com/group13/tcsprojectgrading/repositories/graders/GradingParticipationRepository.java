@@ -4,8 +4,10 @@ import com.group13.tcsprojectgrading.models.project.Project;
 import com.group13.tcsprojectgrading.models.user.User;
 import com.group13.tcsprojectgrading.models.graders.GradingParticipation;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface GradingParticipationRepository extends JpaRepository<GradingParticipation, GradingParticipation.Pk> {
@@ -17,4 +19,23 @@ public interface GradingParticipationRepository extends JpaRepository<GradingPar
             "from GradingParticipation g, User u " +
             "where g.id.user.id = u.id and g.id.project.id=?1")
     List<User> getProjectUsers(Long projectId);
+
+    @Query(value="select distinct u " +
+            "from GradingParticipation g, User u " +
+            "left join fetch u.toGrade " +
+            "where g.id.user.id = u.id and g.id.project.id=?1")
+    List<User> getProjectUsersAndFetchSubmissions(Long projectId);
+
+    @Modifying(clearAutomatically=true)
+    void deleteAllById_UserInAndId_ProjectId(Collection<User> id_user, Long id_project_id);
+
+    @Modifying(clearAutomatically=true)
+    void deleteAllById_Project_Id(Long id_project_id);
+
+//    @Modifying
+//    @Query(value="INSERT INTO grading_participation (user_id, project_id, role_id) " +
+//            "VALUES(1, \"A\", 19) " +
+//            "ON DUPLICATE KEY UPDATE name=VALUES(name) , age=VALUES(age)",
+//            nativeQuery=true)
+//    void addGradingParticipant(List<User> graders);
 }

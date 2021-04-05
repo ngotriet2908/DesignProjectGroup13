@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.course.Course;
 import com.group13.tcsprojectgrading.models.permissions.RoleEnum;
+import com.group13.tcsprojectgrading.models.user.User;
 import com.group13.tcsprojectgrading.services.project.ProjectService;
 import com.group13.tcsprojectgrading.services.course.CourseService;
 import org.springframework.http.HttpStatus;
@@ -142,7 +143,7 @@ class CourseController {
     }
 
     /*
-    Imports selected projects
+    Imports selected projects.
      */
     @RequestMapping(value = "/{courseId}/projects", method = RequestMethod.POST)
     protected ResponseEntity<?> importProjects(
@@ -157,7 +158,18 @@ class CourseController {
 
         // import projects
         this.courseService.importProjects(projects, courseId, Long.valueOf(principal.getName()));
-
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    /*
+    Returns all teachers and TAs participating in the course.
+     */
+    @RequestMapping(value = "/{courseId}/graders", method = RequestMethod.GET, produces = "application/json")
+    protected List<User> getCourseUsers(
+            @PathVariable Long courseId,
+            @RequestParam(required = false) Long id,
+            Principal principal
+    ) throws JsonProcessingException {
+        return this.courseService.getCourseTeachersAndTAsAsUsers(courseId);
     }
 }
