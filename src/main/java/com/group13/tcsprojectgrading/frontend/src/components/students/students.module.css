@@ -1,33 +1,61 @@
+@value primary, secondary, ternary, quaternary, quinary, ultraLightGray, primaryShade, lightGray, senary, darkishGray, moderateGray from '../helpers/colors.css';
+
 .container {
     padding: 2rem;
     width: 100%;
 }
 
-.spinner{
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    color: dodgerblue;
+.titleContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
 }
 
-.header {
-
+.titleContainer svg {
+    cursor: pointer;
 }
-.badge {
-    margin-left: 0.5rem;
+
+@-webkit-keyframes rotating {
+    from{
+        -webkit-transform: rotate(0deg);
+    }
+    to{
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+.titleContainerIconActive svg {
+    /*color: primary;*/
+    -webkit-animation: rotating 1s linear infinite;
+}
+
+.participantContainer {
+    margin-top: 2rem;
+}
+
+.participantCardLabels {
+    margin-bottom: 1rem;
+}
+
+.participantCardLabels > * {
+    margin-right: 0.5rem;
 }
 
 .toolbar {
     display: flex;
+    padding-top: 1rem;
     padding-bottom: 1rem;
     margin-bottom: 1rem;
-    border-bottom:1px solid gray;
+    border-bottom: 1px solid lightGray;
+}
 
+.toolbar > *:last-child {
+    margin-left: 0.5rem;
 }
 
 .groupsSearchBar {
-    display: flex;
-    margin-right: 1rem;
+    margin-right: 0.5rem;
     width: 100%;
 }
 
@@ -36,25 +64,83 @@
     display: flex;
 }
 
-.groupsContainer {
-    display: block;
-    list-style-type: none;
-    padding-right: 1rem;
+:global(.dropdown-item.active) {
+    background-color: primary;
 }
 
-.groupInfo {
+:global(.dropdown-item:active) {
+    background-color: primary;
+}
+
+/* list */
+
+.participantCard {
+    width: 100%;
+}
+
+.participantCard:not(:last-child) {
+    margin-bottom: 0.5rem;
+}
+
+.participantCardTitle {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    /*margin-bottom: 0.5rem;*/
+}
+
+.participantCardTitle h5 {
+    margin: 0;
+}
+
+.participantCardHeaderButtonContainer {
+    flex: 1;
+}
+
+.participantCardHeaderButtonContainer div {
+    float: right;
+    color: primary;
+}
+
+.badge {
+    margin-left: 0.5rem;
+}
+
+:global(.badge-green) {
+    color: white;
+    background-color: primary;
+}
+
+:global(.badge-orange) {
+    color: white;
+    background-color: quaternary;
+}
+
+:global(.badge-yellow) {
+    color: white;
+    background-color: secondary;
+}
+
+:global(.badge-tomato) {
+    color: white;
+    background-color: quinary;
+}
+
+:global(.badge-red) {
+    color: white;
+    background-color: senary;
+}
+
+.participantCardBody {
 
 }
 
-.ul {
-    margin-top: 1rem;
-    padding-inline-start: 0;
-    display: block;
+.goTaskButton {
+
 }
 
-.userInfo {
+.memberItem {
     width: 100%;
     display: inline-grid;
-    grid-template-columns: 47% 47% auto;
+    grid-template-columns: 50% 50%;
 }
-

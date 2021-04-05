@@ -47,7 +47,7 @@ public class SettingsService {
         this.projectService = projectService;
     }
 
-    @Transactional
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public Settings getSettings(Long projectId, Long userId) {
         if (this.projectService.getProject(projectId) == null) {
             throw new ResponseStatusException(
@@ -60,13 +60,18 @@ public class SettingsService {
         );
     }
 
-    @Transactional
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public void createSettings(Long projectId, Long userId) {
         Settings settings = new Settings(userId, projectId);
+        if (settingsRepository.existsById(settings.getId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "settings exist"
+            );
+        }
         this.settingsRepository.save(settings);
     }
 
-    @Transactional
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public Settings saveSettings(Settings settings) {
         return this.settingsRepository.save(settings);
     }

@@ -18,12 +18,14 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-//    @Transactional
+    @Transactional(rollbackOn = Exception.class)
     public void saveUser(User user) {
+        //Obtain write lock on user
+        User user1 = userRepository.findUserById(user.getId()).orElse(null);
         this.userRepository.save(user);
     }
 
-//    @Transactional
+    @Transactional
     public User findById(Long userId) {
         return userRepository.findById(userId).orElse(null);
     }

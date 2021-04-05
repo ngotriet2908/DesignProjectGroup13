@@ -19,15 +19,17 @@ public class ActivityService {
         this.repository = repository;
     }
 
+    @Transactional
     public List<Activity> getActivities(Long userId) {
         return repository.findById_User_IdOrderByLastAccessed(userId);
     }
 
-    @Transactional(value = Transactional.TxType.MANDATORY)
+    @Transactional
     public List<Activity> getActivitiesByProject(Project project) {
         return repository.findActivitiesById_Project(project);
     }
 
+    @Transactional
     public void addOrUpdateActivity(Activity activity) {
         repository.save(activity);
     }

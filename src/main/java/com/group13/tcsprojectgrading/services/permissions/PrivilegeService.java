@@ -21,6 +21,7 @@ public class PrivilegeService {
         return repository.findPrivilegeByName(name);
     }
 
+    @Transactional(rollbackOn = Exception.class)
     public Privilege addPrivilegeIfNotExist(String name) {
         Privilege privilege = repository.findPrivilegeByName(name);
         if (privilege == null) {
