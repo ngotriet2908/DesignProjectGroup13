@@ -1,0 +1,146 @@
+@value primary, secondary, ternary, quaternary, quinary, ultraLightGray, primaryShade, lightGray, senary, darkishGray, moderateGray from '../helpers/colors.css';
+
+.container {
+    padding: 2rem;
+    width: 100%;
+}
+
+.titleContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.titleContainer svg {
+    cursor: pointer;
+}
+
+@-webkit-keyframes rotating {
+    from{
+        -webkit-transform: rotate(0deg);
+    }
+    to{
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+.titleContainerIconActive svg {
+    /*color: primary;*/
+    -webkit-animation: rotating 1s linear infinite;
+}
+
+.participantContainer {
+    margin-top: 2rem;
+}
+
+.participantCardLabels {
+    margin-bottom: 1rem;
+}
+
+.participantCardLabels > * {
+    margin-right: 0.5rem;
+}
+
+.toolbar {
+    display: flex;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid lightGray;
+}
+
+.toolbar > *:last-child {
+    margin-left: 0.5rem;
+}
+
+.groupsSearchBar {
+    margin-right: 0.5rem;
+    width: 100%;
+}
+
+.toolbarButton {
+    margin-top: 1rem;
+    display: flex;
+}
+
+:global(.dropdown-item.active) {
+    background-color: primary;
+}
+
+:global(.dropdown-item:active) {
+    background-color: primary;
+}
+
+/* list */
+
+.participantCard {
+    width: 100%;
+}
+
+.participantCard:not(:last-child) {
+    margin-bottom: 0.5rem;
+}
+
+.participantCardTitle {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    /*margin-bottom: 0.5rem;*/
+}
+
+.participantCardTitle h5 {
+    margin: 0;
+}
+
+.participantCardHeaderButtonContainer {
+    flex: 1;
+}
+
+.participantCardHeaderButtonContainer div {
+    float: right;
+    color: primary;
+}
+
+.badge {
+    margin-left: 0.5rem;
+}
+
+:global(.badge-green) {
+    color: white;
+    background-color: primary;
+}
+
+:global(.badge-orange) {
+    color: white;
+    background-color: quaternary;
+}
+
+:global(.badge-yellow) {
+    color: white;
+    background-color: secondary;
+}
+
+:global(.badge-tomato) {
+    color: white;
+    background-color: quinary;
+}
+
+:global(.badge-red) {
+    color: white;
+    background-color: senary;
+}
+
+.participantCardBody {
+
+}
+
+.goTaskButton {
+
+}
+
+.memberItem {
+    width: 100%;
+    display: inline-grid;
+    grid-template-columns: 50% 50%;
+}
