@@ -62,9 +62,9 @@ public class SubmissionController {
 
     @GetMapping(value = "/{submissionId}")
     protected ResponseEntity<?> getSubmissionInfo(@PathVariable Long courseId,
-                                         @PathVariable Long projectId,
-                                         @PathVariable Long submissionId,
-                                         Principal principal
+                                                  @PathVariable Long projectId,
+                                                  @PathVariable Long submissionId,
+                                                  Principal principal
     ) throws JsonProcessingException {
 //        List<PrivilegeEnum> privileges = securityService
 //                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
@@ -82,10 +82,58 @@ public class SubmissionController {
      */
     @PostMapping(value = "/{submissionId}/assign")
     protected void assignSubmission(@PathVariable Long courseId,
-                                                  @PathVariable Long projectId,
-                                                  @PathVariable Long submissionId,
-                                                 @RequestBody User grader,
-                                                  Principal principal
+                                    @PathVariable Long projectId,
+                                    @PathVariable Long submissionId,
+                                    @RequestBody User grader,
+                                    Principal principal
+    ) throws JsonProcessingException {
+//        List<PrivilegeEnum> privileges = securityService
+//                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+//        if (!(privileges != null
+//                && (privileges.contains(SUBMISSION_READ_ALL) || privileges.contains(SUBMISSION_READ_SINGLE)))) {
+//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+//        }
+
+        this.submissionService.assignSubmission(submissionId, grader);
+    }
+
+    /*
+    Move the submission from its grader back to the 'unassigned' l.
+     */
+    @PostMapping(value = "/{submissionId}/dissociate")
+    protected void dissociateSubmission(@PathVariable Long courseId,
+                                        @PathVariable Long projectId,
+                                        @PathVariable Long submissionId,
+                                        Principal principal
+    ) throws JsonProcessingException {
+//        List<PrivilegeEnum> privileges = securityService
+//                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+//        if (!(privileges != null
+//                && (privileges.contains(SUBMISSION_READ_ALL) || privileges.contains(SUBMISSION_READ_SINGLE)))) {
+//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+//        }
+
+        this.submissionService.dissociateSubmission(submissionId);
+    }
+
+    @PutMapping(value = "/{submissionId}/labels")
+    protected void saveLabels(@PathVariable Long courseId,
+                              @PathVariable Long projectId,
+                              @PathVariable Long submissionId,
+                              @RequestBody Set<Label> labels,
+                              Principal principal
+    ) throws JsonProcessingException {
+//        List<PrivilegeEnum> privileges = securityService
+//                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
+//        if (!(privileges != null
+//                && (privileges.contains(SUBMISSION_EDIT_ALL) || privileges.contains(SUBMISSION_EDIT_SINGLE)))) {
+//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+//        }
+
+        this.submissionService.saveLabels(labels, submissionId);
+    }
+
+
     @PostMapping(value = "/{submissionId}/assessmentManagement")
     protected List<Assessment> createNewAssessment(@PathVariable Long courseId,
                                                    @PathVariable Long projectId,
@@ -137,58 +185,5 @@ public class SubmissionController {
         }
         System.out.println("return all: " + returnAll);
         return submissionService.removeParticipantFromSubmission(courseId, projectId, submissionId, participantId, privileges, Long.valueOf(principal.getName()), returnAll);
-    }
-
-    @PutMapping(value = "/{submissionId}/labels")
-    protected void saveLabels(@PathVariable Long courseId,
-                                  @PathVariable Long projectId,
-                                  @PathVariable Long submissionId,
-                                  @RequestBody Set<Label> labels,
-                                  Principal principal
-    ) throws JsonProcessingException {
-//        List<PrivilegeEnum> privileges = securityService
-//                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
-//        if (!(privileges != null
-//                && (privileges.contains(SUBMISSION_READ_ALL) || privileges.contains(SUBMISSION_READ_SINGLE)))) {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
-//        }
-
-        this.submissionService.assignSubmission(submissionId, grader);
-    }
-
-    /*
-    Move the submission from its grader back to the 'unassigned' list.
-     */
-    @PostMapping(value = "/{submissionId}/dissociate")
-    protected void dissociateSubmission(@PathVariable Long courseId,
-                                    @PathVariable Long projectId,
-                                    @PathVariable Long submissionId,
-                                    Principal principal
-    ) throws JsonProcessingException {
-//        List<PrivilegeEnum> privileges = securityService
-//                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
-//        if (!(privileges != null
-//                && (privileges.contains(SUBMISSION_READ_ALL) || privileges.contains(SUBMISSION_READ_SINGLE)))) {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
-//        }
-
-        this.submissionService.dissociateSubmission(submissionId);
-    }
-
-    @PutMapping(value = "/{submissionId}/labels")
-    protected void saveLabels(@PathVariable Long courseId,
-                                  @PathVariable Long projectId,
-                                  @PathVariable Long submissionId,
-                                  @RequestBody Set<Label> labels,
-                                  Principal principal
-    ) throws JsonProcessingException {
-//        List<PrivilegeEnum> privileges = securityService
-//                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
-//        if (!(privileges != null
-//                && (privileges.contains(SUBMISSION_EDIT_ALL) || privileges.contains(SUBMISSION_EDIT_SINGLE)))) {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
-//        }
-
-        this.submissionService.saveLabels(labels, submissionId);
     }
 }

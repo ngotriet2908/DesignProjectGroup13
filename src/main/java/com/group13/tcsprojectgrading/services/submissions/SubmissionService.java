@@ -29,9 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum.*;
@@ -302,7 +300,7 @@ public class SubmissionService {
 
     /*
     Sets the user as a grader of the submission.
-     */
+    */
     @Transactional
     public void assignSubmission(Long submissionId, User grader) throws JsonProcessingException {
         Submission submission = this.getSubmission(submissionId);
@@ -312,9 +310,32 @@ public class SubmissionService {
                     HttpStatus.NOT_FOUND, "Submission not found"
             );
         }
+
+        submission.setGrader(grader);
+        this.submissionRepository.save(submission);
+    }
+
+    /*
+    Sets the user as a grader of the submission.
+     */
+    @Transactional
+    public void dissociateSubmission(Long submissionId) throws JsonProcessingException {
+        Submission submission = this.getSubmission(submissionId);
+
+        if (submission == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Submission not found"
+            );
+        }
+
+        submission.setGrader(null);
+        this.submissionRepository.save(submission);
+    }
+
+
     @Transactional(rollbackOn = Exception.class)
     public void assessmentManagement(Long courseId, Long projectId, Long submissionId,
-                                                 JsonNode object, List<PrivilegeEnum> privileges, Long userId) throws JsonProcessingException {
+                                     JsonNode object, List<PrivilegeEnum> privileges, Long userId) throws JsonProcessingException {
 
         Submission submission = getSubmission(submissionId);
         if (submission == null) {
@@ -372,7 +393,7 @@ public class SubmissionService {
                                             finalNewAssignment1,
                                             grade.getGrader(),
                                             grade.getGradedAt()
-                                            )
+                                    )
                             );
                         })
                         .collect(Collectors.toSet());
@@ -461,7 +482,7 @@ public class SubmissionService {
     @Transactional(rollbackOn = Exception.class)
     public Submission addParticipantToSubmission(Long courseId, Long projectId, Long submissionId,
                                                  Long participantId, Long assessmentId,
-                                          List<PrivilegeEnum> privileges, Long userId) throws JsonProcessingException {
+                                                 List<PrivilegeEnum> privileges, Long userId) throws JsonProcessingException {
 
         Project project = this.projectRepository.findById(projectId).orElse(null);
         if (project == null) {
@@ -515,7 +536,7 @@ public class SubmissionService {
 
     @Transactional(rollbackOn = Exception.class)
     public Object removeParticipantFromSubmission(Long courseId, Long projectId, Long submissionId, Long participantId,
-                                                 List<PrivilegeEnum> privileges, Long userId, boolean returnAll) throws JsonProcessingException {
+                                                  List<PrivilegeEnum> privileges, Long userId, boolean returnAll) throws JsonProcessingException {
 
         Project project = this.projectRepository.findById(projectId).orElse(null);
         if (project == null) {
@@ -530,18 +551,9 @@ public class SubmissionService {
             );
         }
 
-        submission.setGrader(grader);
-        this.submissionRepository.save(submission);
-    }
         CourseParticipation participant = courseParticipationRepository
                 .findById_User_IdAndId_Course_Id(participantId, courseId);
 
-    /*
-    Sets the user as a grader of the submission.
-     */
-    @Transactional
-    public void dissociateSubmission(Long submissionId) throws JsonProcessingException {
-        Submission submission = this.getSubmission(submissionId);
         if (participant == null) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "task not found"
@@ -614,15 +626,5 @@ public class SubmissionService {
             }
         });
         return submissions;
-    }
-
-        if (submission == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Submission not found"
-            );
-        }
-
-        submission.setGrader(null);
-        this.submissionRepository.save(submission);
     }
 }

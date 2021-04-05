@@ -1,32 +1,28 @@
 import React, {Component} from "react";
-import styles from "./participants.module.css";
+import styles from "./students.module.css";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
-import {Breadcrumb, Button, ListGroup, ListGroupItem, Spinner, ButtonGroup, DropdownButton, Dropdown, FormControl} from "react-bootstrap";
-import {URL_PREFIX} from "../../services/config";
-import GroupCard from "../groups/GroupCard";
-import ParticipantCard from "./ParticipantCard";
-import {Link} from "react-router-dom";
-import {deleteRubric, saveRubric} from "../../redux/rubric/actions";
+import {ListGroup, ListGroupItem, Spinner, ButtonGroup, DropdownButton, Dropdown, FormControl} from "react-bootstrap";
+import ParticipantCard from "./StudentCard";
 import {setCurrentLocation} from "../../redux/navigation/actions";
 import {connect} from "react-redux";
-class Participants extends Component {
+import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
+class Students extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
       participants: [],
       project: {},
-      isLoading: true,
+      isLoaded: false,
       filterChoice: "all",
       searchString: "",
     }
   }
 
   componentDidMount() {
-    this.setState({
-      isLoading: true
-    })
+    this.props.setCurrentLocation(LOCATIONS.submissions);
+
     Promise.all([
       request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/participants`),
       request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}`)]
@@ -68,16 +64,7 @@ class Participants extends Component {
       criteria = participant.sid.toLowerCase().includes(this.state.searchString.toLowerCase())
       if (criteria) return true
     }
-    // if (group.hasOwnProperty("members")) {
-    //   let i;
-    //   for(i = 0; i < group.members.length; i++) {
-    //     criteria = group.members[i].name.toLowerCase().includes(this.state.searchString.toLowerCase())
-    //     if (criteria) return true
-    //
-    //     criteria = group.members[i].sid.toLowerCase().includes(this.state.searchString.toLowerCase())
-    //     if (criteria) return true
-    //   }
-    // }
+
     return false
   }
 
@@ -96,13 +83,13 @@ class Participants extends Component {
         :
         <div className={styles.container}>
           <div className={styles.header}>
-            <h2>{this.state.project.name} participants</h2>
+            <h2>Students</h2>
           </div>
           <div className={styles.toolbar}>
             <FormControl className={styles.groupsSearchBar}
-                         type="text"
-                         placeholder="Search with group name, student name, student id, member name, member student id"
-                         onChange={this.handleSearchChange}/>
+              type="text"
+              placeholder="Search with group name, student name, student id, member name, member student id"
+              onChange={this.handleSearchChange}/>
 
             <DropdownButton
               as={ButtonGroup}
@@ -149,13 +136,14 @@ class Participants extends Component {
 
 }
 
+const actionCreators = {
+  setCurrentLocation
+}
+
 const mapStateToProps = state => {
   return {
+    user: state.users.self
   };
 };
 
-const actionCreators = {
-
-}
-
-export default connect(mapStateToProps, actionCreators)(Participants)
+export default connect(mapStateToProps, actionCreators)(Students)

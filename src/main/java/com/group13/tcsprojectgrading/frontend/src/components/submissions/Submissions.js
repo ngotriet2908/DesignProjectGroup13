@@ -15,7 +15,6 @@ import classnames from 'classnames';
 import {setCurrentLocation} from "../../redux/navigation/actions";
 import {connect} from "react-redux";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
-import {saveUserSelf} from "../../redux/user/actions";
 
 class Submissions extends Component {
   constructor(props) {
@@ -43,7 +42,6 @@ class Submissions extends Component {
 
   filterGroupDropDown = (group) => {
     let filter = this.state.filterGroupChoice;
-
     if (filter === "All") return true;
     if (filter === "Group") return group.groupId != null;
     if (filter === "Individual") return group.groupId == null;

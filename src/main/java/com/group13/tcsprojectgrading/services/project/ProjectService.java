@@ -135,7 +135,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public List<CourseParticipation> getProjectParticipants(Long courseId, Long projectId) throws ResponseStatusException {
+    public List<CourseParticipation> getProjectParticipantsWithSubmissions(Long courseId, Long projectId) throws ResponseStatusException {
         Project project = getProject(projectId);
 
         if (project == null) {

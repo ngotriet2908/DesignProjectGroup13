@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.course.Course;
+import com.group13.tcsprojectgrading.models.course.CourseParticipation;
+import com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum;
 import com.group13.tcsprojectgrading.models.permissions.RoleEnum;
 import com.group13.tcsprojectgrading.models.user.User;
 import com.group13.tcsprojectgrading.services.project.ProjectService;
@@ -109,22 +111,16 @@ class CourseController {
     }
 
 //    @RequestMapping(value = "/{courseId}/participants", method = RequestMethod.GET, produces = "application/json")
-//    protected ArrayNode getCourseUsers(@PathVariable Long courseId,
-//                                      @RequestParam Map<String, String> queryParameters,
-//                                      Principal principal) throws JsonProcessingException {
-//        RoleEnum roleEnum = this.courseService.getCourseRole(courseId, Long.valueOf(principal.getName()));
-//        if (!(roleEnum != null && !roleEnum.equals(RoleEnum.STUDENT))) {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
-//        }
+//    @ResponseBody
+//    protected List<CourseParticipation> getProjectParticipants(@PathVariable Long courseId, Principal principal) throws JsonProcessingException, ParseException {
 //
-//        List<String> response;
-//        if (queryParameters.containsKey("role") && queryParameters.get("role").equals("student"))  {
-//            response = this.canvasApi.getCanvasCoursesApi().getCourseStudents(courseId);
-//        } else {
-//            response = this.canvasApi.getCanvasCoursesApi().getCourseParticipants(courseId);
-//        }
+////        List<PrivilegeEnum> privileges = this.GradingParticipationService
+////                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
+////        if (!(privileges != null && privileges.contains(PROJECT_READ))) {
+////            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+////        }
 //
-//        return groupPages(response);
+//        return this.courseService.getCourseStudents(courseId);
 //    }
 
     /*

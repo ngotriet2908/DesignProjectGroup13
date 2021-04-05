@@ -1,8 +1,7 @@
 import React, {Component} from "react";
-import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
-import {Breadcrumb, Spinner, Button, ListGroup, ListGroupItem, Card, Badge} from "react-bootstrap";
+import {Spinner, Button, Card} from "react-bootstrap";
 import styles from "../submissionDetails/submissionDetails.module.css";
 import globalStyles from "../helpers/global.module.css";
 import classnames from "classnames";
@@ -11,7 +10,7 @@ import {push} from "connected-react-router";
 import {connect} from "react-redux";
 import {toast} from "react-toastify";
 
-class ParticipantDetails extends Component {
+class StudentDetails extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -31,6 +30,7 @@ class ParticipantDetails extends Component {
           console.log(data.status)
           console.log(data.message)
           // alert(data.message)
+
           toast.error(data.message, {
             position: "top-center",
             autoClose: 5000,
@@ -40,10 +40,12 @@ class ParticipantDetails extends Component {
             draggable: true,
             progress: undefined,
           });
-          return
+
+          return;
         }
         this.setState({
-          submissions: data
+          submissions: data,
+          isLoaded: true,
         })
       })
       .catch(error => {
@@ -54,7 +56,7 @@ class ParticipantDetails extends Component {
   componentDidMount() {
     // this.props.setCurrentLocation(LOCATIONS.submission);
 
-    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/participants/${this.props.match.params.participantId}`)
+    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/participants/${this.props.match.params.studentId}`)
       .then(async response => {
         let data = await response.json();
         // console.log(data);
@@ -71,54 +73,54 @@ class ParticipantDetails extends Component {
 
   render() {
     return (
-      (this.state.isLoading)?
-        <Spinner className={styles.spinner} animation="border" role="status">
+      (!this.state.isLoaded)?
+        <Spinner className={globalStyles.spinner} animation="border" role="status">
           <span className="sr-only">Loading...</span>
         </Spinner>
         :
-      <div>
-        <div className={globalStyles.container}>
-          <div className={classnames(globalStyles.titleContainer, styles.titleContainer)}>
-            <h1>{this.state.participant.name}</h1>
-          </div>
+        <div>
+          <div className={globalStyles.container}>
+            <div className={classnames(globalStyles.titleContainer, styles.titleContainer)}>
+              <h1>{this.state.participant.name}</h1>
+            </div>
 
-          <Card>
-            <Card.Body>
-              <Card.Title>
-                Participant Info
-              </Card.Title>
-              <h6>Name: {this.state.participant.name}</h6>
-              <h6>sid: {this.state.participant.sid}</h6>
-              <h6>email: {this.state.participant.email}</h6>
-            </Card.Body>
-          </Card>
+            <Card>
+              <Card.Body>
+                <Card.Title>
+                Student Info
+                </Card.Title>
+                <h6>Name: {this.state.participant.name}</h6>
+                <h6>sid: {this.state.participant.sid}</h6>
+                <h6>email: {this.state.participant.email}</h6>
+              </Card.Body>
+            </Card>
 
-          <Card>
-            <Card.Body>
-              <Card.Title>
+            <Card>
+              <Card.Body>
+                <Card.Title>
                 Submissions
-              </Card.Title>
-              {this.state.submissions.map((submission) => {
-                return (
-                  <Card>
-                    <Card.Body>
-                      <Card.Title>
-                        {submission.name}
-                      </Card.Title>
-                      <Button onClick={() => store.dispatch(push(this.props.match.url.split("/").slice(0, this.props.match.url.split("/").length - 2).join("/") + "/submissions/"+ submission.id))}>
+                </Card.Title>
+                {this.state.submissions.map((submission) => {
+                  return (
+                    <Card>
+                      <Card.Body>
+                        <Card.Title>
+                          {submission.name}
+                        </Card.Title>
+                        <Button onClick={() => store.dispatch(push(this.props.match.url.split("/").slice(0, this.props.match.url.split("/").length - 2).join("/") + "/submissions/"+ submission.id))}>
                         open </Button>
-                      <Button onClick={() => this.deleteHandler(submission)}>delete</Button>
-                      <h6>id: {submission.id}</h6>
-                      {/*<h6>name: {submission.name}</h6>*/}
-                      <h6>contains current assessment: {submission.containsCurrentAssessment.toString()}</h6>
-                    </Card.Body>
-                  </Card>
-                )
-              })}
-            </Card.Body>
-          </Card>
+                        <Button onClick={() => this.deleteHandler(submission)}>delete</Button>
+                        <h6>id: {submission.id}</h6>
+                        {/*<h6>name: {submission.name}</h6>*/}
+                        <h6>contains current assessment: {submission.containsCurrentAssessment.toString()}</h6>
+                      </Card.Body>
+                    </Card>
+                  )
+                })}
+              </Card.Body>
+            </Card>
+          </div>
         </div>
-      </div>
     );
   }
 }
@@ -132,4 +134,4 @@ const actionCreators = {
 
 }
 
-export default connect(mapStateToProps, actionCreators)(ParticipantDetails)
+export default connect(mapStateToProps, actionCreators)(StudentDetails)

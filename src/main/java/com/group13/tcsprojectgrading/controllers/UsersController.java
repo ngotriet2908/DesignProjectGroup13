@@ -124,6 +124,7 @@ class UsersController {
 //
 //        return arrayNode;
 
-        return this.projectService.getToDoList(Long.valueOf(principal.getName()));
+//        return this.projectService.getToDoList(Long.valueOf(principal.getName()));
+        return new ArrayList<>();
     }
 }

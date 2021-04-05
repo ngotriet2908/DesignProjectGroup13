@@ -97,7 +97,7 @@ public class ProjectController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
         }
 
-        return this.projectService.getProjectParticipants(courseId, projectId);
+        return this.projectService.getProjectParticipantsWithSubmissions(courseId, projectId);
     }
 
     @RequestMapping(value = "/{projectId}/participants/students", method = RequestMethod.GET, produces = "application/json")
