@@ -55,6 +55,7 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.mail.MessagingException;
 import javax.transaction.Transactional;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -160,34 +161,54 @@ public class ProjectService {
         return this.projectRepository.getToDoList(userId);
     }
 
-////    @Transactional
-////    public ObjectNode getProjectParticipants(String courseId, String projectId) throws ResponseStatusException {
-////        Project project = projectRepository.findById(new ProjectId(courseId, projectId)).orElse(null);
-////
-////        if (project == null) {
-////            throw new ResponseStatusException(
-////                    HttpStatus.NOT_FOUND, "Project not found"
-////            );
-////        }
-////
-////        List<User> participants = this.courseService.getCourseParticipants(courseId);
-////
-////        ObjectMapper objectMapper = new ObjectMapper();
-////
-////        // TODO
-//////        ArrayNode participantsNode = objectMapper.createArrayNode();
-////
-//////        for (User participant : participants) {
-//////            List<AssessmentLinker> assessmentLinkers = this.assessmentService.findAssessmentLinkersForParticipant(participant);
-//////            participantsNode.add(participant.convertToJson(assessmentLinkers));
-//////        }
-////
-////        ObjectNode resultNode = objectMapper.createObjectNode();
-////        resultNode.set("project", project.convertToJson());
-//////        resultNode.set("participants", participantsNode);
-////
-////        return resultNode;
-////    }
+    @Transactional
+    public List<CourseParticipation> getProjectParticipants(Long courseId, Long projectId) throws ResponseStatusException {
+        Project project = getProject(projectId);
+
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Project not found"
+            );
+        }
+
+        return courseService
+                .getCourseStudents(courseId)
+                .stream()
+                .peek(participation -> participation.setSubmissions(
+                        assessmentService.getAssessmentsByProjectAndUser(
+                                projectId,
+                                participation.getId().getUser()
+                        )
+                                .stream()
+                                .map(assessmentLink -> assessmentLink.getId().getSubmission())
+                                .sorted(Comparator.comparingLong(Submission::getId))
+                                .collect(Collectors.toList())
+                ))
+                .sorted(Comparator.comparingLong(a -> a.getId().getUser().getId()))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public CourseParticipation getProjectParticipant(Long courseId, Long projectId, Long participantId) {
+        CourseParticipation courseParticipation = courseParticipationRepository.findById_User_IdAndId_Course_Id(participantId, courseId);
+        User user = userService.findById(participantId);
+
+        if (courseParticipation == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "courseParticipation not found"
+            );
+        }
+
+        if (user == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "user not found"
+            );
+        }
+
+        courseParticipation.setSubmissions(submissionService.getSubmissionFromParticipants(projectId, user));
+        return courseParticipation;
+    }
+
 //
 ////    @Transactional
 ////    public ObjectNode getProjectParticipant(String courseId, String projectId, String participantId) throws ResponseStatusException {
@@ -554,6 +575,41 @@ public class ProjectService {
         } else {
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.writeValueAsString(rubric);
+        }
+    }
+
+    @Transactional(rollbackOn = Exception.class)
+    public String importRubric(Long projectId, String rubricJson) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Rubric rubric = objectMapper.readValue(rubricJson, Rubric.class);
+            rubric.setId(projectId);
+            return rubricService.importRubric(rubric);
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "cant parse rubric"
+            );
+        }
+    }
+
+    @Transactional
+    public byte[] getRubricFile(Long projectId) throws JsonProcessingException {
+        Project project = getProject(projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "project not found"
+            );
+        }
+
+        Rubric rubric = rubricService.getRubricById(projectId);
+
+        if (rubric == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "rubric not found"
+            );
+        } else {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rubric).getBytes(StandardCharsets.UTF_8);
         }
     }
 

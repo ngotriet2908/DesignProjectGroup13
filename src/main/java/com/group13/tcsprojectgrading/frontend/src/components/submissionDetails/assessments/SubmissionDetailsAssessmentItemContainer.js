@@ -37,9 +37,8 @@ class SubmissionDetailsAssessmentItemContainer extends Component {
           </Link>
         </div>
         <div>
-          {/*<p>id: {this.props.assessment.id}</p>*/}
-          {/*<p>progress: {this.props.assessment.progress}%</p>*/}
-          {/*<p>issues count: {this.props.assessment.issuesCount}</p>*/}
+          <p>progress: {this.props.assessment.progress}%</p>
+          <p>issues count: {this.props.assessment.issues.length}</p>
         </div>
         <div>
           Members:

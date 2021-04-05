@@ -43,7 +43,7 @@ class ParticipantDetails extends Component {
           return
         }
         this.setState({
-          submissions: data.submissions
+          submissions: data
         })
       })
       .catch(error => {
@@ -60,8 +60,7 @@ class ParticipantDetails extends Component {
         // console.log(data);
         this.setState({
           submissions: data.submissions,
-          project: data.project,
-          participant: data.participant,
+          participant: data.id.user,
           isLoaded: true,
         })
       })
@@ -111,7 +110,7 @@ class ParticipantDetails extends Component {
                       <Button onClick={() => this.deleteHandler(submission)}>delete</Button>
                       <h6>id: {submission.id}</h6>
                       {/*<h6>name: {submission.name}</h6>*/}
-                      <h6>contains current assessment: {submission.isCurrent.toString()}</h6>
+                      <h6>contains current assessment: {submission.containsCurrentAssessment.toString()}</h6>
                     </Card.Body>
                   </Card>
                 )

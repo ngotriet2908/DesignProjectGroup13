@@ -1,11 +1,11 @@
-import React, {Component} from "react";
+import React, {Component, useState} from "react";
 import styles from "../submissionDetails.module.css";
 import {request} from "../../../services/request";
 import {BASE} from "../../../services/endpoints";
 import {Card, Breadcrumb, Button, ListGroup, ListGroupItem, Form, Modal, Spinner, ButtonGroup, DropdownButton, Dropdown, FormControl} from "react-bootstrap";
 import classnames from "classnames";
 import globalStyles from "../../helpers/global.module.css";
-import {IoCopyOutline, IoTrashOutline, IoSwapHorizontal} from "react-icons/io5";
+import {IoCopyOutline, IoTrashOutline, IoSwapHorizontal, IoAdd, IoHourglassOutline} from "react-icons/io5";
 
 class SubmissionDetailsAssessmentEditingItemContainer extends Component {
   constructor(props) {
@@ -54,14 +54,10 @@ class SubmissionDetailsAssessmentEditingItemContainer extends Component {
       <div className={styles.memberAssessmentItem}>
         <div className={styles.memberAssessmentHeader}>
           <h4>
-            Assessment
+            Assessment #{this.props.assessment.id}
           </h4>
 
           <div className={styles.buttonGroup}>
-            <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.props.handleClone}>
-              <IoCopyOutline size={26}/>
-            </div>
-
             <div className={classnames(globalStyles.iconButton, styles.dangerButton)} onClick={this.props.handleDelete}>
               <IoTrashOutline size={26}/>
             </div>
@@ -69,25 +65,47 @@ class SubmissionDetailsAssessmentEditingItemContainer extends Component {
 
         </div>
         <div>
-          <p>id: {this.props.assessment.id}</p>
           <p>progress: {this.props.assessment.progress}%</p>
-          <p>issues count: {this.props.assessment.issuesCount}</p>
+          <p>issues count: {this.props.assessment.issues.length}</p>
         </div>
         <div>
           Members:
           <ListGroup>
-            {this.props.assessment.participants.map((participant) => {
+            {this.props.assessment.members.map((participant) => {
               return (
                 <ListGroupItem key={"a-"+participant.id}>
                   <div className={styles.memberEditingItem}>
                     <div className={styles.memberEditingItemHeader}>
                       <h5>{participant.name}</h5>
-                      <div className={classnames(globalStyles.iconButtonSmall, styles.neuterButton)} onClick={() => this.handleShowMoveModal(participant)}>
-                        <IoSwapHorizontal size={26}/>
+                      <div className={styles.buttonGroup}>
+                        {
+                          (participant.isCurrentAssessment)? null :
+                          <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={() => this.props.handleActivateCurrent(this.props.assessment, participant.id)}>
+                            <IoHourglassOutline size={26}/>
+                          </div>
+                        }
+
+                        {
+                          (this.props.assessment.members.length <= 1)? null :
+                            <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={() => this.props.handleCreateNew(participant.id)}>
+                              <IoAdd size={26}/>
+                            </div>
+                        }
+
+                        {
+                          (this.props.assessment.members.length <= 1)? null :
+                            <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={() => this.props.handleClone(this.props.assessment, participant.id)}>
+                              <IoCopyOutline size={26}/>
+                            </div>
+                        }
+
+                        <div className={classnames(globalStyles.iconButtonSmall, styles.neuterButton)} onClick={() => this.handleShowMoveModal(participant)}>
+                          <IoSwapHorizontal size={26}/>
+                        </div>
                       </div>
                     </div>
-                    <p>sid: {participant.sid}</p>
-                    <p>Is current: {participant.isCurrentLinker.toString()}</p>
+                    <p>sid: {participant.sNumber}</p>
+                    <p>Is current: {participant.isCurrentAssessment.toString()}</p>
                   </div>
                 </ListGroupItem>)
             })}

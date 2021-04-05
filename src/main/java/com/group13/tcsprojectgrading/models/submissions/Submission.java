@@ -3,13 +3,19 @@ package com.group13.tcsprojectgrading.models.submissions;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.group13.tcsprojectgrading.models.grading.Assessment;
 import com.group13.tcsprojectgrading.models.grading.AssessmentLink;
 import com.group13.tcsprojectgrading.models.project.Project;
 import com.group13.tcsprojectgrading.models.user.User;
 
 import javax.persistence.*;
+import java.io.IOException;
 import java.util.*;
 
 @Entity
@@ -71,7 +77,10 @@ public class Submission {
     // assessments
     @Transient
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Set<Assessment> assessments;
+    private List<Assessment> assessments;
+
+    @Transient
+    private boolean containsCurrentAssessment;
 
     public Submission() {
     }
@@ -195,12 +204,20 @@ public class Submission {
         this.members = members;
     }
 
-    public Set<Assessment> getAssessments() {
+    public List<Assessment> getAssessments() {
         return assessments;
     }
 
-    public void setAssessments(Set<Assessment> assessments) {
+    public void setAssessments(List<Assessment> assessments) {
         this.assessments = assessments;
+    }
+
+    public boolean isContainsCurrentAssessment() {
+        return containsCurrentAssessment;
+    }
+
+    public void setContainsCurrentAssessment(boolean containsCurrentAssessment) {
+        this.containsCurrentAssessment = containsCurrentAssessment;
     }
 
     @Override
@@ -214,5 +231,29 @@ public class Submission {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public static class SubmissionShortSerializer extends JsonSerializer<Submission> {
+        @Override
+        public void serialize(Submission submission, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+
+            jsonGenerator.writeStartObject();
+            jsonGenerator.writeNumberField("id", submission.getId());
+            jsonGenerator.writeStringField("name", submission.getName());
+            jsonGenerator.writeStringField("submittedAt", submission.getSubmittedAt().toString());
+//            jsonGenerator.writeObjectField("members", submission.getMembers());
+            if (submission.getGrader() != null) {
+//                jsonGenerator.writeObjectFieldStart("grader");
+//                jsonGenerator.writeStartObject();
+//                jsonGenerator.writeNumberField("id", submission.getGrader().getId());
+//                jsonGenerator.writeStringField("name", submission.getGrader().getName());
+//                jsonGenerator.writeStringField("sNumber", submission.getGrader().getsNumber());
+//                jsonGenerator.writeEndObject();
+                jsonGenerator.writeObjectField("grader", submission.getGrader());
+
+            }
+
+            jsonGenerator.writeEndObject();
+        }
     }
 }

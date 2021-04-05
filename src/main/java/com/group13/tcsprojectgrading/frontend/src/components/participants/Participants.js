@@ -27,15 +27,16 @@ class Participants extends Component {
     this.setState({
       isLoading: true
     })
-    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/participants`)
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        console.log(data);
+    Promise.all([
+      request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/participants`),
+      request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}`)]
+    )
+      .then(async ([res1, res2]) =>  {
+        const participants = await res1.json();
+        const project = await res2.json();
         this.setState({
-          participants: data.participants,
-          project: data.project,
+          project: project,
+          participants: participants,
           isLoading: false
         })
       })
@@ -127,7 +128,7 @@ class Participants extends Component {
             {
               this.state.participants
                 .filter((participant) => {
-                  return this.filterParticipantDropDown(participant) && this.filterParticipantSearchChange(participant);
+                  return this.filterParticipantDropDown(participant.id.user) && this.filterParticipantSearchChange(participant.id.user);
                 })
                 // .sort((group1, group2) => {
                 //   // console.log(this.compareFunction(group1, group2, ["name"]))
@@ -136,7 +137,7 @@ class Participants extends Component {
                 // })
                 .map((participant) => {
                   return (
-                    <ListGroupItem key={participant.id} className={styles.ul}>
+                    <ListGroupItem key={participant.id.user.id} className={styles.ul}>
                       {<ParticipantCard match={this.props.match} participant={participant}/>}
                     </ListGroupItem>
                   )

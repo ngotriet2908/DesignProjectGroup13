@@ -13,6 +13,7 @@ class ParticipantItem extends Component {
           </h5>
         </div>
         <h6>sid: {this.props.member.sNumber}</h6>
+        {/*<h6>email: {this.props.member.email}</h6>*/}
       </div>
     );
   }

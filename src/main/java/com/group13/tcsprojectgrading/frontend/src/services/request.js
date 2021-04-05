@@ -14,7 +14,8 @@ export function request(
   data = {},
   accept = 'application/json',
   catch401 = true,
-  catch404 = true
+  catch404 = true,
+  formData = undefined,
 ) {
   let init;
   if (method === "GET") {
@@ -25,13 +26,24 @@ export function request(
       },
     }
   } else if (method === "POST" || method === "PUT" || method === "PATCH") {
-    init = {
-      method: method,
-      headers: {
-        'Accept': accept,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data)
+    if (formData !== undefined) {
+      init = {
+        method: method,
+        headers: {
+          'Accept': accept,
+          // 'Content-Type': 'multipart/form-data',
+        },
+        body: formData
+      }
+    } else {
+      init = {
+        method: method,
+        headers: {
+          'Accept': accept,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      }
     }
   } else if (method === "DELETE") {
     init = {
