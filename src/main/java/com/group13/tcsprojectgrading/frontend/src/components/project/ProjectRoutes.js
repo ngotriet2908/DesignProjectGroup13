@@ -10,9 +10,7 @@ import Submissions from "../submissions/Submissions";
 import SubmissionDetails from "../submissionDetails/SubmissionDetails";
 import NotFound from "../error/NotFound";
 import {URL_PREFIX} from "../../services/config";
-import Participants from "../participants/Participants";
 import Settings from "../settings/Settings";
-import ParticipantDetails from "../participantDetails/ParticipantDetails";
 
 
 class ProjectRoutes extends Component {
