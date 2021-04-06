@@ -215,7 +215,8 @@ public class ProjectService {
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorised");
             }
 
-            ObjectWriter writer = Json.getObjectWriter(Project.class).withAttribute("privileges", privileges);
+            ObjectWriter writer = Json.getObjectWriter(Project.class)
+                    .withAttribute("privileges", privileges.stream().map(PrivilegeEnum::getName).collect(Collectors.toList()));
             return writer.writeValueAsString(project);
         }
     }

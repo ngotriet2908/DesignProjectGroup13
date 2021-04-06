@@ -20,19 +20,19 @@ public enum PrivilegeEnum {
 
     STUDENT_PERSONAL_VIEW("studentView_view"),
 
-    GRADING_WRITE_ALL("Grading_write_all"),
+    GRADING_WRITE_ALL("Grading_write"),
     GRADING_WRITE_SINGLE("Grading_write_assigned"),
-    GRADING_READ_ALL("Grading_read_all"),
-    GRADING_READ_SINGLE("Grading_read_single"),
+    GRADING_READ_ALL("Grading_read"),
+    GRADING_READ_SINGLE("Grading_read_assigned"),
 
     SUBMISSIONS_SYNC("Submissions_sync"),
     SUBMISSIONS_READ("Submissions_read"),
 
-    SUBMISSION_READ_SINGLE("Submission_read_single"),
-    SUBMISSION_READ_ALL("Submission_read_all"),
+    SUBMISSION_READ_SINGLE("Submission_read_assigned"),
+    SUBMISSION_READ_ALL("Submission_read"),
 
-    SUBMISSION_EDIT_SINGLE("Submission_edit_single"),
-    SUBMISSION_EDIT_ALL("Submission_edit_all"),
+    SUBMISSION_EDIT_SINGLE("Submission_edit_assigned"),
+    SUBMISSION_EDIT_ALL("Submission_edit"),
 
 //    ASSESSMENTS_EDIT_SINGLE("Assessment_edit_assigned"),
 //    ASSESSMENTS_EDIT_ALL("Assessment_edit_all"),

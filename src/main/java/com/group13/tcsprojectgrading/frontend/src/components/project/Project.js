@@ -71,6 +71,7 @@ class Project extends Component {
 
         if (project.privileges !== null) {
           updateAbility(ability, project.privileges, this.props.user)
+          console.log(ability)
         } else {
           console.log("No privileges found.")
         }
