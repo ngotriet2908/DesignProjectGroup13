@@ -185,7 +185,7 @@ public class SubmissionService {
         GradingParticipation grader = this.gradingParticipationService.getGradingParticipationByUserAndProject(userId, projectId);
         if (grader == null) {
             throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED, "Unauthorised"
+                    HttpStatus.FORBIDDEN, "Unauthorised"
             );
         }
 
@@ -215,7 +215,7 @@ public class SubmissionService {
         GradingParticipation grader = this.gradingParticipationService.getGradingParticipationByUserAndProject(userId, projectId);
         if (grader == null) {
             throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED, "Unauthorised"
+                    HttpStatus.FORBIDDEN, "Unauthorised"
             );
         }
 
@@ -260,7 +260,7 @@ public class SubmissionService {
             if (grader == null || submission.getGrader() != null ||
                     !grader.getId().getUser().getId().equals(submission.getGrader().getId())) {
                 throw new ResponseStatusException(
-                        HttpStatus.UNAUTHORIZED, "Unauthorised"
+                        HttpStatus.FORBIDDEN, "Unauthorised"
                 );
             }
         }
@@ -342,12 +342,12 @@ public class SubmissionService {
             );
         }
 
-        if (privileges.contains(SUBMISSION_READ_SINGLE)) {
+        if (privileges.contains(SUBMISSION_EDIT_SINGLE)) {
             GradingParticipation grader = this.gradingParticipationService.getGradingParticipationByUserAndProject(graderId, projectId);
-            if (grader == null || submission.getGrader() != null ||
+            if (grader == null || submission.getGrader() == null ||
                     !grader.getId().getUser().getId().equals(submission.getGrader().getId())) {
                 throw new ResponseStatusException(
-                        HttpStatus.UNAUTHORIZED, "Unauthorised"
+                        HttpStatus.FORBIDDEN, "Unauthorised"
                 );
             }
         }
@@ -409,7 +409,7 @@ public class SubmissionService {
             if (submission.getGrader() == null || !submission.getGrader().getId().equals(graderId)) {
 
                 throw new ResponseStatusException(
-                        HttpStatus.UNAUTHORIZED, "Unauthorised"
+                        HttpStatus.FORBIDDEN, "Unauthorised"
                 );
             }
         }
@@ -433,7 +433,7 @@ public class SubmissionService {
         if (privileges != null && privileges.contains(SUBMISSION_EDIT_SINGLE)) {
             if (submission.getGrader() == null || !submission.getGrader().getId().equals(userId)) {
                 throw new ResponseStatusException(
-                        HttpStatus.UNAUTHORIZED, "submission not assigned"
+                        HttpStatus.FORBIDDEN, "submission not assigned"
                 );
             }
         }
@@ -600,7 +600,7 @@ public class SubmissionService {
         if (privileges != null && privileges.contains(SUBMISSION_EDIT_SINGLE)) {
             if (submission.getGrader() == null || !submission.getGrader().getId().equals(userId)) {
                 throw new ResponseStatusException(
-                        HttpStatus.UNAUTHORIZED, "submission not assigned"
+                        HttpStatus.FORBIDDEN, "submission not assigned"
                 );
             }
         }
@@ -648,7 +648,7 @@ public class SubmissionService {
         if (privileges != null && privileges.contains(SUBMISSION_EDIT_SINGLE)) {
             if (submission.getGrader() == null || !submission.getGrader().getId().equals(userId)) {
                 throw new ResponseStatusException(
-                        HttpStatus.UNAUTHORIZED, "submission not assigned"
+                        HttpStatus.FORBIDDEN, "submission not assigned"
                 );
             }
         }

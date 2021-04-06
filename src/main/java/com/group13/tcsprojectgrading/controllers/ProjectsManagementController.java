@@ -28,7 +28,7 @@ public class ProjectsManagementController {
 //        List<PrivilegeEnum> privileges = securityService
 //                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
 //        if (!(privileges != null && privileges.contains(MANAGE_GRADERS_EDIT))) {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+//            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
 //        }
 //
 //        return projectsManagementService.bulkAssign(courseId, projectId, object);

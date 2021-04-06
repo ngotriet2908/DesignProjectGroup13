@@ -65,6 +65,7 @@ public class GradingParticipationService {
     /*
     Removes specified graders from the project.
      */
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public void deleteGradingParticipationByUserIdsAndProject(List<User> users, Long projectId) {
         this.repository.deleteAllById_UserInAndId_ProjectId(users, projectId);
     }
@@ -72,14 +73,22 @@ public class GradingParticipationService {
     /*
     Removes all graders from the project.
      */
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public void deleteAllGradingParticipationByProject(Long projectId) {
         this.repository.deleteAllById_Project_Id(projectId);
+    }
+
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public void deleteAllNonTeacherGradingParticipationByProject(Long projectId) {
+        this.repository.deleteAllById_Project_Id_AndRole_NameNot(projectId, RoleEnum.TEACHER.getName());
     }
 
     /*
    Adds specified graders from the project.
     */
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public void addUsersAsGraders(List<User> users, Project project) {
+        System.out.println(users.size());
         Set<GradingParticipation> participations = new HashSet<>();
         for (User user: users) {
             participations.add(new GradingParticipation(user, project,

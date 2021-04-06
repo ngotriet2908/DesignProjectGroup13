@@ -44,6 +44,9 @@ public interface GradingParticipationRepository extends JpaRepository<GradingPar
     @Modifying(clearAutomatically=true)
     void deleteAllById_Project_Id(Long id_project_id);
 
+    @Modifying(clearAutomatically=true)
+    void deleteAllById_Project_Id_AndRole_NameNot(Long id_project_id, String roleName);
+
 //    @Modifying
 //    @Query(value="INSERT INTO grading_participation (user_id, project_id, role_id) " +
 //            "VALUES(1, \"A\", 19) " +

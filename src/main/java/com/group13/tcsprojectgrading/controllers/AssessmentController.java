@@ -46,7 +46,7 @@ public class AssessmentController {
 
         if (!(privileges != null
                 && (privileges.contains(PrivilegeEnum.GRADING_READ_ALL) || privileges.contains(PrivilegeEnum.GRADING_READ_SINGLE)))) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorized");
         }
 
         Assessment assessment =  this.assessmentService.getAssessment(assessmentId, submissionId, Long.valueOf(principal.getName()), privileges);
@@ -72,7 +72,7 @@ public class AssessmentController {
         if (!(privileges != null
                 && (privileges.contains(PrivilegeEnum.GRADING_WRITE_ALL) ||
                 privileges.contains(PrivilegeEnum.GRADING_WRITE_SINGLE)))) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorized");
         }
 
         Grade createdGrade = this.assessmentService.addGrade(submissionId, assessmentId, grade, Long.valueOf(principal.getName()), privileges);
@@ -81,9 +81,23 @@ public class AssessmentController {
 
     @RequestMapping(value = "/grades/{gradeId}/activate", method = RequestMethod.POST)
     protected ResponseEntity<?> activateGrade(
-            @PathVariable Long gradeId
+            @PathVariable Long gradeId,
+            @PathVariable Long projectId,
+            @PathVariable Long submissionId,
+            @PathVariable Long assessmentId,
+            Principal principal
     ) {
-        this.assessmentService.activateGrade(gradeId);
+
+        List<PrivilegeEnum> privileges = this.gradingParticipationService
+                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
+
+        if (!(privileges != null
+                && (privileges.contains(PrivilegeEnum.GRADING_WRITE_ALL) ||
+                privileges.contains(PrivilegeEnum.GRADING_WRITE_SINGLE)))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorized");
+        }
+
+        this.assessmentService.activateGrade(submissionId, assessmentId, Long.valueOf(principal.getName()), gradeId, privileges);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -101,7 +115,7 @@ public class AssessmentController {
 
         if (!(privileges != null
                 && (privileges.contains(PrivilegeEnum.SUBMISSION_READ_ALL) || privileges.contains(PrivilegeEnum.SUBMISSION_READ_SINGLE)))) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorized");
         }
 
         return this.assessmentService.getIssues(submissionId, assessmentId, Long.valueOf(principal.getName()), privileges);
@@ -122,7 +136,7 @@ public class AssessmentController {
 
         if (!(privileges != null
                 && (privileges.contains(PrivilegeEnum.GRADING_WRITE_SINGLE) || privileges.contains(PrivilegeEnum.GRADING_WRITE_ALL)))) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorized");
         }
 
         return this.assessmentService.createIssue(issue, submissionId, assessmentId, Long.valueOf(principal.getName()), privileges);
@@ -144,7 +158,7 @@ public class AssessmentController {
 
         if (!(privileges != null
                 && (privileges.contains(PrivilegeEnum.GRADING_WRITE_SINGLE) || privileges.contains(PrivilegeEnum.GRADING_WRITE_ALL)))) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorized");
         }
 
         return this.assessmentService.resolveIssue(submissionId, issueId, Long.valueOf(principal.getName()), solution, privileges);

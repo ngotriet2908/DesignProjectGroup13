@@ -276,7 +276,7 @@ public class AssessmentService {
         if (privileges != null && privileges.contains(PrivilegeEnum.GRADING_READ_SINGLE)) {
             if (submission.getGrader() == null || !submission.getGrader().getId().equals(userId)) {
                 throw new ResponseStatusException(
-                        HttpStatus.UNAUTHORIZED, "Unauthorised"
+                        HttpStatus.FORBIDDEN, "Unauthorised"
                 );
             }
         }
@@ -317,10 +317,10 @@ public class AssessmentService {
         if (privileges.contains(GRADING_WRITE_SINGLE)) {
             GradingParticipation grader = this.gradingParticipationService
                     .getGradingParticipationByUserAndProject(graderId, submission.getProject().getId());
-            if (grader == null || submission.getGrader() != null ||
+            if (grader == null || submission.getGrader() == null ||
                     !grader.getId().getUser().getId().equals(submission.getGrader().getId())) {
                 throw new ResponseStatusException(
-                        HttpStatus.UNAUTHORIZED, "Unauthorised"
+                        HttpStatus.FORBIDDEN, "Unauthorised"
                 );
             }
         }
@@ -345,7 +345,30 @@ public class AssessmentService {
     Activates grade and deactivates all other grades for the criterion.
      */
     @Transactional(rollbackOn = Exception.class)
-    public Grade activateGrade(Long gradeId) throws ResponseStatusException {
+    public Grade activateGrade(Long submissionId,
+                               Long assessmentId,
+                               Long graderId,
+                               Long gradeId,
+                               List<PrivilegeEnum> privileges
+                               ) throws ResponseStatusException {
+
+        Submission submission = submissionRepository.findById(submissionId).orElse(null);
+        if (submission == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "submission not found");
+        }
+
+        if (privileges.contains(GRADING_WRITE_SINGLE)) {
+            GradingParticipation grader = this.gradingParticipationService
+                    .getGradingParticipationByUserAndProject(graderId, submission.getProject().getId());
+            if (grader == null || submission.getGrader() == null ||
+                    !grader.getId().getUser().getId().equals(submission.getGrader().getId())) {
+                throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN, "Unauthorised"
+                );
+            }
+        }
+
+
         Grade grade = this.gradeRepository.findById(gradeId).orElse(null);
 
         if (grade == null) {
@@ -382,10 +405,10 @@ public class AssessmentService {
         if (privileges.contains(SUBMISSION_READ_SINGLE)) {
             GradingParticipation grader = this.gradingParticipationService
                     .getGradingParticipationByUserAndProject(graderId, submission.getProject().getId());
-            if (grader == null || submission.getGrader() != null ||
+            if (grader == null || submission.getGrader() == null ||
                     !grader.getId().getUser().getId().equals(submission.getGrader().getId())) {
                 throw new ResponseStatusException(
-                        HttpStatus.UNAUTHORIZED, "Unauthorised"
+                        HttpStatus.FORBIDDEN, "Unauthorised"
                 );
             }
         }
@@ -407,10 +430,10 @@ public class AssessmentService {
         if (privileges.contains(GRADING_WRITE_SINGLE)) {
             GradingParticipation grader = this.gradingParticipationService
                     .getGradingParticipationByUserAndProject(userId, submission.getProject().getId());
-            if (grader == null || submission.getGrader() != null ||
+            if (grader == null || submission.getGrader() == null ||
                     !grader.getId().getUser().getId().equals(submission.getGrader().getId())) {
                 throw new ResponseStatusException(
-                        HttpStatus.UNAUTHORIZED, "Unauthorised"
+                        HttpStatus.FORBIDDEN, "Unauthorised"
                 );
             }
         }
@@ -452,10 +475,10 @@ public class AssessmentService {
         if (privileges.contains(GRADING_WRITE_SINGLE)) {
             GradingParticipation grader = this.gradingParticipationService
                     .getGradingParticipationByUserAndProject(graderId, submission.getProject().getId());
-            if (grader == null || submission.getGrader() != null ||
+            if (grader == null || submission.getGrader() == null ||
                     !grader.getId().getUser().getId().equals(submission.getGrader().getId())) {
                 throw new ResponseStatusException(
-                        HttpStatus.UNAUTHORIZED, "Unauthorised"
+                        HttpStatus.FORBIDDEN, "Unauthorised"
                 );
             }
         }

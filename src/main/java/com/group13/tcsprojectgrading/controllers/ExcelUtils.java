@@ -32,6 +32,7 @@ public class ExcelUtils {
     public void addParticipantsGradePage() {
         Sheet sheet = workbook.createSheet("Participants");
         Row header = sheet.createRow(0);
+        CreationHelper factory = workbook.getCreationHelper();
 
         CellStyle headerStyle = workbook.createCellStyle();
         headerStyle.setWrapText(true);
@@ -85,6 +86,33 @@ public class ExcelUtils {
                     cell.setCellValue("");
                 } else {
                     cell.setCellValue(grade);
+                    Drawing drawing = sheet.createDrawingPatriarch();
+
+
+                    ClientAnchor anchor = factory.createClientAnchor();
+
+                    anchor.setCol1(cell.getColumnIndex());
+
+                    anchor.setCol2(cell.getColumnIndex()+1);
+
+                    anchor.setRow1(row.getRowNum());
+
+                    anchor.setRow2(row.getRowNum()+3);
+
+
+                    Comment comment = drawing.createCellComment(anchor);
+
+                    RichTextString str = factory.createRichTextString(
+                            getCommentFromString(entry1.getValue(), entry.getValue().getId().getAssessment().getGrades())
+                    );
+
+                    comment.setString(str);
+
+                    comment.setAuthor(
+                            getGraderNameFromString(entry1.getValue(), entry.getValue().getId().getAssessment().getGrades())
+                    );
+
+                    cell.setCellComment(comment);
                 }
             }
         }
@@ -95,6 +123,24 @@ public class ExcelUtils {
         for(Grade grade: gradeSet) {
             if (grade.getCriterionId().equals(criterionId)) {
                 return (double) grade.getGrade();
+            }
+        }
+        return null;
+    }
+
+    private String getCommentFromString(String criterionId, Set<Grade> gradeSet) {
+        for(Grade grade: gradeSet) {
+            if (grade.getCriterionId().equals(criterionId)) {
+                return grade.getDescription();
+            }
+        }
+        return null;
+    }
+
+    private String getGraderNameFromString(String criterionId, Set<Grade> gradeSet) {
+        for(Grade grade: gradeSet) {
+            if (grade.getCriterionId().equals(criterionId)) {
+                return grade.getGrader().getName();
             }
         }
         return null;
