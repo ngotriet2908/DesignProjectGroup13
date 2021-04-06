@@ -74,6 +74,7 @@ class CoursesController {
             arrayNode.add(node);
         }
 
+
         ObjectNode resultNode = objectMapper.createObjectNode();
         resultNode.set("course", jsonCourseNode);
         resultNode.set("projects", arrayNode);
@@ -95,7 +96,7 @@ class CoursesController {
 
         if (roleEnum == null) {
             throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED, "Enrolment not found"
+                    HttpStatus.UNAUTHORIZED, "Enrollment not found"
             );
         }
 

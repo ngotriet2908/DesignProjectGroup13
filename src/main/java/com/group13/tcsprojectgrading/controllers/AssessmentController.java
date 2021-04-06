@@ -61,44 +61,7 @@ public class AssessmentController {
     ) {
         return assessmentCoreService.alterCriterionAssessment(courseId, projectId, submissionId, assessmentId, criterionId, newGrade);
     }
-        Submission submission = submissionService.findSubmissionById(submissionId);
-        List<Assessment> assessmentList = assessmentService.getAssessmentBySubmission(submission);
 
-        Assessment submissionAssessment = assessmentService.getAssessmentById(assessmentId);
-        if (submissionAssessment == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } else if (!assessmentList.contains(submissionAssessment)) {
-            System.out.println(assessmentList);
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        } else {Map<String, CriterionGrade> grades = submissionAssessment.getGrades();
-
-            // add the grade to history
-            if (grades.containsKey(criterionId)) {
-                grades.get(criterionId).getHistory().add(newGrade);
-                System.out.println(grades.get(criterionId).getHistory());
-                grades.get(criterionId).setActive(grades.get(criterionId).getActive() + 1);
-            } else {
-                grades.put(criterionId, new CriterionGrade(
-                        0, new ArrayList<>() {{
-                    add(newGrade);
-                }}
-                ));
-            }
-
-            // update graded count and progress of assessment
-            submissionAssessment.increaseGradedCount(1);
-            double progress = assessmentService.getProgress(rubricService.getRubricById(projectId), submissionAssessment);
-            submissionAssessment.setProgress(progress);
-            // update progress of project
-            Project project = projectService.getProjectById(courseId, projectId);
-            projectService.updateProgress(project, progress);
-
-            // check if fully graded (should be possible to replace with a manually typed value)
-            Rubric rubric = this.rubricService.getRubricById(projectId);
-            if (rubric.getCriterionCount() == submissionAssessment.getGradedCount()) {
-                double total = this.assessmentService.calculateFinalGrade(rubric, submissionAssessment);
-                submissionAssessment.setFinalGrade(total);
-            }
 
     @RequestMapping(value = "/grading/{criterionId}/active/{id}", method = RequestMethod.PUT)
     protected String updateActiveGrading(

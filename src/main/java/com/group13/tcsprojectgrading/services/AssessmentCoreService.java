@@ -79,12 +79,10 @@ public class AssessmentCoreService {
 
         Assessment submissionAssessment = assessmentService.getAssessmentById(assessmentId);
 
-        if (!assessmentList.contains(submissionAssessment)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Conflict");
-        }
-
         if (submissionAssessment == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "no submissionAssessment");
+        } else if (!assessmentList.contains(submissionAssessment)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Conflict");
         } else {
             Map<String, CriterionGrade> grades = submissionAssessment.getGrades();
 
@@ -103,15 +101,18 @@ public class AssessmentCoreService {
             // update graded count of assessment (if it's not a regraded criterion)
             if (grades.get(criterionId).getHistory().size() == 1) {
                 submissionAssessment.increaseGradedCount(1);
-
-                // update graded count of project
+                double progress = assessmentService.getProgress(rubricService.getRubricById(projectId), submissionAssessment);
+                submissionAssessment.setProgress(progress);
+                // update progress of project
+                Project project = projectService.getProjectById(courseId, projectId);
+                projectService.updateProgress(project, progress);
                 // -
             }
 
             // check if fully graded (should be possible to replace with a manually typed value)
             Rubric rubric = this.rubricService.getRubricById(projectId);
             if (rubric.getCriterionCount() == submissionAssessment.getGradedCount()) {
-                int total = this.assessmentService.calculateFinalGrade(rubric, submissionAssessment);
+                double total = this.assessmentService.calculateFinalGrade(rubric, submissionAssessment);
                 submissionAssessment.setFinalGrade(total);
             }
 
@@ -129,12 +130,10 @@ public class AssessmentCoreService {
 
         Assessment submissionAssessment = assessmentService.getAssessmentById(assessmentId);
 
-        if (!assessmentList.contains(submissionAssessment)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Conflict");
-        }
-
         if (submissionAssessment == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "no submissionAssessment");
+        } else if (!assessmentList.contains(submissionAssessment)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Conflict");
         } else {
             Map<String, CriterionGrade> grades = submissionAssessment.getGrades();
 
@@ -157,10 +156,6 @@ public class AssessmentCoreService {
         List<Assessment> assessmentList = assessmentService.getAssessmentBySubmission(submission);
 
         Assessment submissionAssessment = assessmentService.getAssessmentById(assessmentId);
-
-        if (!assessmentList.contains(submissionAssessment)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT);
-        }
 
         if (project == null || submissionAssessment == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -192,9 +187,9 @@ public class AssessmentCoreService {
                     subject,
                     description,
                     creator,
-                    "unresolved"
+                    "unresolved",
+                    addressee
             );
-            issue1.setAddressee(addressee);
 
             issueService.saveIssue(issue1);
             List<Issue> issues = issueService.findIssuesByAssessment(submissionAssessment.getId());
@@ -216,12 +211,10 @@ public class AssessmentCoreService {
 
         Assessment submissionAssessment = assessmentService.getAssessmentById(assessmentId);
 
-        if (!assessmentList.contains(submissionAssessment)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT);
-        }
-
         if (project == null || submissionAssessment == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        } else if (!assessmentList.contains(submissionAssessment)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT);
         } else {
             Issue issue1 = issueService.findById(UUID.fromString(issue.get("id").asText()));
             if (issue1 != null) {
@@ -233,8 +226,7 @@ public class AssessmentCoreService {
             List<Issue> issues = issueService.findIssuesByAssessment(submissionAssessment.getId());
             ObjectMapper objectMapper = new ObjectMapper();
             ArrayNode result = objectMapper.createArrayNode();
-            for(Issue issue2: issues) {
-                result.add(issue2.convertToJson());
+            for(Issue issue2: issues) { result.add(issue2.convertToJson());
             }
             return result;
         }
@@ -249,14 +241,13 @@ public class AssessmentCoreService {
 
         Assessment submissionAssessment = assessmentService.getAssessmentById(assessmentId);
 
-        if (!assessmentList.contains(submissionAssessment)) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT, "entity not found"
-            );
-        }
         if (project == null || submissionAssessment == null) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "entity not found"
+            );
+        } else if (!assessmentList.contains(submissionAssessment)) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "entity not found"
             );
         } else {
             List<Issue> issues = issueService.findIssuesByAssessment(submissionAssessment.getId());

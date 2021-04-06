@@ -170,6 +170,7 @@ public class Project {
         objectNode.put("name", name);
         objectNode.put("createAt", createAt);
         objectNode.put("description", description);
+        objectNode.put("progress", progress);
         objectNode.set("flags", createFlagsArrayNode(flags));
         return objectNode;
     }

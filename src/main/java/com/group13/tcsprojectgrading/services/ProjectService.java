@@ -494,4 +494,15 @@ public class ProjectService {
             return objectMapper.writeValueAsString(rubric);
         }
     }
+
+    @Transactional
+    //Progress can be updated by dividing the given assessment progress by the amount of submissions, then adding this
+    //to the current overall progress.
+    public Project updateProgress(Project project, double assessProgress) {
+        double currProgress = project.getProgress();
+        int submissionAmount = project.getSubmissions().size();
+        if (submissionAmount != 0) project.setProgress(currProgress + assessProgress / submissionAmount);
+        else project.setProgress(0);
+        return projectRepository.save(project);
+    }
 }
