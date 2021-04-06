@@ -24,7 +24,6 @@ class Feedback extends Component {
       isPdfAttached: true,
       isAllRecipientsChecked: false,
     }
-
   }
 
   componentDidMount() {
@@ -203,6 +202,7 @@ class Feedback extends Component {
     this.setState({
       isAllRecipientsChecked: !this.state.isAllRecipientsChecked,
       receiver: "",
+      isPdfAttached: this.state.isAllRecipientsChecked,
     })
   }
 
@@ -252,11 +252,15 @@ class Feedback extends Component {
               </Form.Group>
 
               <Form.Group controlId="formPdfCheckbox">
-                <Form.Check defaultChecked={this.state.isPdfAttached}
-                            type="checkbox"
-                            label="Generate and attach .pdf"
-                            onChange={this.handlePdfCheckboxChange}
-                />
+                {
+                  this.state.isAllRecipientsChecked
+                    ? <React.Fragment></React.Fragment>
+                    : <Form.Check defaultChecked={this.state.isPdfAttached}
+                                  type="checkbox"
+                                  label="Generate and attach .pdf"
+                                  onChange={this.handlePdfCheckboxChange}
+                      />
+                }
               </Form.Group>
 
               <Form.Group controlId="exampleForm.ControlSelect1">
@@ -277,7 +281,6 @@ class Feedback extends Component {
               </Form.Group>
 
               <Form.Group controlId="formRecipientCheckbox">
-                {/*TODO: implement all recipients = same email text with different pdfs OR if there is no time, remove this :D */}
                 <Form.Check defaultChecked={this.state.isAllRecipientsChecked}
                             type="checkbox"
                             label="Send to all course students"
