@@ -22,6 +22,11 @@ class GradersModal extends Component {
       graders: [],
       isLoaded: false,
       selected: [],
+
+      initial: [],
+
+      add: [],
+      remove: []
     }
   }
 
@@ -31,8 +36,6 @@ class GradersModal extends Component {
     ])
       .then(async([res1]) => {
         const graders = await res1.json();
-
-        console.log(graders);
 
         let selected = graders.filter(grader => {
           return this.props.currentGraders.find(currentGrader => {return currentGrader.id === grader.id})
@@ -48,6 +51,7 @@ class GradersModal extends Component {
           // labels: labels,
           isLoaded: true,
           selected: selected,
+          initial: selected,
         });
       })
       .catch(error => {
@@ -94,6 +98,8 @@ class GradersModal extends Component {
     }
 
     if (prevSelectedState) {
+
+
       this.setState(prevState => ({
         selected: prevState.selected.filter(selectedGrader => {return selectedGrader.id !== grader.id}),
       }))

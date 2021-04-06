@@ -82,7 +82,9 @@ public class GradingParticipationService {
     public void addUsersAsGraders(List<User> users, Project project) {
         Set<GradingParticipation> participations = new HashSet<>();
         for (User user: users) {
-            participations.add(new GradingParticipation(user, project, this.roleService.findRoleByName(RoleEnum.TA_GRADING.toString())));
+            participations.add(new GradingParticipation(user, project,
+                    this.roleService.findRoleByName(RoleEnum.TA_GRADING.toString()))
+            );
         }
 
         this.repository.saveAll(participations);

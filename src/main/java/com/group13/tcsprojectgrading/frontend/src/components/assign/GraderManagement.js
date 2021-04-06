@@ -1,13 +1,11 @@
 import styles from "./assign.module.css";
 import React, {Component} from "react";
-import {ButtonGroup, Dropdown, DropdownButton, ListGroup, ListGroupItem} from "react-bootstrap";
-import {Button, Card, FormControl, Modal, Alert, Spinner, Breadcrumb} from 'react-bootstrap'
+import {Button, FormControl, Spinner} from 'react-bootstrap'
 import {request} from "../../services/request";
-import {BASE, COURSES, PROJECT, USER_COURSES} from "../../services/endpoints";
+import {BASE, PROJECT, USER_COURSES} from "../../services/endpoints";
 import store from "../../redux/store";
 import {URL_PREFIX} from "../../services/config";
 import {push} from "connected-react-router";
-import BulkAssignModal from "./BulkAssignModal";
 import globalStyles from "../helpers/global.module.css";
 import Breadcrumbs from "../helpers/Breadcrumbs";
 import classnames from "classnames";
@@ -15,11 +13,9 @@ import {IoPencilOutline} from "react-icons/io5";
 import Grader from "./Grader";
 import AssignSubmissionModal from "./AssignSubmissionModal";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
-import {deleteCurrentCourse, saveCurrentCourse} from "../../redux/courses/actions";
 import {setCurrentLocation} from "../../redux/navigation/actions";
 import {connect} from "react-redux";
 import GradersModal from "./GradersModal";
-import LabelModal from "../submissionDetails/labels/LabelModal";
 import BulkModal from "./BulkModal";
 
 
@@ -229,7 +225,7 @@ class GraderManagement extends Component {
 
         <div className={styles.toolbar}>
           <FormControl
-            className={styles.groupsSearchBar}
+            className={classnames(globalStyles.searchBar, styles.groupsSearchBar)}
             type="text"
             placeholder="Search by a group or grader's name"
             onChange={this.handleSearchChange}/>
@@ -360,14 +356,6 @@ class GraderManagement extends Component {
           // onClose={this.modalBulkAssignHandleClose}
           // onAccept={this.modalBulkAssignHandleAccept}
         />
-
-        {/*<BulkAssignModal*/}
-        {/*  show={this.state.modalBulkAssignShow}*/}
-        {/*  graders={this.state.graders}*/}
-        {/*  notAssigned={this.state.notAssigned}*/}
-        {/*  onClose={this.modalBulkAssignHandleClose}*/}
-        {/*  onAccept={this.modalBulkAssignHandleAccept}*/}
-        {/*/>*/}
 
       </div>
     )

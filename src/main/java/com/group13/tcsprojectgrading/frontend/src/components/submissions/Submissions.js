@@ -156,7 +156,7 @@ class Submissions extends Component {
           </div>
 
           <div className={styles.toolbar}>
-            <FormControl className={styles.groupsSearchBar}
+            <FormControl className={classnames(globalStyles.searchBar, styles.groupsSearchBar)}
               type="text"
               placeholder="Search by a group name"
               onChange={this.handleSearchChange}/>

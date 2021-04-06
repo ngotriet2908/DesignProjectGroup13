@@ -188,12 +188,12 @@ class StudentDetails extends Component {
                               </h5>
                               {(this.state.isEditing)?
                                 <div className={classnames(globalStyles.iconButton, styles.dangerButton)}
-                                     onClick={() => this.deleteHandler(submission)}>
+                                  onClick={() => this.deleteHandler(submission)}>
                                   <IoTrashOutline size={26}/>
                                 </div>
                                 :
                                 <div className={classnames(globalStyles.iconButton)}
-                                     onClick={() => store.dispatch(push(this.props.match.url.split("/").slice(0, this.props.match.url.split("/").length - 2).join("/") + "/submissions/"+ submission.id))}>
+                                  onClick={() => store.dispatch(push(this.props.match.url.split("/").slice(0, this.props.match.url.split("/").length - 2).join("/") + "/submissions/"+ submission.id))}>
                                   <IoArrowForward size={26}/>
                                 </div>
                               }

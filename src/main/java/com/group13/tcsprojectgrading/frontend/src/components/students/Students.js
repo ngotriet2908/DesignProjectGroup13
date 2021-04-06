@@ -10,8 +10,9 @@ import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 import globalStyles from "../helpers/global.module.css";
 import Breadcrumbs from "../helpers/Breadcrumbs";
 import classnames from "classnames";
-class Students extends Component {
+import store from "../../redux/store";
 
+class Students extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -110,7 +111,7 @@ class Students extends Component {
           </div>
 
           <div className={styles.toolbar}>
-            <FormControl className={styles.groupsSearchBar}
+            <FormControl className={classnames(globalStyles.searchBar, styles.groupsSearchBar)}
               type="text"
               placeholder="Search with group name, student name, student id, member name, member student id"
               onChange={this.handleSearchChange}/>
@@ -147,7 +148,7 @@ class Students extends Component {
                     <StudentCard
                       key={student.id.user.id}
                       match={this.props.match}
-                      participant={student}/>
+                      student={student}/>
                   )
                 })}
           </div>

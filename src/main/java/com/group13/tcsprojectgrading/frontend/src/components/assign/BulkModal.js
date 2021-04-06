@@ -116,13 +116,15 @@ class BulkModal extends Component {
               </div>
               }
 
+
+
             </div>
           }
 
           <div className={classnames(globalStyles.modalFooterContainer)}>
             <div className={globalStyles.modalFooterContainerButtonGroup}>
               <Button variant="linkLightGray" onClick={this.onClose}>Cancel</Button>
-              <Button variant="lightGreen" onClick={this.onAccept}>Save</Button>
+              <Button variant="lightGreen" onClick={this.onAccept}>Assign</Button>
             </div>
           </div>
         </div>

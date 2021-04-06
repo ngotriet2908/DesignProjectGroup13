@@ -297,13 +297,8 @@ class Project extends Component {
             {/*  </div>*/}
             {/*</Can>*/}
           </div>
-        </div>
 
-        <div className={styles.container}>
-          <div>
-            {/*<Can I="view" a="AdminToolbar">*/}
-            <IssuesProject routeMatch={this.props.match} user={this.props.user} issues={this.state.issues}/>
-          </div>
+          <IssuesProject routeMatch={this.props.match} user={this.props.user} issues={this.state.issues}/>
         </div>
 
       </div>

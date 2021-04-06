@@ -112,24 +112,15 @@ class BulkAssignModal extends Component {
   render() {
     return (
       <Modal centered
-             backdrop="static"
-             size="lg"
-             show={this.props.show}
-             onHide={this.props.onClose}
-             onEnter={this.onShowHandle}
-             onExited={this.onExitHandle}>
-        <Modal.Header closeButton>
-          <Modal.Title>Bulk Assign</Modal.Title>
-        </Modal.Header>
+        backdrop="static"
+        size="lg"
+        show={this.props.show}
+        onHide={this.props.onClose}
+        onEnter={this.onShowHandle}
+        onExited={this.onExitHandle}>
         <Modal.Body>
           {
             <div>
-              {(!this.state.showAlert)? null:
-                <Alert variant="danger" onClose={this.closeAlertHandle} dismissible>
-                  <p>
-                    {this.state.alertBody}
-                  </p>
-                </Alert>}
               <h6>Number of available graders: {this.state.graders.length}</h6>
               <h6>Number of not assigned submissions: {this.state.notAssigned.length}</h6>
 
@@ -168,19 +159,6 @@ class BulkAssignModal extends Component {
             </div>
           }
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary"
-                  onClick={() => {
-                    this.setState({choice:null})
-                    this.props.onClose()
-                  }}>
-            Cancel
-          </Button>
-
-          <Button variant="primary" onClick={this.handleOnClick}>
-            Assign
-          </Button>
-        </Modal.Footer>
       </Modal>
     )
   }

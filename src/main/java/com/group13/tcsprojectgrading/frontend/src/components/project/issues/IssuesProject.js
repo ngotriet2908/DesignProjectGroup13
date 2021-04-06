@@ -58,43 +58,43 @@ class IssuesProject extends Component {
 
             <div className={styles.buttonGroup}>
 
-              <DropdownButton
-                as={ButtonGroup}
-                key={"primary"}
-                id={`dropdown-Primary`}
-                variant={"lightGreen"}
-                title={"Filter"}
-                onSelect={this.onFilterStatusSelectHandler}
-              >
-                {["All", "divider", "Resolved", "Open"].map((filterS) => {
-                  if (filterS === "divider") {
-                    return <Dropdown.Divider key={filterS}/>
-                  } else if (filterS === this.state.filterStatusChoice) {
-                    return <Dropdown.Item key={filterS} eventKey={filterS} active>{filterS}</Dropdown.Item>
-                  } else {
-                    return <Dropdown.Item key={filterS} eventKey={filterS}>{filterS}</Dropdown.Item>
-                  }
-                })}
-              </DropdownButton>
+              {/*<DropdownButton*/}
+              {/*  as={ButtonGroup}*/}
+              {/*  key={"primary"}*/}
+              {/*  id={`dropdown-Primary`}*/}
+              {/*  variant={"lightGreen"}*/}
+              {/*  title={"Filter"}*/}
+              {/*  onSelect={this.onFilterStatusSelectHandler}*/}
+              {/*>*/}
+              {/*  {["All", "divider", "Resolved", "Open"].map((filterS) => {*/}
+              {/*    if (filterS === "divider") {*/}
+              {/*      return <Dropdown.Divider key={filterS}/>*/}
+              {/*    } else if (filterS === this.state.filterStatusChoice) {*/}
+              {/*      return <Dropdown.Item key={filterS} eventKey={filterS} active>{filterS}</Dropdown.Item>*/}
+              {/*    } else {*/}
+              {/*      return <Dropdown.Item key={filterS} eventKey={filterS}>{filterS}</Dropdown.Item>*/}
+              {/*    }*/}
+              {/*  })}*/}
+              {/*</DropdownButton>*/}
 
-              <DropdownButton
-                as={ButtonGroup}
-                key={"primary1"}
-                id={`dropdown-Primary1`}
-                variant={"lightGreen"}
-                title={"Filter"}
-                onSelect={this.onFilterOriginSelectHandler}
-              >
-                {["All", "divider", "Creator", "Addressee"].map((filterS) => {
-                  if (filterS === "divider") {
-                    return <Dropdown.Divider key={filterS}/>
-                  } else if (filterS === this.state.filterOriginChoice) {
-                    return <Dropdown.Item key={filterS} eventKey={filterS} active>{filterS}</Dropdown.Item>
-                  } else {
-                    return <Dropdown.Item key={filterS} eventKey={filterS}>{filterS}</Dropdown.Item>
-                  }
-                })}
-              </DropdownButton>
+              {/*<DropdownButton*/}
+              {/*  as={ButtonGroup}*/}
+              {/*  key={"primary1"}*/}
+              {/*  id={`dropdown-Primary1`}*/}
+              {/*  variant={"lightGreen"}*/}
+              {/*  title={"Filter"}*/}
+              {/*  onSelect={this.onFilterOriginSelectHandler}*/}
+              {/*>*/}
+              {/*  {["All", "divider", "Creator", "Addressee"].map((filterS) => {*/}
+              {/*    if (filterS === "divider") {*/}
+              {/*      return <Dropdown.Divider key={filterS}/>*/}
+              {/*    } else if (filterS === this.state.filterOriginChoice) {*/}
+              {/*      return <Dropdown.Item key={filterS} eventKey={filterS} active>{filterS}</Dropdown.Item>*/}
+              {/*    } else {*/}
+              {/*      return <Dropdown.Item key={filterS} eventKey={filterS}>{filterS}</Dropdown.Item>*/}
+              {/*    }*/}
+              {/*  })}*/}
+              {/*</DropdownButton>*/}
 
             </div>
 
@@ -104,6 +104,7 @@ class IssuesProject extends Component {
           <Card className={styles.card}>
             <Card.Body>
               <div>
+
                 {this.props.issues.filter((issue) => {
                   return this.filterIssueStateDropDown(issue) &&
                     this.filterIssueOriginDropDown(issue)
@@ -112,6 +113,7 @@ class IssuesProject extends Component {
                 <div className={classnames(globalStyles.modalBodyContainerRow, globalStyles.modalBodyContainerRowEmpty)}>
                   No issues
                 </div>
+
                 }
 
                 {this.props.issues

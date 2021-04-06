@@ -94,6 +94,7 @@ class Feedback extends Component {
         </div>
       )
     }
+
     return (
       <div className={globalStyles.container}>
 

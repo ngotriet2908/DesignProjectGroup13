@@ -122,14 +122,19 @@
     /*border-radius: 1rem;*/
     border-radius: 0.25rem;
     border: 2px solid transparent;
-    /*height: 40px;*/
     color: white;
+    min-height: 48px;
+
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
 }
 
 .labelSmall {
     font-size: 0.8rem;
     padding: .2rem .5rem;
     line-height: 1;
+    min-height: 23px;
 }
 
 /*:global(.badge-tomato) {*/
@@ -404,4 +409,9 @@
 :global(.list-group-item:last-of-type) {
     border-bottom-right-radius: 0.5rem;
     border-bottom-left-radius: 0.5rem;
+}
+
+/* search bar */
+.searchBar {
+    min-height: 48px;
 }
