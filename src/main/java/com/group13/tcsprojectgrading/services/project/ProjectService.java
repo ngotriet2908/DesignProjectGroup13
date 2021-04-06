@@ -212,7 +212,7 @@ public class ProjectService {
             List<PrivilegeEnum> privileges = this.gradingParticipationService.getPrivilegesFromUserIdAndProject(userId, projectId);
 
             if (privileges == null) {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorised");
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorised");
             }
 
             ObjectWriter writer = Json.getObjectWriter(Project.class)
@@ -375,7 +375,7 @@ public class ProjectService {
 //        List<PrivilegeEnum> privileges = this.gradingParticipationService.getPrivilegesFromUserIdAndProject(userId, projectId);
 //
 //        if (privileges == null) {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorised");
+//            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorised");
 //        }
 
         return this.gradingParticipationService.getProjectGradersWithSubmissions(projectId);
@@ -405,11 +405,21 @@ public class ProjectService {
         // for all submissions, if submission's grader is NOT in USERS, set grader to null
         this.submissionService.dissociateSubmissionsFromUsers(graders);
 
+        List<User> existing = this.gradingParticipationService
+                .getGradingParticipationFromProject(project)
+                .stream()
+//                .filter(i -> i.getRole().getName().equals(RoleEnum.TEACHER.getName()))
+                .map(i -> i.getId().getUser())
+                .collect(Collectors.toList());
+//        System.out.println(existing.size());
+
         // remove all graders
-        this.gradingParticipationService.deleteAllGradingParticipationByProject(projectId);
+        this.gradingParticipationService.deleteAllNonTeacherGradingParticipationByProject(projectId);
 
         // add new graders
-        this.gradingParticipationService.addUsersAsGraders(graders, project);
+        this.gradingParticipationService.addUsersAsGraders(
+                graders.stream().filter(user -> !existing.contains(user)).collect(Collectors.toList())
+                , project);
 
         return this.getProjectGraders(projectId);
     }
@@ -879,7 +889,7 @@ public class ProjectService {
         Credential credential = flow.loadCredential(teacherId);
         if (credential == null) {
             throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED, "token not found"
+                    HttpStatus.FORBIDDEN, "token not found"
             );
         }
 

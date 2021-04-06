@@ -1,13 +1,10 @@
 import React, {Component} from "react";
-import {Button, ListGroup, ListGroupItem, Card, Badge} from "react-bootstrap";
 import {Breadcrumb, Button, ListGroup, ListGroupItem, Card, Badge} from "react-bootstrap";
 import styles from "./students.module.css";
 import {Link} from "react-router-dom";
 import store from "../../redux/store";
 import {push} from "connected-react-router";
-import classnames from "classnames";
-import globalStyles from "../helpers/global.module.css";
-import {IoArrowForward} from "react-icons/io5";
+
 import {colorToStyles} from "../submissionDetails/labels/LabelRow";
 import {deleteRubric, saveRubric} from "../../redux/rubric/actions";
 import {setCurrentLocation} from "../../redux/navigation/actions";

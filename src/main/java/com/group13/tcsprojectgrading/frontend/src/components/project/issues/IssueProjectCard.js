@@ -26,7 +26,7 @@ class IssueProjectCard extends Component {
   }
 
   componentDidMount() {
-    console.log(`${this.props.routeMatch.url}/submissions/${this.props.issue.submission.id}/assessments/${this.props.issue.assessment.id}/grading`)
+    console.log(`${this.props.routeMatch.url}/submissions/${this.props.issue.submission.id}/assessments/${this.props.issue.assessment}/grading`)
     console.log(this.props.routeMatch)
   }
 
@@ -47,7 +47,7 @@ class IssueProjectCard extends Component {
               </div>
 
               <div className={classnames(globalStyles.iconButtonSmall, styles.gradingCardTitleButton, styles.issuesCardExpandButton)}
-                   onClick={() => store.dispatch(push(`${this.props.routeMatch.url}/submissions/${this.props.issue.submission.id}/assessments/${this.props.issue.assessment.id}/grading`))}>
+                   onClick={() => store.dispatch(push(`${this.props.routeMatch.url}/submissions/${this.props.issue.submission.id}/assessments/${this.props.issue.assessment}/grading`))}>
                 <IoArrowForward size={26}/>
               </div>
             </div>

@@ -37,6 +37,7 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.group13.tcsprojectgrading.controllers.Utils.groupPages;
 
@@ -110,7 +111,7 @@ public class CourseService {
             System.out.println(userCanvas);
             if (!RoleEnum.getRoleFromEnrolment(userNode.get("enrollments").get(0).get("role").asText()).equals(RoleEnum.TEACHER)) {
                 throw new ResponseStatusException(
-                        HttpStatus.UNAUTHORIZED, "You are not a teacher in course " + course.getName());
+                        HttpStatus.FORBIDDEN, "You are not a teacher in course " + course.getName());
             }
 
             // fetch users and for each create a) User b) Participation
@@ -242,6 +243,14 @@ public class CourseService {
         }
 
         RoleEnum role = getCourseRole(courseId, userId);
+        if (!role.equals(RoleEnum.TEACHER)) {
+            course.setProjects(course.getProjects()
+                    .stream()
+                    .filter(project -> gradingParticipationRepository
+                            .findById_User_IdAndId_Project_Id(userId, project.getId()) != null)
+                    .collect(Collectors.toSet()))
+            ;
+        }
 
         ObjectWriter writer = Json.getObjectWriter(Course.class).withAttribute("role", role.toString());
         return writer.writeValueAsString(course);
@@ -467,7 +476,7 @@ public class CourseService {
 
         if (participation == null) {
             throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED, "User does not participate in the course"
+                    HttpStatus.FORBIDDEN, "User does not participate in the course"
             );
         }
 

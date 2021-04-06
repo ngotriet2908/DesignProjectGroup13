@@ -32,7 +32,7 @@ public class TcsProjectGradingApplication {
         return args -> {
             // assign privileges to roles
             List<PrivilegeEnum> teacherPrivilegesEnum = List.of(
-                    MANAGE_GRADERS_OPEN, MANAGE_GRADERS_EDIT, MANAGE_GRADERS_SELF_EDIT,
+                    MANAGE_GRADERS_OPEN, MANAGE_GRADERS_EDIT,
                     RUBRIC_READ, RUBRIC_WRITE, RUBRIC_DOWNLOAD,
                     STATISTIC_READ, STATISTIC_WRITE,
                     ADMIN_TOOLBAR_VIEW,
@@ -42,7 +42,7 @@ public class TcsProjectGradingApplication {
                     SUBMISSIONS_SYNC, SUBMISSIONS_READ,
                     SUBMISSION_READ_ALL, SUBMISSION_EDIT_ALL,
                     FEEDBACK_SEND, FEEDBACK_OPEN, FEEDBACK_EDIT,
-                    FLAG_EDIT, FLAG_ASSIGN
+                    FLAG_EDIT
             );
 
             List<PrivilegeEnum> taPrivilegesEnum = List.of(
@@ -68,7 +68,7 @@ public class TcsProjectGradingApplication {
                     PROJECT_READ,
                     SUBMISSIONS_READ,
                     SUBMISSION_READ_ALL, SUBMISSION_EDIT_SINGLE,
-                    FLAG_ASSIGN
+                    FLAG_EDIT
             );
 
             List<Privilege> teacherPrivileges = new ArrayList<>();

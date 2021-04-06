@@ -20,6 +20,7 @@ public class Issue {
 
     @ManyToOne
     @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id")
+    @JsonIdentityReference(alwaysAsId = true)
     private Assessment assessment;
 
     private String target;
@@ -30,7 +31,7 @@ public class Issue {
 
     private String subject;
 
-    @Column(length = 8196)
+    @Column(columnDefinition="TEXT")
     private String description;
 
     @ManyToOne
