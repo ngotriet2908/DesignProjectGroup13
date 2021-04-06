@@ -20,6 +20,7 @@ import {setCurrentLocation} from "../../redux/navigation/actions";
 import {connect} from "react-redux";
 import GradersModal from "./GradersModal";
 import LabelModal from "../submissionDetails/labels/LabelModal";
+import BulkModal from "./BulkModal";
 
 
 class GraderManagement extends Component {
@@ -38,6 +39,9 @@ class GraderManagement extends Component {
       showAssignModal: false,
       modalAssignSubmission: null,
       modalAssignGrader: null,
+
+      // bulk
+      showBulkModal: false,
 
       // search
       searchQuery: "",
@@ -174,6 +178,13 @@ class GraderManagement extends Component {
     }
   }
 
+  // bulk
+  toggleShowBulkModal = () => {
+    this.setState(prevState => ({
+      showBulkModal: !prevState.showBulkModal,
+    }))
+  }
+
   render () {
     if (!this.state.isLoaded) {
       return(
@@ -293,49 +304,9 @@ class GraderManagement extends Component {
             name={"Not assigned"}
             submissions={this.state.unassigned}
             toggleShow={this.toggleShowAssignModal}
+            toggleShowBulk={this.toggleShowBulkModal}
           />
         </div>
-
-
-        {/*<Card className={styles.notAssignedContainer}>*/}
-        {/*<div className={styles.notAssignedToolbar}>*/}
-        {/*  <h4 className={styles.notAssignedText}>Not assigned </h4>*/}
-        {/*  <Button className={styles.notAssignedButton}*/}
-        {/*    variant="primary"*/}
-        {/*    onClick={this.handleHideSearch}>*/}
-        {/*      search*/}
-        {/*  </Button>*/}
-        {/*  {(this.state.hideSearch) ? null :*/}
-        {/*    <FormControl className={styles.notAssignedToolBarSearch}*/}
-        {/*      type="text"*/}
-        {/*      placeholder="Normal text"*/}
-        {/*      onChange={this.handleSearchChange}/>*/}
-        {/*  }*/}
-        {/*  <Button className={styles.notAssignedButton}*/}
-        {/*    variant="primary"*/}
-        {/*    onClick={this.modalBulkAssignHandleShow}>*/}
-        {/*      bulk assign*/}
-        {/*  </Button>*/}
-        {/*  <h5 className={styles.notAssignedCount}> Submissions: {this.state.notAssigned.length}</h5>*/}
-        {/*</div>*/}
-
-        {/*<ListGroup className={styles.notAssignedGroupList}>*/}
-        {/*  {this.state.notAssigned*/}
-        {/*    .filter((group) => {*/}
-        {/*      return group.name.toLowerCase().includes(this.state.groupsFilterString.toLowerCase())*/}
-        {/*    })*/}
-        {/*    .map(group => {*/}
-        {/*      return (*/}
-        {/*        <ListGroupItem*/}
-        {/*          key={group.id}*/}
-        {/*          className={styles.listGroupItemCustom}*/}
-        {/*          action onClick={() => this.onGroupClicked(group, null, true)} >*/}
-        {/*          {<TaskCard data={group}/>}*/}
-        {/*        </ListGroupItem>*/}
-        {/*      )*/}
-        {/*    })}*/}
-        {/*</ListGroup>*/}
-        {/*</Card>*/}
 
         {/*<Modal show={this.state.modalGraderShow} onHide={this.modalGraderHandleClose}>*/}
         {/*  <Modal.Header closeButton>*/}
@@ -379,6 +350,15 @@ class GraderManagement extends Component {
             })
             this.fetchData()
           }}
+        />
+
+        <BulkModal
+          show={this.state.showBulkModal}
+          toggleShow={this.toggleShowBulkModal}
+          graders={this.state.graders}
+          submissions={this.state.notAssigned}
+          // onClose={this.modalBulkAssignHandleClose}
+          // onAccept={this.modalBulkAssignHandleAccept}
         />
 
         {/*<BulkAssignModal*/}

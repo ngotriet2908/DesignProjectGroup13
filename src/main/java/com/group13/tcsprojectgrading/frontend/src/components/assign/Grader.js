@@ -1,10 +1,12 @@
 import React, {Component} from "react";
 import styles from "./assign.module.css";
 import {Button, Card, FormControl} from 'react-bootstrap'
-import {IoEllipsisVerticalOutline, IoChevronDownOutline, IoArrowBackOutline} from "react-icons/io5";
+import {IoEllipsisVerticalOutline, IoChevronDownOutline, IoArrowBackOutline, IoArrowForward} from "react-icons/io5";
 import classnames from 'classnames';
 import {isTeacher} from "../permissions/functions";
 import globalStyles from "../helpers/global.module.css";
+import store from "../../redux/store";
+import {push} from "connected-react-router";
 
 
 class Grader extends Component {
@@ -31,8 +33,15 @@ class Grader extends Component {
               {/*{this.props.grader != null && (isTeacher(this.props.grader.role[0].name) ? "(Teacher)" : "(TA)")}*/}
             </h4>
             <div className={styles.graderHeaderButtonContainer}>
-              <div className={classnames(styles.outlineButton, styles.collapseButton)} onClick={this.toggleCollapsed}>
-                <IoChevronDownOutline/>
+              {this.props.grader == null &&
+                <Button variant={"yellow"}
+                  onClick={this.props.toggleShowBulk}>
+                  Bulk assign
+                </Button>
+              }
+
+              <div className={classnames(globalStyles.iconButton, styles.collapseButton)} onClick={this.toggleCollapsed}>
+                <IoChevronDownOutline size={26}/>
               </div>
             </div>
           </div>
@@ -69,4 +78,4 @@ class Grader extends Component {
   }
 }
 
-export default Grader
+export default Grader;
