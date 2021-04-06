@@ -2,6 +2,7 @@ package com.group13.tcsprojectgrading.services.grading;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.group13.tcsprojectgrading.models.course.CourseParticipation;
+import com.group13.tcsprojectgrading.models.graders.GradingParticipation;
 import com.group13.tcsprojectgrading.models.grading.*;
 import com.group13.tcsprojectgrading.models.project.Project;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
@@ -9,6 +10,8 @@ import com.group13.tcsprojectgrading.models.user.User;
 import com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum;
 import com.group13.tcsprojectgrading.models.submissions.Submission;
 import com.group13.tcsprojectgrading.repositories.grading.*;
+import com.group13.tcsprojectgrading.repositories.submissions.SubmissionRepository;
+import com.group13.tcsprojectgrading.services.graders.GradingParticipationService;
 import com.group13.tcsprojectgrading.services.notifications.NotificationService;
 import com.group13.tcsprojectgrading.services.project.ProjectService;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
@@ -30,6 +33,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum.*;
+
 @Service
 public class AssessmentService {
     private final AssessmentRepository assessmentRepository;
@@ -37,6 +42,9 @@ public class AssessmentService {
     private final AssessmentLinkRepository assessmentLinkRepository;
     private final IssueRepository issueRepository;
     private final IssueStatusRepository issueStatusRepository;
+    private final SubmissionRepository submissionRepository;
+    private final GradingParticipationService gradingParticipationService;
+
 
     private final UserService userService;
     private final SettingsService settingsService;
@@ -52,7 +60,7 @@ public class AssessmentService {
                              @Lazy ProjectService projectService, @Lazy SubmissionService submissionService,
                              GradeRepository gradeRepository, @Lazy UserService userService,
                              @Lazy IssueRepository issueRepository, IssueStatusRepository issueStatusRepository,
-                             SettingsService settingsService,
+                             SubmissionRepository submissionRepository, GradingParticipationService gradingParticipationService, SettingsService settingsService,
                              ApplicationEventPublisher applicationEventPublisher, NotificationService notificationService, RubricService rubricService) {
         this.assessmentLinkRepository = assessmentLinkRepository;
         this.assessmentRepository = assessmentRepository;
@@ -63,6 +71,8 @@ public class AssessmentService {
         this.projectService = projectService;
         this.submissionService = submissionService;
         this.userService = userService;
+        this.submissionRepository = submissionRepository;
+        this.gradingParticipationService = gradingParticipationService;
         this.notificationService = notificationService;
         this.settingsService = settingsService;
 
@@ -285,17 +295,34 @@ public class AssessmentService {
     as active.
      */
     @Transactional(rollbackOn = Exception.class)
-    public Grade addGrade(Long assessmentId, Grade grade, Long userId) {
+    public Grade addGrade(Long submissionId, Long assessmentId, Grade grade, Long graderId, List<PrivilegeEnum> privileges) throws ResponseStatusException {
         Assessment assessment = getAssessment(assessmentId);
 
         if (assessment == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Assessment not found");
         }
 
-        User user = this.userService.findById(userId);
+        User user = this.userService.findById(graderId);
 
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+
+
+        Submission submission = submissionRepository.findById(submissionId).orElse(null);
+        if (submission == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "submission not found");
+        }
+
+        if (privileges.contains(GRADING_WRITE_SINGLE)) {
+            GradingParticipation grader = this.gradingParticipationService
+                    .getGradingParticipationByUserAndProject(graderId, submission.getProject().getId());
+            if (grader == null || submission.getGrader() != null ||
+                    !grader.getId().getUser().getId().equals(submission.getGrader().getId())) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "Unauthorised"
+                );
+            }
         }
 
         grade.setGradedAt(Date.from(Instant.now()));
@@ -318,7 +345,7 @@ public class AssessmentService {
     Activates grade and deactivates all other grades for the criterion.
      */
     @Transactional(rollbackOn = Exception.class)
-    public Grade activateGrade(Long gradeId) {
+    public Grade activateGrade(Long gradeId) throws ResponseStatusException {
         Grade grade = this.gradeRepository.findById(gradeId).orElse(null);
 
         if (grade == null) {
@@ -345,7 +372,24 @@ public class AssessmentService {
     Returns issues associated with the assessment.
      */
     @Transactional
-    public List<Issue> getIssues(Long assessmentId) {
+    public List<Issue> getIssues(Long submissionId, Long assessmentId, Long graderId, List<PrivilegeEnum> privileges) {
+
+        Submission submission = submissionRepository.findById(submissionId).orElse(null);
+        if (submission == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "submission not found");
+        }
+
+        if (privileges.contains(SUBMISSION_READ_SINGLE)) {
+            GradingParticipation grader = this.gradingParticipationService
+                    .getGradingParticipationByUserAndProject(graderId, submission.getProject().getId());
+            if (grader == null || submission.getGrader() != null ||
+                    !grader.getId().getUser().getId().equals(submission.getGrader().getId())) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "Unauthorised"
+                );
+            }
+        }
+
         return this.issueRepository.findIssuesByAssessmentId(assessmentId);
     }
 
@@ -353,16 +397,35 @@ public class AssessmentService {
     Creates an issue and sends an email notification to the recipient.
      */
     @Transactional(rollbackOn = Exception.class)
-    public Issue createIssue(Issue issue, Long assessmentId, Long userId) {
+    public Issue createIssue(Issue issue, Long submissionId, Long assessmentId, Long userId, List<PrivilegeEnum> privileges) {
+
+        Submission submission = submissionRepository.findById(submissionId).orElse(null);
+        if (submission == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "submission not found");
+        }
+
+        if (privileges.contains(GRADING_WRITE_SINGLE)) {
+            GradingParticipation grader = this.gradingParticipationService
+                    .getGradingParticipationByUserAndProject(userId, submission.getProject().getId());
+            if (grader == null || submission.getGrader() != null ||
+                    !grader.getId().getUser().getId().equals(submission.getGrader().getId())) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "Unauthorised"
+                );
+            }
+        }
+
         Assessment assessment = this.getAssessment(assessmentId);
         User creator = this.userService.findById(userId);
-        User addressee = this.userService.findById(issue.getAddressee().getId());
+        User addressee = null;
+        if (issue.getAddressee() != null) {
+            addressee = this.userService.findById(issue.getAddressee().getId());
+        }
 
         issue.setAssessment(assessment);
         issue.setSolution(null);
         issue.setStatus(this.issueStatusRepository.findByName(IssueStatusEnum.OPEN.toString()));
         issue.setCreator(creator);
-        // TODO, can the addressee be null?
         issue.setAddressee(addressee);
         issue = this.issueRepository.save(issue);
 
@@ -379,7 +442,24 @@ public class AssessmentService {
     TODO send email
      */
     @Transactional(rollbackOn = Exception.class)
-    public Issue resolveIssue(Long issueId, IssueSolution solution) {
+    public Issue resolveIssue(Long submissionId, Long issueId, Long graderId, IssueSolution solution, List<PrivilegeEnum> privileges) {
+
+        Submission submission = submissionRepository.findById(submissionId).orElse(null);
+        if (submission == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "submission not found");
+        }
+
+        if (privileges.contains(GRADING_WRITE_SINGLE)) {
+            GradingParticipation grader = this.gradingParticipationService
+                    .getGradingParticipationByUserAndProject(graderId, submission.getProject().getId());
+            if (grader == null || submission.getGrader() != null ||
+                    !grader.getId().getUser().getId().equals(submission.getGrader().getId())) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "Unauthorised"
+                );
+            }
+        }
+
         Issue issue = this.issueRepository.findById(issueId).orElse(null);
 
         if (issue == null) {

@@ -149,10 +149,12 @@ class CreateIssueModal extends Component {
                 <Form.Group controlId="addresseeSelector" className={styles.gradeEditorCardItem}>
                   <Form.Label>Select Addressee</Form.Label>
                   <Form.Control as="select">
-                    <option value={"null"}>no addressee</option>
+                    {/*<option value={"null"}>no addressee</option>*/}
                     {this.state.users.map((grader) => {
+                      let p1 = (this.props.submission.grader != null && this.props.submission.grader.id === grader.id)? "(grader)": null
+                      let p2 = (this.props.user.id === grader.id)? "(you)": null
                       return (
-                        <option key={grader.id} value={grader.id}>{grader.name}</option>
+                        <option key={grader.id} value={grader.id}>{grader.name} {p1} {p2} </option>
                       )
                     })}
                   </Form.Control>

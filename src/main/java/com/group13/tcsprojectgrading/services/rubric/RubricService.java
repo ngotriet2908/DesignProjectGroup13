@@ -77,19 +77,8 @@ public class RubricService {
 
         ObjectMapper mapper = new ObjectMapper();
         linker.setRubric(mapper.writeValueAsString(rubric));
-        System.out.println("before save rubric");
-        Rubric rubric1 = getRubricFromLinker(this.rubricLinkerRepository.save(linker));
-        System.out.println("after save rubric");
 
-        System.out.println("before wait 10");
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.println("after wait 10");
-
-        return rubric1;
+        return getRubricFromLinker(this.rubricLinkerRepository.save(linker));
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)

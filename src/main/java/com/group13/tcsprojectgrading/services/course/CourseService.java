@@ -82,7 +82,7 @@ public class CourseService {
     Imports selected courses into the app
      */
     @Transactional(rollbackOn = Exception.class)
-    public void importCourses(ArrayNode courses) throws IOException, ResponseStatusException {
+    public void importCourses(ArrayNode courses, Long userId) throws IOException, ResponseStatusException {
         // for each course that was added
         for (JsonNode courseToImport: courses) {
             // TODO: users should submit only course ids, rest info should be fetched here directly
@@ -103,6 +103,15 @@ public class CourseService {
                 );
             }
             this.courseRepository.save(course);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String userCanvas = this.canvasApi.getCanvasCoursesApi().getUserCourse(course.getId());
+            JsonNode userNode = objectMapper.readTree(userCanvas);
+            System.out.println(userCanvas);
+            if (!RoleEnum.getRoleFromEnrolment(userNode.get("enrollments").get(0).get("role").asText()).equals(RoleEnum.TEACHER)) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "You are not a teacher in course " + course.getName());
+            }
 
             // fetch users and for each create a) User b) Participation
             ArrayNode usersArray = groupPages(this.canvasApi.getCanvasCoursesApi().getCourseParticipantsWithAvatars(id));
@@ -335,7 +344,7 @@ public class CourseService {
         return users;
     }
 
-    @Transactional(value = Transactional.TxType.MANDATORY)
+    @Transactional
     public List<CourseParticipation> getCourseStudents(Long courseId) throws ResponseStatusException {
         Optional<Course> courseOptional = this.courseRepository.findById(courseId);
 

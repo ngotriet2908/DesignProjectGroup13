@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.group13.tcsprojectgrading.models.submissions.Submission;
 import com.group13.tcsprojectgrading.models.user.User;
 
 import javax.persistence.*;
@@ -46,6 +47,10 @@ public class Issue {
     private IssueStatus status;
 
     private String solution;
+
+    @Transient
+    @JsonSerialize(using = Submission.SubmissionShortSerializer.class)
+    private Submission submission;
 
     public Issue() {
     }
@@ -144,9 +149,17 @@ public class Issue {
         this.target = target;
     }
 
+    public Submission getSubmission() {
+        return submission;
+    }
+
+    public void setSubmission(Submission submission) {
+        this.submission = submission;
+    }
+
     /*
-    Serialiser for the brief information about the issue.
-     */
+        Serialiser for the brief information about the issue.
+         */
     public static class IssueShortSerialiser extends JsonSerializer<Issue> {
         @Override
         public void serialize(Issue issue, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {

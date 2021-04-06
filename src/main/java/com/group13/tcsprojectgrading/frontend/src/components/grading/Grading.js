@@ -97,7 +97,7 @@ class Grading extends Component {
         <div className={styles.container}>
           <RubricPanel match={this.props.match}/>
           <GradingPanel match={this.props.match}/>
-          <RightsidePanel routeParams={this.props.match.params}/>
+          <RightsidePanel user={this.props.user} submission={this.state.submission} routeParams={this.props.match.params}/>
         </div>
 
       </>
@@ -108,6 +108,7 @@ class Grading extends Component {
 const mapStateToProps = state => {
   return {
     rubric: state.rubric.rubric,
+    user: state.users.self
   };
 };
 

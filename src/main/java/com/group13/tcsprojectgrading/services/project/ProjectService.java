@@ -10,12 +10,14 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.services.gmail.Gmail;
 import com.group13.tcsprojectgrading.controllers.ExcelUtils;
+import com.group13.tcsprojectgrading.controllers.PdfRubricUtils;
 import com.group13.tcsprojectgrading.controllers.PdfUtils;
 import com.group13.tcsprojectgrading.models.course.CourseParticipation;
 import com.group13.tcsprojectgrading.models.feedback.FeedbackLog;
 import com.group13.tcsprojectgrading.models.feedback.FeedbackTemplate;
 import com.group13.tcsprojectgrading.models.grading.Assessment;
 import com.group13.tcsprojectgrading.models.grading.AssessmentLink;
+import com.group13.tcsprojectgrading.models.grading.Issue;
 import com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum;
 import com.group13.tcsprojectgrading.models.permissions.RoleEnum;
 import com.group13.tcsprojectgrading.models.project.Project;
@@ -27,6 +29,7 @@ import com.group13.tcsprojectgrading.models.submissions.Submission;
 import com.group13.tcsprojectgrading.models.submissions.SubmissionAttachment;
 import com.group13.tcsprojectgrading.models.submissions.SubmissionComment;
 import com.group13.tcsprojectgrading.models.user.User;
+import com.group13.tcsprojectgrading.repositories.grading.IssueRepository;
 import com.group13.tcsprojectgrading.repositories.project.ProjectRepository;
 import com.group13.tcsprojectgrading.repositories.course.CourseParticipationRepository;
 import com.group13.tcsprojectgrading.repositories.submissions.LabelRepository;
@@ -64,7 +67,9 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.group13.tcsprojectgrading.controllers.EmailUtils.createEmailWithAttachment;
 import static com.group13.tcsprojectgrading.controllers.EmailUtils.sendMessage;
@@ -90,6 +95,7 @@ public class ProjectService {
 
     private final CourseParticipationRepository courseParticipationRepository;
     private final LabelRepository labelRepository;
+    private final IssueRepository issueRepository;
 
     public ProjectService(ProjectRepository projectRepository, ProjectRoleService projectRoleService,
                           RoleService roleService,
@@ -100,7 +106,7 @@ public class ProjectService {
                           @Lazy AssessmentService assessmentService, @Lazy CourseService courseService,
                           @Lazy SettingsService settingsService,
                           LabelRepository labelRepository,
-                          CourseParticipationRepository courseParticipationRepository, FeedbackService feedbackService) {
+                          CourseParticipationRepository courseParticipationRepository, FeedbackService feedbackService, IssueRepository issueRepository) {
         this.projectRepository = projectRepository;
         this.projectRoleService = projectRoleService;
         this.roleService = roleService;
@@ -116,6 +122,7 @@ public class ProjectService {
         this.courseService = courseService;
         this.labelRepository = labelRepository;
         this.feedbackService = feedbackService;
+        this.issueRepository = issueRepository;
     }
 
     /*
@@ -780,33 +787,28 @@ public class ProjectService {
 //        return new ResponseEntity<byte[]>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.OK);
 //    }
 
-//    @Transactional
-//    public ResponseEntity<byte[]> downloadRubric(String courseId, String projectId) throws IOException {
-//        Project project = getProjectById(courseId, projectId);
-//        if (project == null) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.NOT_FOUND, "entity not found"
-//            );
-//        }
-//
-//        String fileName = project.getName() + " rubric.pdf";
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(MediaType.APPLICATION_PDF);
-//        headers.setContentDispositionFormData(fileName, fileName);
-//        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-//        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-//
-//        PdfWriter pdfWriter = new PdfWriter(byteArrayOutputStream);
-//        PdfDocument pdfDocument = new PdfDocument(pdfWriter);
-//        Document document = new Document(pdfDocument, PageSize.A4);
-//
-//        document.getPdfDocument();
-//
-//        PdfRubricUtils rubricUtils = new PdfRubricUtils(document, rubricService.getRubricById(projectId));
-//        rubricUtils.generateRubrics();
-//
-//        return new ResponseEntity<>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.OK);
-//    }
+    @Transactional
+    public byte[] downloadRubric(Long courseId, Long projectId) throws IOException {
+        Project project = getProject(projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "entity not found"
+            );
+        }
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        PdfWriter pdfWriter = new PdfWriter(byteArrayOutputStream);
+        PdfDocument pdfDocument = new PdfDocument(pdfWriter);
+        Document document = new Document(pdfDocument, PageSize.A4);
+
+        document.getPdfDocument();
+
+        PdfRubricUtils rubricUtils = new PdfRubricUtils(document, rubricService.getRubricById(projectId), project);
+        rubricUtils.generateRubrics();
+
+        return byteArrayOutputStream.toByteArray();
+    }
 
     @Transactional
     public List<FeedbackLog> sendFeedback(Long projectId, Long templateId, boolean isAll,
@@ -920,5 +922,44 @@ public class ProjectService {
         }
 
         return false;
+    }
+
+    @Transactional
+    public List<Issue> getIssuesInProject(Long projectId, Long graderId) throws ResponseStatusException {
+
+        User user = userService.findById(graderId);
+        if (user == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "user not found"
+            );
+        }
+
+//        return Stream
+//                .concat(
+////                    submissionService.findSubmissionsForGrader(graderId)
+////                            .stream()
+////                            .map(submission -> assessmentService
+////                                    .getAssessmentsBySubmission(submission)
+////                                    .stream()
+////                                    .map(Assessment::getIssues)
+////                                    .flatMap(Collection::stream)
+////                                    .collect(Collectors.toSet()))
+////                            .flatMap(Collection::stream),
+//                    issueRepository.findIssuesByCreator(user).stream()
+//                    , issueRepository.findIssuesByAddressee(user).stream()
+//                )
+//                .distinct()
+//                .sorted(Comparator.comparingLong(Issue::getId))
+//                .collect(Collectors.toList());
+        return issueRepository.findIssuesByCreatorOrAddressee(user, user)
+                .stream()
+                .peek(issue -> issue.setSubmission(
+                        submissionService
+                                .findSubmissionsFromAssessment(
+                                        issue.getAssessment().getId()
+                                )
+                ))
+                .sorted(Comparator.comparingLong(Issue::getId))
+                .collect(Collectors.toList());
     }
 }

@@ -6,6 +6,7 @@ import {request} from "../../../services/request";
 import Issues from "./Issues";
 import classnames from 'classnames';
 import CreateIssueModal from "./CreateIssueModal";
+import RightsidePanel from "./RightsidePanel";
 
 
 class IssuesViewer extends Component {
@@ -84,6 +85,8 @@ class IssuesViewer extends Component {
         </Card>
 
         <CreateIssueModal
+          user={this.props.user}
+          submission={this.props.submission}
           show={this.state.showModal}
           toggleShow={this.toggleShowModal}
           routeParams={this.props.routeParams}

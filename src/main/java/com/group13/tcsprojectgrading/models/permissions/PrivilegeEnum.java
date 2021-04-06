@@ -1,6 +1,7 @@
 package com.group13.tcsprojectgrading.models.permissions;
 
 public enum PrivilegeEnum {
+
     PROJECT_READ("Project_read"),
 
     MANAGE_GRADERS_OPEN("ManageGraders_open"),
@@ -37,10 +38,12 @@ public enum PrivilegeEnum {
 //    ASSESSMENTS_EDIT_ALL("Assessment_edit_all"),
 
     FEEDBACK_SEND("Feedback_send"),
+    FEEDBACK_EDIT("Feedback_edit"),
     FEEDBACK_OPEN("Feedback_open"),
 
-    FLAG_CREATE("Flag_create"),
-    FLAG_DELETE("Flag_delete"),
+//    FLAG_CREATE("Flag_create"),
+//    FLAG_DELETE("Flag_delete"),
+    FLAG_EDIT("Flag_edit"),
     FLAG_ASSIGN("Flag_assign"),
 
     NULL("NULL")

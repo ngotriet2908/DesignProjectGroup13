@@ -41,8 +41,8 @@ public class TcsProjectGradingApplication {
                     PROJECT_READ,
                     SUBMISSIONS_SYNC, SUBMISSIONS_READ,
                     SUBMISSION_READ_ALL, SUBMISSION_EDIT_ALL,
-                    FEEDBACK_SEND, FEEDBACK_OPEN,
-                    FLAG_CREATE, FLAG_DELETE, FLAG_ASSIGN
+                    FEEDBACK_SEND, FEEDBACK_OPEN, FEEDBACK_EDIT,
+                    FLAG_EDIT, FLAG_ASSIGN
             );
 
             List<PrivilegeEnum> taPrivilegesEnum = List.of(
@@ -68,7 +68,7 @@ public class TcsProjectGradingApplication {
                     PROJECT_READ,
                     SUBMISSIONS_READ,
                     SUBMISSION_READ_ALL, SUBMISSION_EDIT_SINGLE,
-                    FLAG_CREATE, FLAG_ASSIGN
+                    FLAG_ASSIGN
             );
 
             List<Privilege> teacherPrivileges = new ArrayList<>();

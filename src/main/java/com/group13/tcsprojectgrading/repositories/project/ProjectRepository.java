@@ -17,8 +17,10 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Project findProjectsById(Long courseId);
 
+    @Lock(LockModeType.PESSIMISTIC_READ)
     List<Project> findProjectsByCourse_Id(Long course_id);
 
+    @Lock(LockModeType.PESSIMISTIC_READ)
     @Query(value = "select * " +
             "from submission s " +
             "where s.grader_id = ?1 "

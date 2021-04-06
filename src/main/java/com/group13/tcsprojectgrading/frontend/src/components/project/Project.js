@@ -2,7 +2,7 @@ import React, {Component} from "react";
 import styles from "../project/project.module.css";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
-import Button from 'react-bootstrap/Button'
+import {Button, DropdownButton, ButtonGroup, Dropdown} from 'react-bootstrap'
 import {URL_PREFIX} from "../../services/config";
 import {v4 as uuidv4} from "uuid";
 import {connect} from "react-redux";
@@ -23,6 +23,8 @@ import classnames from "classnames";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Tooltip from "react-bootstrap/Tooltip";
 import * as FileSaver from 'file-saver';
+import Masonry from 'react-masonry-css'
+import IssuesProject from "./issues/IssuesProject";
 
 class Project extends Component {
   constructor(props) {
@@ -35,7 +37,7 @@ class Project extends Component {
       grader: {},
       stats: [],
       isLoaded: false,
-
+      issues: [],
       syncing: false
     }
   }
@@ -49,12 +51,14 @@ class Project extends Component {
 
     Promise.all([
       request(BASE + "courses/" + courseId + "/projects/" + projectId),
+      request(BASE + "courses/" + courseId + "/projects/" + projectId + "/issues"),
       // request(`${BASE}courses/${courseId}/projects/${projectId}/stats/submissions`),
       // request(`${BASE}courses/${courseId}/projects/${projectId}/stats/grades`),
       // request(`${BASE}courses/${courseId}/projects/${projectId}/stats/groups`),
     ])
-      .then(async([res1, res2, res3]) => {
+      .then(async([res1, res2]) => {
         const project = await res1.json();
+        const issues = await res2.json();
 
         // console.log(project);
 
@@ -77,7 +81,8 @@ class Project extends Component {
           // stats: stats,
           // grader: project.grader,
           isLoaded: true,
-          syncing: false
+          syncing: false,
+          issues: issues
         });
       })
       .catch(error => {
@@ -292,6 +297,14 @@ class Project extends Component {
             {/*</Can>*/}
           </div>
         </div>
+
+        <div className={styles.container}>
+          <div>
+            {/*<Can I="view" a="AdminToolbar">*/}
+            <IssuesProject routeMatch={this.props.match} user={this.props.user} issues={this.state.issues}/>
+          </div>
+        </div>
+
       </div>
     )
   }

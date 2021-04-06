@@ -50,11 +50,12 @@ class CourseController {
     Imports selected courses
      */
     @RequestMapping(value = "", method = RequestMethod.POST)
-    protected ResponseEntity<?> importCourses(@RequestBody ArrayNode courses) throws IOException, ParseException {
+    protected ResponseEntity<?> importCourses(@RequestBody ArrayNode courses,
+                                              Principal principal) throws IOException, ParseException {
         // TODO check if teacher is performing this action
 
         // import courses
-        this.courseService.importCourses(courses);
+        this.courseService.importCourses(courses, Long.valueOf(principal.getName()));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -165,7 +166,17 @@ class CourseController {
             @PathVariable Long courseId,
             @RequestParam(required = false) Long id,
             Principal principal
-    ) throws JsonProcessingException {
+    ) {
+
+        RoleEnum roleEnum = this.courseService.getCourseRole(courseId, Long.valueOf(principal.getName()));
+        if (!(roleEnum != null &&
+                ((roleEnum.equals(RoleEnum.TEACHER)) ||
+//                (roleEnum.equals(RoleEnum.TA)) ||
+                (roleEnum.equals(RoleEnum.TA_GRADING)))
+        )) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+        }
+
         return this.courseService.getCourseTeachersAndTAsAsUsers(courseId);
     }
 }

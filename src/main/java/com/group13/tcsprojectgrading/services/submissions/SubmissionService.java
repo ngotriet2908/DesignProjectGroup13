@@ -5,16 +5,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.group13.tcsprojectgrading.models.course.CourseParticipation;
 import com.group13.tcsprojectgrading.models.grading.AssessmentLink;
 import com.group13.tcsprojectgrading.models.grading.Grade;
-import com.group13.tcsprojectgrading.models.grading.Issue;
 import com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum;
 import com.group13.tcsprojectgrading.models.project.Project;
-import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.models.submissions.Label;
 import com.group13.tcsprojectgrading.models.user.User;
 import com.group13.tcsprojectgrading.models.graders.GradingParticipation;
 import com.group13.tcsprojectgrading.models.grading.Assessment;
 import com.group13.tcsprojectgrading.models.submissions.Submission;
 import com.group13.tcsprojectgrading.repositories.course.CourseParticipationRepository;
+import com.group13.tcsprojectgrading.repositories.grading.IssueRepository;
 import com.group13.tcsprojectgrading.repositories.project.ProjectRepository;
 import com.group13.tcsprojectgrading.repositories.submissions.SubmissionRepository;
 import com.group13.tcsprojectgrading.services.user.UserService;
@@ -44,12 +43,13 @@ public class SubmissionService {
     private final SubmissionDetailsService submissionDetailsService;
     private final UserService userService;
     private final CourseParticipationRepository courseParticipationRepository;
+    private final IssueRepository issueRepository;
 
     @Autowired
     public SubmissionService(SubmissionRepository submissionRepository, ProjectRepository projectRepository,
                              GradingParticipationService gradingParticipationService, RubricService rubricService,
                              @Lazy AssessmentService assessmentService, SubmissionDetailsService submissionDetailsService,
-                             @Lazy UserService userService, CourseParticipationRepository courseParticipationRepository) {
+                             @Lazy UserService userService, CourseParticipationRepository courseParticipationRepository, IssueRepository issueRepository) {
         this.submissionRepository = submissionRepository;
         this.projectRepository = projectRepository;
         this.gradingParticipationService = gradingParticipationService;
@@ -58,6 +58,7 @@ public class SubmissionService {
         this.submissionDetailsService = submissionDetailsService;
         this.userService = userService;
         this.courseParticipationRepository = courseParticipationRepository;
+        this.issueRepository = issueRepository;
     }
 
     /*
@@ -153,6 +154,21 @@ public class SubmissionService {
 //    }
 //
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public List<Submission> findSubmissionsForGrader(Long graderId) {
+        return submissionRepository.findSubmissionsByGrader_Id(graderId);
+    }
+
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public Submission findSubmissionsFromAssessment(Long assessmentId) {
+        Set<AssessmentLink> assessmentLinks = assessmentService.findAssessmentLinksByAssessmentId(assessmentId);
+        if (assessmentLinks.size() == 0) return null;
+        return assessmentLinks.stream()
+                .findFirst()
+                .orElse(null)
+                .getId().getSubmission();
+    }
+
     /*
     Returns all submissions in the project (if the user is a grader inside that project).
      */
@@ -217,6 +233,48 @@ public class SubmissionService {
     Returns a single submission.
      */
     @Transactional
+    public Submission getSubmissionController(Long projectId, Long submissionId,
+                                    List<PrivilegeEnum> privileges,
+                                    Long graderId) throws JsonProcessingException, ResponseStatusException {
+//        Project project = this.projectRepository.findById(projectId).orElse(null);
+//
+//        if (project == null) {
+//            throw new ResponseStatusException(
+//                    HttpStatus.NOT_FOUND, "Project not found"
+//            );
+//        }
+
+        // TODO I'm not sure whether to hide the submission or not (only grading?)
+
+        // find submission
+        Submission submission = this.submissionRepository.findById(submissionId).orElse(null);
+
+        if (submission == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Submission not found"
+            );
+        }
+
+        if (privileges.contains(SUBMISSION_READ_SINGLE)) {
+            GradingParticipation grader = this.gradingParticipationService.getGradingParticipationByUserAndProject(graderId, projectId);
+            if (grader == null || submission.getGrader() != null ||
+                    !grader.getId().getUser().getId().equals(submission.getGrader().getId())) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "Unauthorised"
+                );
+            }
+        }
+
+        // link submission's members
+        submission = this.addSubmissionMembers(submission);
+
+        // link submission's assessments
+        submission = this.addSubmissionAssessments(submission);
+
+        return submission;
+    }
+
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public Submission getSubmission(Long submissionId) throws JsonProcessingException, ResponseStatusException {
 //        Project project = this.projectRepository.findById(projectId).orElse(null);
 //
@@ -227,12 +285,6 @@ public class SubmissionService {
 //        }
 
         // TODO I'm not sure whether to hide the submission or not (only grading?)
-//        GradingParticipation grader = this.gradingParticipationService.getGradingParticipationByUserAndProject(userId, projectId);
-//        if (grader == null) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.UNAUTHORIZED, "Unauthorised"
-//            );
-//        }
 
         // find submission
         Submission submission = this.submissionRepository.findById(submissionId).orElse(null);
@@ -268,7 +320,11 @@ public class SubmissionService {
     @Transactional
     public Submission addSubmissionAssessments(Submission submission) {
         List<Assessment> assessments = this.assessmentService.getAssessmentsBySubmission(submission);
-        submission.setAssessments(assessments);
+        submission.setAssessments(assessments
+                .stream()
+                .peek(assessment -> assessment.setIssues(issueRepository.findIssuesByAssessmentId(assessment.getId())))
+                .collect(Collectors.toList())
+        );
         return submission;
     }
 
@@ -276,13 +332,24 @@ public class SubmissionService {
     Saves the list of labels for the submission.
      */
     @Transactional
-    public void saveLabels(Set<Label> labels, Long submissionId) throws JsonProcessingException, ResponseStatusException {
+    public void saveLabels(Long projectId, Long graderId, Set<Label> labels, Long submissionId,
+                           List<PrivilegeEnum> privileges) throws JsonProcessingException, ResponseStatusException {
         Submission submission = this.getSubmission(submissionId);
 
         if (submission == null) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Submission not found"
             );
+        }
+
+        if (privileges.contains(SUBMISSION_READ_SINGLE)) {
+            GradingParticipation grader = this.gradingParticipationService.getGradingParticipationByUserAndProject(graderId, projectId);
+            if (grader == null || submission.getGrader() != null ||
+                    !grader.getId().getUser().getId().equals(submission.getGrader().getId())) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "Unauthorised"
+                );
+            }
         }
 
         submission.setLabels(labels);
@@ -310,6 +377,14 @@ public class SubmissionService {
             );
         }
 
+        GradingParticipation grader1 = this.gradingParticipationService
+                .getGradingParticipationByUserAndProject(grader.getId(), submission.getProject().getId());
+
+        if (grader1 == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "Grader is not found"
+            );
+        }
         submission.setGrader(grader);
         this.submissionRepository.save(submission);
     }
@@ -318,13 +393,25 @@ public class SubmissionService {
     Sets the user as a grader of the submission.
      */
     @Transactional
-    public void dissociateSubmission(Long submissionId) throws JsonProcessingException {
+    public void dissociateSubmission(Long submissionId,
+                                     List<PrivilegeEnum> privileges, Long graderId) throws JsonProcessingException {
+
+//        TODO put locks and check only self remove
         Submission submission = this.getSubmission(submissionId);
 
         if (submission == null) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Submission not found"
             );
+        }
+
+        if (privileges.contains(MANAGE_GRADERS_SELF_EDIT)) {
+            if (submission.getGrader() == null || !submission.getGrader().getId().equals(graderId)) {
+
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "Unauthorised"
+                );
+            }
         }
 
         submission.setGrader(null);

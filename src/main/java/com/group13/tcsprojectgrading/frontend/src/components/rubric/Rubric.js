@@ -97,7 +97,7 @@ class Rubric extends Component {
 
   downloadRubric = () => {
     console.log("download")
-    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/downloadRubric`, "GET", 'application/pdf')
+    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/downloadRubric`, "GET", null, "application/octet-stream")
       .then(response => {
         if (response.status === 200) {
           return response.blob()
@@ -105,10 +105,9 @@ class Rubric extends Component {
       })
       .then((blob) => {
         console.log(blob)
-        const file = new Blob([blob], {
-          type: 'application/pdf',
-        });
-        saveAs(file, 'rubric.pdf');
+        const file = new Blob([blob], {type: "application/pdf;charset=utf-8"});
+        let file_name = "Rubric " + this.state.project.name + ", " + Date().toLocaleString();
+        FileSaver.saveAs(file, file_name + ".pdf");
       })
       .catch(error => {
         console.error(error.message);

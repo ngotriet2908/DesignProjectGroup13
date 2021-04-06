@@ -44,11 +44,11 @@ public class SubmissionController {
             @RequestParam(required=false, name = "grader") String grader,
             Principal principal) {
 
-//        List<PrivilegeEnum> privileges = securityService
-//                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
-//        if (!(privileges != null && privileges.contains(SUBMISSIONS_READ))) {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
-//        }
+        List<PrivilegeEnum> privileges = this.gradingParticipationService
+                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
+        if (!(privileges != null && privileges.contains(SUBMISSIONS_READ))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+        }
 
         List<Submission> submissions;
         if (grader != null && grader.equals("unassigned")) {
@@ -66,14 +66,16 @@ public class SubmissionController {
                                                   @PathVariable Long submissionId,
                                                   Principal principal
     ) throws JsonProcessingException {
-//        List<PrivilegeEnum> privileges = securityService
-//                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
-//        if (!(privileges != null
-//                && (privileges.contains(SUBMISSION_READ_ALL) || privileges.contains(SUBMISSION_READ_SINGLE)))) {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
-//        }
+        List<PrivilegeEnum> privileges = this.gradingParticipationService
+                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
+        if (!(privileges != null &&
+                ((privileges.contains(SUBMISSION_READ_SINGLE)) ||
+                (privileges.contains(SUBMISSION_READ_ALL)))
+        )) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+        }
 
-        Submission submission = this.submissionService.getSubmission(submissionId);
+        Submission submission = this.submissionService.getSubmissionController(projectId, submissionId, privileges, Long.valueOf(principal.getName()));
         return new ResponseEntity<>(submission, HttpStatus.OK);
     }
 
@@ -87,12 +89,13 @@ public class SubmissionController {
                                     @RequestBody User grader,
                                     Principal principal
     ) throws JsonProcessingException {
-//        List<PrivilegeEnum> privileges = securityService
-//                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
-//        if (!(privileges != null
-//                && (privileges.contains(SUBMISSION_READ_ALL) || privileges.contains(SUBMISSION_READ_SINGLE)))) {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
-//        }
+        List<PrivilegeEnum> privileges = this.gradingParticipationService
+                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
+        if (!(privileges != null &&
+                ((privileges.contains(MANAGE_GRADERS_EDIT)))
+        )) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+        }
 
         this.submissionService.assignSubmission(submissionId, grader);
     }
@@ -106,14 +109,16 @@ public class SubmissionController {
                                         @PathVariable Long submissionId,
                                         Principal principal
     ) throws JsonProcessingException {
-//        List<PrivilegeEnum> privileges = securityService
-//                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
-//        if (!(privileges != null
-//                && (privileges.contains(SUBMISSION_READ_ALL) || privileges.contains(SUBMISSION_READ_SINGLE)))) {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
-//        }
+        List<PrivilegeEnum> privileges = this.gradingParticipationService
+                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
+        if (!(privileges != null &&
+                ((privileges.contains(MANAGE_GRADERS_EDIT)) ||
+                        (privileges.contains(MANAGE_GRADERS_SELF_EDIT)))
+        )) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+        }
 
-        this.submissionService.dissociateSubmission(submissionId);
+        this.submissionService.dissociateSubmission(submissionId, privileges, Long.valueOf(principal.getName()));
     }
 
     @PutMapping(value = "/{submissionId}/labels")
@@ -123,14 +128,17 @@ public class SubmissionController {
                               @RequestBody Set<Label> labels,
                               Principal principal
     ) throws JsonProcessingException {
-//        List<PrivilegeEnum> privileges = securityService
-//                .getPrivilegesFromUserIdAndProject(principal.getName(), courseId, projectId);
-//        if (!(privileges != null
-//                && (privileges.contains(SUBMISSION_EDIT_ALL) || privileges.contains(SUBMISSION_EDIT_SINGLE)))) {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
-//        }
 
-        this.submissionService.saveLabels(labels, submissionId);
+        List<PrivilegeEnum> privileges = this.gradingParticipationService
+                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
+        if (!(privileges != null &&
+                ((privileges.contains(SUBMISSION_EDIT_ALL)) ||
+                        (privileges.contains(SUBMISSION_EDIT_SINGLE)))
+        )) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+        }
+
+        this.submissionService.saveLabels(projectId, Long.valueOf(principal.getName()), labels, submissionId, privileges);
     }
 
 

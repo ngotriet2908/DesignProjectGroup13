@@ -99,3 +99,83 @@
 .cardBody {
 
 }
+
+
+/* issues */
+.issuesContainer {
+    flex: 3;
+}
+
+.issueCard {
+    padding: 1rem;
+}
+
+.issueCard:not(:last-child) {
+    margin-bottom: 0.5rem;
+}
+
+.issueCardTitle {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.2rem;
+}
+
+.issueCardTitle > *:first-child {
+    display: flex;
+    flex-direction: column;
+
+}
+
+.issueCardTitle h5 {
+    margin: 0 0 0.3rem 0;
+}
+
+.issueCardBadges {
+    margin-bottom: 0.3rem;
+}
+
+.issuesCardExpanded {
+
+}
+
+.issuesCardExpandButton svg {
+    color: #5b5b5b;
+    transition: transform .1s ease-in-out;
+}
+
+.issuesCardExpandButton:hover svg {
+    color: white;
+}
+
+.issuesCardExpanded .issuesCardExpandButton svg {
+    transform: rotate(180deg);
+}
+
+.issueCardSolution {
+    margin-top: 0.5rem;
+}
+
+.issueCardSolution h5 {
+    margin-bottom: 0.3rem;
+}
+.gradeEditorCardFooter {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
+.gradeEditorCardFooter > * {
+    margin-left: 0.5rem;
+}
+
+.buttonGroup {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.buttonGroup > *:not(:last-child) {
+    margin-right: 0.5rem;
+}

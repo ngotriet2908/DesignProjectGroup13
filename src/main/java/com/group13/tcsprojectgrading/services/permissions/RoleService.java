@@ -29,8 +29,10 @@ public class RoleService {
         Role role = repository.findByName(name);
         if (role == null) {
             role = new Role(name, privileges);
-            repository.save(role);
+        } else {
+            role.setPrivileges(privileges);
         }
+        repository.save(role);
         return role;
     }
 

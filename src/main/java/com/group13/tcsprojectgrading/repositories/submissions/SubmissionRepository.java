@@ -35,6 +35,7 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     <S extends Submission> S save(S s);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Modifying
     @Query(value="UPDATE Submission s " +
         "SET s.grader=null " +

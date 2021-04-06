@@ -10,8 +10,8 @@ import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.course.CourseParticipation;
 import com.group13.tcsprojectgrading.models.feedback.FeedbackLog;
 import com.group13.tcsprojectgrading.models.feedback.FeedbackTemplate;
+import com.group13.tcsprojectgrading.models.grading.Issue;
 import com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum;
-import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.models.submissions.Label;
 import com.group13.tcsprojectgrading.models.user.User;
 import com.group13.tcsprojectgrading.services.course.CourseService;
@@ -63,27 +63,22 @@ public class ProjectController {
      */
     @RequestMapping(value = "/{projectId}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    protected ResponseEntity<?> getProject(@PathVariable Long courseId,
-                                           @PathVariable Long projectId,
-                                           Principal principal) throws IOException, ParseException {
+    protected String getProject(@PathVariable Long courseId,
+                                @PathVariable Long projectId,
+                                Principal principal) throws IOException, ParseException {
 
-//        List<PrivilegeEnum> privileges = securityService.getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), courseId, projectId);
-//
-//        if ((roleEnum != null && roleEnum.equals(TEACHER)) ||
-//                (privileges != null && privileges.contains(PROJECT_READ))){
-//            ObjectNode resultJson = projectService.getProject(courseId, projectId, roleEnum, userJson, Long.valueOf(principal.getName()));
-//            resultJson.set("course", courseJson);
-//            return resultJson;
-//        } else {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
-//        }
+        List<PrivilegeEnum> privileges = this.gradingParticipationService
+                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
+        if (!(privileges != null && privileges.contains(PROJECT_READ))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
 
         String project = this.projectService.getProject(projectId, Long.valueOf(principal.getName()));
 
         if (project == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found");
         } else {
-            return new ResponseEntity<>(project, HttpStatus.OK);
+            return project;
         }
     }
 
@@ -143,11 +138,11 @@ public class ProjectController {
             @PathVariable Long projectId,
             Principal principal) throws IOException, ParseException {
 
-//        List<PrivilegeEnum> privileges = this.gradingParticipationService
-//                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
-//        if (!(privileges != null && privileges.contains(PROJECT_READ))) {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
-//        }
+        List<PrivilegeEnum> privileges = this.gradingParticipationService
+                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
+        if (!(privileges != null && privileges.contains(PROJECT_READ))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
 
         return this.projectService.getProjectGraders(projectId);
     }
@@ -163,11 +158,11 @@ public class ProjectController {
             @RequestBody List<User> graders,
             Principal principal) throws IOException, ParseException {
 
-//        List<PrivilegeEnum> privileges = this.gradingParticipationService
-//                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
-//        if (!(privileges != null && privileges.contains(PROJECT_READ))) {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
-//        }
+        List<PrivilegeEnum> privileges = this.gradingParticipationService
+                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
+        if (!(privileges != null && privileges.contains(MANAGE_GRADERS_EDIT))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
 
         return this.projectService.saveProjectGraders(projectId, graders, Long.valueOf(principal.getName()));
     }
@@ -206,11 +201,11 @@ public class ProjectController {
                                              Principal principal
     ) {
 
-//        List<PrivilegeEnum> privileges = this.gradingParticipationService
-//                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
-//        if (!(privileges != null && privileges.contains(FLAG_DELETE))) {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
-//        }
+        List<PrivilegeEnum> privileges = this.gradingParticipationService
+                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
+        if (!(privileges != null && privileges.contains(PROJECT_READ))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+        }
 
         return this.projectService.getProjectLabels(projectId);
     }
@@ -225,11 +220,11 @@ public class ProjectController {
                                                 Principal principal
     ) {
 
-//        List<PrivilegeEnum> privileges = this.gradingParticipationService
-//                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
-//        if (!(privileges != null && privileges.contains(FLAG_DELETE))) {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
-//        }
+        List<PrivilegeEnum> privileges = this.gradingParticipationService
+                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
+        if (!(privileges != null && privileges.contains(FLAG_EDIT))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+        }
 
         return this.projectService.saveProjectLabel(label, projectId);
     }
@@ -281,18 +276,24 @@ public class ProjectController {
 ////        return projectService.sendFeedbackPdf(courseId, projectId, feedback);
 //    }
 
-//    @GetMapping(value = "/{projectId}/downloadRubric")
-//    @ResponseBody
-//    protected ResponseEntity<byte[]> sendFeedbackPdf(@PathVariable Long courseId,
-//                                                     @PathVariable Long projectId,
-//                                                     Principal principal) throws IOException, ParseException {
-//        List<PrivilegeEnum> privileges = securityService
-//                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), courseId, projectId);
-//        if (!(privileges != null && privileges.contains(RUBRIC_DOWNLOAD))) {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
-//        }
-//        return projectService.downloadRubric(courseId, projectId);
-//    }
+    @GetMapping(
+            value = "/{projectId}/downloadRubric",
+            produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
+
+    )
+    @ResponseBody
+    protected byte[] sendFeedbackPdf(@PathVariable Long courseId,
+                                                     @PathVariable Long projectId,
+                                                     Principal principal) throws IOException, ParseException {
+
+        List<PrivilegeEnum> privileges = this.gradingParticipationService
+                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
+        if (!(privileges != null && privileges.contains(RUBRIC_DOWNLOAD))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
+
+        return projectService.downloadRubric(courseId, projectId);
+    }
 
 //    @PostMapping(value = "/{projectId}/feedbackEmail")
 //    @ResponseBody
@@ -343,7 +344,7 @@ public class ProjectController {
 
         List<PrivilegeEnum> privileges = this.gradingParticipationService
                 .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
-        if (!(privileges != null && privileges.contains(FEEDBACK_OPEN))) {
+        if (!(privileges != null && privileges.contains(FEEDBACK_EDIT))) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
         }
 
@@ -359,7 +360,7 @@ public class ProjectController {
 
         List<PrivilegeEnum> privileges = this.gradingParticipationService
                 .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
-        if (!(privileges != null && privileges.contains(FEEDBACK_OPEN))) {
+        if (!(privileges != null && privileges.contains(FEEDBACK_EDIT))) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
         }
 
@@ -374,7 +375,7 @@ public class ProjectController {
 
         List<PrivilegeEnum> privileges = this.gradingParticipationService
                 .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
-        if (!(privileges != null && privileges.contains(FEEDBACK_OPEN))) {
+        if (!(privileges != null && privileges.contains(FEEDBACK_EDIT))) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
         }
 
@@ -502,12 +503,13 @@ public class ProjectController {
     )
     public @ResponseBody byte[] getProjectExcel(@PathVariable Long projectId,
                                   Principal principal) {
-//        List<PrivilegeEnum> privileges = this.gradingParticipationService
-//                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
-//        if (!(privileges != null && privileges.contains(RUBRIC_READ))) {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
-//        }
-//        return projectService.getRubric(projectId);
+
+        List<PrivilegeEnum> privileges = this.gradingParticipationService
+                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
+        if (!(privileges != null && privileges.contains(RUBRIC_READ))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+        }
+
         try {
             return projectService.getProjectExcel(projectId);
         } catch (IOException e) {
@@ -515,5 +517,19 @@ public class ProjectController {
                     HttpStatus.NOT_FOUND, "project not found"
             );
         }
+    }
+
+    @GetMapping("/{projectId}/issues")
+    public List<Issue> getIssuesForProject(
+            @PathVariable Long projectId,
+            Principal principal, @PathVariable String courseId) throws JsonProcessingException {
+
+        List<PrivilegeEnum> privileges = this.gradingParticipationService
+                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
+        if (!(privileges != null && privileges.contains(PROJECT_READ))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+        }
+
+        return projectService.getIssuesInProject(projectId, Long.valueOf(principal.getName()));
     }
 }
