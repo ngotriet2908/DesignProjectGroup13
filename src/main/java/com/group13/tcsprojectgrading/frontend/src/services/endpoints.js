@@ -1,7 +1,7 @@
 // TODO redefine all API endpoints, they're pure chaos right now
 
-// export const HOST = "http://localhost:8080"
-export const HOST = "http://prograding.ddns.net:8080"
+export const HOST = "http://localhost:8080"
+// export const HOST = "http://prograding.ddns.net:8080"
 export const BASE = "/api/";
 export const USER_COURSES = "courses";
 export const USER_INFO = "users/self";

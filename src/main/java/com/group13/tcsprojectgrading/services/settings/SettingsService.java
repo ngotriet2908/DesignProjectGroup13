@@ -47,7 +47,7 @@ public class SettingsService {
         this.projectService = projectService;
     }
 
-    @Transactional(value = Transactional.TxType.MANDATORY)
+    @Transactional
     public Settings getSettings(Long projectId, Long userId) {
         if (this.projectService.getProject(projectId) == null) {
             throw new ResponseStatusException(
@@ -60,7 +60,7 @@ public class SettingsService {
         );
     }
 
-    @Transactional(value = Transactional.TxType.MANDATORY)
+    @Transactional
     public void createSettings(Long projectId, Long userId) {
         Settings settings = new Settings(userId, projectId);
         if (settingsRepository.existsById(settings.getId())) {
@@ -71,7 +71,7 @@ public class SettingsService {
         this.settingsRepository.save(settings);
     }
 
-    @Transactional(value = Transactional.TxType.MANDATORY)
+    @Transactional
     public Settings saveSettings(Settings settings) {
         return this.settingsRepository.save(settings);
     }
