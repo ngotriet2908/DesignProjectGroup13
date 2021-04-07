@@ -47,7 +47,7 @@ public class SubmissionController {
         List<PrivilegeEnum> privileges = this.gradingParticipationService
                 .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
         if (!(privileges != null && privileges.contains(SUBMISSIONS_READ))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorized");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
         }
 
         List<Submission> submissions;
@@ -72,7 +72,7 @@ public class SubmissionController {
                 ((privileges.contains(SUBMISSION_READ_SINGLE)) ||
                 (privileges.contains(SUBMISSION_READ_ALL)))
         )) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorized");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
         }
 
         Submission submission = this.submissionService.getSubmissionController(projectId, submissionId, privileges, Long.valueOf(principal.getName()));
@@ -94,7 +94,7 @@ public class SubmissionController {
         if (!(privileges != null &&
                 ((privileges.contains(MANAGE_GRADERS_EDIT)))
         )) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorized");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
         }
 
         this.submissionService.assignSubmission(submissionId, grader);
@@ -115,7 +115,7 @@ public class SubmissionController {
                 ((privileges.contains(MANAGE_GRADERS_EDIT)) ||
                         (privileges.contains(MANAGE_GRADERS_SELF_EDIT)))
         )) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorized");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
         }
 
         this.submissionService.dissociateSubmission(submissionId, privileges, Long.valueOf(principal.getName()));
@@ -135,7 +135,7 @@ public class SubmissionController {
                 ((privileges.contains(SUBMISSION_EDIT_ALL)) ||
                         (privileges.contains(SUBMISSION_EDIT_SINGLE)))
         )) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorized");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
         }
 
         this.submissionService.saveLabels(projectId, Long.valueOf(principal.getName()), labels, submissionId, privileges);
@@ -153,7 +153,7 @@ public class SubmissionController {
                 .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
         if (!(privileges != null
                 && (privileges.contains(SUBMISSION_EDIT_ALL) || privileges.contains(SUBMISSION_EDIT_SINGLE)))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
         }
 
         submissionService.assessmentManagement(courseId, projectId, submissionId, object, privileges, Long.valueOf(principal.getName()));
@@ -171,7 +171,7 @@ public class SubmissionController {
                 .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
         if (!(privileges != null
                 && (privileges.contains(SUBMISSION_EDIT_ALL) || privileges.contains(SUBMISSION_EDIT_SINGLE)))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
         }
 
         return submissionService.addParticipantToSubmission(courseId, projectId, submissionId, participantId, assessmentId, privileges, Long.valueOf(principal.getName()));
@@ -189,7 +189,7 @@ public class SubmissionController {
                 .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
         if (!(privileges != null
                 && (privileges.contains(SUBMISSION_EDIT_ALL) || privileges.contains(SUBMISSION_EDIT_SINGLE)))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
         }
         System.out.println("return all: " + returnAll);
         return submissionService.removeParticipantFromSubmission(courseId, projectId, submissionId, participantId, privileges, Long.valueOf(principal.getName()), returnAll);

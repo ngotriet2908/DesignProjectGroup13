@@ -79,7 +79,7 @@ class CourseController {
         List<String> response = this.canvasApi.getCanvasCoursesApi().getUserCourseList();
 
         if (response == null) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         ObjectMapper mapper = new ObjectMapper();
@@ -105,7 +105,7 @@ class CourseController {
         RoleEnum roleEnum = this.courseService.getCourseRole(courseId, Long.valueOf(principal.getName()));
 
         if (!(roleEnum != null && !roleEnum.equals(RoleEnum.STUDENT))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
         }
 
         return this.courseService.getCourse(courseId, Long.valueOf(principal.getName()));
@@ -118,7 +118,7 @@ class CourseController {
 ////        List<PrivilegeEnum> privileges = this.GradingParticipationService
 ////                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
 ////        if (!(privileges != null && privileges.contains(PROJECT_READ))) {
-////            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
+////            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
 ////        }
 //
 //        return this.courseService.getCourseStudents(courseId);
@@ -132,7 +132,7 @@ class CourseController {
         List<String> projects = this.canvasApi.getCanvasCoursesApi().getCourseProjects(courseId);
 
         if (projects == null) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         ArrayNode projectsNode = groupPages(projects);
@@ -150,7 +150,7 @@ class CourseController {
     ) throws JsonProcessingException {
         RoleEnum roleEnum = this.courseService.getCourseRole(courseId, Long.valueOf(principal.getName()));
         if (!(roleEnum != null && roleEnum.equals(RoleEnum.TEACHER))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorized");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
         }
 
         // import projects
@@ -174,7 +174,7 @@ class CourseController {
 //                (roleEnum.equals(RoleEnum.TA)) ||
                 (roleEnum.equals(RoleEnum.TA_GRADING)))
         )) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorized");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
         }
 
         return this.courseService.getCourseTeachersAndTAsAsUsers(courseId);
