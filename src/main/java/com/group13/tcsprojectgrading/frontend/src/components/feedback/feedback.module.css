@@ -106,3 +106,13 @@
 .neuterButton {
     color: quaternary;
 }
+
+.sendButtonGroup {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
+.sendButtonGroup > *:first-child {
+    margin-right: 0.5rem;
+}

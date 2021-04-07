@@ -44,7 +44,7 @@ class IssuesProject extends Component {
     })
   }
 
-  onFilterOriginSelectHandler = (eventKey, event) => {
+  onFilterOriginSelectHandler = (eventKey) => {
     this.setState({
       filterOriginChoice: eventKey
     })
@@ -52,8 +52,8 @@ class IssuesProject extends Component {
 
   render() {
     return (
-      <div className={[globalStyles.sectionContainer, styles.administrationSectionContainer].join(" ")}>
-        <div className={[globalStyles.sectionTitle, globalStyles.sectionTitleWithButton].join(" ")}>
+      <div className={classnames(globalStyles.sectionContainer)}>
+        <div className={classnames(globalStyles.sectionTitle, globalStyles.sectionTitleWithButton)}>
           <h3 className={globalStyles.sectionTitleH}>
             Issues
 
@@ -102,35 +102,31 @@ class IssuesProject extends Component {
           </h3>
         </div>
         <div className={globalStyles.sectionFlexContainer}>
-          <div>
-
-            {this.props.issues.filter((issue) => {
-              return this.filterIssueStateDropDown(issue) &&
+          {this.props.issues.filter((issue) => {
+            return this.filterIssueStateDropDown(issue) &&
                     this.filterIssueOriginDropDown(issue)
 
-            }).length === 0 &&
-              <EmptyCard data={"No issues"} icon={IoCheckboxOutline} />
-            }
+          }).length === 0 &&
+              <EmptyCard data={"No issues"} icon={IoCheckboxOutline} className={styles.stretchHeight}/>
+          }
 
-            {this.props.issues
-              .filter((issue) => {
-                return this.filterIssueStateDropDown(issue) &&
+          {this.props.issues
+            .filter((issue) => {
+              return this.filterIssueStateDropDown(issue) &&
                       this.filterIssueOriginDropDown(issue)
 
-              })
-              .map((issue) => {
-                return (
-                  <IssueProjectCard
-                    key={issue.id}
-                    issue={issue}
-                    user={this.props.user}
-                    routeMatch={this.props.routeMatch}
-                    updateIssue={this.props.updateIssue}/>
-                )
-              })}
-          </div>
+            })
+            .map((issue) => {
+              return (
+                <IssueProjectCard
+                  key={issue.id}
+                  issue={issue}
+                  user={this.props.user}
+                  routeMatch={this.props.routeMatch}
+                  updateIssue={this.props.updateIssue}/>
+              )
+            })}
         </div>
-
       </div>
 
 

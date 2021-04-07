@@ -16,20 +16,27 @@ import FeedbackSendingForm from "./FeedbackSendingForm";
 import Breadcrumbs from "../helpers/Breadcrumbs";
 import {push} from "connected-react-router";
 import EmptyCard from "../home/EmptyCard";
+import AssignSubmissionModal from "../assign/AssignSubmissionModal";
+import CreateTemplateModal from "./CreateTemplateModal";
 
 class Feedback extends Component {
   constructor(props) {
     super(props);
     this.state = {
       users: [],
+
       participantsNotSent: [],
       participantsAll: [],
+
       course: {},
       project: {},
       templates: [],
-      isCreatingTemplate: false,
+
+      // isCreatingTemplate: false,
       isLoaded: false,
-      isEditingTemplates: false,
+      // isEditingTemplates: false,
+
+      showCreateTemplateModal: false,
     }
 
   }
@@ -71,8 +78,6 @@ class Feedback extends Component {
     })
   }
 
-
-
   handleToggleCreatingTemplates = () => {
     this.setState(prev => {
       return {
@@ -87,6 +92,11 @@ class Feedback extends Component {
     })
   }
 
+  toggleShowCreateTemplateModal = () => {
+    this.setState(prevState => ({
+      showCreateTemplateModal: !prevState.showCreateTemplateModal
+    }))
+  }
 
   render() {
     if (!this.state.isLoaded) {
@@ -117,9 +127,7 @@ class Feedback extends Component {
             <div className={classnames(styles.sectionTitle, styles.sectionTitleWithButton)}>
               <h3 className={styles.sectionTitleH}>Templates</h3>
               {(!this.state.isEditingTemplates) ?
-                <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.handleToggleEditingTemplates}>
-                  <IoPencilOutline size={26}/>
-                </div>
+                <Button variant="lightGreen" onClick={this.toggleShowCreateTemplateModal}><IoAdd size={20}/> Add</Button>
                 :
                 <div className={styles.buttonGroup}>
                   <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.handleToggleCreatingTemplates}>
@@ -168,6 +176,13 @@ class Feedback extends Component {
 
           </div>
         </div>
+
+        <CreateTemplateModal
+          show={this.state.showCreateTemplateModal}
+          toggleShow={this.toggleShowCreateTemplateModal}
+          routeParams={this.props.match.params}
+          updateTemplates={this.updateTemplatesHandler}
+        />
       </div>
     )
   }

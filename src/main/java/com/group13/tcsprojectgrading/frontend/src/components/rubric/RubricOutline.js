@@ -122,24 +122,24 @@ class RubricOutline extends Component {
             {!this.props.isEditing ?
               (<div className={styles.outlineHeaderButtonContainer}>
                 <Can I="write" a="Rubric">
-                <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.onClickEdit}>
-                  <IoPencil size={26}/>
-                </div>
+                  <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.onClickEdit}>
+                    <IoPencil size={26}/>
+                  </div>
                 </Can>
                 <Can I="download" a="Rubric">
-                <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.downloadRubric}>
-                  <IoCodeDownloadOutline size={34}/>
-                </div>
+                  <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.downloadRubric}>
+                    <IoCodeDownloadOutline size={34}/>
+                  </div>
                 </Can>
                 <Can I="write" a="Rubric">
-                <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.toggleShowUploadModal}>
-                  <IoCloudUploadSharp size={34}/>
-                </div>
+                  <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.toggleShowUploadModal}>
+                    <IoCloudUploadSharp size={34}/>
+                  </div>
                 </Can>
                 <Can I="download" a="Rubric">
-                <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.props.exportRubricFile}>
-                  <IoCloudDownload size={34}/>
-                </div>
+                  <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.props.exportRubricFile}>
+                    <IoCloudDownload size={34}/>
+                  </div>
                 </Can>
               </div>)
               :

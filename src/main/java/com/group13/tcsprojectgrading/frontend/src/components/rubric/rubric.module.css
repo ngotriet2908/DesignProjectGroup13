@@ -6,9 +6,9 @@
     flex-direction: row;
     position: relative;
 
-    max-height: 100%;
-    height: 100%;
-    flex: 1;
+    /*max-height: 100%;*/
+    /*height: 100%;*/
+    /*flex: 1;*/
     overflow: hidden;
 }
 
@@ -22,7 +22,7 @@
 
 .outlineContainer {
     height: 100%;
-    /*overflow: scroll;*/
+    /*overflow-y: scroll;*/
     /*white-space: nowrap;*/
     /*text-overflow: ellipsis;*/
     position: relative;
@@ -119,8 +119,16 @@
     /*border-top: 1px solid #dfdfdf;*/
     padding: 0.5rem 0.5rem 0.5rem 0;
 
-    overflow: scroll;
     white-space: nowrap;
+
+    overflow-x: scroll;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.outlineElement::-webkit-scrollbar {
+    width: 0;
+    height: 0;
 }
 
 .outlineElementLeft {
