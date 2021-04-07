@@ -10,7 +10,7 @@ import SubmissionDetailsAssessmentsContainer
   from "./assessments/SubmissionDetailsAssessmentsContainer";
 import SubmissionDetailsAssessmentsEditingContainer
   from "./assessments/SubmissionDetailsAssessmentsEditingContainer";
-import {IoAdd, IoPencilOutline, IoCloseOutline} from "react-icons/io5";
+import {IoAdd, IoPencilOutline, IoCloseOutline, IoCloudDownloadSharp} from "react-icons/io5";
 import globalStyles from "../helpers/global.module.css";
 import Breadcrumbs from "../helpers/Breadcrumbs";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
@@ -27,6 +27,7 @@ import LabelModal from "./labels/LabelModal";
 import Button from "react-bootstrap/Button";
 import {ability, Can, updateAbility} from "../permissions/ProjectAbility";
 import { subject } from '@casl/ability';
+import {Link} from "react-router-dom";
 
 const masonryBreakpointColumns = {
   default: 2,
@@ -288,15 +289,28 @@ class SubmissionDetails extends Component {
                   return (
                     <Card key={attachment.id}>
                       <Card.Body>
-                        <div>
-                          <h6>name: {attachment.display_name}</h6>
-                          <h6>type: {attachment["content-type"]}</h6>
-                          <h6>size: {attachment.size}</h6>
+                        <div className={styles.memberAssessmentItem}>
+                          <div className={styles.memberAssessmentHeader}>
+                            <h4>
+                              {attachment.display_name}
+                            </h4>
+                            <div className={classnames(globalStyles.iconButton, styles.primaryButton)}
+                                 onClick={() => window.open(attachment.url)}
+                            >
+                              <IoCloudDownloadSharp size={26}/>
+                            </div>
+                          </div>
+                          <div>
+                            {/*<h6>name: {attachment.display_name}</h6>*/}
+                            <h6>type: {attachment["content-type"]}</h6>
+                            <h6>size: {attachment.size}</h6>
+                          </div>
                         </div>
                       </Card.Body>
                     </Card>
                   )
-                })}
+                })
+                }
               </div>
             </div>
             }

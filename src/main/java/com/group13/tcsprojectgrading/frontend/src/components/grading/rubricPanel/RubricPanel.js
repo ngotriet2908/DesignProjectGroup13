@@ -4,6 +4,16 @@ import {connect} from "react-redux";
 import RubricOutline from "./RubricOutline";
 import Card from "react-bootstrap/Card";
 import RubricViewer from "./RubricViewer";
+import {
+  addBlock, addCriterion,
+  deleteAllElements, deleteElement,
+  resetUpdates,
+  saveRubric,
+  saveRubricTemp,
+  setCurrentPath,
+  setEditingRubric,
+  setSelectedElement
+} from "../../../redux/rubric/actions";
 
 
 class RubricPanel extends Component {
@@ -21,6 +31,36 @@ class RubricPanel extends Component {
     }))
   }
 
+  handlePrevCriterion = (id) => {
+    let nextId = -1
+    console.log(id)
+    this.props.rubricCriteria.forEach((criterion, i) => {
+      if (criterion.id === id) {
+        nextId = i - 1
+      }
+    })
+    if (nextId >= 0) {
+      console.log("next: " + this.props.rubricCriteria[nextId].id)
+      this.props.setSelectedElement(this.props.rubricCriteria[nextId].id);
+      // this.props.toggleOutlineHidden();
+    }
+  }
+
+  handleNextCriterion = (id) => {
+    let nextId = -1
+    console.log(id)
+    this.props.rubricCriteria.forEach((criterion, i) => {
+      if (criterion.id === id) {
+        nextId = i + 1
+      }
+    })
+    if (nextId >= 0 && nextId < this.props.rubricCriteria.length) {
+      console.log("next: " + this.props.rubricCriteria[nextId].id)
+      this.props.setSelectedElement(this.props.rubricCriteria[nextId].id);
+      // this.props.toggleOutlineHidden();
+    }
+  }
+
   render () {
     return (
       <div className={styles.rubricPanelContainer}>
@@ -31,9 +71,15 @@ class RubricPanel extends Component {
             </div>
             <div className={styles.rubricPanelInnerContainer}>
               {/*{!this.state.isOutlineHidden ?*/}
-              <RubricOutline outlineHidden={this.state.isOutlineHidden} toggleOutlineHidden={this.toggleOutlineHidden}/>
+              <RubricOutline rubricCriteria={this.props.rubricCriteria} outlineHidden={this.state.isOutlineHidden} toggleOutlineHidden={this.toggleOutlineHidden}/>
               {/*:*/}
-              <RubricViewer outlineHidden={this.state.isOutlineHidden} toggleOutlineHidden={this.toggleOutlineHidden}/>
+              <RubricViewer rubricCriteria={this.props.rubricCriteria}
+                            firstCritId={this.props.rubricCriteria[0].id}
+                            lastCritId={this.props.rubricCriteria[this.props.rubricCriteria.length - 1].id}
+                            handlePrevCriterion = {this.handlePrevCriterion}
+                            handleNextCriterion = {this.handleNextCriterion}
+                            outlineHidden={this.state.isOutlineHidden}
+                            toggleOutlineHidden={this.toggleOutlineHidden}/>
               {/*}*/}
             </div>
           </Card.Body>
@@ -45,12 +91,22 @@ class RubricPanel extends Component {
 
 const mapStateToProps = state => {
   return {
-
+    rubric: state.rubric.rubric,
+    selectedElement: state.rubric.selectedElement,
   };
 };
 
 const actionCreators = {
-
+  setSelectedElement,
+  setCurrentPath,
+  setEditingRubric,
+  saveRubric,
+  saveRubricTemp,
+  resetUpdates,
+  deleteAllElements,
+  addBlock,
+  addCriterion,
+  deleteElement,
 }
 
 export default connect(mapStateToProps, actionCreators)(RubricPanel)

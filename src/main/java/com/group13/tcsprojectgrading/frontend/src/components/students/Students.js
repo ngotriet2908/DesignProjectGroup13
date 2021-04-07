@@ -67,9 +67,11 @@ class Students extends Component {
     })
   }
 
-  filterParticipantDropDown = () => {
+  filterParticipantDropDown = (user) => {
     let filter = this.state.filterChoice
     if (filter === "All") return true;
+    if (filter === "Has submissions") return user.submissions.length > 0;
+    if (filter === "Has no submissions") return user.submissions.length === 0;
     // if (filter === "group") return group.isGroup;
     // if (filter === "individual") return !group.isGroup;
     return false
@@ -81,6 +83,11 @@ class Students extends Component {
 
     if (student.hasOwnProperty("sid")) {
       criteria = student.sid.toLowerCase().includes(this.state.searchString.toLowerCase())
+      if (criteria) return true
+    }
+
+    if (student.hasOwnProperty("email")) {
+      criteria = student.email.toLowerCase().includes(this.state.searchString.toLowerCase())
       if (criteria) return true
     }
 
@@ -125,7 +132,7 @@ class Students extends Component {
           <div className={styles.toolbar}>
             <FormControl className={classnames(globalStyles.searchBar, styles.groupsSearchBar)}
               type="text"
-              placeholder="Search with group name, student name, student id, member name, member student id"
+              placeholder="Search with student name, student id, email"
               onChange={this.handleSearchChange}/>
 
             <DropdownButton
@@ -133,14 +140,14 @@ class Students extends Component {
               key={"primary"}
               id={`dropdown-Primary`}
               variant={"lightGreen"}
-              title={"Group Filter"}
-              onSelect={this.handleSearchChange}
+              title={"Filter"}
+              onSelect={this.onFilterSelectHandler}
             >
 
-              {["All", "divider", "Group", "Individual"].map((filterS) => {
+              {["All", "divider", "Has submissions", "Has no submissions"].map((filterS) => {
                 if (filterS === "divider") {
                   return <Dropdown.Divider key={filterS}/>
-                } else if (filterS === this.state.filterGroupChoice) {
+                } else if (filterS === this.state.filterChoice) {
                   return <Dropdown.Item variant="lightGreen" key={filterS} eventKey={filterS} active>{filterS}</Dropdown.Item>
                 } else {
                   return <Dropdown.Item key={filterS} eventKey={filterS}>{filterS}</Dropdown.Item>
@@ -153,8 +160,9 @@ class Students extends Component {
             {
               this.state.students
                 .filter((student) => {
-                  return this.filterParticipantDropDown(student.id.user) && this.filterParticipantSearchChange(student.id.user);
+                  return this.filterParticipantDropDown(student) && this.filterParticipantSearchChange(student.id.user);
                 })
+                .sort((s1, s2) => s1.id.user.name.localeCompare(s2.id.user.name))
                 .map((student) => {
                   return (
                     <StudentCard

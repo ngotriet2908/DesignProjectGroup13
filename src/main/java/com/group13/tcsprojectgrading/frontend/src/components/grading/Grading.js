@@ -25,7 +25,8 @@ class Grading extends Component {
     this.state = {
       data: this.props.location.data,
       isLoaded: false,
-      submission: {}
+      submission: {},
+      rubricCriteria: []
     }
   }
 
@@ -33,6 +34,29 @@ class Grading extends Component {
     this.props.setCurrentLocation(LOCATIONS.grading);
     this.fetchGradingData();
   }
+
+  visitTree(node, result) {
+    let obj = {
+      id: node.content.id,
+      type: node.content.type,
+      name: (node.content.type === "0")? "B: " + node.content.title : "C: " + node.content.title
+    }
+    if (node.content.type === "1") result.push(obj)
+    if (node.hasOwnProperty("children")) {
+      node.children.forEach((node) => {
+        this.visitTree(node, result)
+      })
+    }
+  }
+
+  getAllElements(rubric) {
+    let result = []
+    rubric.children.forEach((node) => {
+      this.visitTree(node, result)
+    })
+    return result
+  }
+
 
   fetchGradingData = () => {
     Promise.all([
@@ -76,6 +100,7 @@ class Grading extends Component {
         this.setState({
           submission: submission,
           isLoaded: true,
+          rubricCriteria: this.getAllElements(rubric)
         });
       })
       .catch(error => {
@@ -106,7 +131,7 @@ class Grading extends Component {
         />
 
         <div className={styles.container}>
-          <RubricPanel match={this.props.match}/>
+          <RubricPanel match={this.props.match} rubricCriteria={this.state.rubricCriteria}/>
           <GradingPanel submission={this.state.submission} match={this.props.match}/>
           <RightsidePanel user={this.props.user} submission={this.state.submission} routeParams={this.props.match.params}/>
         </div>
