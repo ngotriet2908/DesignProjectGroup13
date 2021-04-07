@@ -244,6 +244,8 @@ public class ProjectsControllerTest {
                 .andExpect(status().isOk());
     }
 
+
+    //TODO: perhaps test the contents of the pdf, seems very complicated
     @WithMockUser
     @Test
     public void sendFeedbackPdfOk() throws Exception {
@@ -265,5 +267,54 @@ public class ProjectsControllerTest {
                 .content(feedback.toString())
                 .with(csrf()))
                 .andExpect(status().isOk());
+    }
+
+    @WithMockUser
+    @Test
+    public void getFeedbackInfoPageProjectNotFound() throws Exception {
+        when(projectService.getProjectById(courseId, projectId)).thenReturn(null);
+
+        mockMvc.perform(get("/api/courses/{courseId}/projects/{projectId}/feedback", courseId, projectId))
+                .andExpect(status().isNotFound());
+    }
+
+    @WithMockUser
+    @Test
+    public void getFeedbackInfoPageOk() throws Exception {
+        ObjectNode projectResponse = objectMapper.createObjectNode();
+        ObjectNode courseResponse = objectMapper.createObjectNode();
+        ArrayNode participantResponse = objectMapper.createArrayNode();
+
+        projectResponse.put("id", projectId);
+        projectResponse.put("name", "test");
+        projectResponse.put("description", "test");
+        projectResponse.put("created_at", 0);
+
+        courseResponse.put("id", courseId);
+        courseResponse.put("name", "Test Course 1");
+
+        ObjectNode participant1 = objectMapper.createObjectNode();
+        ObjectNode participant2 = objectMapper.createObjectNode();
+
+        participant1.put("id", "631");
+        participant2.put("id", "431");
+
+        participantResponse.add(participant1);
+        participantResponse.add(participant2);
+
+        ObjectNode expected = objectMapper.createObjectNode();
+        expected.set("users", participantResponse);
+        expected.set("course", courseResponse);
+        expected.set("project", projectResponse);
+
+        when(projectService.getProjectById(courseId, projectId)).thenReturn(testProject);
+        when(canvasApi.getCanvasCoursesApi()).thenReturn(canvasCoursesApi);
+        when(canvasCoursesApi.getCourseProject(courseId, projectId)).thenReturn(projectResponse.toString());
+        when(canvasCoursesApi.getUserCourse(courseId)).thenReturn(courseResponse.toString());
+        when(canvasCoursesApi.getCourseParticipants(courseId)).thenReturn(List.of(participantResponse.toString()));
+
+        mockMvc.perform(get("/api/courses/{courseId}/projects/{projectId}/feedback", courseId, projectId))
+                .andExpect(status().isOk())
+                .andExpect(content().json(expected.toString()));
     }
 }

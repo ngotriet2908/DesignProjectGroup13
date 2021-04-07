@@ -37,6 +37,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+//TODO: make this a test for the assessmentCoreService instead, since all the controller does now is call functions from that
 @SpringBootTest
 @AutoConfigureMockMvc
 public class AssessmentControllerTest {
