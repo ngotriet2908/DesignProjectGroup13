@@ -11,6 +11,9 @@ import globalStyles from "../helpers/global.module.css";
 import Breadcrumbs from "../helpers/Breadcrumbs";
 import classnames from "classnames";
 import store from "../../redux/store";
+import {push} from "connected-react-router";
+import {URL_PREFIX} from "../../services/config";
+import {ability, updateAbility} from "../permissions/ProjectAbility";
 
 class Students extends Component {
   constructor(props) {
@@ -36,6 +39,15 @@ class Students extends Component {
         const students = await res1.json();
         const project = await res2.json();
         const course = await res3.json();
+
+        if (project.privileges !== null) {
+          updateAbility(ability, project.privileges, this.props.user)
+          console.log(ability)
+          // console.log(ability.can('view',"AdminToolbar"))
+          // console.log(ability.can('read',"Submissions"))
+        } else {
+          console.log("No privileges found.")
+        }
 
         this.setState({
           course: course,
@@ -165,7 +177,7 @@ const actionCreators = {
 
 const mapStateToProps = state => {
   return {
-
+    user: state.users.self
   };
 };
 

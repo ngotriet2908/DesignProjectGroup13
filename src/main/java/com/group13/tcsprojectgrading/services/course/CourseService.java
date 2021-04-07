@@ -111,7 +111,7 @@ public class CourseService {
             System.out.println(userCanvas);
             if (!RoleEnum.getRoleFromEnrolment(userNode.get("enrollments").get(0).get("role").asText()).equals(RoleEnum.TEACHER)) {
                 throw new ResponseStatusException(
-                        HttpStatus.FORBIDDEN, "You are not a teacher in course " + course.getName());
+                        HttpStatus.UNAUTHORIZED, "You are not a teacher in course " + course.getName());
             }
 
             // fetch users and for each create a) User b) Participation
@@ -476,7 +476,7 @@ public class CourseService {
 
         if (participation == null) {
             throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN, "User does not participate in the course"
+                    HttpStatus.UNAUTHORIZED, "User does not participate in the course"
             );
         }
 

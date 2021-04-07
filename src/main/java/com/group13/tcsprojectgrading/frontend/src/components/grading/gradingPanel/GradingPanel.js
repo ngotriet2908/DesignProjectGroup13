@@ -4,6 +4,8 @@ import {connect} from "react-redux";
 import GradeEditor from "./GradeEditor";
 import GradeViewer from "./GradeViewer";
 import Card from "react-bootstrap/Card";
+import {Can} from "../../permissions/ProjectAbility";
+import { subject } from '@casl/ability';
 
 
 class GradingPanel extends Component {
@@ -15,8 +17,10 @@ class GradingPanel extends Component {
   render () {
     return (
       <div className={styles.gradingPanelContainer}>
-        <GradeEditor match={this.props.match}/>
-        <GradeViewer match={this.props.match}/>
+        <Can I="edit" this={subject('Submission', (this.props.submission.grader === null)? {id: -1}:this.props.submission.grader)}>
+          <GradeEditor match={this.props.match}/>
+        </Can>
+        <GradeViewer submission={this.props.submission} match={this.props.match}/>
       </div>
     )
   }

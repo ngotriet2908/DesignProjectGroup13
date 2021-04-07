@@ -57,6 +57,7 @@ class Course extends Component {
         // const stats = await res2.json();
 
         updateAbilityCoursePage(ability, course.role)
+        console.log(ability)
         this.props.saveCurrentCourse(course);
 
         course.projects.forEach((project, index, array) => {
@@ -163,9 +164,11 @@ class Course extends Component {
             <span>{(new Date(this.state.course.startAt)).getFullYear()}</span>
           </div>
 
-          <Button variant="lightGreen" className={globalStyles.titleActiveButton} onClick={this.syncCourseHandler}>
-            <IoSyncOutline size={20}/> Sync
-          </Button>
+          <Can I="sync" a="Course">
+            <Button variant="lightGreen" className={globalStyles.titleActiveButton} onClick={this.syncCourseHandler}>
+              <IoSyncOutline size={20}/> Sync
+            </Button>
+          </Can>
         </div>
 
         <div className={styles.container}>

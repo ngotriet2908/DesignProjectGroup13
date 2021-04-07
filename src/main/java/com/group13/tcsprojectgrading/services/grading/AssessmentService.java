@@ -276,7 +276,7 @@ public class AssessmentService {
         if (privileges != null && privileges.contains(PrivilegeEnum.GRADING_READ_SINGLE)) {
             if (submission.getGrader() == null || !submission.getGrader().getId().equals(userId)) {
                 throw new ResponseStatusException(
-                        HttpStatus.FORBIDDEN, "Unauthorised"
+                        HttpStatus.UNAUTHORIZED, "Unauthorised"
                 );
             }
         }
@@ -320,7 +320,7 @@ public class AssessmentService {
             if (grader == null || submission.getGrader() == null ||
                     !grader.getId().getUser().getId().equals(submission.getGrader().getId())) {
                 throw new ResponseStatusException(
-                        HttpStatus.FORBIDDEN, "Unauthorised"
+                        HttpStatus.UNAUTHORIZED, "Unauthorised"
                 );
             }
         }
@@ -363,7 +363,7 @@ public class AssessmentService {
             if (grader == null || submission.getGrader() == null ||
                     !grader.getId().getUser().getId().equals(submission.getGrader().getId())) {
                 throw new ResponseStatusException(
-                        HttpStatus.FORBIDDEN, "Unauthorised"
+                        HttpStatus.UNAUTHORIZED, "Unauthorised"
                 );
             }
         }
@@ -408,7 +408,7 @@ public class AssessmentService {
             if (grader == null || submission.getGrader() == null ||
                     !grader.getId().getUser().getId().equals(submission.getGrader().getId())) {
                 throw new ResponseStatusException(
-                        HttpStatus.FORBIDDEN, "Unauthorised"
+                        HttpStatus.UNAUTHORIZED, "Unauthorised"
                 );
             }
         }
@@ -433,7 +433,7 @@ public class AssessmentService {
             if (grader == null || submission.getGrader() == null ||
                     !grader.getId().getUser().getId().equals(submission.getGrader().getId())) {
                 throw new ResponseStatusException(
-                        HttpStatus.FORBIDDEN, "Unauthorised"
+                        HttpStatus.UNAUTHORIZED, "Unauthorised"
                 );
             }
         }
@@ -478,7 +478,7 @@ public class AssessmentService {
             if (grader == null || submission.getGrader() == null ||
                     !grader.getId().getUser().getId().equals(submission.getGrader().getId())) {
                 throw new ResponseStatusException(
-                        HttpStatus.FORBIDDEN, "Unauthorised"
+                        HttpStatus.UNAUTHORIZED, "Unauthorised"
                 );
             }
         }

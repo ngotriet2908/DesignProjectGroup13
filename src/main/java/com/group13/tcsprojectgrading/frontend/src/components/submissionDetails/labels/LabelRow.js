@@ -8,6 +8,8 @@ import Button from "react-bootstrap/Button";
 import {IoAddOutline, IoPencilOutline} from "react-icons/io5";
 import globalStyles from "../../helpers/global.module.css";
 import classnames from 'classnames';
+import {Can} from "../../permissions/ProjectAbility";
+import { subject } from '@casl/ability';
 
 export const colors = [
   "primary",
@@ -55,10 +57,11 @@ class LabelRow extends Component {
           // </OverlayTrigger>
           )
         })}
-
+        <Can I="edit" this={subject('Submission', (this.props.submission.grader === null)? {id: -1}:this.props.submission.grader)}>
         <Button variant="dashed" onClick={this.props.toggleShow}>
-          <IoPencilOutline size={20}/> Edit labels
-        </Button>
+            <IoPencilOutline size={20}/> Edit labels
+          </Button>
+        </Can>
       </div>
     );
   }

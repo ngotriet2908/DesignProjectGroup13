@@ -212,7 +212,7 @@ public class ProjectService {
             List<PrivilegeEnum> privileges = this.gradingParticipationService.getPrivilegesFromUserIdAndProject(userId, projectId);
 
             if (privileges == null) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorised");
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorised");
             }
 
             ObjectWriter writer = Json.getObjectWriter(Project.class)
@@ -375,7 +375,7 @@ public class ProjectService {
 //        List<PrivilegeEnum> privileges = this.gradingParticipationService.getPrivilegesFromUserIdAndProject(userId, projectId);
 //
 //        if (privileges == null) {
-//            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorised");
+//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorised");
 //        }
 
         return this.gradingParticipationService.getProjectGradersWithSubmissions(projectId);
@@ -889,7 +889,7 @@ public class ProjectService {
         Credential credential = flow.loadCredential(teacherId);
         if (credential == null) {
             throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN, "token not found"
+                    HttpStatus.UNAUTHORIZED, "token not found"
             );
         }
 

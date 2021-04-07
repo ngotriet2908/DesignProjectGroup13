@@ -25,6 +25,7 @@ function updateAbilityCoursePage(ability, role) {
 
   if (isTeacher(role)) {
     can(['read', 'write'], 'Projects')
+    can(['sync'], 'Course')
     can(['read', 'write'], 'Statistic')
   } else if (isTA(role)) {
     can(['read'], 'Projects')

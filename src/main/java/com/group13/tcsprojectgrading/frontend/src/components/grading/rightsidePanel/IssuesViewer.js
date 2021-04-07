@@ -75,6 +75,7 @@ class IssuesViewer extends Component {
         <Card className={styles.panelCard}>
           <Card.Body className={classnames(styles.gradeViewerBody)}>
             <Issues
+              submission={this.props.submission}
               updateIssue={this.updateIssue}
               issues={this.state.issues}
               routeParams={this.props.routeParams}

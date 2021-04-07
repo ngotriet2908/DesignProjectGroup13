@@ -66,7 +66,7 @@ class UsersController {
 //        String response = this.canvasApi.getCanvasUsersApi().getAccount();
 //
 //        if (response == null) {
-//            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 //        } else {
 //            return new ResponseEntity<>(response, HttpStatus.OK);
 //        }
