@@ -12,6 +12,8 @@ import {request} from "../../../services/request";
 import classnames from 'classnames';
 import {IoCheckboxOutline, IoListOutline, IoFileTrayOutline, IoSquareOutline} from "react-icons/io5";
 import {findUserById} from "../../../redux/user/functions";
+import {ability, Can} from "../../permissions/ProjectAbility";
+import { subject } from '@casl/ability';
 
 
 class GradeViewer extends Component {
@@ -24,7 +26,9 @@ class GradeViewer extends Component {
   }
 
   makeActive = (id) => {
-    request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/assessments/${this.props.match.params.assessmentId}/grades/${id}/activate`, "POST")
+    if (!ability.can('edit', subject('Submission', (this.props.submission.grader === null)? {id: -1}:this.props.submission.grader))) return
+
+      request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/assessments/${this.props.match.params.assessmentId}/grades/${id}/activate`, "POST")
       .then(() => {
         this.props.setActive(this.props.selectedElement, id)
       })

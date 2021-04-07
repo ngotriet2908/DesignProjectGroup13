@@ -17,6 +17,7 @@ import {setCurrentLocation} from "../../redux/navigation/actions";
 import {connect} from "react-redux";
 import GradersModal from "./GradersModal";
 import BulkModal from "./BulkModal";
+import {Can, ability, updateAbility} from "../permissions/ProjectAbility";
 
 
 class GraderManagement extends Component {
@@ -65,6 +66,15 @@ class GraderManagement extends Component {
         const unassigned = await res2.json();
         const course = await res3.json();
         const project = await res4.json();
+
+        if (project.privileges !== null) {
+          updateAbility(ability, project.privileges, this.props.user)
+          console.log(ability)
+          // console.log(ability.can('view',"AdminToolbar"))
+          // console.log(ability.can('read',"Submissions"))
+        } else {
+          console.log("No privileges found.")
+        }
 
         console.log(graders);
         console.log(unassigned);
@@ -211,7 +221,9 @@ class GraderManagement extends Component {
 
         <div className={classnames(globalStyles.titleContainer, styles.titleContainer)}>
           <h1>Graders</h1>
-          <Button variant="lightGreen" onClick={this.toggleShowGradersModal}><IoPencilOutline size={20}/> Edit graders</Button>
+          <Can I="edit" a="ManageGraders">
+            <Button variant="lightGreen" onClick={this.toggleShowGradersModal}><IoPencilOutline size={20}/> Edit graders</Button>
+          </Can>
         </div>
 
         {/*  /!*<Button className={styles.manageTaToolbarButton}*!/*/}
@@ -362,8 +374,15 @@ class GraderManagement extends Component {
   }
 }
 
+const mapStateToProps = state => {
+  return {
+    user: state.users.self
+  };
+};
+
+
 const actionCreators = {
   setCurrentLocation
 }
 
-export default connect(null, actionCreators)(GraderManagement)
+export default connect(mapStateToProps, actionCreators)(GraderManagement)

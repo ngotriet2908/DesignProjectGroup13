@@ -152,20 +152,26 @@ class RubricOutline extends Component {
             <h3>Rubric</h3>
             {!this.props.isEditing ?
               (<div className={styles.outlineHeaderButtonContainer}>
-                {/*<Can I="write" a="Rubric">*/}
-                <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.onClickEdit}>
-                  <IoPencil size={26}/>
-                </div>
-                {/*</Can>*/}
-                <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.downloadRubric}>
-                  <IoCodeDownloadOutline size={34}/>
-                </div>
-                <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.openUploadModal}>
-                  <IoCloudUploadSharp size={34}/>
-                </div>
-                <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.props.exportRubricFile}>
-                  <IoCloudDownload size={34}/>
-                </div>
+                <Can I="write" a="Rubric">
+                  <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.onClickEdit}>
+                    <IoPencil size={26}/>
+                  </div>
+                </Can>
+                <Can I="download" a="Rubric">
+                  <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.downloadRubric}>
+                    <IoCodeDownloadOutline size={34}/>
+                  </div>
+                </Can>
+                <Can I="write" a="Rubric">
+                  <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.openUploadModal}>
+                    <IoCloudUploadSharp size={34}/>
+                  </div>
+                </Can>
+                <Can I="download" a="Rubric">
+                  <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.props.exportRubricFile}>
+                    <IoCloudDownload size={34}/>
+                  </div>
+                </Can>
               </div>)
               :
               (<div className={styles.outlineHeaderButtonContainer}>

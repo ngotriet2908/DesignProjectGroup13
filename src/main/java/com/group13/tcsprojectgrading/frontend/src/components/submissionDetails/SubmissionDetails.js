@@ -25,6 +25,8 @@ import Masonry from 'react-masonry-css'
 import LabelRow from "./labels/LabelRow";
 import LabelModal from "./labels/LabelModal";
 import Button from "react-bootstrap/Button";
+import {ability, Can, updateAbility} from "../permissions/ProjectAbility";
+import { subject } from '@casl/ability';
 
 const masonryBreakpointColumns = {
   default: 2,
@@ -67,6 +69,14 @@ class SubmissionDetails extends Component {
         const project = await res3.json();
 
         console.log(submission);
+        if (project.privileges !== null) {
+          updateAbility(ability, project.privileges, this.props.user)
+          console.log(ability)
+          // console.log(ability.can('view',"AdminToolbar"))
+          // console.log(ability.can('read',"Submissions"))
+        } else {
+          console.log("No privileges found.")
+        }
 
         this.setState({
           course: course,
@@ -253,6 +263,7 @@ class SubmissionDetails extends Component {
 
         {/* labels bar */}
         <LabelRow
+          submission={this.state.submission}
           labels={this.state.submission.labels}
           toggleShow={this.toggleShowLabelModal}
         />
@@ -356,8 +367,10 @@ class SubmissionDetails extends Component {
                   // <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.toggleAddingParticipant}>
                   //   <IoPencilOutline size={26}/>
                   // </div>
-                  <Button variant="lightGreen" onClick={this.toggleAddingParticipant}><IoPencilOutline size={20}/> Edit</Button>
-                  :
+                  <Can I="edit" this={subject('Submission', (this.state.submission.grader === null)? {id: -1}:this.state.submission.grader)}>
+                    <Button variant="lightGreen" onClick={this.toggleAddingParticipant}><IoPencilOutline size={20}/> Edit</Button>
+                  </Can>
+                    :
                   <div className={styles.buttonGroup}>
                     <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.handleAddParticipant}>
                       <IoAdd size={26}/>
@@ -412,8 +425,14 @@ class SubmissionDetails extends Component {
   }
 }
 
+const mapStateToProps = state => {
+  return {
+    user: state.users.self
+  };
+};
+
 const actionCreators = {
   setCurrentLocation
 }
 
-export default connect(null, actionCreators)(SubmissionDetails)
+export default connect(mapStateToProps, actionCreators)(SubmissionDetails)

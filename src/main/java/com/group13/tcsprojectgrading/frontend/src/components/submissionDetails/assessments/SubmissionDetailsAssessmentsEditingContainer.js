@@ -12,6 +12,8 @@ import SubmissionDetailsAssessmentEditingItemContainer from "./SubmissionDetails
 import classnames from 'classnames';
 import globalStyles from "../../helpers/global.module.css";
 import {IoCloseOutline, IoPencilOutline, IoAdd} from "react-icons/io5";
+import {Can} from "../../permissions/ProjectAbility";
+import { subject } from '@casl/ability';
 
 class SubmissionDetailsAssessmentsEditingContainer extends Component {
   constructor(props) {
@@ -131,9 +133,9 @@ class SubmissionDetailsAssessmentsEditingContainer extends Component {
         <div className={classnames(styles.sectionTitle, styles.sectionTitleWithButton)}>
           <h3 className={styles.sectionTitleH}>Grading sheets</h3>
           <div className={styles.buttonGroup}>
-            <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.props.toggleEditing}>
-              <IoCloseOutline size={26}/>
-            </div>
+              <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.props.toggleEditing}>
+                <IoCloseOutline size={26}/>
+              </div>
           </div>
         </div>
 

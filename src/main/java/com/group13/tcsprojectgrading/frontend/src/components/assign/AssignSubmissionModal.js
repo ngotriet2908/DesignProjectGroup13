@@ -6,6 +6,7 @@ import {connect} from "react-redux";
 import {IoCloseOutline, IoCheckboxOutline, IoSquareOutline, IoReturnUpBack, IoAddOutline} from "react-icons/io5";
 import classnames from 'classnames';
 import globalStyles from "../helpers/global.module.css";
+import {Can} from "../permissions/ProjectAbility";
 
 
 class AssignSubmissionModal extends Component {
@@ -123,6 +124,7 @@ class AssignSubmissionModal extends Component {
         onHide={this.onClose}
         animation={false}
       >
+
         <div className={globalStyles.modalContainer}>
           <div className={globalStyles.modalHeaderContainer}>
             <h2>Assign</h2>
@@ -131,46 +133,48 @@ class AssignSubmissionModal extends Component {
             </div>
           </div>
 
-          <div className={globalStyles.modalDescriptionContainer}>
-            <div>
-              Choose a person who will be responsible for grading the submission <b>'{(this.props.submission != null)? this.props.submission.name : null}'</b> or leave the submission unassigned.
+          <Can I="edit" a="ManageGraders">
+
+            <div className={globalStyles.modalDescriptionContainer}>
+              <div>
+                Choose a person who will be responsible for grading the submission <b>'{(this.props.submission != null)? this.props.submission.name : null}'</b> or leave the submission unassigned.
+              </div>
             </div>
-          </div>
 
 
-          {/* body */}
-          <div className={globalStyles.modalBodyContainer}>
-            {/*{this.createFirstRow()}*/}
+            {/* body */}
+            <div className={globalStyles.modalBodyContainer}>
+              {/*{this.createFirstRow()}*/}
 
-            {this.props.graders.length === 0 &&
-            <div className={classnames(globalStyles.modalBodyContainerRow, globalStyles.modalBodyContainerRowEmpty)}>
-              No graders available in this project
+              {this.props.graders.length === 0 &&
+              <div className={classnames(globalStyles.modalBodyContainerRow, globalStyles.modalBodyContainerRowEmpty)}>
+                No graders available in this project
+              </div>
+              }
+
+              {this.props.graders
+                // .filter((grader) => {
+                // return (this.props.currentGrader == null) || (grader.id !== this.props.currentGrader.id)
+              // })
+                .map((grader) => {
+                  const eq = this.state.selected != null && this.state.selected.id === grader.id;
+
+                  return (
+                    <div className={classnames(globalStyles.modalBodyContainerRow, eq && globalStyles.modalBodyContainerRowActive)}
+                      key={grader.id}
+                      onClick={() => this.handleGraderClick(grader)}>
+                      {eq ?
+                        <IoCheckboxOutline size={16}/>
+                        :
+                        <IoSquareOutline size={16}/>
+                      }
+                      <span>{grader.name} - {grader.submissions.length} submission(s)</span>
+                    </div>
+                  )
+                })
+              }
             </div>
-            }
-
-            {this.props.graders
-              // .filter((grader) => {
-              // return (this.props.currentGrader == null) || (grader.id !== this.props.currentGrader.id)
-            // })
-              .map((grader) => {
-                const eq = this.state.selected != null && this.state.selected.id === grader.id;
-
-                return (
-                  <div className={classnames(globalStyles.modalBodyContainerRow, eq && globalStyles.modalBodyContainerRowActive)}
-                    key={grader.id}
-                    onClick={() => this.handleGraderClick(grader)}>
-                    {eq ?
-                      <IoCheckboxOutline size={16}/>
-                      :
-                      <IoSquareOutline size={16}/>
-                    }
-                    <span>{grader.name} - {grader.submissions.length} submission(s)</span>
-                  </div>
-                )
-              })
-            }
-          </div>
-
+          </Can>
           {/* footer */}
           <div className={classnames(globalStyles.modalFooterContainer, this.props.currentGrader && globalStyles.modalFooterContainerSpaceBetween)}>
             {this.props.currentGrader &&
@@ -180,7 +184,10 @@ class AssignSubmissionModal extends Component {
             }
             <div className={globalStyles.modalFooterContainerButtonGroup}>
               <Button variant="linkLightGray" onClick={this.onClose}>Cancel</Button>
-              <Button variant="lightGreen" onClick={this.onAccept}>Save</Button>
+              <Can I="edit" a="ManageGraders">
+                <Button variant="lightGreen" onClick={this.onAccept}>Save</Button>
+              </Can>
+
             </div>
           </div>
         </div>

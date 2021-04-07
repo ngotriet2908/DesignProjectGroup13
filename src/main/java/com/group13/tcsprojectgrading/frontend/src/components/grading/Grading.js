@@ -25,6 +25,7 @@ class Grading extends Component {
     this.state = {
       data: this.props.location.data,
       isLoaded: false,
+      submission: {}
     }
   }
 
@@ -38,12 +39,22 @@ class Grading extends Component {
       request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/assessments/${this.props.match.params.assessmentId}`),
       request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/rubric`),
       request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}`),
+      request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}`),
     ])
-      .then(async([res1, res2, res3]) => {
+      .then(async([res1, res2, res3, res4]) => {
         const assessment = await res1.json();
         const rubric = await res2.json();
         const submission = await res3.json();
-
+        const project = await res4.json();
+        
+        if (project.privileges !== null) {
+          updateAbility(ability, project.privileges, this.props.user)
+          console.log(ability)
+          // console.log(ability.can('view',"AdminToolbar"))
+          // console.log(ability.can('read',"Submissions"))
+        } else {
+          console.log("No privileges found.")
+        }
         // let user = submission.grader;
         // if (user !== null && user.privileges !== null) {
         //   updateAbility(ability, user.privileges, user)
@@ -96,7 +107,7 @@ class Grading extends Component {
 
         <div className={styles.container}>
           <RubricPanel match={this.props.match}/>
-          <GradingPanel match={this.props.match}/>
+          <GradingPanel submission={this.state.submission} match={this.props.match}/>
           <RightsidePanel user={this.props.user} submission={this.state.submission} routeParams={this.props.match.params}/>
         </div>
 

@@ -5,6 +5,8 @@ import styles from "../grading.module.css";
 import classnames from "classnames";
 import globalStyles from "../../helpers/global.module.css";
 import {IoAdd} from "react-icons/io5";
+import {Can} from "../../permissions/ProjectAbility";
+import { subject } from '@casl/ability';
 
 
 class Issues extends Component {
@@ -36,12 +38,13 @@ class Issues extends Component {
         <div className={classnames(styles.gradingCardTitle, styles.gradingCardTitleWithButton)}>
           <h4>Issues</h4>
           <div className={styles.gradeEditorCardFooter}>
-            <div className={classnames(globalStyles.iconButton, styles.gradingCardTitleButton)}
-              // onClick={this.props.toggleCreatingState}>
-              onClick={this.props.toggleShow}>
-              <IoAdd size={26}/>
-            </div>
-
+            <Can I="edit" this={subject('Submission', (this.props.submission.grader === null)? {id: -1}:this.props.submission.grader)}>
+              <div className={classnames(globalStyles.iconButton, styles.gradingCardTitleButton)}
+                // onClick={this.props.toggleCreatingState}>
+                onClick={this.props.toggleShow}>
+                <IoAdd size={26}/>
+              </div>
+            </Can>
             <DropdownButton
               as={ButtonGroup}
               key={"primary"}
@@ -76,9 +79,10 @@ class Issues extends Component {
             })
             .map((issue) => {
               return (
-                <IssueCard key={issue.id} issue={issue} routeParams={this.props.routeParams} updateIssue={this.props.updateIssue}/>
+                <IssueCard submission={this.props.submission} key={issue.id} issue={issue} routeParams={this.props.routeParams} updateIssue={this.props.updateIssue}/>
               )
-            })}
+            })
+          }
         </div>
 
       </>

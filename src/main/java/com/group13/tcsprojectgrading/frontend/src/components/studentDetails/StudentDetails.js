@@ -16,6 +16,8 @@ import Breadcrumbs from "../helpers/Breadcrumbs";
 import {URL_PREFIX} from "../../services/config";
 import Masonry from 'react-masonry-css'
 import {IoArrowForward, IoTrashOutline} from "react-icons/io5";
+import {ability, Can, updateAbility} from "../permissions/ProjectAbility";
+import { subject } from '@casl/ability';
 
 const masonryBreakpointColumns = {
   default: 2,
@@ -84,6 +86,16 @@ class StudentDetails extends Component {
         const course = await res1.json();
         const project = await res2.json();
         let data = await res3.json();
+
+        if (project.privileges !== null) {
+          updateAbility(ability, project.privileges, this.props.user)
+          console.log(ability)
+          // console.log(ability.can('view',"AdminToolbar"))
+          // console.log(ability.can('read',"Submissions"))
+        } else {
+          console.log("No privileges found.")
+        }
+
         // console.log(data);
         this.setState({
           submissions: data.submissions,
@@ -187,10 +199,12 @@ class StudentDetails extends Component {
                                 {submission.name}
                               </h5>
                               {(this.state.isEditing)?
-                                <div className={classnames(globalStyles.iconButton, styles.dangerButton)}
-                                  onClick={() => this.deleteHandler(submission)}>
-                                  <IoTrashOutline size={26}/>
-                                </div>
+                                <Can I="edit" this={subject('Submission', (submission.grader === null)? {id: -1}:submission.grader)}>
+                                  <div className={classnames(globalStyles.iconButton, styles.dangerButton)}
+                                    onClick={() => this.deleteHandler(submission)}>
+                                    <IoTrashOutline size={26}/>
+                                  </div>
+                                </Can>
                                 :
                                 <div className={classnames(globalStyles.iconButton)}
                                   onClick={() => store.dispatch(push(this.props.match.url.split("/").slice(0, this.props.match.url.split("/").length - 2).join("/") + "/submissions/"+ submission.id))}>
@@ -220,6 +234,7 @@ class StudentDetails extends Component {
 
 const mapStateToProps = state => {
   return {
+    user: state.users.self
   };
 };
 

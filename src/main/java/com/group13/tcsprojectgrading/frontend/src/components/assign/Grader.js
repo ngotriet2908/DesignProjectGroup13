@@ -7,6 +7,7 @@ import {isTeacher} from "../permissions/functions";
 import globalStyles from "../helpers/global.module.css";
 import store from "../../redux/store";
 import {push} from "connected-react-router";
+import {Can} from "../permissions/ProjectAbility";
 
 
 class Grader extends Component {
@@ -34,10 +35,12 @@ class Grader extends Component {
             </h4>
             <div className={styles.graderHeaderButtonContainer}>
               {this.props.grader == null &&
-                <Button variant={"yellow"}
-                  onClick={this.props.toggleShowBulk}>
-                  Bulk assign
-                </Button>
+                <Can I="edit" a="ManageGraders">
+                  <Button variant={"yellow"}
+                      onClick={this.props.toggleShowBulk}>
+                      Bulk assign
+                  </Button>
+                </Can>
               }
 
               <div className={classnames(globalStyles.iconButton, styles.collapseButton)} onClick={this.toggleCollapsed}>

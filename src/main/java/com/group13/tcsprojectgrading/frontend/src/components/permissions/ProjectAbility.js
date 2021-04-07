@@ -10,10 +10,10 @@ function updateAbility(ability, privileges, user) {
     let privileges1 = privilege.split("_")
 
     // e.g. "MANAGE"
-    let action = privileges1[0]
+    let action = privileges1[1]
 
     // e.g. "GRADERS"
-    let object = privileges1[1]
+    let object = privileges1[0]
 
     // console.log(privileges1);
 

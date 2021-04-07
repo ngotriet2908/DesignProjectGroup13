@@ -5,6 +5,8 @@ import {Button, Form, Card, Badge} from "react-bootstrap";
 import classnames from "classnames";
 import globalStyles from "../../helpers/global.module.css";
 import {IoCheckmarkDone, IoChevronDownOutline} from "react-icons/io5";
+import {Can} from "../../permissions/ProjectAbility";
+import { subject } from '@casl/ability';
 
 
 class IssueCard extends Component {
@@ -72,10 +74,12 @@ class IssueCard extends Component {
               <IoChevronDownOutline size={26}/>
             </div>
             {!(this.props.issue.status === "Resolved") &&
-            <div className={classnames(globalStyles.iconButtonSmall, styles.gradingCardTitleButton)}
-              onClick={this.startResolve}>
-              <IoCheckmarkDone size={26}/>
-            </div>
+            <Can I="edit" this={subject('Submission', (this.props.submission.grader === null)? {id: -1}:this.props.submission.grader)}>
+              <div className={classnames(globalStyles.iconButtonSmall, styles.gradingCardTitleButton)}
+                onClick={this.startResolve}>
+                <IoCheckmarkDone size={26}/>
+              </div>
+            </Can>
             }
           </div>
         </div>

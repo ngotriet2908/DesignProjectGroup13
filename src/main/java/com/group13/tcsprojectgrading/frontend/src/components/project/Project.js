@@ -72,6 +72,8 @@ class Project extends Component {
         if (project.privileges !== null) {
           updateAbility(ability, project.privileges, this.props.user)
           console.log(ability)
+          // console.log(ability.can('view',"AdminToolbar"))
+          // console.log(ability.can('read',"Submissions"))
         } else {
           console.log("No privileges found.")
         }
@@ -192,10 +194,13 @@ class Project extends Component {
         <div className={classnames(globalStyles.titleContainer, this.state.syncing && globalStyles.titleContainerIconActive)}>
           <h1>{this.state.project.name}</h1>
 
+
           <div className={styles.titleContainerButtons}>
-            <Button className={globalStyles.titleActiveButton} variant="lightGreen" onClick={this.syncHandler}>
-              <IoSyncOutline size={20}/> Sync
-            </Button>
+            <Can I="sync" a="Submissions">
+              <Button className={globalStyles.titleActiveButton} variant="lightGreen" onClick={this.syncHandler}>
+                <IoSyncOutline size={20}/> Sync
+              </Button>
+            </Can>
 
             {/*<OverlayTrigger*/}
             {/*  placement={'left'}*/}
@@ -213,94 +218,97 @@ class Project extends Component {
           </div>
         </div>
 
-        <div className={styles.container}>
-          <div>
-            {/*<Can I="view" a="AdminToolbar">*/}
-            <div className={[globalStyles.sectionContainer, styles.administrationSectionContainer].join(" ")}>
-              <div className={[globalStyles.sectionTitle, globalStyles.sectionTitleWithButton].join(" ")}>
-                <h3 className={globalStyles.sectionTitleH}>
-                  Administration
-                </h3>
-              </div>
+          <div className={styles.container}>
+            <div>
+              <Can I="view" a="AdminToolbar">
+                <div className={[globalStyles.sectionContainer, styles.administrationSectionContainer].join(" ")}>
+                  <div className={[globalStyles.sectionTitle, globalStyles.sectionTitleWithButton].join(" ")}>
+                    <h3 className={globalStyles.sectionTitleH}>
+                      Administration
+                    </h3>
+                  </div>
 
-              <div className={globalStyles.sectionFlexContainer}>
-                <Card className={styles.card}>
-                  <Card.Body className={[styles.cardBody, styles.administrationSectionContainerBody].join(" ")}>
-                    {/*<Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/groups"))}>*/}
-                    {/*Groups*/}
-                    {/*</Button>*/}
+                  <div className={globalStyles.sectionFlexContainer}>
+                    <Card className={styles.card}>
+                      <Card.Body className={[styles.cardBody, styles.administrationSectionContainerBody].join(" ")}>
+                        {/*<Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/groups"))}>*/}
+                        {/*Groups*/}
+                        {/*</Button>*/}
 
-                    <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/students"))}>
-                        Students
-                    </Button>
+                        <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/students"))}>
+                            Students
+                        </Button>
 
-                    <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/submissions"))}>
-                      Submissions
-                    </Button>
+                        <Can I="read" a="Submissions">
+                          <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/submissions"))}>
+                            Submissions
+                          </Button>
+                        </Can>
 
-                    {/*<Can I="open" a={"ManageGraders"}>*/}
-                    <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/graders"))}>
-                      Graders
-                    </Button>
-                    {/*</Can>*/}
+                        <Can I="open" a="ManageGraders">
+                          <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/graders"))}>
+                            Graders
+                          </Button>
+                        </Can>
 
-                    <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/feedback"))}>
-                        Feedback
-                    </Button>
+                        <Can I="open" a="Feedback">
+                          <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/feedback"))}>
+                              Feedback
+                          </Button>
+                        </Can>
 
-                    {/*<Can I="read" a="Rubric">*/}
-                    <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/rubric"))}>
-                          Rubric
-                    </Button>
-                    {/*</Can>*/}
+                        <Can I="read" a="Rubric">
+                          <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/rubric"))}>
+                                Rubric
+                          </Button>
+                        </Can>
 
-                    <Button variant="lightGreen" onClick={this.handleExcel}>
-                      Export Results
-                    </Button>
+                        <Button variant="lightGreen" onClick={this.handleExcel}>
+                          Export Results
+                        </Button>
 
-                  </Card.Body>
-                </Card>
-              </div>
+                      </Card.Body>
+                    </Card>
+                  </div>
+                </div>
+              </Can>
+
+              {/*<Can I="read" a="Statistic">*/}
+              {/*  <div className={[globalStyles.sectionContainer, styles.statisticSectionContainer].join(" ")}>*/}
+              {/*    <div className={[globalStyles.sectionTitle, globalStyles.sectionTitleWithButton].join(" ")}>*/}
+              {/*      <h3 className={globalStyles.sectionTitleH}>*/}
+              {/*        Statistics*/}
+              {/*      </h3>*/}
+              {/*    </div>*/}
+              {/*    <Card>*/}
+              {/*      <Card.Body>*/}
+              {/*        Here comes the Stats*/}
+              {/*        /!*<CardColumns className={styles.stats}>*!/*/}
+              {/*        /!*  {testStats.map(stat => {*!/*/}
+              {/*        /!*    return (*!/*/}
+              {/*        /!*      <Statistic title={stat.title}*!/*/}
+              {/*        /!*        type={stat.type}*!/*/}
+              {/*        /!*        data={stat.data}*!/*/}
+              {/*        /!*        unit={stat.unit}/>*!/*/}
+              {/*        /!*    );*!/*/}
+              {/*        /!*  }).concat(this.state.stats.map((stat, index) => {*!/*/}
+              {/*        /!*    return (*!/*/}
+              {/*        /!*      <Statistic title={stat.title}*!/*/}
+              {/*        /!*        key={index}*!/*/}
+              {/*        /!*        type={stat.type}*!/*/}
+              {/*        /!*        data={stat.data}*!/*/}
+              {/*        /!*        unit={stat.unit}/>*!/*/}
+              {/*        /!*    );*!/*/}
+              {/*        /!*  }))}*!/*/}
+              {/*        /!*</CardColumns>*!/*/}
+              {/*      </Card.Body>*/}
+              {/*    </Card>*/}
+              {/*  </div>*/}
+              {/*</Can>*/}
             </div>
-            {/*</Can>*/}
 
-            {/*<Can I="read" a="Statistic">*/}
-            {/*  <div className={[globalStyles.sectionContainer, styles.statisticSectionContainer].join(" ")}>*/}
-            {/*    <div className={[globalStyles.sectionTitle, globalStyles.sectionTitleWithButton].join(" ")}>*/}
-            {/*      <h3 className={globalStyles.sectionTitleH}>*/}
-            {/*        Statistics*/}
-            {/*      </h3>*/}
-            {/*    </div>*/}
-            {/*    <Card>*/}
-            {/*      <Card.Body>*/}
-            {/*        Here comes the Stats*/}
-            {/*        /!*<CardColumns className={styles.stats}>*!/*/}
-            {/*        /!*  {testStats.map(stat => {*!/*/}
-            {/*        /!*    return (*!/*/}
-            {/*        /!*      <Statistic title={stat.title}*!/*/}
-            {/*        /!*        type={stat.type}*!/*/}
-            {/*        /!*        data={stat.data}*!/*/}
-            {/*        /!*        unit={stat.unit}/>*!/*/}
-            {/*        /!*    );*!/*/}
-            {/*        /!*  }).concat(this.state.stats.map((stat, index) => {*!/*/}
-            {/*        /!*    return (*!/*/}
-            {/*        /!*      <Statistic title={stat.title}*!/*/}
-            {/*        /!*        key={index}*!/*/}
-            {/*        /!*        type={stat.type}*!/*/}
-            {/*        /!*        data={stat.data}*!/*/}
-            {/*        /!*        unit={stat.unit}/>*!/*/}
-            {/*        /!*    );*!/*/}
-            {/*        /!*  }))}*!/*/}
-            {/*        /!*</CardColumns>*!/*/}
-            {/*      </Card.Body>*/}
-            {/*    </Card>*/}
-            {/*  </div>*/}
-            {/*</Can>*/}
+            <IssuesProject routeMatch={this.props.match} user={this.props.user} issues={this.state.issues}/>
           </div>
-
-          <IssuesProject routeMatch={this.props.match} user={this.props.user} issues={this.state.issues}/>
-        </div>
-
       </div>
     )
   }
