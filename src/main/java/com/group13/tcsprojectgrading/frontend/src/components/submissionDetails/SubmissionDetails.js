@@ -44,12 +44,11 @@ class SubmissionDetails extends Component {
       isAssessmentEditing: false,
       isAddingParticipant: false,
 
-      participantModalShow: false,
+      // participantModalShow: false,
 
       showLabelModal: false,
 
-      // allParticipants: [],
-      students: []
+      showAddStudentModal: false,
     }
   }
 
@@ -65,8 +64,6 @@ class SubmissionDetails extends Component {
         const submission = await res1.json();
         const course = await res2.json();
         const project = await res3.json();
-
-        console.log(submission);
 
         this.setState({
           course: course,
@@ -116,73 +113,11 @@ class SubmissionDetails extends Component {
     })
   }
 
-  searchArray(participants, participant) {
-    let i;
-    for(i = 0; i < participants.length; i++) {
-      if (participants[i].id === participant.id) return true
-    }
-    return false
-  }
-
-  filterCurrentParticipant(participants) {
-    return participants.filter((participant) => {
-      return !this.searchArray(this.state.submission.members, participant)
-    })
-  }
-
   updateSubmission = (submission) => {
-    console.log("update submission")
-    console.log(submission)
     this.setState({
       submission: submission,
-      participantModalShow: false
     })
   }
-
-  onFlagModalClose = () => {
-    this.setState({
-      flagModalShow: false
-    })
-  }
-
-  onAddParticipantModalClose = () => {
-    this.setState({
-      participantModalShow: false,
-    })
-  }
-
-  updateSubmissionFlags = (data) => {
-    let submissionCopy = {...this.state.submission}
-    submissionCopy.flags = data
-    this.setState({
-      submission: submissionCopy
-    })
-  }
-  updateProjectFlags = (data) => {
-    let projectCopy = {...this.state.project}
-    projectCopy.flags = data
-    this.setState({
-      project: projectCopy
-    })
-  }
-
-  handleAddParticipant = () => {
-    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/participants/students`)
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        console.log(data);
-        this.setState({
-          students: data,
-          participantModalShow: true
-        })
-      })
-      .catch(error => {
-        console.error(error.message);
-      });
-  }
-
 
   setAssessment = (data) => {
     let stateCopy = {...this.state.submission}
@@ -217,6 +152,14 @@ class SubmissionDetails extends Component {
       }
     }))
   }
+
+  // Add student modal
+  toggleShowAddStudentModal = () => {
+    this.setState(prevState => ({
+      showAddStudentModal: !prevState.showAddStudentModal
+    }))
+  }
+
 
   render() {
     if (!this.state.isLoaded) {
@@ -351,15 +294,12 @@ class SubmissionDetails extends Component {
             {(this.state.submission.members != null) &&
             <div className={styles.section}>
               <div className={classnames(styles.sectionTitle, styles.sectionTitleWithButton)}>
-                <h3 className={styles.sectionTitleH}>Participants</h3>
+                <h3 className={styles.sectionTitleH}>Students</h3>
                 {(!this.state.isAddingParticipant)?
-                  // <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.toggleAddingParticipant}>
-                  //   <IoPencilOutline size={26}/>
-                  // </div>
                   <Button variant="lightGreen" onClick={this.toggleAddingParticipant}><IoPencilOutline size={20}/> Edit</Button>
                   :
                   <div className={styles.buttonGroup}>
-                    <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.handleAddParticipant}>
+                    <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.toggleShowAddStudentModal}>
                       <IoAdd size={26}/>
                     </div>
                     <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.toggleAddingParticipant}>
@@ -387,7 +327,6 @@ class SubmissionDetails extends Component {
               </div>
             </div>
             }
-
           </Masonry>
         </div>
 
@@ -400,13 +339,22 @@ class SubmissionDetails extends Component {
         />
 
         <AddParticipantModal
-          show={this.state.participantModalShow}
-          onClose={this.onAddParticipantModalClose}
-          participants={this.filterCurrentParticipant(this.state.students)}
-          assessments={this.state.submission.assessments}
-          params={this.props.match.params}
+          show={this.state.showAddStudentModal}
+          toggleShow={this.toggleShowAddStudentModal}
+          routeParams={this.props.match.params}
+          currentStudents={this.state.submission.members}
+          currentAssessments={this.state.submission.assessments}
           updateSubmission={this.updateSubmission}
         />
+
+        {/*<AddParticipantModal*/}
+        {/*  show={this.state.participantModalShow}*/}
+        {/*  onClose={this.onAddParticipantModalClose}*/}
+        {/*  participants={this.filterCurrentParticipant(this.state.students)}*/}
+        {/*  assessments={this.state.submission.assessments}*/}
+        {/*  params={this.props.match.params}*/}
+        {/*  updateSubmission={this.updateSubmission}*/}
+        {/*/>*/}
       </div>
     );
   }

@@ -137,27 +137,6 @@ class SubmissionDetailsAssessmentsEditingContainer extends Component {
           </div>
         </div>
 
-        {/*<div className={styles.sectionContent}>*/}
-        {/*  <Card>*/}
-        {/*    <Card.Body>*/}
-        {/*      <ListGroup>*/}
-        {/*        {this.props.submission.assessments.map((assessment) => {*/}
-        {/*          return (*/}
-        {/*            <ListGroupItem id={assessment.id} key={assessment.id}>*/}
-        {/*              <SubmissionDetailsAssessmentEditingItemContainer*/}
-        {/*                assessments={this.props.submission.assessments}*/}
-        {/*                handleMove={this.handleMove}*/}
-        {/*                handleClone={() => this.handleClone(assessment)}*/}
-        {/*                handleDelete={() => this.handleDelete(assessment)}*/}
-        {/*                params={this.props.params}*/}
-        {/*                submission={this.props.submission}*/}
-        {/*                assessment={assessment}/>*/}
-        {/*            </ListGroupItem>)*/}
-        {/*        })}*/}
-        {/*      </ListGroup>*/}
-        {/*    </Card.Body>*/}
-        {/*  </Card>*/}
-        {/*</div>*/}
         <div className={styles.sectionContent}>
           {this.props.submission.assessments.map((assessment) => {
             return (

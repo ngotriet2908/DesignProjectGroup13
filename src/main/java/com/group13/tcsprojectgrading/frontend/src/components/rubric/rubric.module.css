@@ -22,16 +22,16 @@
 
 .outlineContainer {
     height: 100%;
-    overflow: scroll;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    /*overflow: scroll;*/
+    /*white-space: nowrap;*/
+    /*text-overflow: ellipsis;*/
     position: relative;
 }
 
 .outlineContainer ul {
     padding: 0;
     list-style-type: none;
-    flex: 1;
+    /*flex: 1;*/
 }
 
 .outlineHeaderContainer {
@@ -42,10 +42,6 @@
     border-left: 4px solid transparent;
 
     /*box-sizing: border-box;*/
-}
-
-.outlineHeaderContainer > div {
-    flex: 1;
 }
 
 .outlineHeaderContainerSelected {
@@ -97,6 +93,15 @@
 .outlineElementContainer {
     height: 65px;
     border-left: 4px solid transparent;
+    position: relative;
+
+    border-bottom: 1px solid #dfdfdf;
+    padding: 0.5rem 0.5rem 0.5rem 0;
+    /*padding-right: 1rem;*/
+}
+
+.outlineElementContainerEditing {
+    padding-right: 4rem;
 }
 
 .outlineElementContainerSelected {
@@ -111,15 +116,12 @@
     align-items: center;
 
     cursor: pointer;
-    border-top: 1px solid #dfdfdf;
+    /*border-top: 1px solid #dfdfdf;*/
     padding: 0.5rem 0.5rem 0.5rem 0;
 
-    position: relative;
+    overflow: scroll;
+    white-space: nowrap;
 }
-
-/*.outlineContainer > div > ul > div:last-child .outlineElement {*/
-/*    !*border-bottom: 1px solid #dfdfdf;*!*/
-/*}*/
 
 .outlineElementLeft {
     display: flex;
@@ -127,21 +129,12 @@
     align-items: flex-end;
 }
 
-.outlineElementLeftBlock {
-    /*font-size: 1.1rem;*/
-}
-
 .outlineElementRight {
-    /*visibility: hidden;*/
+    position: absolute;
+    right: 0;
     margin-left: 0.5rem;
-}
-
-.outlineElement:hover .outlineElementRight {
-    /*visibility: visible;*/
-}
-
-.outlineElementText {
-
+    margin-right: 0.5rem;
+    background-color: white;
 }
 
 .outlineElementIcon {
@@ -151,14 +144,8 @@
     transition: transform .1s ease-in-out;
 }
 
-/*.outlineElementIcon svg {*/
-/*    transform: rotate(0deg);*/
-/*    transition: transform .1s ease-in-out;*/
-/*}*/
-
 .outlineElementIconRotated {
     transform: rotate(90deg);
-    /*transition: transform .1s ease-in-out;*/
 }
 
 

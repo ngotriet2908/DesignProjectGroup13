@@ -131,8 +131,7 @@ class Rubric extends Component {
         console.error(error.message);
       });
   }
-  
-  
+
   render () {
     if (!this.state.isLoaded) {
       return(

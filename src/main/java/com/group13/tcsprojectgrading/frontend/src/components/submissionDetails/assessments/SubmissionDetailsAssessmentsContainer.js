@@ -18,9 +18,6 @@ class SubmissionDetailsAssessmentsContainer extends Component {
       <div className={styles.section}>
         <div className={classnames(styles.sectionTitle, styles.sectionTitleWithButton)}>
           <h3 className={styles.sectionTitleH}>Grading sheets</h3>
-          {/*<div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.props.toggleEditing}>*/}
-          {/*  <IoPencilOutline size={26}/>*/}
-          {/*</div>*/}
           <Button variant="lightGreen" onClick={this.props.toggleEditing}><IoPencilOutline size={20}/> Edit</Button>
         </div>
 

@@ -204,3 +204,26 @@
 .labelModalCreateColorDarkishGray {
     background-color: darkishGray;
 }
+
+
+/* add student modal */
+.gradeEditorCardItem {
+    margin-bottom: 1rem;
+}
+
+.gradeEditorCardItem input, .gradeEditorCardItem textarea, .gradeEditorCardItem select {
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+
+    cursor: text;
+    padding: 6px 12px;
+
+    width: 100%;
+
+    margin-top: 0.3rem;
+}
+
+.gradeEditorCardItem label {
+    margin: 0;
+}

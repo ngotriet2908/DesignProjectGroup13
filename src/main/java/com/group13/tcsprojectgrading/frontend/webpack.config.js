@@ -8,8 +8,8 @@ module.exports = {
     path: path.resolve(__dirname, '../../../../../resources/static/built'),
     filename: 'bundle.js' // the same one we import in home.html
   },
-  // mode: 'development',
-  mode: 'production',
+  mode: 'development',
+  // mode: 'production',
   module: {
     rules: [
       {
