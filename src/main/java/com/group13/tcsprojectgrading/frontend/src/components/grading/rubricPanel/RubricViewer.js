@@ -48,12 +48,19 @@ class RubricViewer extends Component {
           }
           {isCriterion(this.props.element.content.type) ?
             <div className={styles.buttonGroup}>
-              <div className={classnames(globalStyles.iconButton)} onClick={() => this.props.handlePrevCriterion(this.props.element.content.id)}>
-                <IoCaretBack size={26}/>
-              </div>
-              <div className={classnames(globalStyles.iconButton)} onClick={() => this.props.handleNextCriterion(this.props.element.content.id)}>
-                <IoCaretForward size={26}/>
-              </div>
+              {(this.props.element.content.id !== this.props.firstCritId) &&
+                <div className={classnames(globalStyles.iconButton)}
+                     onClick={() => this.props.handlePrevCriterion(this.props.element.content.id)}>
+                  <IoCaretBack size={26}/>
+                </div>
+              }
+
+              {(this.props.element.content.id !== this.props.lastCritId) &&
+                <div className={classnames(globalStyles.iconButton)}
+                     onClick={() => this.props.handleNextCriterion(this.props.element.content.id)}>
+                  <IoCaretForward size={26}/>
+                </div>
+              }
             </div>
             :null
           }
