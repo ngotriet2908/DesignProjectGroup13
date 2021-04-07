@@ -36,8 +36,18 @@ class Submissions extends Component {
   }
   
   filterGroupSearchChange = (group) => {
-    let criteria = this.normalizeLowercase(group.name).includes(this.normalizeLowercase(this.state.searchString))
-    return !!criteria;
+    let searchString = this.state.searchString
+    let criteria = this.normalizeLowercase(group.name).includes(this.normalizeLowercase(searchString))
+    let memberCriteria = group.members.reduce(
+      (cur, member) => {
+        console.log(member)
+        return (this.normalizeLowercase(member.name).includes(this.normalizeLowercase(searchString)) ||
+          this.normalizeLowercase(member.sNumber).includes(this.normalizeLowercase(searchString)) ||
+          cur)
+      },
+      false
+    )
+    return (criteria || memberCriteria);
   }
 
   filterGroupDropDown = (group) => {
@@ -158,7 +168,7 @@ class Submissions extends Component {
           <div className={styles.toolbar}>
             <FormControl className={classnames(globalStyles.searchBar, styles.groupsSearchBar)}
               type="text"
-              placeholder="Search by a group name"
+              placeholder="Search by a group name, member name, member sNumber"
               onChange={this.handleSearchChange}/>
 
             <DropdownButton
