@@ -2,6 +2,7 @@ import React, {Component} from "react";
 import {Breadcrumb, Button, Spinner, InputGroup, Form, Card, Modal, ListGroup, Badge} from "react-bootstrap";
 import {request} from "../../services/request";
 import {toast} from 'react-toastify'
+import styles from './feedback.module.css';
 
 class FeedbackSendingForm extends Component {
   constructor(props) {
@@ -63,16 +64,16 @@ class FeedbackSendingForm extends Component {
           progress: undefined,
         });
       }).catch(error => {
-      toast.error(error.message, {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-    })
+        toast.error(error.message, {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      })
   }
 
   handleGmailModalClose = () => {
@@ -98,20 +99,23 @@ class FeedbackSendingForm extends Component {
               <option value="null">None</option>
               {this.props.templates.map(template => {
                 return (
-                  <option value={template.id}>{template.name}</option>
+                  <option key={template.id} value={template.id}>{template.name}</option>
                 )
               })}
             </Form.Control>
           </Form.Group>
 
-          <Button variant="primary" onClick={() => this.handleSendFeedback(true)}>
-            Send to All
-            <Badge style={{marginLeft: "0.5rem"}} variant="light">{this.props.pAll.length}</Badge>
-          </Button>
-          <Button variant="info" onClick={() => this.handleSendFeedback(false)}>
+          <div className={styles.sendButtonGroup}>
+            <Button variant="yellow" onClick={() => this.handleSendFeedback(false)}>
             Send to not sent
-            <Badge style={{marginLeft: "0.5rem"}} variant="light">{this.props.pNotSent.length}</Badge>
-          </Button>
+              <Badge style={{marginLeft: "0.5rem"}} variant="light">{this.props.pNotSent.length}</Badge>
+            </Button>
+
+            <Button variant="lightGreen" onClick={() => this.handleSendFeedback(true)}>
+            Send to all
+              <Badge style={{marginLeft: "0.5rem"}} variant="light">{this.props.pAll.length}</Badge>
+            </Button>
+          </div>
         </Form>
 
         <Modal show={this.state.gmailModalShow} onHide={this.handleGmailModalClose}>

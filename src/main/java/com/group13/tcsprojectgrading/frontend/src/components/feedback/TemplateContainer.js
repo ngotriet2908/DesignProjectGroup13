@@ -2,7 +2,15 @@ import React, {Component} from "react";
 import {Breadcrumb, Button, Spinner, InputGroup, Form, Card, Modal, ListGroup} from "react-bootstrap";
 import globalStyles from "../helpers/global.module.css";
 import styles from "../submissionDetails/submissionDetails.module.css";
-import {IoCopyOutline, IoTrashOutline, IoSwapHorizontal, IoPencilOutline, IoEye, IoEyeOff} from "react-icons/io5";
+import {
+  IoCopyOutline,
+  IoTrashOutline,
+  IoSwapHorizontal,
+  IoPencilOutline,
+  IoEye,
+  IoEyeOff,
+  IoChevronDown, IoChevronUp
+} from "react-icons/io5";
 import classnames from "classnames";
 class TemplateContainer extends Component {
   constructor(props) {
@@ -29,9 +37,9 @@ class TemplateContainer extends Component {
           <div className={styles.buttonGroup}>
             <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.toggleExpand}>
               {(this.state.isExpand)?
-                <IoEyeOff size={26}/>
+                <IoChevronUp size={26}/>
                 :
-                <IoEye size={26}/>
+                <IoChevronDown size={26}/>
               }
             </div>
           </div>

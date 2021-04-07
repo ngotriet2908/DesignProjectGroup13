@@ -217,26 +217,16 @@ class Project extends Component {
 
         <div className={styles.container}>
           <Can I="view" a="AdminToolbar">
-            <div className={[globalStyles.sectionContainer, styles.administrationSectionContainer].join(" ")}>
-              <div className={[globalStyles.sectionTitle, globalStyles.sectionTitleWithButton].join(" ")}>
+            <div className={classnames(globalStyles.sectionContainer)}>
+              <div className={classnames(globalStyles.sectionTitle, globalStyles.sectionTitleWithButton)}>
                 <h3 className={globalStyles.sectionTitleH}>
                       Administration
                 </h3>
               </div>
 
-              {/*<div className={globalStyles.sectionFlexContainer}>*/}
-              {/*  <Card className={styles.card}>*/}
-              {/*    <Card.Body className={styles.administrationSectionContainerBody}>*/}
-              {/*      <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/students"))}>*/}
-              {/*          Students*/}
-              {/*      </Button>*/}
               <div className={globalStyles.sectionFlexContainer}>
                 <Card className={styles.card}>
-                  <Card.Body className={[styles.cardBody, styles.administrationSectionContainerBody].join(" ")}>
-                    {/*<Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/groups"))}>*/}
-                    {/*Groups*/}
-                    {/*</Button>*/}
-
+                  <Card.Body className={classnames(styles.cardBody, styles.administrationSectionContainerBody)}>
                     <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/students"))}>
                             Students
                     </Button>

@@ -65,9 +65,9 @@ class RubricUploadModal extends Component {
             </div>
           </div>
 
-          <div className={globalStyles.modalDescriptionContainer}>
-            <div>Upload a rubric.</div>
-          </div>
+          {/*<div className={globalStyles.modalDescriptionContainer}>*/}
+          {/*  <div>Upload a rubric.</div>*/}
+          {/*</div>*/}
 
           <div className={globalStyles.modalBodyContainer}>
             <Form>

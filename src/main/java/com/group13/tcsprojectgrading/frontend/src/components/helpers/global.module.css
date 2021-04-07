@@ -17,7 +17,8 @@
 /* section */
 .sectionContainer {
     width: 100%;
-    display: block;
+    display: flex;
+    flex-direction: column;
 }
 
 .sectionTitle {
@@ -94,6 +95,9 @@
 .sectionFlexContainer {
     display: flex;
     flex-direction: column;
+
+    flex: 1;
+    margin-bottom: 1rem;
 }
 
 .plainLink, .plainLink:hover {

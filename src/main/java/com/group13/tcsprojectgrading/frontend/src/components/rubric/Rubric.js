@@ -62,7 +62,7 @@ class Rubric extends Component {
           } else {
             console.log("No privileges found.")
             this.setState({
-              isLoaded: true
+              isLoaded: true,
             });
           }
         })
@@ -124,8 +124,8 @@ class Rubric extends Component {
       })
       .then((blob) => {
         const file = new Blob([blob], {type: "text/plain;charset=utf-8"});
-        let file_name = "Rubric " + this.state.project.name + ", " + Date().toLocaleString();
-        FileSaver.saveAs(file, file_name + ".txt");
+        let fileName = "Rubric " + this.state.project.name + ", " + Date().toLocaleString();
+        FileSaver.saveAs(file, fileName + ".txt");
       })
       .catch(error => {
         console.error(error.message);
