@@ -74,8 +74,8 @@ class RubricPanel extends Component {
               <RubricOutline rubricCriteria={this.props.rubricCriteria} outlineHidden={this.state.isOutlineHidden} toggleOutlineHidden={this.toggleOutlineHidden}/>
               {/*:*/}
               <RubricViewer rubricCriteria={this.props.rubricCriteria}
-                            firstCritId={this.props.rubricCriteria[0].id}
-                            lastCritId={this.props.rubricCriteria[this.props.rubricCriteria.length - 1].id}
+                            firstCritId={(this.props.rubricCriteria.length === 0)? "null" : this.props.rubricCriteria[0].id}
+                            lastCritId={(this.props.rubricCriteria.length === 0)? "null" : this.props.rubricCriteria[this.props.rubricCriteria.length - 1].id}
                             handlePrevCriterion = {this.handlePrevCriterion}
                             handleNextCriterion = {this.handleNextCriterion}
                             outlineHidden={this.state.isOutlineHidden}
