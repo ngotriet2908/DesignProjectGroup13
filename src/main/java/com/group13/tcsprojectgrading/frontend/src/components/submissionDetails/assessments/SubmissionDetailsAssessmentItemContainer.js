@@ -41,7 +41,7 @@ class SubmissionDetailsAssessmentItemContainer extends Component {
           <p>issues count: {this.props.assessment.issues.length}</p>
         </div>
         <div>
-          Members:
+          <p>Members:</p>
           <ListGroup>
             {this.props.assessment.members.map((member) => {
               return (

@@ -29,9 +29,11 @@ class RubricOutlineElement extends Component {
       <div className={classnames(
         styles.outlineElementContainer,
         (this.props.selectedElement != null &&
-        this.props.data.content.id === this.props.selectedElement) && styles.outlineElementContainerSelected
+        this.props.data.content.id === this.props.selectedElement) && styles.outlineElementContainerSelected,
+        this.props.isEditing && styles.outlineElementContainerEditing
       )} onClick={this.onClick}>
-        <div className={styles.outlineElement} style={{paddingLeft: `${this.props.padding}rem`}}>
+
+        <div className={classnames(styles.outlineElement)} style={{paddingLeft: `${this.props.padding}rem`}}>
           <div className={classnames(styles.outlineElementLeft, isBlock(this.props.data.content.type) && styles.outlineElementLeftBlock)}>
             {isBlock(this.props.data.content.type) ?
               <div className={classnames(styles.outlineElementIcon,
@@ -47,6 +49,7 @@ class RubricOutlineElement extends Component {
               {this.props.data.content.title}
             </div>
           </div>
+
           {this.props.isEditing &&
               <div className={styles.outlineElementRight}>
                 <Dropdown onClick={(event) => {event.stopPropagation();}}>

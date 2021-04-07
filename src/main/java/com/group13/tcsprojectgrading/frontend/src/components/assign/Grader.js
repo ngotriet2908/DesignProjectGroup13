@@ -3,7 +3,6 @@ import styles from "./assign.module.css";
 import {Button, Card, FormControl} from 'react-bootstrap'
 import {IoEllipsisVerticalOutline, IoChevronDownOutline, IoArrowBackOutline, IoArrowForward} from "react-icons/io5";
 import classnames from 'classnames';
-import {isTeacher} from "../permissions/functions";
 import globalStyles from "../helpers/global.module.css";
 import store from "../../redux/store";
 import {push} from "connected-react-router";
@@ -63,7 +62,7 @@ class Grader extends Component {
                 >
                   <div>{submission.name}</div>
                   <div>
-                    <div className={styles.outlineButton}
+                    <div className={classnames(styles.grayButton, globalStyles.iconButton)}
                       onClick={() => this.props.toggleShow(
                         submission,
                         this.props.grader,

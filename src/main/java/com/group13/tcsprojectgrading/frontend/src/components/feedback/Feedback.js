@@ -11,8 +11,11 @@ import globalStyles from "../helpers/global.module.css";
 import TemplatesContainer from "./TemplatesContainer";
 import classnames from "classnames";
 import TemplatesEditContainer from "./TemplatesEditContainer";
-import {IoPencilOutline, IoAdd, IoCloseOutline} from "react-icons/io5";
+import {IoPencilOutline, IoAdd, IoCloseOutline, IoFileTrayOutline} from "react-icons/io5";
 import FeedbackSendingForm from "./FeedbackSendingForm";
+import Breadcrumbs from "../helpers/Breadcrumbs";
+import {push} from "connected-react-router";
+import EmptyCard from "../home/EmptyCard";
 
 class Feedback extends Component {
   constructor(props) {
@@ -36,17 +39,20 @@ class Feedback extends Component {
       request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}`),
       request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/feedback/templates`),
       request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/feedback/participants/notSent`),
-      request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/feedback/participants/all`)
+      request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/feedback/participants/all`),
+      request(BASE + "courses/" + this.props.match.params.courseId),
     ])
-      .then(async([res1, res2, res3, res4]) => {
+      .then(async([res1, res2, res3, res4, res5]) => {
         const project = await res1.json();
         const templates = await res2.json();
         const participantsNotSent = await res3.json();
         const participantsAll = await res4.json();
+        const course = await res5.json();
 
         this.setState({
           templates: templates,
           project: project,
+          course: course,
           isLoaded: true,
           participantsNotSent: participantsNotSent,
           participantsAll: participantsAll
@@ -56,8 +62,6 @@ class Feedback extends Component {
         console.error(error.message);
       });
   }
-
-
 
   handleToggleEditingTemplates = () => {
     this.setState(prev => {
@@ -97,6 +101,16 @@ class Feedback extends Component {
 
     return (
       <div className={globalStyles.container}>
+        <Breadcrumbs>
+          <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumbs.Item>
+          <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id ))}>{this.state.course.name}</Breadcrumbs.Item>
+          <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id + "/projects/"+this.state.project.id))}>{this.state.project.name}</Breadcrumbs.Item>
+          <Breadcrumbs.Item active>Feedback</Breadcrumbs.Item>
+        </Breadcrumbs>
+
+        <div className={classnames(globalStyles.titleContainer, styles.titleContainer, this.state.syncing && styles.titleContainerIconActive)}>
+          <h1>Feedback</h1>
+        </div>
 
         <div className={classnames(styles.container)}>
           <div className={styles.section}>
@@ -119,21 +133,19 @@ class Feedback extends Component {
             </div>
 
             <div className={styles.sectionContent}>
-              <Card>
-                <Card.Body>
-                  {(this.state.isEditingTemplates)?
-                    <TemplatesEditContainer params={this.props.match.params} isCreating={this.state.isCreatingTemplate} updateTemplates={this.updateTemplatesHandler} toggleCreating={this.handleToggleCreatingTemplates} toggleEditing={this.handleToggleEditingTemplates} templates={this.state.templates}/>
-                    :
-                    <TemplatesContainer templates={this.state.templates}/>
-                  }
-                </Card.Body>
-              </Card>
+              {this.state.templates.length === 0 &&
+                <EmptyCard data={"No templates"} icon={IoFileTrayOutline}/>
+              }
+
+
+              {(this.state.isEditingTemplates)?
+                <TemplatesEditContainer params={this.props.match.params} isCreating={this.state.isCreatingTemplate} updateTemplates={this.updateTemplatesHandler} toggleCreating={this.handleToggleCreatingTemplates} toggleEditing={this.handleToggleEditingTemplates} templates={this.state.templates}/>
+                :
+                <TemplatesContainer templates={this.state.templates}/>
+              }
             </div>
-
           </div>
-
         </div>
-
 
         <div className={classnames(styles.container)}>
           <div className={styles.section}>

@@ -96,11 +96,6 @@
     height: 100%;
 }
 
-.cardBody {
-
-}
-
-
 /* issues */
 .issuesContainer {
     flex: 3;
@@ -178,4 +173,77 @@
 
 .buttonGroup > *:not(:last-child) {
     margin-right: 0.5rem;
+}
+
+
+/* issues */
+.card {
+    position:relative;
+    width: 100%;
+    margin-bottom: 1rem;
+
+    /*min-height: 10rem;*/
+}
+
+.cardBodyContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    /*height: 100%;*/
+}
+
+.cardBodyContent {
+    /*display: flex;*/
+    /*flex-direction: row;*/
+    /*align-items: flex-end;*/
+    /*justify-content: space-between;*/
+}
+
+.cardBodyTitle {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+
+.cardBodyTitleButtonGroup {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+
+.cardContentType {
+    /*font-size: 0.8rem;*/
+}
+
+.cardContentTypeCourse {
+    color: secondary;
+}
+
+.cardContentTypeProject {
+    color: quinary;
+}
+
+.cardButtonContainer {
+    color: primary;
+}
+
+.cardBlock {
+    display: block;
+}
+
+
+.issuesCardExpandButton svg {
+    color: #5b5b5b;
+    transition: transform .1s ease-in-out;
+}
+
+.issuesCardExpandButton:hover svg {
+    color: white;
+}
+
+.cardExpanded .issuesCardExpandButton svg {
+    transform: rotate(180deg);
 }

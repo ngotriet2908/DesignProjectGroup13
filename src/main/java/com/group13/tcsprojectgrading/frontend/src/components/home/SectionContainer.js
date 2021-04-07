@@ -29,8 +29,6 @@ class SectionContainer extends Component {
 
         {this.props.data.length > 0 ?
           (this.props.data.map((item, index) => {
-            console.log(item);
-
             return (
               <this.props.Component key={index} data={item}/>
             )

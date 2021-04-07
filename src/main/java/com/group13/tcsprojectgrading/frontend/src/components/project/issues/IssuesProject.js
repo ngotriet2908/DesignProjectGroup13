@@ -1,10 +1,11 @@
 import React, {Component} from "react";
 import styles from "../../project/project.module.css";
 import globalStyles from "../../helpers/global.module.css";
-import IssueCard from "../../grading/rightsidePanel/IssueCard";
 import classnames from "classnames";
 import IssueProjectCard from "./IssueProjectCard";
 import {Card, Button, DropdownButton, ButtonGroup, Dropdown} from 'react-bootstrap'
+import EmptyCard from "../../home/EmptyCard";
+import {IoCheckboxOutline} from "react-icons/io5";
 
 class IssuesProject extends Component {
   constructor(props) {
@@ -101,40 +102,33 @@ class IssuesProject extends Component {
           </h3>
         </div>
         <div className={globalStyles.sectionFlexContainer}>
-          <Card className={styles.card}>
-            <Card.Body>
-              <div>
+          <div>
 
-                {this.props.issues.filter((issue) => {
-                  return this.filterIssueStateDropDown(issue) &&
+            {this.props.issues.filter((issue) => {
+              return this.filterIssueStateDropDown(issue) &&
                     this.filterIssueOriginDropDown(issue)
 
-                }).length === 0 &&
-                <div className={classnames(globalStyles.modalBodyContainerRow, globalStyles.modalBodyContainerRowEmpty)}>
-                  No issues
-                </div>
+            }).length === 0 &&
+              <EmptyCard data={"No issues"} icon={IoCheckboxOutline} />
+            }
 
-                }
-
-                {this.props.issues
-                  .filter((issue) => {
-                    return this.filterIssueStateDropDown(issue) &&
+            {this.props.issues
+              .filter((issue) => {
+                return this.filterIssueStateDropDown(issue) &&
                       this.filterIssueOriginDropDown(issue)
 
-                  })
-                  .map((issue) => {
-                    return (
-                      <IssueProjectCard
-                        key={issue.id}
-                        issue={issue}
-                        user={this.props.user}
-                        routeMatch={this.props.routeMatch}
-                        updateIssue={this.props.updateIssue}/>
-                    )
-                  })}
-              </div>
-            </Card.Body>
-          </Card>
+              })
+              .map((issue) => {
+                return (
+                  <IssueProjectCard
+                    key={issue.id}
+                    issue={issue}
+                    user={this.props.user}
+                    routeMatch={this.props.routeMatch}
+                    updateIssue={this.props.updateIssue}/>
+                )
+              })}
+          </div>
         </div>
 
       </div>

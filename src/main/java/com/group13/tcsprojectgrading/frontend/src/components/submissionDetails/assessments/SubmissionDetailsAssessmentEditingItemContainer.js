@@ -69,7 +69,7 @@ class SubmissionDetailsAssessmentEditingItemContainer extends Component {
           <p>issues count: {this.props.assessment.issues.length}</p>
         </div>
         <div>
-          Members:
+          <p>Members:</p>
           <ListGroup>
             {this.props.assessment.members.map((participant) => {
               return (
@@ -80,9 +80,9 @@ class SubmissionDetailsAssessmentEditingItemContainer extends Component {
                       <div className={styles.buttonGroup}>
                         {
                           (participant.isCurrentAssessment)? null :
-                          <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={() => this.props.handleActivateCurrent(this.props.assessment, participant.id)}>
-                            <IoHourglassOutline size={26}/>
-                          </div>
+                            <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={() => this.props.handleActivateCurrent(this.props.assessment, participant.id)}>
+                              <IoHourglassOutline size={26}/>
+                            </div>
                         }
 
                         {
