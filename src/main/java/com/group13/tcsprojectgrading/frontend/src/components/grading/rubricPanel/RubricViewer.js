@@ -9,7 +9,7 @@ import {isBlock, isCriterion} from "../../rubric/helpers";
 import RubricViewerElementGrade from "../../rubric/RubricViewerElementGrade";
 import classnames from 'classnames';
 import globalStyles from "../../helpers/global.module.css";
-import {IoArrowBackOutline} from "react-icons/io5";
+import {IoArrowBackOutline, IoCaretBack, IoCaretForward} from "react-icons/io5";
 
 
 class RubricViewer extends Component {
@@ -20,6 +20,11 @@ class RubricViewer extends Component {
   onClickBack = () => {
     this.props.toggleOutlineHidden();
   }
+  //
+  // componentDidMount() {
+  //   // console.log("mounted: " + this.props.selectedElement)
+  //   console.log(this.props.element.content.id)
+  // }
 
   render () {
     if (!this.props.element.hasOwnProperty("content")) {
@@ -40,6 +45,17 @@ class RubricViewer extends Component {
             <h3>Criterion</h3>
             :
             <h3>Section</h3>
+          }
+          {isCriterion(this.props.element.content.type) ?
+            <div className={styles.buttonGroup}>
+              <div className={classnames(globalStyles.iconButton)} onClick={() => this.props.handlePrevCriterion(this.props.element.content.id)}>
+                <IoCaretBack size={26}/>
+              </div>
+              <div className={classnames(globalStyles.iconButton)} onClick={() => this.props.handleNextCriterion(this.props.element.content.id)}>
+                <IoCaretForward size={26}/>
+              </div>
+            </div>
+            :null
           }
         </div>
 
@@ -70,7 +86,7 @@ class RubricViewer extends Component {
 const mapStateToProps = state => {
   return {
     // rubric: state.rubric.rubric,
-    // selectedElement: state.rubric.selectedElement,
+    selectedElement: state.rubric.selectedElement,
     element: findById(state.rubric.rubric, state.rubric.selectedElement)
   };
 };

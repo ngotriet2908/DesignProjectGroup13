@@ -580,3 +580,13 @@
 .flagModalFlagViewButton {
     margin-left: 0.5rem;
 }
+
+.buttonGroup {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.buttonGroup > *:not(:last-child) {
+    margin-right: 0.5rem;
+}
