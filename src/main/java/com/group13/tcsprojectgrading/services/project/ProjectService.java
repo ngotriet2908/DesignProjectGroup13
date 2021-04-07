@@ -514,7 +514,7 @@ public class ProjectService {
             );
         } else {
             ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rubric).getBytes(StandardCharsets.UTF_8);
+            return objectMapper.writeValueAsString(rubric).getBytes(StandardCharsets.UTF_8);
         }
     }
 

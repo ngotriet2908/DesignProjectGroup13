@@ -325,6 +325,9 @@ public class AssessmentService {
             }
         }
 
+        assessment.setGradedCount(assessment.getGradedCount() + 1);
+        assessment = assessmentRepository.save(assessment);
+
         grade.setGradedAt(Date.from(Instant.now()));
         grade.setAssessment(assessment);
         grade.setGrader(user);
