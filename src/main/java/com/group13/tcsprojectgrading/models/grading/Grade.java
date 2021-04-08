@@ -1,78 +1,120 @@
 package com.group13.tcsprojectgrading.models.grading;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.group13.tcsprojectgrading.models.user.User;
+
+import javax.persistence.*;
+import java.util.Date;
+
+@Entity
 public class Grade {
-    private int grade;
-    private String comment;
-    private String userId;
-//    private boolean isActive;
-    private long created;
+    @Id
+    @GeneratedValue(strategy=GenerationType.SEQUENCE)
+    private Long id;
 
-//    public Grade(int grade, String comment, String userId, boolean isActive, long created) {
-//        this.grade = grade;
-//        this.comment = comment;
-//        this.userId = userId;
-//        this.isActive = isActive;
-//        this.created = created;
-//    }
+    private float grade;
+    private String description;
+    private boolean isActive;
+    private String criterionId;
 
-//    public Grade(int grade, String userId, boolean isActive, long created) {
-//        this.grade = grade;
-//        this.userId = userId;
-//        this.isActive = isActive;
-//        this.created = created;
-//    }
+    @JsonBackReference(value="assessment-grades")
+    @ManyToOne
+    private Assessment assessment;
+
+    @ManyToOne
+    @JsonSerialize(using= User.UserShortSerialiser.class)
+    private User grader;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date gradedAt;
+
+    public Grade(Long id, Assessment assessment, String criterionId, User grader, Date gradedAt,
+                 float grade, String description, boolean isActive) {
+        this.id = id;
+        this.assessment = assessment;
+        this.criterionId = criterionId;
+        this.grader = grader;
+        this.gradedAt = gradedAt;
+        this.grade = grade;
+        this.description = description;
+        this.isActive = isActive;
+    }
+
+    public Grade(float grade, String description, boolean isActive, String criterionId, Assessment assessment, User grader, Date gradedAt) {
+        this.grade = grade;
+        this.description = description;
+        this.isActive = isActive;
+        this.criterionId = criterionId;
+        this.assessment = assessment;
+        this.grader = grader;
+        this.gradedAt = gradedAt;
+    }
 
     public Grade() {
     }
 
-//    public boolean getIsActive() {
-//        return isActive;
-//    }
-//
-//    public void setIsActive(boolean isActive) {
-//        this.isActive = isActive;
-//    }
-
-    public long getCreated() {
-        return created;
+    public Long getId() {
+        return id;
     }
 
-    public void setCreated(long created) {
-        this.created = created;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public int getGrade() {
+    public Assessment getAssessment() {
+        return assessment;
+    }
+
+    public void setAssessment(Assessment assessment) {
+        this.assessment = assessment;
+    }
+
+    public String getCriterionId() {
+        return criterionId;
+    }
+
+    public void setCriterionId(String criterionId) {
+        this.criterionId = criterionId;
+    }
+
+    public User getGrader() {
+        return grader;
+    }
+
+    public void setGrader(User grader) {
+        this.grader = grader;
+    }
+
+    public Date getGradedAt() {
+        return gradedAt;
+    }
+
+    public void setGradedAt(Date createdAt) {
+        this.gradedAt = createdAt;
+    }
+
+    public float getGrade() {
         return grade;
     }
 
-    public void setGrade(int grade) {
+    public void setGrade(float grade) {
         this.grade = grade;
     }
 
-    public String getComment() {
-        return comment;
+    public String getDescription() {
+        return description;
     }
 
-    public void setComment(String comment) {
-        this.comment = comment;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public String getUserId() {
-        return userId;
+    public boolean getActive() {
+        return isActive;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    @Override
-    public String toString() {
-        return "Grade{" +
-                "grade=" + grade +
-                ", comment='" + comment + '\'' +
-                ", userId='" + userId + '\'' +
-//                ", isActive=" + isActive +
-                ", created=" + created +
-                '}';
+    public void setActive(boolean active) {
+        isActive = active;
     }
 }

@@ -36,7 +36,7 @@ public class GmailConfig {
     @Bean
     public GoogleAuthorizationCodeFlow getGmailFlow() throws GeneralSecurityException, IOException {
         if (flow == null) {
-            System.out.println("null flow");
+//            System.out.println("null flow");
             GoogleClientSecrets.Details web = new GoogleClientSecrets.Details();
             web.setClientId(clientId);
             web.setClientSecret(clientSecret);

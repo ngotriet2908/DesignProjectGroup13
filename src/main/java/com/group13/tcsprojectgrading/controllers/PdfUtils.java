@@ -1,114 +1,54 @@
 package com.group13.tcsprojectgrading.controllers;
 
-import com.group13.tcsprojectgrading.models.Assessment;
-import com.group13.tcsprojectgrading.models.Participant;
-import com.group13.tcsprojectgrading.models.grading.CriterionGrade;
+
+import com.group13.tcsprojectgrading.models.course.CourseParticipation;
+import com.group13.tcsprojectgrading.models.grading.Assessment;
 import com.group13.tcsprojectgrading.models.grading.Grade;
 import com.group13.tcsprojectgrading.models.rubric.Element;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.models.rubric.RubricContent;
 import com.itextpdf.io.font.FontConstants;
-import com.itextpdf.kernel.color.Color;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
-import com.itextpdf.kernel.geom.Rectangle;
-import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
-import com.itextpdf.kernel.pdf.canvas.draw.ILineDrawer;
-import com.itextpdf.kernel.pdf.canvas.draw.SolidLine;
 import com.itextpdf.layout.Document;
-import com.itextpdf.layout.element.LineSeparator;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.property.HorizontalAlignment;
-import com.itextpdf.layout.property.Property;
-import com.itextpdf.layout.property.TextAlignment;
-import org.jsoup.Jsoup;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import static com.group13.tcsprojectgrading.controllers.ProjectsController.addEmptyLine;
-
 public class PdfUtils {
-    private Document document;
-    private Rubric rubric;
-    private Assessment assessment;
-    private Map<String, NodeInfo> nodeInfoMap;
-    private Participant participant;
-    private String body;
-    private String subject;
+    private final Document document;
+    private final Rubric rubric;
+    private final Assessment assessment;
+    private final Map<String, NodeInfo> nodeInfoMap;
+    private final CourseParticipation participation;
     private int maxLevel;
 
-    private static final int FONT_SIZE_TITLE = 22;
-    private static final int FONT_SIZE_CONTENT = 12;
-    private static final int FONT_SIZE_LABEL = 17;
-
-    public PdfUtils(Document document, Rubric rubric, Assessment assessment, Participant participant) {
+    public PdfUtils(Document document, Rubric rubric, Assessment assessment, CourseParticipation participation) {
         this.document = document;
         this.rubric = rubric;
         this.assessment = assessment;
+        this.participation = participation;
         this.maxLevel = 0;
         nodeInfoMap = new HashMap<>();
-        this.participant = participant;
     }
 
     public void headerGenerator(String title, String body) {
 
     }
 
-    private LineSeparator getLineSeparator()
-    {
-        return new LineSeparator(new SolidLine(1f));
-    }
-
-    public void setBody(String body)
-    {
-        this.body = body;
-    }
-
-    public void setSubject(String subject)
-    {
-        this.subject = subject;
-    }
-
-    private void addTitleParagraphToDocument(String topTitle, String bottomTitle) throws IOException {
-        PdfFont titleFont = PdfFontFactory.createFont(FontConstants.HELVETICA);
-
-        document.add(new Paragraph(topTitle).setFont(titleFont).setFontSize(FONT_SIZE_TITLE).setBold().setTextAlignment(TextAlignment.CENTER));
-        document.add(getLineSeparator());
-
-        if (participant.getName() != null) {
-            Paragraph name = new Paragraph("Student name: " + participant.getName()).setFont(titleFont).setFontSize(FONT_SIZE_CONTENT);
-            addEmptyLine(name, 1);
-            document.add(name);
+    private Grade findActiveGradeForCriterion(String criterion) {
+        for(Grade grade: this.assessment.getGrades()) {
+            if (grade.getActive() && grade.getCriterionId().equals(criterion)) {
+                return grade;
+            }
         }
-        if (participant.getSid() != null) {
-            Paragraph title = new Paragraph("Student number: " + participant.getSid()).setFont(titleFont).setFontSize(FONT_SIZE_CONTENT);
-            addEmptyLine(title, 1);
-            document.add(title);
-        }
-        if (subject != null) {
-            Paragraph subjectParagraph = new Paragraph("Subject: ").setFont(titleFont).setFontSize(FONT_SIZE_LABEL);
-            addEmptyLine(subjectParagraph, 1);
-            subjectParagraph.add(new Paragraph(subject).setFont(titleFont).setFontSize(FONT_SIZE_CONTENT));
-            addEmptyLine(subjectParagraph, 1);
-            document.add(subjectParagraph);
-        }
-        if (body != null) {
-            Paragraph bodyParagraph = new Paragraph("Overall comment: ").setFont(titleFont).setFontSize(FONT_SIZE_LABEL);
-            addEmptyLine(bodyParagraph, 1);
-            bodyParagraph.add(new Paragraph(body).setFont(titleFont).setFontSize(FONT_SIZE_CONTENT));
-            addEmptyLine(bodyParagraph, 1);
-            document.add(bodyParagraph);
-        }
-
-        document.add(new Paragraph(bottomTitle).setFont(titleFont).setFontSize(FONT_SIZE_TITLE).setBold().setTextAlignment(TextAlignment.CENTER));
-        document.add(getLineSeparator());
+        return null;
     }
 
     public Document generatePdfOfFeedback() throws IOException {
-        addTitleParagraphToDocument("Feedback sheet", "Assignment feedback");
         if (rubric.getChildren() == null) return null;
         nodeInfoMap.put("-1", new NodeInfo(0, null, 0, "-1","P", 0, 0));
         NodeInfo nodeInfo = nodeInfoMap.get("-1");
@@ -118,7 +58,15 @@ public class PdfUtils {
         }
 
         PdfFont font = PdfFontFactory.createFont(FontConstants.COURIER);
-        Paragraph header = new Paragraph("Final sum grade: " + nodeInfo.getSumGrade())
+        Paragraph header = new Paragraph("Feedback for " + participation.getId().getUser().getName())
+                .setHorizontalAlignment(HorizontalAlignment.CENTER)
+                .setFont(font)
+                .setFontSize(20);
+        addEmptyLine(header, 1);
+        document.add(header);
+
+        font = PdfFontFactory.createFont(FontConstants.COURIER);
+        header = new Paragraph("Final sum grade: " + nodeInfo.getSumGrade())
                 .setFont(font)
                 .setFontSize(20);
         addEmptyLine(header, 3);
@@ -143,7 +91,7 @@ public class PdfUtils {
                     .setFontSize(13);
             document.add(header);
             //TODO check for null comment
-            Paragraph body = new Paragraph("comment: " + nodeInfo.getGrade().getComment())
+            Paragraph body = new Paragraph("comment: " + nodeInfo.getGrade().getDescription())
                     .setFont(font)
                     .setPaddingLeft(fixPadding + 10)
                     .setFontSize(12);
@@ -176,8 +124,8 @@ public class PdfUtils {
     public void visitNode(Element currentNode, Element parentNode) {
         RubricContent content = currentNode.getContent();
         if (content.getType().equals(RubricContent.CRITERION_TYPE)) {
-            CriterionGrade grade = assessment.getGrades().get(content.getId());
-            if (grade.getHistory().size() > grade.getActive()) {
+            Grade grade = findActiveGradeForCriterion(content.getId());
+            if (grade != null) {
                 NodeInfo nodeInfo = null;
 
                 //level 0
@@ -186,7 +134,7 @@ public class PdfUtils {
                     maxLevel = Math.max(maxLevel , 1);
                     nodeInfo = new NodeInfo(
                             1,
-                            grade.getHistory().get(grade.getActive()),
+                            grade,
                             -1,
                             "-1",
                             "C" + nodeInfoMap.get("-1").getCriterionCount(),
@@ -200,7 +148,8 @@ public class PdfUtils {
                     parentInfo.setCriterionCount(parentInfo.getCriterionCount() + 1);
                     nodeInfo = new NodeInfo(
                             nodeInfoMap.get(parentNode.getContent().getId()).getLevel() + 1,
-                            grade.getHistory().get(grade.getActive()),
+                            grade
+                            ,
                             -1,
                             parentNode.getContent().getId(),
                             "C" + parentInfo.getLabel().substring(1) + "." + parentInfo.getCriterionCount(),
@@ -217,7 +166,7 @@ public class PdfUtils {
                         !currentNode.getContent().getId().equals(parentNode.getContent().getId())) {
                     nodeInfoMap.get(parentNode.getContent().getId()).setSumGrade(
                             nodeInfoMap.get(parentNode.getContent().getId()).getSumGrade() +
-                                    grade.getHistory().get(grade.getActive()).getGrade()
+                                    grade.getGrade()
                     );
                 } else if (currentNode.getContent().getId().equals(parentNode.getContent().getId())) {
                     nodeInfoMap.get("-1").setSumGrade(nodeInfoMap.get("-1").getSumGrade() + nodeInfo.getGrade().getGrade());
@@ -283,13 +232,13 @@ public class PdfUtils {
     public class NodeInfo {
         private int level;
         private Grade grade;
-        private int sumGrade;
+        private float sumGrade;
         private String parentId;
         private String label;
         private int blockCount;
         private int criterionCount;
 
-        public NodeInfo(int level, Grade grade, int sumGrade, String parentId, String label, int blockCount, int criterionCount) {
+        public NodeInfo(int level, Grade grade, float sumGrade, String parentId, String label, int blockCount, int criterionCount) {
             this.level = level;
             this.grade = grade;
             this.sumGrade = sumGrade;
@@ -299,11 +248,11 @@ public class PdfUtils {
             this.criterionCount = criterionCount;
         }
 
-        public int getSumGrade() {
+        public float getSumGrade() {
             return sumGrade;
         }
 
-        public void setSumGrade(int sumGrade) {
+        public void setSumGrade(float sumGrade) {
             this.sumGrade = sumGrade;
         }
 
@@ -353,6 +302,12 @@ public class PdfUtils {
 
         public void setCriterionCount(int criterionCount) {
             this.criterionCount = criterionCount;
+        }
+    }
+
+    public static void addEmptyLine(Paragraph paragraph, int number) {
+        for (int i = 0; i < number; i++) {
+            paragraph.add(new Paragraph(" "));
         }
     }
 

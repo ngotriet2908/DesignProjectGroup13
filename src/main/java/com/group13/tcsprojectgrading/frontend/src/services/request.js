@@ -8,7 +8,15 @@ function getCookie(name) {
   if (parts.length === 2) return parts.pop().split(';').shift();
 }
 
-export function request(url, method = "GET", data = {}, accept = 'application/json', catch401 = true) {
+export function request(
+  url,
+  method = "GET",
+  data = {},
+  accept = 'application/json',
+  catch401 = true,
+  catch404 = true,
+  formData = undefined,
+) {
   let init;
   if (method === "GET") {
     init = {
@@ -18,13 +26,24 @@ export function request(url, method = "GET", data = {}, accept = 'application/js
       },
     }
   } else if (method === "POST" || method === "PUT" || method === "PATCH") {
-    init = {
-      method: method,
-      headers: {
-        'Accept': accept,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data)
+    if (formData !== undefined) {
+      init = {
+        method: method,
+        headers: {
+          'Accept': accept,
+          // 'Content-Type': 'multipart/form-data',
+        },
+        body: formData
+      }
+    } else {
+      init = {
+        method: method,
+        headers: {
+          'Accept': accept,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      }
     }
   } else if (method === "DELETE") {
     init = {
@@ -46,7 +65,7 @@ export function request(url, method = "GET", data = {}, accept = 'application/js
         throw new Error("Not authenticated: 401")
       }
       // TODO: we should catch 404
-      else if (response.status === 404) {
+      else if (catch404 && response.status === 404) {
         store.dispatch(push(URL_PREFIX + "/404/"))
         throw new Error("Not found: 404")
       }

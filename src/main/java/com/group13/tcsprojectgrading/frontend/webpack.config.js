@@ -2,9 +2,6 @@ var path = require("path");
 var values = require('postcss-modules-values');
 
 module.exports = {
-  // entry: './rootReducer.js',
-  // devtool: 'nosources',
-
   entry: [path.resolve(__dirname, './index.js')],
   output: {
     // where compiled files go
@@ -12,8 +9,8 @@ module.exports = {
     filename: 'bundle.js' // the same one we import in home.html
   },
   mode: 'development',
+  // mode: 'production',
   module: {
-    // configuration regarding modules
     rules: [
       {
         test: /\.js$/,
@@ -21,8 +18,7 @@ module.exports = {
         use: ['source-map-loader']
       },
       {
-        test: /\.(js|jsx|mjs)?$/,
-        // enforce: 'pre',
+        test: /\.(mjs|js|jsx)?$/,
         exclude: /(node_modules|bower_components)/,
         use: [{
           loader: 'babel-loader',
@@ -35,7 +31,6 @@ module.exports = {
             ]
           }
         },
-          // 'source-map-loader'
         ]
       },
       {

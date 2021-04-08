@@ -31,6 +31,7 @@ class RubricOutline extends Component {
   }
 
   onClickElement = (id, path) => {
+    console.log(id)
     this.props.setSelectedElement(id);
     this.props.toggleOutlineHidden();
 

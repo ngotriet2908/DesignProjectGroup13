@@ -13,8 +13,8 @@ class RightsidePanel extends Component {
   render () {
     return (
       <div className={styles.rightsidePanel}>
-        <IssuesViewer routeParams={this.props.routeParams}/>
-        <FinalGrade match={this.props.routeParams}/>
+        <IssuesViewer user={this.props.user} submission={this.props.submission} routeParams={this.props.routeParams}/>
+        {/*<FinalGrade match={this.props.routeParams}/>*/}
       </div>
     )
   }

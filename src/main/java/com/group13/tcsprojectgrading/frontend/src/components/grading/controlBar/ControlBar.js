@@ -20,14 +20,11 @@ class ControlBar extends Component {
         <div className={styles.controlBarBody}>
           <div>
             <h4>
-              {this.props.data.submission.name}
+              {this.props.submission.name}
             </h4>
 
           </div>
         </div>
-        {/*</Card.Body>*/}
-        {/*</Card>*/}
-
       </div>
     )
   }

@@ -1,5 +1,4 @@
 import React, {Component} from "react";
-import {Ability, AbilityBuilder } from "@casl/ability";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
 
@@ -9,11 +8,10 @@ import Spinner from "react-bootstrap/Spinner";
 import store from "../../redux/store";
 import {push} from "connected-react-router";
 import {URL_PREFIX} from "../../services/config";
-// import Statistic from "../stat/Statistic";
-import EditProjectsModal from "./EditProjectsModal";
+import EditProjectsModal from "./ImportProjectsModal";
 import Breadcrumbs from "../helpers/Breadcrumbs";
 import ProjectCard from "../home/ProjectCard";
-import {IoPencil} from "react-icons/io5";
+import {IoCloudDownloadOutline, IoSyncOutline} from "react-icons/io5";
 import StatsCard from "../home/StatsCard";
 import {Can, ability, updateAbilityCoursePage} from "../permissions/CoursePageAbility";
 import {connect} from "react-redux";
@@ -24,6 +22,8 @@ import SectionContainer from "../home/SectionContainer";
 
 import globalStyles from '../helpers/global.module.css';
 import {IoFileTrayOutline} from "react-icons/io5";
+import classnames from 'classnames';
+import {Button} from "react-bootstrap";
 
 
 class Course extends Component {
@@ -31,19 +31,18 @@ class Course extends Component {
     super(props)
 
     this.state = {
-      projects: [],
       course: {},
       stats: [],
       isLoaded: false,
       user: {},
+
+      syncing: false,
 
       showModal: false,
     }
   }
 
   componentDidMount() {
-    // TODO, the location won't be set if the component is not re-mounted, so we need to find a better location for the call below
-    // TODO, UPD2: I'm not sure anymore
     this.props.setCurrentLocation(LOCATIONS.course);
     this.reloadPageData();
   }
@@ -51,24 +50,29 @@ class Course extends Component {
   reloadPageData = () => {
     Promise.all([
       request(BASE + "courses/" + this.props.match.params.courseId),
-      request(`${BASE}courses/${this.props.match.params.courseId}/stats/count`)
+      // request(`${BASE}courses/${this.props.match.params.courseId}/stats/count`)
     ])
       .then(async([res1, res2]) => {
-        const courses = await res1.json();
-        const stats = await res2.json();
+        const course = await res1.json();
+        // const stats = await res2.json();
 
-        updateAbilityCoursePage(ability, courses.user)
-        this.props.saveCurrentCourse(courses.course);
+        updateAbilityCoursePage(ability, course.role)
+        console.log(ability)
+        this.props.saveCurrentCourse(course);
 
-        this.setState({
-          projects: courses.projects,
-          course: courses.course,
-          stats: stats,
-          isLoaded: true,
-          user: courses.user
+        course.projects.forEach((project, index, array) => {
+          array[index].course = {
+            id: course.id,
+            name: course.name
+          }
         })
 
-        // console.log(ability.rules)
+        this.setState({
+          course: course,
+          // stats: stats,
+          isLoaded: true,
+          syncing: false
+        })
       })
       .catch(error => {
         console.error(error.message);
@@ -79,25 +83,60 @@ class Course extends Component {
     this.props.deleteCurrentCourse();
   }
 
-  openModal = () => {
-    this.setState({
-      showModal: true
-    })
+  toggleShowModal = () => {
+    this.setState(prevState => ({
+      showModal: !prevState.showModal
+    }))
   }
 
-  setShow = (show, reload=false) => {
-    if (reload) {
-      this.setState({
-        showModal: show,
-        isLoaded: false,
-      })
-
-      this.reloadPageData();
-    } else {
-      this.setState({
-        showModal: show
-      })
+  syncCourseHandler = () => {
+    if (this.state.syncing) {
+      return;
     }
+
+    this.setState({
+      syncing: true
+    })
+
+    request(`${BASE}courses/${this.props.match.params.courseId}/sync`, "POST", {})
+      .then(response => {
+        if (response.status === 200) {
+          // console.log("Sync successful");
+          this.reloadPageData()
+        }
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
+  }
+
+  reloadProjects = () => {
+    this.setState({
+      isLoaded: false,
+    })
+
+    request(BASE + "courses/" + this.props.match.params.courseId)
+      .then(async response => {
+        const course = await response.json();
+
+        updateAbilityCoursePage(ability, course.role)
+        this.props.saveCurrentCourse(course);
+
+        course.projects.forEach((project, index, array) => {
+          array[index].course = {
+            id: course.id,
+            name: course.name
+          }
+        })
+
+        this.setState({
+          course: course,
+          isLoaded: true,
+        })
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
   }
 
   render () {
@@ -119,20 +158,34 @@ class Course extends Component {
           <Breadcrumbs.Item active>{this.state.course.name}</Breadcrumbs.Item>
         </Breadcrumbs>
 
-        <div className={[globalStyles.titleContainer].join(" ")}>
-          <h1>{this.state.course.name}</h1><span>{(new Date(this.state.course.start_at)).getFullYear()}</span>
+        <div className={classnames(globalStyles.titleContainer, styles.titleContainer, this.state.syncing && globalStyles.titleContainerIconActive)}>
+          <div className={globalStyles.titleContainerLeft}>
+            <h1>{this.state.course.name}</h1>
+            <span>{(new Date(this.state.course.startAt)).getFullYear()}</span>
+          </div>
+
+          <Can I="sync" a="Course">
+            <Button variant="lightGreen" className={globalStyles.titleActiveButton} onClick={this.syncCourseHandler}>
+              <IoSyncOutline size={20}/> Sync
+            </Button>
+          </Can>
         </div>
 
         <div className={styles.container}>
           <SectionContainer
             className={styles.section}
             title={"Course projects"}
-            data={this.state.projects}
-            emptyText={"No projects selected in this course. Click on the pencil button to select course projects."}
+            data={
+              this.state.course.projects
+            }
+            emptyText={"No projects imported in this course. Click on the button to import course projects"}
             Component={ProjectCard}
-            icon={
+            spreadButton={true}
+            button={
               <Can I="write" a="Projects">
-                <IoPencil size={28} onClick={this.openModal}/>
+                <Button variant="lightGreen" onClick={this.toggleShowModal}>
+                  <IoCloudDownloadOutline size={20}/> Import
+                </Button>
               </Can>
             }
             EmptyIcon={IoFileTrayOutline}
@@ -163,8 +216,9 @@ class Course extends Component {
 
           <EditProjectsModal
             show={this.state.showModal}
-            setShow={this.setShow}
-            currentActive={this.state.projects}
+            toggleShow={this.toggleShowModal}
+            refresh={this.reloadProjects}
+            imported={this.state.course.projects}
           />
 
         </div>
@@ -172,12 +226,6 @@ class Course extends Component {
     )
   }
 }
-
-// const mapStateToProps = state => {
-//   return {
-//
-//   };
-// };
 
 const actionCreators = {
   saveCurrentCourse,

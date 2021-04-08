@@ -8,19 +8,17 @@
 
 /* card */
 .card {
-    /*width: 22rem;*/
-    min-height: 150px;
     position:relative;
-    /*width: 50%;*/
     width: 100%;
     margin-bottom: 1rem;
+
+    min-height: 10rem;
 }
 
 .cardBodyContainer {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    /*grid-template-columns: 85% 15%;*/
 }
 
 .cardBodyContent {
@@ -43,89 +41,15 @@
 
 .cardContentTypeCourse {
     color: secondary;
-    /*opacity: 0.8;*/
 }
 
 .cardContentTypeProject {
     color: quinary;
 }
 
-/*.cardButtonContainer {*/
-/*    !*align-self: end;*!*/
-/*}*/
-
 .cardButtonContainer {
-    /*cursor: pointer;*/
-    /*float: right;*/
     color: primary;
-    /*transition: color 0.1s ease-in, margin 0.1s ease-in;*/
 }
-
-.cardButtonContainer div:hover {
-    /*color: secondary;*/
-    /*margin-right: -0.5rem;*/
-}
-
-/*.cardBodyContainer:before {*/
-/*    content: '';*/
-/*    position: absolute;*/
-/*    height: 1rem;*/
-/*    width: 1rem;*/
-
-/*    top: 0;*/
-/*    left: 0;*/
-
-/*    !*background-color: red;*!*/
-
-/*    margin-left: -1px;*/
-/*    margin-top: -1px;*/
-
-/*    border-top-left-radius: 0.5rem;*/
-
-/*    box-sizing: border-box;*/
-/*}*/
-
-/*.cardCourse .cardBodyContainer:before {*/
-/*    border-left: 1px solid secondary;*/
-/*    border-top: 1px solid secondary;*/
-/*    background: linear-gradient(135deg, secondary 50%, transparent 50%);*/
-/*}*/
-
-/*.cardProject .cardBodyContainer:before {*/
-/*    border-left: 1px solid quinary;*/
-/*    border-top: 1px solid quinary;*/
-/*    background: linear-gradient(135deg, quinary 50%, transparent 50%);*/
-/*}*/
-
-/*.cardBodyCorner {*/
-/*    position: absolute;*/
-/*    height: 1rem;*/
-/*    width: 1rem;*/
-
-/*    top: 0;*/
-/*    left: 0;*/
-
-/*    margin-left: -1px;*/
-/*    margin-top: -1px;*/
-
-/*    border-top-left-radius: 0.5rem;*/
-
-/*    box-sizing: border-box;*/
-/*}*/
-
-/*.cardCourse .cardBodyCorner {*/
-/*    border-left: 1px solid secondary;*/
-/*    border-top: 1px solid secondary;*/
-/*    background: linear-gradient(135deg, secondary 50%, transparent 50%);*/
-/*}*/
-
-/*.cardProject .cardBodyCorner {*/
-/*    border-left: 1px solid quinary;*/
-/*    border-top: 1px solid quinary;*/
-/*    background: linear-gradient(135deg, quinary 50%, transparent 50%);*/
-/*}*/
-
-
 
 .cardBlock {
     display: block;
@@ -137,7 +61,7 @@
     text-align: center;
     border: 2px dashed rgba(0,0,0,.125);
 
-    min-height: 6rem;
+    min-height: 10rem;
 }
 
 .emptyCardBodyContainer {

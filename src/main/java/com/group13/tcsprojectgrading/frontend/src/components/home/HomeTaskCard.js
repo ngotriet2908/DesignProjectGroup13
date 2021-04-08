@@ -12,8 +12,6 @@ import globalStyles from "../helpers/global.module.css";
 class HomeTaskCard extends Component {
   constructor(props) {
     super(props);
-
-    console.log(this.props.data);
   }
 
   onClickSeeMore = () => {

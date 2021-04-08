@@ -79,14 +79,15 @@
 }
 
 .submissionCard:not(:last-child) {
-    margin-bottom: 0.5rem;
+    /*margin-bottom: 0.5rem;*/
+    margin-bottom: 1rem;
 }
 
 .submissionCardTitle {
     display: flex;
     flex-direction: row;
     align-items: center;
-    margin-bottom: 0.5rem;
+    /*margin-bottom: 0.5rem;*/
 }
 
 .submissionCardTitle h5 {

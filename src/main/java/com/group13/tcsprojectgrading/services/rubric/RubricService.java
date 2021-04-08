@@ -5,39 +5,109 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.flipkart.zjsonpatch.JsonPatch;
-import com.flipkart.zjsonpatch.JsonPatchApplicationException;
+import com.group13.tcsprojectgrading.models.project.Project;
+import com.group13.tcsprojectgrading.models.rubric.RubricHistoryLinker;
+import com.group13.tcsprojectgrading.models.rubric.RubricLinker;
 import com.group13.tcsprojectgrading.models.rubric.*;
-import com.group13.tcsprojectgrading.repositories.rubric.RubricHistoryRepository;
-import com.group13.tcsprojectgrading.repositories.rubric.RubricRepository;
+import com.group13.tcsprojectgrading.repositories.rubric.RubricHistoryLinkerRepository;
+import com.group13.tcsprojectgrading.repositories.rubric.RubricLinkerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.lang.model.util.Elements;
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Stack;
 
 @Service
 public class RubricService {
-    private final RubricRepository repository;
-    private final RubricHistoryRepository historyRepository;
+    private final RubricLinkerRepository rubricLinkerRepository;
+    private final RubricHistoryLinkerRepository rubricHistoryLinkerRepository;
 
     @Autowired
-    public RubricService(RubricRepository repository, RubricHistoryRepository historyRepository) {
-        this.repository = repository;
-        this.historyRepository = historyRepository;
+    public RubricService(RubricLinkerRepository repository, RubricHistoryLinkerRepository rubricHistoryLinkerRepository) {
+        this.rubricLinkerRepository = repository;
+        this.rubricHistoryLinkerRepository = rubricHistoryLinkerRepository;
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
-    public Rubric getRubricById(String id) {
-        return repository.getById(id);
+    public Rubric getRubricById(Long id) {
+        return getRubricFromLinker(rubricLinkerRepository.findById(new RubricLinker.Pk(new Project(id))).orElse(null));
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
-    public Rubric saveRubric(Rubric rubric) {
+    public Rubric getRubricAndLock(Long id) {
+        return getRubricFromLinker(rubricLinkerRepository.findRubricLinkerById(new RubricLinker.Pk(new Project(id))).orElse(null));
+    }
+
+    private Rubric getRubricFromLinker(RubricLinker linker) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            if (linker != null) {
+                return objectMapper.readValue(linker.getRubric(), Rubric.class);
+            }
+        } catch (JsonProcessingException e) {
+            return null;
+        }
+        return null;
+    }
+
+    private RubricHistory getRubricHistoryFromLinker(RubricHistoryLinker linker) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            if (linker != null) {
+                return objectMapper.readValue(linker.getRubricHistory(), RubricHistory.class);
+            }
+        } catch (JsonProcessingException e) {
+            return null;
+        }
+        return null;
+    }
+
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public Rubric saveRubric(Rubric rubric) throws JsonProcessingException {
         updateCriterionCount(rubric);
         updateLastModified(rubric);
-        return repository.save(rubric);
+        RubricLinker linker = this.rubricLinkerRepository.findById(new RubricLinker.Pk(new Project(rubric.getId()))).orElse(null);
+
+        if (linker == null) {
+            return null;
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        linker.setRubric(mapper.writeValueAsString(rubric));
+
+        return getRubricFromLinker(this.rubricLinkerRepository.save(linker));
+    }
+
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public Rubric addNewRubric(Rubric rubric) throws JsonProcessingException {
+        updateCriterionCount(rubric);
+        updateLastModified(rubric);
+        RubricLinker linker = this.rubricLinkerRepository.findById(new RubricLinker.Pk(new Project(rubric.getId()))).orElse(null);
+
+        if (linker != null) {
+            return null;
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        linker = new RubricLinker(rubric.getId(), mapper.writeValueAsString(rubric));
+        return getRubricFromLinker(this.rubricLinkerRepository.save(linker));
+    }
+
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public Rubric addNewRubric(Long projectId) throws JsonProcessingException {
+        return this.addNewRubric(new Rubric(projectId));
+    }
+
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public String importRubric(Rubric rubric) throws JsonProcessingException {
+        RubricLinker linker = rubricLinkerRepository.findById(new RubricLinker.Pk(new Project(rubric.getId()))).orElse(null);
+        if (linker == null) return null;
+        ObjectMapper mapper = new ObjectMapper();
+        linker.setRubric(mapper.writeValueAsString(rubric));
+        return rubricLinkerRepository.save(linker).getRubric();
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
@@ -59,22 +129,39 @@ public class RubricService {
 
     @Transactional(value = Transactional.TxType.MANDATORY)
     public List<Rubric> getAllRubrics() {
-        return repository.findAll();
+        List<Rubric> rubrics = new ArrayList<>();
+        List<RubricLinker> linkers = rubricLinkerRepository.findAll();
+        for(RubricLinker linker: linkers) {
+            Rubric rubric = getRubricFromLinker(linker);
+            if (rubric != null) {
+                rubrics.add(rubric);
+            }
+        }
+        return rubrics;
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
-    public void deleteRubric(String projectId) {
-        repository.deleteById(projectId);
+    public void deleteRubric(Long projectId) {
+        rubricLinkerRepository.deleteById(new RubricLinker.Pk(new Project(projectId)));
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
-    public void storeHistory(RubricHistory history) {
-        this.historyRepository.save(history);
+    public void storeHistory(RubricHistory history) throws JsonProcessingException {
+
+        RubricHistoryLinker linker = rubricHistoryLinkerRepository.findById(history.getId()).orElse(null);
+        if (linker == null) {
+//            throw new NullPointerException("null linker")
+            linker = new RubricHistoryLinker(history.getId());
+        };
+        ObjectMapper mapper = new ObjectMapper();
+        linker.setRubricHistory(mapper.writeValueAsString(history));
+        rubricHistoryLinkerRepository.save(linker);
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
-    public RubricHistory getHistory(String projectId) {
-        return this.historyRepository.getById(projectId);
+    public RubricHistory getHistory(Long projectId) {
+        RubricHistoryLinker linker = rubricHistoryLinkerRepository.findById(projectId).orElse(null);
+        return getRubricHistoryFromLinker(linker);
     }
 
     // TODO: mark all? mark specific? put in issues? notify? if mark all - stop when first issue below is found
@@ -127,11 +214,21 @@ public class RubricService {
                     JsonNode element = findInRubric(rubricJson, path);
 
                     if (element.get("content").get("type").asText().equals(Type.SECTION.toString())) {
-                        // it was a title with non-empty subtree
-                        // TODO it might have been a hierarchy of headers, too tired to check
-                        System.out.println(element.get("children").size());
-                        if (element.get("children").size() > 0) {
-                            System.out.println("A section with criteria has been removed (well, not necessarily, but hey). Mark all submissions.");
+                        // the code below is very inefficient
+
+                        // recursively get all criteria
+                        List<JsonNode> criteria = this.findAllCriteria(element);
+
+                        if (criteria.isEmpty()) {
+                            // no criterion was removed, so skip
+                            continue;
+                        }
+
+                        System.out.println("A section with criteria has been removed. Mark all submissions.");
+
+                        // for each criterion
+                        for (JsonNode criterion: criteria) {
+                            // for each assessment in the project check if the criterion is in it
                         }
                     } else {
                         // it was a criterion
@@ -165,6 +262,46 @@ public class RubricService {
         }
 
         return currentElement;
+    }
+
+    public List<Element> findAllCriteria(Element element) {
+        List<Element> criteria = new ArrayList<>();
+        Stack<Element> fringe = new Stack<>();
+        fringe.push(element);
+
+        while (!fringe.isEmpty()) {
+            Element currentElement = fringe.pop();
+
+            if (currentElement.getContent().getType().equals(Type.SECTION.toString())) {
+                for (Element e: currentElement.getChildren()) {
+                    fringe.push(e);
+                }
+            } else {
+                criteria.add(currentElement);
+            }
+        }
+
+        return criteria;
+    }
+
+    public List<JsonNode> findAllCriteria(JsonNode element) {
+        List<JsonNode> criteria = new ArrayList<>();
+        Stack<JsonNode> fringe = new Stack<>();
+        fringe.push(element);
+
+        while (!fringe.isEmpty()) {
+            JsonNode currentElement = fringe.pop();
+
+            if (currentElement.get("content").get("type").asText().equals(Type.SECTION.toString())) {
+                for (JsonNode e: currentElement.get("children")) {
+                    fringe.push(e);
+                }
+            } else {
+                criteria.add(currentElement);
+            }
+        }
+
+        return criteria;
     }
 
     private enum Operation {

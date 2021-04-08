@@ -1,4 +1,4 @@
-@value primary, secondary, ternary, quaternary, quinary, senary, senaryShade, ultraLightGray, primaryShade, lightGray, darkishGray, moderateGray from './colors.css';
+@value primary, secondary, ternary, quaternary, quinary, senary, senaryShade, secondaryShade, ultraLightGray, primaryShade, lightGray, darkishGray, moderateGray from './colors.css';
 
 .spinner {
     position: fixed;
@@ -17,7 +17,8 @@
 /* section */
 .sectionContainer {
     width: 100%;
-    display: block;
+    display: flex;
+    flex-direction: column;
 }
 
 .sectionTitle {
@@ -46,15 +47,36 @@
 .titleContainer {
     display: flex;
     flex-direction: row;
-    align-items: flex-end;
+    align-items: center;
     margin-top: 0.5rem;
+    justify-content: space-between;
 }
 
-.titleContainer div {
-    margin-left: 1rem;
-    font-size: 1.6rem;
-    color: primary;
-    /*color: #a2a1a1;*/
+.titleContainerLeft {
+    /*margin-left: 1rem;*/
+    /*font-size: 1.6rem;*/
+    /*color: primary;*/
+
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+}
+
+.titleContainer svg {
+    cursor: pointer;
+}
+
+@-webkit-keyframes rotating {
+    from{
+        -webkit-transform: rotate(0deg);
+    }
+    to{
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+.titleContainerIconActive .titleActiveButton svg {
+    -webkit-animation: rotating 1s linear infinite;
 }
 
 .sectionTitleWithButton {
@@ -63,9 +85,19 @@
     align-items: center;
 }
 
+.sectionTitleWithButtonSpread {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
 .sectionFlexContainer {
     display: flex;
     flex-direction: column;
+
+    flex: 1;
+    margin-bottom: 1rem;
 }
 
 .plainLink, .plainLink:hover {
@@ -73,12 +105,70 @@
     color: white;
 }
 
-
-
-
 :global(.modal-content) {
     border-radius: 0.5rem;
     border: 1px solid lightGray;
+}
+
+:global(.alert-custom) {
+    background: quinary;
+    color: white;
+    border-radius: 0.5rem;
+}
+
+
+/* labels and badges */
+
+.label {
+    font-size: 1rem;
+    padding: .375rem .75rem;
+    line-height: 1.5;
+    /*border-radius: 1rem;*/
+    border-radius: 0.25rem;
+    border: 2px solid transparent;
+    color: white;
+    min-height: 48px;
+
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.labelSmall {
+    font-size: 0.8rem;
+    padding: .2rem .5rem;
+    line-height: 1;
+    min-height: 23px;
+}
+
+/*:global(.badge-tomato) {*/
+/*    background-color: senary;*/
+/*    color: white;*/
+/*}*/
+
+/*:global(.badge-green) {*/
+/*    background-color: primary;*/
+/*    color: white;*/
+/*}*/
+
+/*:global(.badge-orange) {*/
+/*    background-color: quaternary;*/
+/*    color: white;*/
+/*}*/
+
+
+/* buttons */
+:global(.btn) {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    min-height: 48px;
+}
+
+:global(.btn svg) {
+    margin-right: 0.5rem;
 }
 
 :global(.btn-lightGreen) {
@@ -108,32 +198,13 @@
     color: darkishGray;
 }
 
-:global(.alert-custom) {
-    background: quinary;
-    color: white;
-    border-radius: 0.5rem;
-}
-
-/* buttons */
-:global(.btn) {
-    display: inline-flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    width: auto;
-}
-
-:global(.btn svg) {
-    margin-right: 0.5rem;
-}
-
 .iconButton {
     width: 48px;
     height: 48px;
     font-size: 26px;
     border-radius: 5px;
     cursor: pointer;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
 }
@@ -176,29 +247,12 @@
     color: white;
 }
 
-
-
-
-
-.label {
-    font-size: 1rem;
-    padding: .375rem .75rem;
-    line-height: 1.5;
-    border-radius: 1rem;
-    border: 2px dashed transparent;
-}
-
-.labelSmall {
-    font-size: 0.8rem;
-    padding: .2rem .5rem;
-    line-height: 1;
-}
-
 :global(.btn-dashed) {
     background-color: transparent;
     color: gray;
     border: 2px dashed rgba(0,0,0,.125);
-    border-radius: 1rem;
+    /*border-radius: 1rem;*/
+    border-radius: 0.25rem;
 }
 
 :global(.btn-dashed:hover) {
@@ -207,18 +261,161 @@
     border: 2px solid primary;
 }
 
-
-:global(.badge-tomato) {
-    background-color: senary;
+:global(.btn-yellow) {
+    background-color: secondary;
     color: white;
 }
 
-:global(.badge-green) {
-    background-color: primary;
+:global(.btn-yellow:hover) {
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    background-color: secondaryShade;
     color: white;
 }
 
-:global(.badge-orange) {
-    background-color: quaternary;
+
+/* modal */
+.modalContainer {
+    padding: 2rem 2rem 1rem 2rem;
+    max-height: calc(100vh - 3.5rem);
+}
+
+.modalHeaderContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.modalHeaderContainer > div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.modalHeaderContainer > div > *:nth-child(1) {
+    /*margin-right: 0.5rem;*/
+}
+
+.modalHeaderContainer h2 {
+    margin: 0;
+}
+
+.modalHeaderContainerButton {
+    cursor: pointer;
+    color: darkishGray;
+
+    width: 48px;
+    height: 48px;
+    font-size: 26px;
+    border-radius: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modalHeaderContainerButton:hover {
+    background-color: moderateGray;
     color: white;
+}
+
+.modalDescriptionContainer {
+    margin: 1rem 0;
+}
+
+.modalBodyContainer {
+    overflow: scroll;
+    max-height: 30rem;
+}
+
+.modalBodyContainerRow {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 0.5rem 0;
+
+    border: 1px solid moderateGray;
+
+    cursor: pointer;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.modalBodyContainerRow span {
+    margin-left: 0.5rem;
+}
+
+.modalBodyContainerRowActive {
+    border: 1px solid primary;
+}
+
+.modalBodyContainerRowActiveDisabled {
+    background-color: lightGray;
+    border: 1px solid lightGray;
+}
+
+.modalBodyContainerRowActive.modalBodyContainerRowActiveDisabled > *:first-child {
+    color: inherit;
+}
+
+.modalBodyContainerRowActive > *:first-child {
+    color: primary;
+}
+
+.modalBodyContainerRowEmpty {
+    cursor: default;
+    border: 1px dashed moderateGray;
+}
+
+.modalFooterContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+
+    padding-top: 1rem;
+    margin-top: 1rem;
+
+    border-top: 1px solid lightGray;
+}
+
+.modalFooterContainerSpaceBetween {
+    justify-content: space-between;
+}
+
+.modalFooterContainerButtonGroup {
+
+}
+
+.modalFooterContainerButtonGroup > *:first-child {
+    margin-right: 0.5rem;
+}
+
+.modalSpinnerContainer {
+    min-height: 10rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.modalSpinner {
+    color: primary;
+}
+
+/* list groups */
+:global(.list-group-item:first-of-type) {
+    border-top-right-radius: 0.5rem;
+    border-top-left-radius: 0.5rem;
+}
+
+:global(.list-group-item:last-of-type) {
+    border-bottom-right-radius: 0.5rem;
+    border-bottom-left-radius: 0.5rem;
+}
+
+/* search bar */
+.searchBar {
+    min-height: 48px;
 }

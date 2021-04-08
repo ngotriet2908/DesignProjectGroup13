@@ -11,7 +11,7 @@ import {
   saveRubricTemp,
   setCurrentPath,
   setEditingRubric,
-  setSelectedElement
+  setSelectedElement,
 } from "../../redux/rubric/actions";
 import {Can} from "../permissions/ProjectAbility";
 import {
@@ -19,14 +19,20 @@ import {
   IoCloseOutline,
   IoCodeDownloadOutline,
   IoPencil,
-  IoEllipsisVerticalOutline
+  IoEllipsisVerticalOutline,
+  IoCloudDownload,
+  IoCloudUploadSharp
+
 } from "react-icons/io5";
 import globalStyles from "../helpers/global.module.css";
 import classnames from "classnames";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
-import Dropdown from "react-bootstrap/Dropdown";
+import {Dropdown, Modal, Button} from "react-bootstrap";
 import {createNewBlock, createNewCriterion, removeAll} from "./helpers";
+import {Form} from 'react-bootstrap'
+import RubricUploadModal from "./RubricUploadModal";
+import AssignSubmissionModal from "../assign/AssignSubmissionModal";
 
 
 class RubricOutline extends Component {
@@ -41,6 +47,10 @@ class RubricOutline extends Component {
         id: this.props.rubric.id,
       },
       children: this.props.rubric.children
+    }
+
+    this.state = {
+      showUploadModal: false,
     }
   }
 
@@ -57,12 +67,10 @@ class RubricOutline extends Component {
   }
 
   downloadRubric = () => {
-    alert("Handle download.")
+    this.props.downloadRubric();
   }
 
   onClickCancelButton = () => {
-    console.log("Cancel save.")
-
     // get rubric backup
     let rubricBackup = this.props.rubricTemp;
 
@@ -73,9 +81,6 @@ class RubricOutline extends Component {
   }
 
   onClickSaveButton = () => {
-    console.log("Save rubric.");
-    console.log(this.props.updates);
-
     if (this.props.updates.length === 0) {
       this.props.saveRubricTemp(null);
       this.props.setEditingRubric(false);
@@ -99,6 +104,14 @@ class RubricOutline extends Component {
     }
   }
 
+  // upload rubric modal
+
+  toggleShowUploadModal = () => {
+    this.setState(prevState => ({
+      showUploadModal: !prevState.showUploadModal
+    }))
+  }
+
   render () {
     return (
       <div className={styles.outlineContainer}>
@@ -113,17 +126,29 @@ class RubricOutline extends Component {
                     <IoPencil size={26}/>
                   </div>
                 </Can>
-                <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.downloadRubric}>
-                  <IoCodeDownloadOutline size={34}/>
-                </div>
+                <Can I="download" a="Rubric">
+                  <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.downloadRubric}>
+                    <IoCodeDownloadOutline size={34}/>
+                  </div>
+                </Can>
+                <Can I="write" a="Rubric">
+                  <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.toggleShowUploadModal}>
+                    <IoCloudUploadSharp size={34}/>
+                  </div>
+                </Can>
+                <Can I="download" a="Rubric">
+                  <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.props.exportRubricFile}>
+                    <IoCloudDownload size={34}/>
+                  </div>
+                </Can>
               </div>)
               :
               (<div className={styles.outlineHeaderButtonContainer}>
-                <Can I="write" a="Rubric">
-                  <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.onClickSaveButton}>
-                    <IoSaveOutline size={26}/>
-                  </div>
-                </Can>
+                {/*<Can I="write" a="Rubric">*/}
+                <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.onClickSaveButton}>
+                  <IoSaveOutline size={26}/>
+                </div>
+                {/*</Can>*/}
                 <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGray)} onClick={this.onClickCancelButton}>
                   <IoCloseOutline size={34}/>
                 </div>
@@ -174,6 +199,14 @@ class RubricOutline extends Component {
             Empty
           </div>
         }
+
+        <RubricUploadModal
+          show={this.state.showUploadModal}
+          toggleShow={this.toggleShowUploadModal}
+          updateRubric={this.props.saveRubric}
+          courseId={this.props.courseId}
+          projectId={this.props.projectId}
+        />
       </div>
     )
   }

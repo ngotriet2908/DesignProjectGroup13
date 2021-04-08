@@ -19,7 +19,9 @@ import Button from 'react-bootstrap/Button'
 
 
 import globalStyles from '../helpers/global.module.css';
-import {IoCheckboxOutline, IoFileTrayOutline} from "react-icons/io5";
+import {IoCheckboxOutline, IoFileTrayOutline, IoCloudDownloadOutline, IoPencilOutline} from "react-icons/io5";
+import {Can} from "../permissions/CoursePageAbility";
+import ImportCourseModal from "./ImportCourseModal";
 
 class Home extends Component {
   constructor (props) {
@@ -28,8 +30,15 @@ class Home extends Component {
       courses: [],
       recentProjects: [],
       isLoaded: false,
-      tasks: []
+      tasks: [],
+      showImportModal: false
     }
+  }
+
+  toggleShowImportModal = () => {
+    this.setState(prevState=> ({
+      showImportModal: !prevState.showImportModal
+    }))
   }
 
   componentDidMount () {
@@ -61,17 +70,25 @@ class Home extends Component {
       });
   }
 
-  // gmailHandler = () => {
-  //   request(`/weird_string/gmail`)
-  //     .then(response => {
-  //       console.log(response)
-  //       return response.json()
-  //     })
-  //     .then((url) => {
-  //       window.location.href = url;
-  //       }
-  //     )
-  // }
+  reloadCourses = () => {
+    this.setState({
+      isLoaded: false,
+    })
+
+    request(BASE + USER_COURSES)
+      .then(async response => {
+        let courses = await response.json();
+        // console.log(courses);
+        this.setState({
+          courses: courses,
+          isLoaded: true
+        })
+
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
+  }
 
   render () {
     if (!this.state.isLoaded) {
@@ -100,6 +117,12 @@ class Home extends Component {
             data={this.state.courses}
             emptyText={"You are not participating in any course."}
             Component={CourseCard}
+            spreadButton={true}
+            button={
+              <Button variant="lightGreen" onClick={this.toggleShowImportModal}>
+                <IoCloudDownloadOutline size={20}/> Import
+              </Button>
+            }
             EmptyIcon={IoFileTrayOutline}
           />
 
@@ -121,6 +144,13 @@ class Home extends Component {
             EmptyIcon={IoFileTrayOutline}
           />
         </div>
+
+        <ImportCourseModal
+          show={this.state.showImportModal}
+          toggleShow={this.toggleShowImportModal}
+          imported={this.state.courses}
+          refresh={this.reloadCourses}
+        />
       </div>
     )
   }

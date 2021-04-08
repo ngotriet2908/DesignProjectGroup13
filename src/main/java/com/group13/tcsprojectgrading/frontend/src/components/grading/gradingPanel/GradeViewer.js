@@ -2,10 +2,8 @@ import React, { Component } from 'react'
 import styles from '../grading.module.css'
 import {connect} from "react-redux";
 
-import globalStyles from '../../helpers/global.module.css';
 import Card from "react-bootstrap/Card";
 import {isCriterion as isCriterionChecker} from "../../rubric/helpers";
-import Button from "react-bootstrap/Button";
 import {findById} from "../../../redux/rubric/functions";
 import {findCriterion} from "../../../redux/grading/functions";
 import {setActive} from "../../../redux/grading/actions";
@@ -14,6 +12,8 @@ import {request} from "../../../services/request";
 import classnames from 'classnames';
 import {IoCheckboxOutline, IoListOutline, IoFileTrayOutline, IoSquareOutline} from "react-icons/io5";
 import {findUserById} from "../../../redux/user/functions";
+import {ability, Can} from "../../permissions/ProjectAbility";
+import { subject } from '@casl/ability';
 
 
 class GradeViewer extends Component {
@@ -25,33 +25,17 @@ class GradeViewer extends Component {
     }
   }
 
-  componentDidMount() {
+  makeActive = (id) => {
+    if (!ability.can('edit', subject('Submission', (this.props.submission.grader === null)? {id: -1}:this.props.submission.grader))) return
 
-  }
-
-  makeActive = (key) => {
-    // send request
-    request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/${this.props.match.params.assessmentId}/grading/${this.props.selectedElement}/active/${key}`, "PUT")
+      request(`/api/courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${this.props.match.params.submissionId}/assessments/${this.props.match.params.assessmentId}/grades/${id}/activate`, "POST")
       .then(() => {
-        this.props.setActive(this.props.selectedElement, key)
+        this.props.setActive(this.props.selectedElement, id)
       })
       .catch(error => {
         console.error(error.message)
       });
   }
-
-  getUnknownUsers = (userIds) =>  {
-    let unknownUsers = []
-
-    userIds.forEach((userId) => {
-      if (!findUserById(userId, this.props.users)) {
-        unknownUsers.push(userId)
-      }
-    })
-
-    return unknownUsers;
-  }
-
 
   render () {
     let isCriterion = this.props.element.hasOwnProperty("content") && isCriterionChecker(this.props.element.content.type);
@@ -68,12 +52,12 @@ class GradeViewer extends Component {
             {isCriterion ?
               (isGraded ?
                 <div className={styles.gradeViewerBodyScroll}>
-                  {this.props.grades.history.map((grade, index) => {
+                  {this.props.grades.map((grade, index) => {
                     return (
-                      <div key={index} onClick={() => this.makeActive(index)}
-                        className={classnames(styles.gradeViewerRow, (index === this.props.grades.active) && styles.gradeViewerRowActive)}>
+                      <div key={index} onClick={() => this.makeActive(grade.id)}
+                        className={classnames(styles.gradeViewerRow, grade.active && styles.gradeViewerRowActive)}>
                         <div className={styles.gradeViewerRowIcon}>
-                          {index === this.props.grades.active ?
+                          {grade.active ?
                             <IoCheckboxOutline size={26}/>
                             :
                             <IoSquareOutline size={26}/>
@@ -81,12 +65,12 @@ class GradeViewer extends Component {
                         </div>
                         <div className={styles.gradeViewerRowContent}>
                           <div>
-                              Graded by {grade.userId} on {new Date(grade.created).toDateString()}
+                              Graded by {grade.grader.name} on {new Date(grade.gradedAt).toDateString()}
                           </div>
                           <div>
                               Grade {grade.grade}
-                            {grade.comment != null &&
-                              <span> with a note: {grade.comment}
+                            {grade.description != null &&
+                              <span> with a note: {grade.description}
                               </span>
                             }
                           </div>

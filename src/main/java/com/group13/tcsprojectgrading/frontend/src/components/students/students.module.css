@@ -1,0 +1,66 @@
+@value primary, secondary, ternary, quaternary, quinary, ultraLightGray, primaryShade, lightGray, senary, darkishGray, moderateGray from '../helpers/colors.css';
+
+.container {
+    margin-top: 2rem;
+}
+
+.toolbar {
+    display: flex;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid lightGray;
+}
+
+.toolbar > *:last-child {
+    margin-left: 0.5rem;
+}
+
+.groupsSearchBar {
+    margin-right: 0.5rem;
+    width: 100%;
+}
+
+.toolbarButton {
+    margin-top: 1rem;
+    display: flex;
+}
+
+
+/* list */
+
+.studentCard {
+    width: 100%;
+}
+
+.studentCard:not(:last-child) {
+    /*margin-bottom: 0.5rem;*/
+    margin-bottom: 1rem;
+}
+
+.studentCardTitle {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    /*margin-bottom: 0.5rem;*/
+}
+
+.studentCardTitle h5 {
+    margin: 0;
+}
+
+.studentCardHeaderButtonContainer {
+    flex: 1;
+}
+
+.studentCardHeaderButtonContainer div {
+    float: right;
+    color: primary;
+}
+
+.submissionItemHeader {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}

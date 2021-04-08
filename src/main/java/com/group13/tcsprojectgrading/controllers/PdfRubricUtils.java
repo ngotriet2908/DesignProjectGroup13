@@ -1,7 +1,6 @@
 package com.group13.tcsprojectgrading.controllers;
 
-import com.group13.tcsprojectgrading.models.grading.CriterionGrade;
-import com.group13.tcsprojectgrading.models.grading.Grade;
+import com.group13.tcsprojectgrading.models.project.Project;
 import com.group13.tcsprojectgrading.models.rubric.Element;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.models.rubric.RubricContent;
@@ -16,18 +15,20 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.group13.tcsprojectgrading.controllers.ProjectsController.addEmptyLine;
+import static com.group13.tcsprojectgrading.controllers.PdfUtils.addEmptyLine;
 
 public class PdfRubricUtils {
     private final Document document;
     private final Rubric rubric;
     private final Map<String, NodeInfo> nodeInfoMap;
     private int maxLevel;
+    private final Project project;
 
-    public PdfRubricUtils(Document document, Rubric rubric) {
+    public PdfRubricUtils(Document document, Rubric rubric, Project project) {
         this.document = document;
         this.rubric = rubric;
         this.maxLevel = 0;
+        this.project = project;
         nodeInfoMap = new HashMap<>();
     }
 
@@ -41,10 +42,10 @@ public class PdfRubricUtils {
         }
 
         PdfFont font = PdfFontFactory.createFont(FontConstants.COURIER);
-        Paragraph header = new Paragraph("Rubric")
+        Paragraph header = new Paragraph("Rubric of " + project.getName())
                 .setFont(font)
                 .setHorizontalAlignment(HorizontalAlignment.CENTER)
-                .setFontSize(25);
+                .setFontSize(24);
         addEmptyLine(header, 3);
 
         document.add(header);
@@ -172,7 +173,7 @@ public class PdfRubricUtils {
             }
         }
     }
-    
+
     public class NodeInfo {
         private int level;
         private String parentId;

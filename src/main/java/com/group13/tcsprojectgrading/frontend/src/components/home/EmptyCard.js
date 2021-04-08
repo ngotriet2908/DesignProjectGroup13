@@ -11,7 +11,7 @@ class EmptyCard extends Component {
 
   render () {
     return (
-      <Card className={classnames(styles.cardEmpty)}>
+      <Card className={classnames(styles.cardEmpty, this.props.className)}>
         <Card.Body className={styles.emptyCardBodyContainer}>
           <div className={styles.emptyCardContentContainer}>
             {this.props.icon &&

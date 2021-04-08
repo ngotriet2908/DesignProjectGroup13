@@ -17,7 +17,10 @@ import {
   IoReturnDownBackOutline,
   IoPencilSharp,
   IoListOutline,
-  IoReaderOutline
+  IoReaderOutline,
+  IoSettingsOutline,
+  IoPersonOutline,
+  IoSchool
 } from "react-icons/io5";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 import classnames from 'classnames';
@@ -46,7 +49,7 @@ class Sidebar extends React.Component {
 
   onClickSignOut = () => {
     request( "/logout", "POST", {})
-      .then(data => {
+      .then(() => {
         // redirect to login and remove user's info
         store.dispatch(push(URL_PREFIX + "/login"));
         this.props.removeUser();
@@ -147,6 +150,21 @@ class Sidebar extends React.Component {
           }
         </div>)
       )
+
+      result.push(
+        <div key="settings" className={`${styles.sidebarBodyItem}`}
+          onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.props.courseId + "/projects/" + this.props.projectId + "/settings"))}
+        >
+          <div className={styles.sidebarBodyItemLeft}>
+            <IoSettingsOutline className={styles.sidebarIcon} size={26}/>
+          </div>
+          {!this.state.isHidden &&
+          <span className={styles.sidebarBodyItemRight}>
+                  Settings
+          </span>
+          }
+        </div>
+      )
     } else if (this.props.location === LOCATIONS.rubric) {
       // rubric
       result.push(
@@ -206,8 +224,48 @@ class Sidebar extends React.Component {
           }
         </div>)
       )
+    } else if (this.props.location === LOCATIONS.settings) {
+      result.push(
+        <div key="settings" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`}
+          onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.props.courseId + "/projects/" + this.props.projectId + "/settings"))}
+        >
+          <div className={styles.sidebarBodyItemLeft}>
+            <IoSettingsOutline className={styles.sidebarIcon} size={26}/>
+          </div>
+          {!this.state.isHidden &&
+          <span className={styles.sidebarBodyItemRight}>
+                  Settings
+          </span>
+          }
+        </div>
+      );
+    } else if (this.props.location === LOCATIONS.graders) {
+      result.push(
+        <div key="graders" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {}}>
+          <div className={styles.sidebarBodyItemLeft}>
+            <IoPersonOutline className={styles.sidebarIcon} size={26}/>
+          </div>
+          {!this.state.isHidden &&
+            <span className={styles.sidebarBodyItemRight}>
+                  Graders
+            </span>
+          }
+        </div>
+      )
+    } else if (this.props.location === LOCATIONS.students) {
+      result.push(
+        <div key="students" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {}}>
+          <div className={styles.sidebarBodyItemLeft}>
+            <IoSchool className={styles.sidebarIcon} size={26}/>
+          </div>
+          {!this.state.isHidden &&
+          <span className={styles.sidebarBodyItemRight}>
+                  Students
+          </span>
+          }
+        </div>
+      )
     }
-    // }
 
     return result;
   }
@@ -251,7 +309,7 @@ class Sidebar extends React.Component {
             <div className={styles.sidebarBodyItem}>
               <div className={styles.sidebarBodyItemLeft}>
                 {this.props.user &&
-                <img height="40" width="40" src={this.props.user.avatar_url} alt={"profile picture"}/>
+                <img height="40" width="40" src={this.props.user.avatar} alt={"profile picture"}/>
                 }
               </div>
               {!this.state.isHidden &&
@@ -274,7 +332,9 @@ class Sidebar extends React.Component {
 const mapStateToProps = state => {
   return {
     user: state.users.self,
-    location: state.navigation.location
+    location: state.navigation.location,
+    courseId: state.navigation.course,
+    projectId: state.navigation.project
   };
 };
 

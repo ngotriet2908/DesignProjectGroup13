@@ -1,0 +1,192 @@
+import React, {Component} from "react";
+import styles from "./students.module.css";
+import {request} from "../../services/request";
+import {BASE} from "../../services/endpoints";
+import {Spinner, ButtonGroup, DropdownButton, Dropdown, FormControl} from "react-bootstrap";
+import StudentCard from "./StudentCard";
+import {setCurrentLocation} from "../../redux/navigation/actions";
+import {connect} from "react-redux";
+import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
+import globalStyles from "../helpers/global.module.css";
+import Breadcrumbs from "../helpers/Breadcrumbs";
+import classnames from "classnames";
+import store from "../../redux/store";
+import {push} from "connected-react-router";
+import {URL_PREFIX} from "../../services/config";
+import {ability, updateAbility} from "../permissions/ProjectAbility";
+
+class Students extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      participants: [],
+      project: {},
+      isLoaded: false,
+      filterChoice: "All",
+      searchString: "",
+    }
+  }
+
+  componentDidMount() {
+    this.props.setCurrentLocation(LOCATIONS.submissions);
+
+    Promise.all([
+      request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/participants`),
+      request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}`),
+      request(BASE + "courses/" + this.props.match.params.courseId),
+    ])
+      .then(async ([res1, res2, res3]) =>  {
+        const students = await res1.json();
+        const project = await res2.json();
+        const course = await res3.json();
+
+        if (project.privileges !== null) {
+          updateAbility(ability, project.privileges, this.props.user)
+          console.log(ability)
+          // console.log(ability.can('view',"AdminToolbar"))
+          // console.log(ability.can('read',"Submissions"))
+        } else {
+          console.log("No privileges found.")
+        }
+
+        this.setState({
+          course: course,
+          project: project,
+          students: students,
+          isLoaded: true,
+        })
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
+  }
+
+  onFilterSelectHandler = (eventKey) => {
+    this.setState({
+      filterChoice: eventKey
+    })
+  }
+
+  filterParticipantDropDown = (user) => {
+    let filter = this.state.filterChoice
+    if (filter === "All") return true;
+    if (filter === "Has submissions") return user.submissions.length > 0;
+    if (filter === "Has no submissions") return user.submissions.length === 0;
+    // if (filter === "group") return group.isGroup;
+    // if (filter === "individual") return !group.isGroup;
+    return false
+  }
+
+  filterParticipantSearchChange = (student) => {
+    let criteria = student.name.toLowerCase().includes(this.state.searchString.toLowerCase())
+    if (criteria) return true
+
+    if (student.hasOwnProperty("sid")) {
+      criteria = student.sid.toLowerCase().includes(this.state.searchString.toLowerCase())
+      if (criteria) return true
+    }
+
+    if (student.hasOwnProperty("email")) {
+      criteria = student.email.toLowerCase().includes(this.state.searchString.toLowerCase())
+      if (criteria) return true
+    }
+
+    return false
+  }
+
+  handleSearchChange = (event) => {
+    this.setState({
+      searchString: event.target.value
+    })
+  }
+
+  render () {
+    if (!this.state.isLoaded) {
+      return(
+        <div className={globalStyles.container}>
+          <Spinner className={globalStyles.spinner} animation="border" role="status">
+            <span className="sr-only">Loading...</span>
+          </Spinner>
+        </div>
+      )
+    }
+
+    return(
+      <div className={globalStyles.container}>
+        <Breadcrumbs>
+          <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumbs.Item>
+          <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id ))}>{this.state.course.name}</Breadcrumbs.Item>
+          <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id + "/projects/"+this.state.project.id))}>{this.state.project.name}</Breadcrumbs.Item>
+          <Breadcrumbs.Item active>Students</Breadcrumbs.Item>
+        </Breadcrumbs>
+
+        <div className={classnames(globalStyles.titleContainer, styles.titleContainer, this.state.syncing && styles.titleContainerIconActive)}>
+          <h1>Students</h1>
+        </div>
+
+        <div className={styles.container}>
+          <div>
+            <h3>Student List</h3>
+          </div>
+
+          <div className={styles.toolbar}>
+            <FormControl className={classnames(globalStyles.searchBar, styles.groupsSearchBar)}
+              type="text"
+              placeholder="Search with student name, student id, email"
+              onChange={this.handleSearchChange}/>
+
+            <DropdownButton
+              as={ButtonGroup}
+              key={"primary"}
+              id={`dropdown-Primary`}
+              variant={"lightGreen"}
+              title={"Filter"}
+              onSelect={this.onFilterSelectHandler}
+            >
+
+              {["All", "divider", "Has submissions", "Has no submissions"].map((filterS) => {
+                if (filterS === "divider") {
+                  return <Dropdown.Divider key={filterS}/>
+                } else if (filterS === this.state.filterChoice) {
+                  return <Dropdown.Item variant="lightGreen" key={filterS} eventKey={filterS} active>{filterS}</Dropdown.Item>
+                } else {
+                  return <Dropdown.Item key={filterS} eventKey={filterS}>{filterS}</Dropdown.Item>
+                }
+              })}
+            </DropdownButton>
+          </div>
+
+          <div>
+            {
+              this.state.students
+                .filter((student) => {
+                  return this.filterParticipantDropDown(student) && this.filterParticipantSearchChange(student.id.user);
+                })
+                .sort((s1, s2) => s1.id.user.name.localeCompare(s2.id.user.name))
+                .map((student) => {
+                  return (
+                    <StudentCard
+                      key={student.id.user.id}
+                      match={this.props.match}
+                      student={student}/>
+                  )
+                })}
+          </div>
+        </div>
+
+      </div>
+    )
+  }
+}
+
+const actionCreators = {
+  setCurrentLocation
+}
+
+const mapStateToProps = state => {
+  return {
+    user: state.users.self
+  };
+};
+
+export default connect(mapStateToProps, actionCreators)(Students)

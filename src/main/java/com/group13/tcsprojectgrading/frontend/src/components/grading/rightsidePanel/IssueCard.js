@@ -5,6 +5,8 @@ import {Button, Form, Card, Badge} from "react-bootstrap";
 import classnames from "classnames";
 import globalStyles from "../../helpers/global.module.css";
 import {IoCheckmarkDone, IoChevronDownOutline} from "react-icons/io5";
+import {Can} from "../../permissions/ProjectAbility";
+import { subject } from '@casl/ability';
 
 
 class IssueCard extends Component {
@@ -26,30 +28,36 @@ class IssueCard extends Component {
   }
 
   submitSolution = () => {
-    let obj = {
-      id: this.props.issue.id,
+    let solution = {
       solution: this.formRef.current.solutionInput.value
     }
 
-    request(`/api/courses/${this.props.routeParams.courseId}/projects/${this.props.routeParams.projectId}/submissions/${this.props.routeParams.submissionId}/${this.props.routeParams.assessmentId}/issues/resolve`, "POST", obj)
+    request(`/api/courses/${this.props.routeParams.courseId}/projects/${this.props.routeParams.projectId}/submissions/${this.props.routeParams.submissionId}/assessments/${this.props.routeParams.assessmentId}/issues/${this.props.issue.id}/resolve`,
+      "POST",
+      solution)
       .then(async (response) => {
         let data = await response.json();
-        this.props.updateIssues(data)
+
         this.setState({
-          isSolving: false
+          isSolving: false,
+          isExpanded: false,
         })
+
+        this.props.updateIssue(data);
       })
   }
 
   cancelResolve = () => {
     this.setState({
       isSolving: false,
+      isExpanded: false,
     })
   }
 
   startResolve = () => {
     this.setState({
       isSolving: true,
+      isExpanded: true,
     })
   }
 
@@ -65,19 +73,21 @@ class IssueCard extends Component {
               onClick={this.expandHandler}>
               <IoChevronDownOutline size={26}/>
             </div>
-            {!(this.props.issue.status === "resolved") &&
-            <div className={classnames(globalStyles.iconButtonSmall, styles.gradingCardTitleButton)}
-              onClick={this.startResolve}>
-              <IoCheckmarkDone size={26}/>
-            </div>
+            {!(this.props.issue.status === "Resolved") &&
+            <Can I="edit" this={subject('Submission', (this.props.submission.grader === null)? {id: -1}:this.props.submission.grader)}>
+              <div className={classnames(globalStyles.iconButtonSmall, styles.gradingCardTitleButton)}
+                onClick={this.startResolve}>
+                <IoCheckmarkDone size={26}/>
+              </div>
+            </Can>
             }
           </div>
         </div>
 
         <div className={styles.issueCardBadges}>
-          {(this.props.issue.status === "resolved")?
-            <Badge className={styles.badge} variant="success">resolved</Badge> :
-            <Badge className={styles.badge} variant="danger">unresolved</Badge>
+          {(this.props.issue.status === "Resolved")?
+            <Badge className={styles.badge} variant="success">Resolved</Badge> :
+            <Badge className={styles.badge} variant="danger">Open</Badge>
           }
         </div>
           
@@ -85,10 +95,11 @@ class IssueCard extends Component {
           (
             <div>
               <div>
-                Opened by <b>{this.props.issue.creator.name}</b> about <b>{this.props.issue.targetName}</b>.
+                Opened by <b>{this.props.issue.creator.name}</b>
+                {/*about <b>{this.props.issue.subject}</b>.*/}
               </div>
 
-              <div>Subject: {this.props.issue.subject}</div>
+              {/*<div>Subject: {this.props.issue.subject}</div>*/}
               <div>Description: {this.props.issue.description}</div>
 
               {(this.props.issue.hasOwnProperty("reference")) &&
@@ -107,13 +118,15 @@ class IssueCard extends Component {
           (
             <div>
               <div>
-                Opened by <b>{this.props.issue.creator.name}</b> about <b>{this.props.issue.targetName}</b>.
+                {/* todo: target vs subject */}
+                Opened by <b>{this.props.issue.creator.name}</b>
+                {/*about <b>{this.props.issue.subject}</b>.*/}
               </div>
             </div>
           )
         }
 
-        {(this.state.isSolving) &&
+        {this.props.issue.status !== "Resolved" && this.state.isSolving &&
           <div className={styles.issueCardSolution}>
             <h5>Solution</h5>
             <Form ref={this.formRef}>

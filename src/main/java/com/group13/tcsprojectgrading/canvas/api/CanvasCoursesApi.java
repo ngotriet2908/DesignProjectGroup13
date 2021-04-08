@@ -38,7 +38,7 @@ public class CanvasCoursesApi {
         }
     }
 
-    public String getUserCourse(String courseId) {
+    public String getUserCourse(Long courseId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
         if (authorizedClient == null) {
@@ -54,7 +54,7 @@ public class CanvasCoursesApi {
         }
     }
 
-    public List<String> getCourseProjects(String courseId) {
+    public List<String> getCourseProjects(Long courseId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
         if (authorizedClient == null) {
@@ -70,7 +70,7 @@ public class CanvasCoursesApi {
         }
     }
 
-    public List<String> getCourseParticipants(String courseId) {
+    public List<String> getCourseParticipants(Long courseId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
         if (authorizedClient == null) {
@@ -87,7 +87,24 @@ public class CanvasCoursesApi {
         }
     }
 
-    public String getCourseUser(String courseId, String userId) {
+    public List<String> getCourseParticipantsWithAvatars(Long courseId) {
+        OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
+
+        if (authorizedClient == null) {
+            return null;
+        } else {
+            URI uri = UriComponentsBuilder.newInstance()
+                    .scheme(CanvasEndpoints.SCHEME)
+                    .host(CanvasEndpoints.HOST)
+                    .path(CanvasEndpoints.COURSE_USERS_PATH)
+                    .queryParam("include[]", "enrollments", "avatar_url", "email")
+                    .build(courseId);
+
+            return this.canvasApi.sendRequestWithPagination(uri, HttpMethod.GET, authorizedClient);
+        }
+    }
+
+    public String getCourseUser(Long courseId, Long userId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
         if (authorizedClient == null) {
@@ -103,7 +120,7 @@ public class CanvasCoursesApi {
         }
     }
 
-    public List<String> getCourseGraders(String courseId) {
+    public List<String> getCourseGraders(Long courseId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
         if (authorizedClient == null) {
@@ -121,7 +138,7 @@ public class CanvasCoursesApi {
         }
     }
 
-    public List<String> getCourseStudents(String courseId) {
+    public List<String> getCourseStudents(Long courseId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
         if (authorizedClient == null) {
@@ -139,7 +156,7 @@ public class CanvasCoursesApi {
         }
     }
 
-    public List<String> getCourseGroupCategories(String courseId) {
+    public List<String> getCourseGroupCategories(Long courseId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
         if (authorizedClient == null) {
@@ -155,7 +172,7 @@ public class CanvasCoursesApi {
         }
     }
 
-    public List<String> getCourseGroupCategoryGroup(String groupCatId) {
+    public List<String> getCourseGroupCategoryGroup(Long groupCatId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
         if (authorizedClient == null) {
@@ -172,7 +189,7 @@ public class CanvasCoursesApi {
         }
     }
 
-    public List<String> getCourseGroups(String courseId) {
+    public List<String> getCourseGroups(Long courseId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
         if (authorizedClient == null) {
@@ -189,7 +206,7 @@ public class CanvasCoursesApi {
         }
     }
 
-    public List<String> getGroupMemberships(String groupId) {
+    public List<String> getGroupMemberships(Long groupId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
         if (authorizedClient == null) {
@@ -205,7 +222,7 @@ public class CanvasCoursesApi {
         }
     }
 
-    public List<String> getGroupUsers(String groupId) {
+    public List<String> getGroupUsers(Long groupId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
         if (authorizedClient == null) {
@@ -221,7 +238,7 @@ public class CanvasCoursesApi {
         }
     }
 
-    public List<String> getGroupsFromAccount(String accountId) {
+    public List<String> getGroupsFromAccount(Long accountId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
         if (authorizedClient == null) {
@@ -237,7 +254,7 @@ public class CanvasCoursesApi {
         }
     }
 
-    public List<String> getSubmissions(String courseId, Long assignmentId) {
+    public List<String> getSubmissions(Long courseId, Long assignmentId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
         if (authorizedClient == null) {
@@ -255,7 +272,7 @@ public class CanvasCoursesApi {
         }
     }
 
-    public List<String> getSubmissionsInfo(String courseId, Long assignmentId) {
+    public List<String> getSubmissionsInfo(Long courseId, Long assignmentId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
         if (authorizedClient == null) {
@@ -273,7 +290,7 @@ public class CanvasCoursesApi {
         }
     }
 
-    public String getSubmission(String courseId, String projectId , String submitterId) {
+    public String getSubmission(Long courseId, Long projectId , Long submitterId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
         if (authorizedClient == null) {
@@ -290,7 +307,7 @@ public class CanvasCoursesApi {
         }
     }
 
-    public String getSubmissionsSummary(String courseId, Long assignmentId) {
+    public String getSubmissionsSummary(Long courseId, Long assignmentId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
         if (authorizedClient == null) {
@@ -306,7 +323,7 @@ public class CanvasCoursesApi {
         }
     }
 
-    public String getCourseProject(String courseId, String projectId) {
+    public String getCourseProject(Long courseId, Long projectId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
         if (authorizedClient == null) {
@@ -322,7 +339,7 @@ public class CanvasCoursesApi {
         }
     }
 
-    public String getAssignmentGroups(String courseId, Long assignmentId) {
+    public String getAssignmentGroups(Long courseId, Long assignmentId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
         if (authorizedClient == null) {

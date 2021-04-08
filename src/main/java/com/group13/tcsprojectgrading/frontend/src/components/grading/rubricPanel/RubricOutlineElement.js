@@ -3,11 +3,11 @@ import React, { Component } from 'react'
 import styles from '../grading.module.css'
 import {connect} from "react-redux";
 import {addBlock, addCriterion, deleteElement, setCurrentPath, setSelectedElement} from "../../../redux/rubric/actions";
-import { isBlock} from "../../rubric/helpers";
+import {isBlock, isCriterion} from "../../rubric/helpers";
 import classnames from "classnames";
 import globalStyles from "../../helpers/global.module.css";
 import {IoChevronForwardOutline, IoCheckmarkSharp, IoPricetagOutline} from "react-icons/io5";
-import {isGraded} from "./helpers";
+import {getGrade, isGraded} from "./helpers";
 
 class RubricOutlineElement extends Component {
   constructor (props) {
@@ -23,7 +23,8 @@ class RubricOutlineElement extends Component {
   }
 
   render () {
-    const graded = isGraded(this.props.assessment.grades, this.props.data.content.id);
+    // const graded = isGraded(this.props.grades, this.props.data.content.id);
+    const activeGrade = getGrade(this.props.grades, this.props.data.content.id)
 
     return (
       <div className={classnames(
@@ -40,7 +41,7 @@ class RubricOutlineElement extends Component {
                 <IoChevronForwardOutline size={22} onClick={this.props.onClickBlockCollapse}/>
               </div>
               :
-              (graded ?
+              (activeGrade != null ?
                 <div className={classnames(styles.outlineElementIcon, styles.outlineElementIconGraded)}>
                   <IoCheckmarkSharp size={22}/>
                 </div>
@@ -55,6 +56,14 @@ class RubricOutlineElement extends Component {
               {this.props.data.content.title}
             </div>
           </div>
+
+          {isCriterion(this.props.data.content.type) && activeGrade != null &&
+          <div className={classnames(styles.outlineElementGrade)}>
+            <div>
+              {activeGrade.grade}
+            </div>
+          </div>
+          }
         </div>
       </div>
     )
@@ -66,7 +75,8 @@ const mapStateToProps = state => {
   return {
     rubric: state.rubric.rubric,
     selectedElement: state.rubric.selectedElement,
-    assessment: state.grading.assessment,
+    grades: state.grading.assessment.grades
+    // assessment: state.grading.assessment,
   };
 };
 
