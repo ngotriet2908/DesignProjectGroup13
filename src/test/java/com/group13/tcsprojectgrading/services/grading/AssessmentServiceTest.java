@@ -1,4 +1,4 @@
-package com.group13.tcsprojectgrading.grading;
+package com.group13.tcsprojectgrading.services.grading;
 
 import com.group13.tcsprojectgrading.models.Assessment;
 import com.group13.tcsprojectgrading.models.grading.CriterionGrade;
@@ -9,7 +9,6 @@ import com.group13.tcsprojectgrading.models.rubric.RubricContent;
 import com.group13.tcsprojectgrading.models.rubric.RubricGrade;
 import com.group13.tcsprojectgrading.repositories.grading.AssessmentRepository;
 import com.group13.tcsprojectgrading.services.AssessmentLinkerService;
-import com.group13.tcsprojectgrading.services.grading.AssessmentService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
