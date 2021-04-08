@@ -57,7 +57,8 @@ public class StatsController {
     @GetMapping(value="/{courseId}/projects/{projectId}/stats/groups", produces = "application/json")
     @ResponseBody
     protected ResponseEntity<ObjectNode> getGroupStats(@PathVariable String courseId, @PathVariable String projectId) throws JsonProcessingException {
-        String groupsString = this.canvasApi.getCanvasCoursesApi().getAssignmentGroups(courseId, Long.parseLong(projectId));
+        String groupsString = this.canvasApi.getCanvasCoursesApi().getAssignmentGroups(Long.parseLong(courseId), Long.parseLong(projectId));
+
         ArrayNode groups = mapper.readValue(groupsString, ArrayNode.class);
         int groupCount = groups.size();
 
@@ -74,7 +75,7 @@ public class StatsController {
     @GetMapping(value="/{courseId}/projects/{projectId}/stats/submissions", produces = "application/json")
     @ResponseBody
     protected ResponseEntity<ObjectNode> getSubmissionStats(@PathVariable String courseId, @PathVariable String projectId) throws JsonProcessingException {
-        String summary = this.canvasApi.getCanvasCoursesApi().getSubmissionsSummary(courseId, Long.parseLong(projectId));
+        String summary = this.canvasApi.getCanvasCoursesApi().getSubmissionsSummary(Long.parseLong(courseId), Long.parseLong(projectId));
 
         ObjectNode summaryNode = mapper.createObjectNode();
         summaryNode.put("title", "Submissions summary");

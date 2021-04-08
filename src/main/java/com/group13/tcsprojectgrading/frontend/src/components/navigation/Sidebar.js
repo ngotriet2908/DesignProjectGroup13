@@ -1,5 +1,5 @@
 import React from "react";
-import {Nav} from "react-bootstrap";
+import {Nav, OverlayTrigger} from "react-bootstrap";
 import styles from "./navigation.module.css"
 import store from "../../redux/store";
 import {goBack, push} from "connected-react-router";
@@ -20,10 +20,11 @@ import {
   IoReaderOutline,
   IoSettingsOutline,
   IoPersonOutline,
-  IoSchool
+  IoSchool, IoChevronBackSharp
 } from "react-icons/io5";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 import classnames from 'classnames';
+import Tooltip from "react-bootstrap/Tooltip";
 
 class Sidebar extends React.Component {
   constructor (props) {
@@ -65,206 +66,373 @@ class Sidebar extends React.Component {
 
     result = []
 
+    //if sidebar expanded, show text and remove tooltips
+
     if (this.props.location !== LOCATIONS.home) {
-      result.push(
-        <div key="back" className={`${styles.sidebarBodyItem}`} onClick={() => store.dispatch(goBack())}>
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoReturnDownBackOutline className={styles.sidebarIcon} size={26}/>
+      if (this.state.isHidden) {
+        result.push(
+          <OverlayTrigger placement="auto" overlay={
+            <Tooltip>Back</Tooltip>
+          }>
+            <div key="back" className={`${styles.sidebarBodyItem}`} onClick={() => store.dispatch(goBack())}>
+              <div className={styles.sidebarBodyItemLeft}>
+                <IoReturnDownBackOutline className={styles.sidebarIcon} size={26}/>
+              </div>
+            </div>
+          </OverlayTrigger>
+        );
+      } else {
+        result.push(
+          <div key="back" className={`${styles.sidebarBodyItem}`} onClick={() => store.dispatch(goBack())}>
+            <div className={styles.sidebarBodyItemLeft}>
+              <IoReturnDownBackOutline className={styles.sidebarIcon} size={26}/>
+            </div>
+            <span className={styles.sidebarBodyItemRight}>Back</span>
           </div>
-          {!this.state.isHidden &&
-            <span className={styles.sidebarBodyItemRight}>
-                  Back
-            </span>
-          }
-        </div>
-      )
+        );
+      }
     } else {
-      result.push(
-        <div key="back" className={classnames(styles.sidebarBodyItem, styles.sidebarBodyItemHidden)} onClick={() => store.dispatch(goBack())}>
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoReturnDownBackOutline className={styles.sidebarIcon} size={26}/>
+      if (this.state.isHidden) {
+        result.push(
+          <OverlayTrigger placement="auto" overlay={
+            <Tooltip>Back</Tooltip>
+          }>
+            <div key="back" className={classnames(styles.sidebarBodyItem, styles.sidebarBodyItemHidden)}
+               onClick={() => store.dispatch(goBack())}>
+              <div className={styles.sidebarBodyItemLeft}>
+                <IoReturnDownBackOutline className={styles.sidebarIcon} size={26}/>
+              </div>
+            </div>
+          </OverlayTrigger>
+        );
+      } else {
+        result.push(
+          <div key="back" className={classnames(styles.sidebarBodyItem, styles.sidebarBodyItemHidden)}
+               onClick={() => store.dispatch(goBack())}>
+            <div className={styles.sidebarBodyItemLeft}>
+              <IoReturnDownBackOutline className={styles.sidebarIcon} size={26}/>
+            </div>
+            <span className={styles.sidebarBodyItemRight}>Back</span>
           </div>
-          {!this.state.isHidden &&
-            <span className={styles.sidebarBodyItemRight}>
-                  Back
-            </span>
-          }
-        </div>
-      )
+        );
+      }
     }
 
-    if  (this.props.location === LOCATIONS.home) {
+    if (this.props.location === LOCATIONS.home) {
       // home
-      result.push(
-        <div key="home" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={this.onClickLogo}>
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoHomeOutline className={styles.sidebarIcon} size={26}/>
+      if (this.state.isHidden) {
+        result.push(
+          <OverlayTrigger placement="auto" overlay={
+            <Tooltip>Home</Tooltip>
+          }>
+            <div key="home" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`}
+               onClick={this.onClickLogo}>
+              <div className={styles.sidebarBodyItemLeft}>
+                <IoHomeOutline className={styles.sidebarIcon} size={26}/>
+              </div>
           </div>
-          {!this.state.isHidden &&
-        <span className={styles.sidebarBodyItemRight}>
-                  Home
-        </span>
-          }
-        </div>
-      )
+          </OverlayTrigger>
+        );
+      } else {
+        result.push(
+          <div key="home" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`}
+               onClick={this.onClickLogo}>
+            <div className={styles.sidebarBodyItemLeft}>
+              <IoHomeOutline className={styles.sidebarIcon} size={26}/>
+            </div>
+            <span className={styles.sidebarBodyItemRight}>Home</span>
+          </div>
+        );
+      }
     } else {
-      result.push(
-        <div key="home" className={`${styles.sidebarBodyItem}`} onClick={this.onClickLogo}>
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoHomeOutline className={styles.sidebarIcon} size={26}/>
+      if (this.state.isHidden) {
+        result.push(
+          <OverlayTrigger placement="auto" overlay={
+            <Tooltip>Home</Tooltip>
+          }>
+            <div key="home" className={`${styles.sidebarBodyItem}`} onClick={this.onClickLogo}>
+              <div className={styles.sidebarBodyItemLeft}>
+                <IoHomeOutline className={styles.sidebarIcon} size={26}/>
+              </div>
+            </div>
+          </OverlayTrigger>
+        );
+      } else {
+        result.push(
+          <div key="home" className={`${styles.sidebarBodyItem}`} onClick={this.onClickLogo}>
+            <div className={styles.sidebarBodyItemLeft}>
+              <IoHomeOutline className={styles.sidebarIcon} size={26}/>
+            </div>
+            <span className={styles.sidebarBodyItemRight}>Home</span>
           </div>
-          {!this.state.isHidden &&
-          <span className={styles.sidebarBodyItemRight}>
-                  Home
-          </span>
-          }
-        </div>
-      )
+        );
+      }
     }
 
     if (this.props.location === LOCATIONS.course) {
       // course
-      result.push(
-        (<div key="course" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {}}>
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoBookOutline className={styles.sidebarIcon} size={26}/>
+      if (this.state.isHidden) {
+        result.push(
+          <OverlayTrigger placement="auto" overlay={
+            <Tooltip>Course</Tooltip>
+          }>
+            <div key="course" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
+            }}>
+              <div className={styles.sidebarBodyItemLeft}>
+                  <IoBookOutline className={styles.sidebarIcon} size={26}/>
+              </div>
+            </div>
+          </OverlayTrigger>
+        );
+      } else {
+        result.push(
+          <div key="course" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
+          }}>
+            <div className={styles.sidebarBodyItemLeft}>
+              <IoBookOutline className={styles.sidebarIcon} size={26}/>
+            </div>
+            <span className={styles.sidebarBodyItemRight}>Course</span>
           </div>
-          {!this.state.isHidden &&
-          <span className={styles.sidebarBodyItemRight}>
-                    Course
-          </span>
-          }
-        </div>)
-      )
+        );
+      }
     } else if (this.props.location === LOCATIONS.project) {
-      // project
-      result.push(
-        (<div key="project" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {}}>
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoCreateOutline className={styles.sidebarIcon} size={26}/>
-          </div>
-          {!this.state.isHidden &&
-            <span className={styles.sidebarBodyItemRight}>
-                    Project
-            </span>
-          }
-        </div>)
-      )
+      if (this.state.isHidden) {
+        // project
+        result.push(
+          <OverlayTrigger placement="auto" overlay={
+            <Tooltip>Project</Tooltip>
+          }>
+            <div key="project" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
+            }}>
+              <div className={styles.sidebarBodyItemLeft}>
+                  <IoCreateOutline className={styles.sidebarIcon} size={26}/>
+              </div>
+            </div>
+          </OverlayTrigger>
+        );
 
-      result.push(
-        <div key="settings" className={`${styles.sidebarBodyItem}`}
-          onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.props.courseId + "/projects/" + this.props.projectId + "/settings"))}
-        >
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoSettingsOutline className={styles.sidebarIcon} size={26}/>
+        result.push(
+          <OverlayTrigger placement="auto" overlay={
+            <Tooltip>Settings</Tooltip>
+          }>
+            <div key="settings" className={`${styles.sidebarBodyItem}`}
+                 onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.props.courseId + "/projects/" + this.props.projectId + "/settings"))}
+            >
+              <div className={styles.sidebarBodyItemLeft}>
+                  <IoSettingsOutline className={styles.sidebarIcon} size={26}/>
+              </div>
+            </div>
+          </OverlayTrigger>
+        );
+      } else {
+        result.push(
+          <div key="project" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
+          }}>
+            <div className={styles.sidebarBodyItemLeft}>
+              <IoCreateOutline className={styles.sidebarIcon} size={26}/>
+            </div>
+            <span className={styles.sidebarBodyItemRight}>Project</span>
           </div>
-          {!this.state.isHidden &&
-          <span className={styles.sidebarBodyItemRight}>
-                  Settings
-          </span>
-          }
-        </div>
-      )
+        );
+
+        result.push(
+          <div key="settings" className={`${styles.sidebarBodyItem}`}
+               onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.props.courseId + "/projects/" + this.props.projectId + "/settings"))}
+          >
+            <div className={styles.sidebarBodyItemLeft}>
+              <IoSettingsOutline className={styles.sidebarIcon} size={26}/>
+            </div>
+            <span className={styles.sidebarBodyItemRight}>Settings</span>
+            }
+          </div>
+        );
+      }
+
     } else if (this.props.location === LOCATIONS.rubric) {
       // rubric
-      result.push(
-        (<div key="rubric" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {}}>
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoGrid className={styles.sidebarIcon} size={26}/>
+      if (this.state.isHidden) {
+        result.push(
+          <OverlayTrigger placement="auto" overlay={
+            <Tooltip>Rubric</Tooltip>
+          }>
+            <div key="rubric" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
+            }}>
+              <div className={styles.sidebarBodyItemLeft}>
+                  <IoGrid className={styles.sidebarIcon} size={26}/>
+              </div>
+            </div>
+          </OverlayTrigger>
+        );
+      } else {
+        result.push(
+          <div key="rubric" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
+          }}>
+            <div className={styles.sidebarBodyItemLeft}>
+              <IoGrid className={styles.sidebarIcon} size={26}/>
+            </div>
+            <span className={styles.sidebarBodyItemRight}>Rubric</span>
           </div>
-          {!this.state.isHidden &&
-            <span className={styles.sidebarBodyItemRight}>
-                    Rubric
-            </span>
-          }
-        </div>)
-      )
+        );
+      }
     } else if (this.props.location === LOCATIONS.grading) {
       // grading
-      result.push(
-        (<div key="grading" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
-        }}>
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoPencilSharp className={styles.sidebarIcon} size={26}/>
+      if (this.state.isHidden) {
+        result.push(
+          <OverlayTrigger placement="auto" overlay={
+            <Tooltip>Grading</Tooltip>
+          }>
+            <div key="grading" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
+            }}>
+              <div className={styles.sidebarBodyItemLeft}>
+                  <IoPencilSharp className={styles.sidebarIcon} size={26}/>
+              </div>
+            </div>
+          </OverlayTrigger>
+        );
+      } else {
+        result.push(
+          <div key="grading" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
+          }}>
+            <div className={styles.sidebarBodyItemLeft}>
+              <IoPencilSharp className={styles.sidebarIcon} size={26}/>
+            </div>
+            <span className={styles.sidebarBodyItemRight}>Grading</span>
           </div>
-          {!this.state.isHidden &&
-            <span className={styles.sidebarBodyItemRight}>
-                    Grading
-            </span>
-          }
-        </div>)
-      )
+        );
+      }
     } else if (this.props.location === LOCATIONS.submissions) {
       // submissions
-      result.push(
-        (<div key="submissions" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
-        }}>
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoListOutline className={styles.sidebarIcon} size={26}/>
+      if (this.state.isHidden) {
+        result.push(
+          <OverlayTrigger placement="auto" overlay={
+            <Tooltip>Submissions</Tooltip>
+          }>
+            <div key="submissions" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`}
+                  onClick={() => {
+                  }}>
+              <div className={styles.sidebarBodyItemLeft}>
+                  <IoListOutline className={styles.sidebarIcon} size={26}/>
+              </div>
+            </div>
+          </OverlayTrigger>
+        );
+      } else {
+        result.push(
+          <div key="submissions" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`}
+                onClick={() => {
+                }}>
+            <div className={styles.sidebarBodyItemLeft}>
+              <IoListOutline className={styles.sidebarIcon} size={26}/>
+            </div>
+            <span className={styles.sidebarBodyItemRight}>Submissions</span>
           </div>
-          {!this.state.isHidden &&
-          <span className={styles.sidebarBodyItemRight}>
-                    Submissions
-          </span>
-          }
-        </div>)
-      )
+        );
+      }
     } else if (this.props.location === LOCATIONS.submission) {
       // submission
-      result.push(
-        (<div key="submission" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
-        }}>
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoReaderOutline className={styles.sidebarIcon} size={26}/>
+      if (this.state.isHidden) {
+        result.push(
+          <OverlayTrigger placement="auto" overlay={
+            <Tooltip>Submission</Tooltip>
+          }>
+            <div key="submission" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`}
+                  onClick={() => {
+                  }}>
+              <div className={styles.sidebarBodyItemLeft}>
+                  <IoReaderOutline className={styles.sidebarIcon} size={26}/>
+              </div>
+            </div>
+          </OverlayTrigger>
+        );
+      } else {
+        result.push(
+          <div key="submission" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`}
+                onClick={() => {
+                }}>
+            <div className={styles.sidebarBodyItemLeft}>
+              <IoReaderOutline className={styles.sidebarIcon} size={26}/>
+            </div>
+            <span className={styles.sidebarBodyItemRight}>Submission</span>
           </div>
-          {!this.state.isHidden &&
-          <span className={styles.sidebarBodyItemRight}>
-                    Submission
-          </span>
-          }
-        </div>)
-      )
+        );
+      }
     } else if (this.props.location === LOCATIONS.settings) {
-      result.push(
-        <div key="settings" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`}
-          onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.props.courseId + "/projects/" + this.props.projectId + "/settings"))}
-        >
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoSettingsOutline className={styles.sidebarIcon} size={26}/>
+      if (this.state.isHidden) {
+        result.push(
+          <OverlayTrigger placement="auto" overlay={
+            <Tooltip>Settings</Tooltip>
+          }>
+            <div key="settings" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`}
+                 onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.props.courseId + "/projects/" + this.props.projectId + "/settings"))}
+            >
+              <div className={styles.sidebarBodyItemLeft}>
+                  <IoSettingsOutline className={styles.sidebarIcon} size={26}/>
+              </div>
+            </div>
+          </OverlayTrigger>
+        );
+      } else {
+        result.push(
+          <div key="settings" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`}
+               onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.props.courseId + "/projects/" + this.props.projectId + "/settings"))}
+          >
+            <div className={styles.sidebarBodyItemLeft}>
+              <IoSettingsOutline className={styles.sidebarIcon} size={26}/>
+            </div>
+            <span className={styles.sidebarBodyItemRight}>Settings</span>
           </div>
-          {!this.state.isHidden &&
-          <span className={styles.sidebarBodyItemRight}>
-                  Settings
-          </span>
-          }
-        </div>
-      );
+        );
+      }
     } else if (this.props.location === LOCATIONS.graders) {
-      result.push(
-        <div key="graders" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {}}>
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoPersonOutline className={styles.sidebarIcon} size={26}/>
+      if (this.state.isHidden) {
+        result.push(
+          <OverlayTrigger placement="auto" overlay={
+            <Tooltip>Graders</Tooltip>
+          }>
+            <div key="graders" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
+            }}>
+              <div className={styles.sidebarBodyItemLeft}>
+                  <IoPersonOutline className={styles.sidebarIcon} size={26}/>
+              </div>
+            </div>
+          </OverlayTrigger>
+        );
+      } else {
+        result.push(
+          <div key="graders" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
+          }}>
+            <div className={styles.sidebarBodyItemLeft}>
+              <IoPersonOutline className={styles.sidebarIcon} size={26}/>
+            </div>
+            <span className={styles.sidebarBodyItemRight}>Graders</span>
           </div>
-          {!this.state.isHidden &&
-            <span className={styles.sidebarBodyItemRight}>
-                  Graders
-            </span>
-          }
-        </div>
-      )
+        );
+      }
     } else if (this.props.location === LOCATIONS.students) {
-      result.push(
-        <div key="students" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {}}>
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoSchool className={styles.sidebarIcon} size={26}/>
+      if (this.state.isHidden) {
+        result.push(
+          <OverlayTrigger placement="auto" overlay={
+            <Tooltip>Students</Tooltip>
+          }>
+            <div key="students" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
+            }}>
+              <div className={styles.sidebarBodyItemLeft}>
+                <IoSchool className={styles.sidebarIcon} size={26}/>
+              </div>
+            </div>
+          </OverlayTrigger>
+        );
+      } else {
+        result.push(
+          <div key="students" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
+          }}>
+            <div className={styles.sidebarBodyItemLeft}>
+              <IoSchool className={styles.sidebarIcon} size={26}/>
+            </div>
+            <span className={styles.sidebarBodyItemRight}>Students</span>
           </div>
-          {!this.state.isHidden &&
-          <span className={styles.sidebarBodyItemRight}>
-                  Students
-          </span>
-          }
-        </div>
-      )
+        );
+      }
     }
 
     return result;
@@ -289,14 +457,19 @@ class Sidebar extends React.Component {
                 onClick={this.onClickLogo}/>
             </div>
             }
-
-            <div className={styles.sidebarHeaderButton} onClick={this.onClickHideSidebar}>
-              {this.state.isHidden ?
-                <IoMenuSharp size={26}/>
-                :
-                <IoMenuSharp size={26}/>
-              }
-            </div>
+            {/*The tooltip stays once you close the menu and idk how to go around that, not sure if we even need tooltip
+            here anyway*/}
+            {/*<OverlayTrigger placement="auto" overlay={*/}
+            {/*  <Tooltip>{this.state.isHidden ? "Open Menu" : "Close"}</Tooltip>*/}
+            {/*} trigger="hover">*/}
+              <div className={styles.sidebarHeaderButton} onClick={this.onClickHideSidebar}>
+                {this.state.isHidden ?
+                  <IoMenuSharp size={26}/>
+                  :
+                  <IoChevronBackSharp size={26}/>
+                }
+              </div>
+            {/*</OverlayTrigger>*/}
           </div>
 
           <div className={styles.sidebarBody}>
