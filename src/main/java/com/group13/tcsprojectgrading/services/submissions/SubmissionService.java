@@ -361,7 +361,14 @@ public class SubmissionService {
      */
     @Transactional
     public void dissociateSubmissionsFromUsers(List<User> users) {
-        this.submissionRepository.dissociateSubmissionsFromUsersNotInList(users);
+
+//        Obtain write locks on these submissions
+        List<Submission> submissions = submissionRepository.findAllByGraderIsNotIn(users)
+                .stream().peek(submission -> submission.setGrader(null)).collect(Collectors.toList());
+        submissionRepository.saveAll(submissions);
+
+//        TODO check this whether you want to use saveAll or your custom update
+//        this.submissionRepository.dissociateSubmissionsFromUsersNotInList(users);
     }
 
     /*

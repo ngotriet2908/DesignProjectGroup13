@@ -190,7 +190,6 @@ public class ProjectService {
         return courseParticipation;
     }
 
-
     @Transactional
     public Project getProject(Long projectId) {
         return this.projectRepository.findById(projectId).orElse(null);
@@ -387,7 +386,9 @@ public class ProjectService {
      */
     @Transactional
     public List<User> saveProjectGraders(Long projectId, List<User> graders, Long userId) throws IOException {
-        Project project = this.projectRepository.findById(projectId).orElse(null);
+
+        //Obtain a write lock on project
+        Project project = this.projectRepository.findProjectById(projectId).orElse(null);
 
         if (project == null) {
             throw new ResponseStatusException(
@@ -400,6 +401,10 @@ public class ProjectService {
                     HttpStatus.BAD_REQUEST, "Self must be explicitly included as a grader"
             );
         }
+
+////        Obtain a locks on all graders in the project
+////        TODO should more efficient by only lock the "would be" affected only
+//        this.gradingParticipationService.getLocksOnAllProjectGraders(project);
 
         // move all submissions of the removed graders to 'unassigned' (i.e. all graders that are not in the selected list)
         // for all submissions, if submission's grader is NOT in USERS, set grader to null

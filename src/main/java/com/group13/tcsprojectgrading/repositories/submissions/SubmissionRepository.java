@@ -40,4 +40,7 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
         "SET s.grader=null " +
         "WHERE s.grader NOT IN ?1")
     void dissociateSubmissionsFromUsersNotInList(List<User> graders);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    List<Submission> findAllByGraderIsNotIn(List<User> graders);
 }

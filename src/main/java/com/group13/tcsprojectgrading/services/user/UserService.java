@@ -22,6 +22,7 @@ public class UserService {
     public void saveUser(User user) {
         //Obtain write lock on user
         User user1 = userRepository.findUserById(user.getId()).orElse(null);
+
         this.userRepository.save(user);
     }
 

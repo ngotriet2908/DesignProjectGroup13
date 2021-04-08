@@ -5,7 +5,9 @@ import com.group13.tcsprojectgrading.models.user.User;
 import com.group13.tcsprojectgrading.models.grading.AssessmentLink;
 import com.group13.tcsprojectgrading.models.submissions.Submission;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 
+import javax.persistence.LockModeType;
 import javax.transaction.Transactional;
 import java.util.Set;
 
@@ -18,6 +20,8 @@ public interface AssessmentLinkRepository extends JpaRepository<AssessmentLink, 
     Set<AssessmentLink> findDistinctUserById_Submission(Submission id_submission);
 
     AssessmentLink findAssessmentLinkById_Submission_IdAndAndId_User_Id(Long submissionId, Long userId);
+
+    @Lock(LockModeType.PESSIMISTIC_READ)
     Set<AssessmentLink> findAssessmentLinksById_Submission_Project_IdAndId_User(Long projectId, User user);
 
     // get current assessment

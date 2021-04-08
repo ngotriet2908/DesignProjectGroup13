@@ -45,6 +45,11 @@ public class GradingParticipationService {
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
+    public List<GradingParticipation> getLocksOnAllProjectGraders(Project project) {
+        return this.repository.findAllById_Project(project);
+    }
+
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public void deleteGradingParticipation(GradingParticipation grader) {
         this.repository.delete(grader);
     }
@@ -80,6 +85,7 @@ public class GradingParticipationService {
 
     @Transactional(value = Transactional.TxType.MANDATORY)
     public void deleteAllNonTeacherGradingParticipationByProject(Long projectId) {
+        this.repository.findAllById_Project_Id_AndRole_NameNot(projectId, RoleEnum.TEACHER.getName());
         this.repository.deleteAllById_Project_Id_AndRole_NameNot(projectId, RoleEnum.TEACHER.getName());
     }
 

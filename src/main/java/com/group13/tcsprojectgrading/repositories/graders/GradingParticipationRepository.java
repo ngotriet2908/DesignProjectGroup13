@@ -23,6 +23,9 @@ public interface GradingParticipationRepository extends JpaRepository<GradingPar
     @Lock(LockModeType.PESSIMISTIC_READ)
     List<GradingParticipation> findById_Project(Project id_project);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    List<GradingParticipation> findAllById_Project(Project id_project);
+
     @Lock(LockModeType.PESSIMISTIC_READ)
     @Query(value="select new User(u.id, u.name) " +
             "from GradingParticipation g, User u " +
@@ -32,6 +35,7 @@ public interface GradingParticipationRepository extends JpaRepository<GradingPar
     @Lock(LockModeType.PESSIMISTIC_WRITE)
    <S extends GradingParticipation> S save(S s);
 
+    @Lock(LockModeType.PESSIMISTIC_READ)
     @Query(value="select distinct u " +
             "from GradingParticipation g, User u " +
             "left join fetch u.toGrade " +
@@ -46,6 +50,9 @@ public interface GradingParticipationRepository extends JpaRepository<GradingPar
 
     @Modifying(clearAutomatically=true)
     void deleteAllById_Project_Id_AndRole_NameNot(Long id_project_id, String roleName);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    List<GradingParticipation> findAllById_Project_Id_AndRole_NameNot(Long id_project_id, String roleName);
 
 //    @Modifying
 //    @Query(value="INSERT INTO grading_participation (user_id, project_id, role_id) " +
