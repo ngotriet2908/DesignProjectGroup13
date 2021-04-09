@@ -1,5 +1,4 @@
 import React from "react";
-import {Nav, OverlayTrigger} from "react-bootstrap";
 import styles from "./navigation.module.css"
 import store from "../../redux/store";
 import {goBack, push} from "connected-react-router";
@@ -24,6 +23,8 @@ import {
 } from "react-icons/io5";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 import classnames from 'classnames';
+import ButtonTooltip from "../helpers/ButtonTooltip";
+import {OverlayTrigger} from "react-bootstrap";
 import Tooltip from "react-bootstrap/Tooltip";
 
 class Sidebar extends React.Component {
@@ -71,15 +72,12 @@ class Sidebar extends React.Component {
     if (this.props.location !== LOCATIONS.home) {
       if (this.state.isHidden) {
         result.push(
-          <OverlayTrigger placement="auto" overlay={
-            <Tooltip>Back</Tooltip>
-          }>
-            <div key="back" className={`${styles.sidebarBodyItem}`} onClick={() => store.dispatch(goBack())}>
-              <div className={styles.sidebarBodyItemLeft}>
-                <IoReturnDownBackOutline className={styles.sidebarIcon} size={26}/>
-              </div>
+          <ButtonTooltip key="back" className={styles.sidebarBodyItem} onClick={() => store.dispatch(goBack())}
+          content="Back">
+            <div className={styles.sidebarBodyItemLeft}>
+              <IoReturnDownBackOutline className={styles.sidebarIcon} size={26}/>
             </div>
-          </OverlayTrigger>
+          </ButtonTooltip>
         );
       } else {
         result.push(
@@ -94,16 +92,12 @@ class Sidebar extends React.Component {
     } else {
       if (this.state.isHidden) {
         result.push(
-          <OverlayTrigger placement="auto" overlay={
-            <Tooltip>Back</Tooltip>
-          }>
-            <div key="back" className={classnames(styles.sidebarBodyItem, styles.sidebarBodyItemHidden)}
-               onClick={() => store.dispatch(goBack())}>
-              <div className={styles.sidebarBodyItemLeft}>
-                <IoReturnDownBackOutline className={styles.sidebarIcon} size={26}/>
-              </div>
+          <ButtonTooltip key="back" className={classnames(styles.sidebarBodyItem, styles.sidebarBodyItemHidden)}
+             onClick={() => store.dispatch(goBack())} content="Back">
+            <div className={styles.sidebarBodyItemLeft}>
+              <IoReturnDownBackOutline className={styles.sidebarIcon} size={26}/>
             </div>
-          </OverlayTrigger>
+          </ButtonTooltip>
         );
       } else {
         result.push(
@@ -122,16 +116,12 @@ class Sidebar extends React.Component {
       // home
       if (this.state.isHidden) {
         result.push(
-          <OverlayTrigger placement="auto" overlay={
-            <Tooltip>Home</Tooltip>
-          }>
-            <div key="home" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`}
-               onClick={this.onClickLogo}>
+          <ButtonTooltip key="home" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`}
+               onClick={this.onClickLogo} content="Home">
               <div className={styles.sidebarBodyItemLeft}>
                 <IoHomeOutline className={styles.sidebarIcon} size={26}/>
               </div>
-          </div>
-          </OverlayTrigger>
+          </ButtonTooltip>
         );
       } else {
         result.push(
@@ -147,15 +137,11 @@ class Sidebar extends React.Component {
     } else {
       if (this.state.isHidden) {
         result.push(
-          <OverlayTrigger placement="auto" overlay={
-            <Tooltip>Home</Tooltip>
-          }>
-            <div key="home" className={`${styles.sidebarBodyItem}`} onClick={this.onClickLogo}>
-              <div className={styles.sidebarBodyItemLeft}>
-                <IoHomeOutline className={styles.sidebarIcon} size={26}/>
-              </div>
+          <ButtonTooltip key="home" className={`${styles.sidebarBodyItem}`} onClick={this.onClickLogo} content="Home">
+            <div className={styles.sidebarBodyItemLeft}>
+              <IoHomeOutline className={styles.sidebarIcon} size={26}/>
             </div>
-          </OverlayTrigger>
+          </ButtonTooltip>
         );
       } else {
         result.push(
@@ -173,16 +159,12 @@ class Sidebar extends React.Component {
       // course
       if (this.state.isHidden) {
         result.push(
-          <OverlayTrigger placement="auto" overlay={
-            <Tooltip>Course</Tooltip>
-          }>
-            <div key="course" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
-            }}>
-              <div className={styles.sidebarBodyItemLeft}>
-                  <IoBookOutline className={styles.sidebarIcon} size={26}/>
-              </div>
+          <ButtonTooltip key="course" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
+          }} content="Course">
+            <div className={styles.sidebarBodyItemLeft}>
+                <IoBookOutline className={styles.sidebarIcon} size={26}/>
             </div>
-          </OverlayTrigger>
+          </ButtonTooltip>
         );
       } else {
         result.push(
@@ -199,30 +181,22 @@ class Sidebar extends React.Component {
       if (this.state.isHidden) {
         // project
         result.push(
-          <OverlayTrigger placement="auto" overlay={
-            <Tooltip>Project</Tooltip>
-          }>
-            <div key="project" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
-            }}>
-              <div className={styles.sidebarBodyItemLeft}>
-                  <IoCreateOutline className={styles.sidebarIcon} size={26}/>
-              </div>
+          <ButtonTooltip key="project" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
+          }} content="Project">
+            <div className={styles.sidebarBodyItemLeft}>
+                <IoCreateOutline className={styles.sidebarIcon} size={26}/>
             </div>
-          </OverlayTrigger>
+          </ButtonTooltip>
         );
 
         result.push(
-          <OverlayTrigger placement="auto" overlay={
-            <Tooltip>Settings</Tooltip>
-          }>
-            <div key="settings" className={`${styles.sidebarBodyItem}`}
-                 onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.props.courseId + "/projects/" + this.props.projectId + "/settings"))}
-            >
+          <ButtonTooltip key="settings" className={`${styles.sidebarBodyItem}`} content="Settings"
+               onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.props.courseId + "/projects/" + this.props.projectId + "/settings"))}
+          >
               <div className={styles.sidebarBodyItemLeft}>
                   <IoSettingsOutline className={styles.sidebarIcon} size={26}/>
               </div>
-            </div>
-          </OverlayTrigger>
+          </ButtonTooltip>
         );
       } else {
         result.push(
@@ -252,16 +226,12 @@ class Sidebar extends React.Component {
       // rubric
       if (this.state.isHidden) {
         result.push(
-          <OverlayTrigger placement="auto" overlay={
-            <Tooltip>Rubric</Tooltip>
-          }>
-            <div key="rubric" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
-            }}>
-              <div className={styles.sidebarBodyItemLeft}>
-                  <IoGrid className={styles.sidebarIcon} size={26}/>
-              </div>
+          <ButtonTooltip key="rubric" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
+          }} content="Rubric">
+            <div className={styles.sidebarBodyItemLeft}>
+                <IoGrid className={styles.sidebarIcon} size={26}/>
             </div>
-          </OverlayTrigger>
+          </ButtonTooltip>
         );
       } else {
         result.push(
@@ -278,16 +248,12 @@ class Sidebar extends React.Component {
       // grading
       if (this.state.isHidden) {
         result.push(
-          <OverlayTrigger placement="auto" overlay={
-            <Tooltip>Grading</Tooltip>
-          }>
-            <div key="grading" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
-            }}>
-              <div className={styles.sidebarBodyItemLeft}>
-                  <IoPencilSharp className={styles.sidebarIcon} size={26}/>
-              </div>
+          <ButtonTooltip key="grading" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
+          }} content="Grading">
+            <div className={styles.sidebarBodyItemLeft}>
+                <IoPencilSharp className={styles.sidebarIcon} size={26}/>
             </div>
-          </OverlayTrigger>
+          </ButtonTooltip>
         );
       } else {
         result.push(
@@ -304,17 +270,12 @@ class Sidebar extends React.Component {
       // submissions
       if (this.state.isHidden) {
         result.push(
-          <OverlayTrigger placement="auto" overlay={
-            <Tooltip>Submissions</Tooltip>
-          }>
-            <div key="submissions" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`}
-                  onClick={() => {
-                  }}>
-              <div className={styles.sidebarBodyItemLeft}>
-                  <IoListOutline className={styles.sidebarIcon} size={26}/>
-              </div>
+          <ButtonTooltip key="submissions" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`}
+                onClick={() => {}} content="Submissions">
+            <div className={styles.sidebarBodyItemLeft}>
+                <IoListOutline className={styles.sidebarIcon} size={26}/>
             </div>
-          </OverlayTrigger>
+          </ButtonTooltip>
         );
       } else {
         result.push(
@@ -332,17 +293,12 @@ class Sidebar extends React.Component {
       // submission
       if (this.state.isHidden) {
         result.push(
-          <OverlayTrigger placement="auto" overlay={
-            <Tooltip>Submission</Tooltip>
-          }>
-            <div key="submission" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`}
-                  onClick={() => {
-                  }}>
-              <div className={styles.sidebarBodyItemLeft}>
-                  <IoReaderOutline className={styles.sidebarIcon} size={26}/>
-              </div>
+          <ButtonTooltip key="submission" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`}
+                onClick={() => {}} content="Submission">
+            <div className={styles.sidebarBodyItemLeft}>
+                <IoReaderOutline className={styles.sidebarIcon} size={26}/>
             </div>
-          </OverlayTrigger>
+          </ButtonTooltip>
         );
       } else {
         result.push(
@@ -359,17 +315,13 @@ class Sidebar extends React.Component {
     } else if (this.props.location === LOCATIONS.settings) {
       if (this.state.isHidden) {
         result.push(
-          <OverlayTrigger placement="auto" overlay={
-            <Tooltip>Settings</Tooltip>
-          }>
-            <div key="settings" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`}
-                 onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.props.courseId + "/projects/" + this.props.projectId + "/settings"))}
-            >
-              <div className={styles.sidebarBodyItemLeft}>
-                  <IoSettingsOutline className={styles.sidebarIcon} size={26}/>
-              </div>
+          <ButtonTooltip key="settings" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} content="Settings"
+               onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.props.courseId + "/projects/" + this.props.projectId + "/settings"))}
+          >
+            <div className={styles.sidebarBodyItemLeft}>
+                <IoSettingsOutline className={styles.sidebarIcon} size={26}/>
             </div>
-          </OverlayTrigger>
+          </ButtonTooltip>
         );
       } else {
         result.push(
@@ -386,16 +338,12 @@ class Sidebar extends React.Component {
     } else if (this.props.location === LOCATIONS.graders) {
       if (this.state.isHidden) {
         result.push(
-          <OverlayTrigger placement="auto" overlay={
-            <Tooltip>Graders</Tooltip>
-          }>
-            <div key="graders" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
-            }}>
-              <div className={styles.sidebarBodyItemLeft}>
-                  <IoPersonOutline className={styles.sidebarIcon} size={26}/>
-              </div>
+          <ButtonTooltip key="graders" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} content="Graders"
+                         onClick={() => {}}>
+            <div className={styles.sidebarBodyItemLeft}>
+                <IoPersonOutline className={styles.sidebarIcon} size={26}/>
             </div>
-          </OverlayTrigger>
+          </ButtonTooltip>
         );
       } else {
         result.push(
@@ -411,16 +359,12 @@ class Sidebar extends React.Component {
     } else if (this.props.location === LOCATIONS.students) {
       if (this.state.isHidden) {
         result.push(
-          <OverlayTrigger placement="auto" overlay={
-            <Tooltip>Students</Tooltip>
-          }>
-            <div key="students" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
-            }}>
-              <div className={styles.sidebarBodyItemLeft}>
-                <IoSchool className={styles.sidebarIcon} size={26}/>
-              </div>
+          <ButtonTooltip key="students" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} content="Students"
+                         onClick={() => {}}>
+            <div className={styles.sidebarBodyItemLeft}>
+              <IoSchool className={styles.sidebarIcon} size={26}/>
             </div>
-          </OverlayTrigger>
+          </ButtonTooltip>
         );
       } else {
         result.push(
@@ -457,11 +401,9 @@ class Sidebar extends React.Component {
                 onClick={this.onClickLogo}/>
             </div>
             }
+
             {/*The tooltip stays once you close the menu and idk how to go around that, not sure if we even need tooltip
             here anyway*/}
-            {/*<OverlayTrigger placement="auto" overlay={*/}
-            {/*  <Tooltip>{this.state.isHidden ? "Open Menu" : "Close"}</Tooltip>*/}
-            {/*} trigger="hover">*/}
               <div className={styles.sidebarHeaderButton} onClick={this.onClickHideSidebar}>
                 {this.state.isHidden ?
                   <IoMenuSharp size={26}/>
@@ -469,7 +411,6 @@ class Sidebar extends React.Component {
                   <IoChevronBackSharp size={26}/>
                 }
               </div>
-            {/*</OverlayTrigger>*/}
           </div>
 
           <div className={styles.sidebarBody}>
@@ -488,9 +429,10 @@ class Sidebar extends React.Component {
               {!this.state.isHidden &&
                 <div className={styles.sidebarBodyItemRight}>
                   {this.props.user && this.props.user.name}
-                  <div className={styles.sideBarFooterSignOutButton} onClick={this.onClickSignOut}>
+                  <ButtonTooltip className={styles.sideBarFooterSignOutButton} onClick={this.onClickSignOut}
+                                 content="Sign Out" placement="top">
                     <IoLogOutOutline size={26}/>
-                  </div>
+                  </ButtonTooltip>
                 </div>
               }
             </div>

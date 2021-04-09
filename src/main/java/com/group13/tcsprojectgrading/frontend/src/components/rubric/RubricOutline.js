@@ -33,6 +33,7 @@ import {createNewBlock, createNewCriterion, removeAll} from "./helpers";
 import {Form} from 'react-bootstrap'
 import RubricUploadModal from "./RubricUploadModal";
 import AssignSubmissionModal from "../assign/AssignSubmissionModal";
+import ButtonTooltip from "../helpers/ButtonTooltip";
 
 
 class RubricOutline extends Component {
@@ -122,32 +123,37 @@ class RubricOutline extends Component {
             {!this.props.isEditing ?
               (<div className={styles.outlineHeaderButtonContainer}>
                 <Can I="write" a="Rubric">
-                  <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.onClickEdit}>
+                  <ButtonTooltip className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)}
+                                 content="Edit" placement="top" onClick={this.onClickEdit}>
                     <IoPencil size={26}/>
-                  </div>
+                  </ButtonTooltip>
                 </Can>
                 <Can I="download" a="Rubric">
-                  <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.downloadRubric}>
+                  <ButtonTooltip className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)}
+                                 content="Export to PDF" placement="top" onClick={this.downloadRubric}>
                     <IoCodeDownloadOutline size={34}/>
-                  </div>
+                  </ButtonTooltip>
                 </Can>
                 <Can I="write" a="Rubric">
-                  <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.toggleShowUploadModal}>
+                  <ButtonTooltip className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)}
+                                 content="Import Rubric" placement="top" onClick={this.toggleShowUploadModal}>
                     <IoCloudUploadSharp size={34}/>
-                  </div>
+                  </ButtonTooltip>
                 </Can>
                 <Can I="download" a="Rubric">
-                  <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.props.exportRubricFile}>
+                  <ButtonTooltip className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)}
+                                 content="Download as Text" placement="top" onClick={this.props.exportRubricFile}>
                     <IoCloudDownload size={34}/>
-                  </div>
+                  </ButtonTooltip>
                 </Can>
               </div>)
               :
               (<div className={styles.outlineHeaderButtonContainer}>
                 {/*<Can I="write" a="Rubric">*/}
-                <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)} onClick={this.onClickSaveButton}>
+                <ButtonTooltip className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGreen)}
+                               content="Save Rubric" placement="top" onClick={this.onClickSaveButton}>
                   <IoSaveOutline size={26}/>
-                </div>
+                </ButtonTooltip>
                 {/*</Can>*/}
                 <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGray)} onClick={this.onClickCancelButton}>
                   <IoCloseOutline size={34}/>

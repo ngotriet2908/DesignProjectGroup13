@@ -7,6 +7,7 @@ import globalStyles from "../../helpers/global.module.css";
 import {IoAdd} from "react-icons/io5";
 import {Can} from "../../permissions/ProjectAbility";
 import { subject } from '@casl/ability';
+import ButtonTooltip from "../../helpers/ButtonTooltip";
 
 
 class Issues extends Component {
@@ -39,11 +40,12 @@ class Issues extends Component {
           <h4>Issues</h4>
           <div className={styles.gradeEditorCardFooter}>
             <Can I="edit" this={subject('Submission', (this.props.submission.grader === null)? {id: -1}:this.props.submission.grader)}>
-              <div className={classnames(globalStyles.iconButton, styles.gradingCardTitleButton)}
+              <ButtonTooltip className={classnames(globalStyles.iconButton, styles.gradingCardTitleButton)}
+                             placement="top" content="Add Issue"
                 // onClick={this.props.toggleCreatingState}>
                 onClick={this.props.toggleShow}>
                 <IoAdd size={26}/>
-              </div>
+              </ButtonTooltip>
             </Can>
             <DropdownButton
               as={ButtonGroup}

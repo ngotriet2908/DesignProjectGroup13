@@ -28,6 +28,7 @@ import Button from "react-bootstrap/Button";
 import {ability, Can, updateAbility} from "../permissions/ProjectAbility";
 import { subject } from '@casl/ability';
 import {Link} from "react-router-dom";
+import ButtonTooltip from "../helpers/ButtonTooltip";
 
 const masonryBreakpointColumns = {
   default: 2,
@@ -294,11 +295,11 @@ class SubmissionDetails extends Component {
                             <h4>
                               {attachment.display_name}
                             </h4>
-                            <div className={classnames(globalStyles.iconButton, styles.primaryButton)}
-                                 onClick={() => window.open(attachment.url)}
+                            <ButtonTooltip className={classnames(globalStyles.iconButton, styles.primaryButton)}
+                                 placement="top" content="Download Attachment" onClick={() => window.open(attachment.url)}
                             >
                               <IoCloudDownloadSharp size={26}/>
-                            </div>
+                            </ButtonTooltip>
                           </div>
                           <div>
                             {/*<h6>name: {attachment.display_name}</h6>*/}

@@ -6,6 +6,7 @@ import {push} from "connected-react-router";
 import classnames from "classnames";
 import globalStyles from "../helpers/global.module.css";
 import {IoArrowForward} from "react-icons/io5";
+import ButtonTooltip from "../helpers/ButtonTooltip";
 
 class StudentCard extends Component {
   render() {
@@ -18,10 +19,10 @@ class StudentCard extends Component {
             </h4>
 
             <div className={styles.studentCardHeaderButtonContainer}>
-              <div className={classnames(globalStyles.iconButton)}
+              <ButtonTooltip className={classnames(globalStyles.iconButton)} content="Go to Student" placement="bottom"
                 onClick={() => store.dispatch(push(this.props.match.url +"/"+ this.props.student.id.user.id))}>
                 <IoArrowForward size={26}/>
-              </div>
+              </ButtonTooltip>
             </div>
           </div>
 
@@ -40,10 +41,11 @@ class StudentCard extends Component {
                           <h5>Submission #{submission.id}</h5>
 
                           <div className={styles.studentCardHeaderButtonContainer}>
-                            <div className={classnames(globalStyles.iconButton)}
+                            <ButtonTooltip className={classnames(globalStyles.iconButton)} content="Go to Submission"
+                                           placement="bottom"
                                  onClick={() => store.dispatch(push(this.props.match.url.split("/").slice(0, this.props.match.url.split("/").length - 1).join("/") + "/submissions/" + submission.id))}>
                               <IoArrowForward size={26}/>
-                            </div>
+                            </ButtonTooltip>
                           </div>
                         </div>
                         <p>name: {submission.name}</p>

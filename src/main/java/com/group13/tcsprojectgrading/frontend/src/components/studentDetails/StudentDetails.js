@@ -18,6 +18,7 @@ import Masonry from 'react-masonry-css'
 import {IoArrowForward, IoTrashOutline} from "react-icons/io5";
 import {ability, Can, updateAbility} from "../permissions/ProjectAbility";
 import { subject } from '@casl/ability';
+import ButtonTooltip from "../helpers/ButtonTooltip";
 
 const masonryBreakpointColumns = {
   default: 2,
@@ -200,16 +201,18 @@ class StudentDetails extends Component {
                               </h5>
                               {(this.state.isEditing)?
                                 <Can I="edit" this={subject('Submission', (submission.grader === null)? {id: -1}:submission.grader)}>
-                                  <div className={classnames(globalStyles.iconButton, styles.dangerButton)}
+                                  <ButtonTooltip className={classnames(globalStyles.iconButton, styles.dangerButton)}
+                                                 content="Delete Submission" placement="bottom"
                                     onClick={() => this.deleteHandler(submission)}>
                                     <IoTrashOutline size={26}/>
-                                  </div>
+                                  </ButtonTooltip>
                                 </Can>
                                 :
-                                <div className={classnames(globalStyles.iconButton)}
+                                <ButtonTooltip className={classnames(globalStyles.iconButton, styles.primaryButton)}
+                                               content="Go to Submission" placement="bottom"
                                   onClick={() => store.dispatch(push(this.props.match.url.split("/").slice(0, this.props.match.url.split("/").length - 2).join("/") + "/submissions/"+ submission.id))}>
                                   <IoArrowForward size={26}/>
-                                </div>
+                                </ButtonTooltip>
                               }
                             </div>
 

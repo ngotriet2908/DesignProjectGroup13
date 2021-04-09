@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import {Badge, Card, OverlayTrigger, Tooltip, ListGroup} from "react-bootstrap";
+import {Badge, Card, ListGroup} from "react-bootstrap";
 import {push} from "connected-react-router";
 import styles from "./submissions.module.css"
 import {IoArrowForward} from "react-icons/io5";
@@ -7,6 +7,7 @@ import store from "../../redux/store";
 import classnames from "classnames";
 import globalStyles from "../helpers/global.module.css";
 import {colorToStyles} from "../submissionDetails/labels/LabelRow";
+import ButtonTooltip from "../helpers/ButtonTooltip";
 
 
 class SubmissionsOverviewCard extends Component {
@@ -20,10 +21,10 @@ class SubmissionsOverviewCard extends Component {
             </h4>
 
             <div className={styles.submissionCardHeaderButtonContainer}>
-              <div className={classnames(globalStyles.iconButton)}
+              <ButtonTooltip className={classnames(globalStyles.iconButton)} placement="bottom" content="Go to Submission"
                 onClick={() => store.dispatch(push("/app/courses/" + this.props.routeParams.courseId + "/projects/" + this.props.routeParams.projectId + "/submissions/" + this.props.submission.id))}>
                 <IoArrowForward size={26}/>
-              </div>
+              </ButtonTooltip>
             </div>
           </div>
 

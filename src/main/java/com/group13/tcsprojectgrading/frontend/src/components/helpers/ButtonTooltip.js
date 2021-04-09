@@ -9,15 +9,20 @@ class ButtonTooltip extends Component {
   render() {
     return (
       <OverlayTrigger
-        placement=auto
+        placement={this.props.placement ?? "auto"}
+        delay={{ show: 500, hide: 0}}
         overlay={
           <Tooltip>
-            {this.props.tooltip.content}
+            {this.props.content}
           </Tooltip>
         }
       >
-        <Button variant={this.props.button.variant} onClick={this.props.button.onClick}>{this.props.button.content}</Button>
+        <div key = {this.props.key} className={this.props.className} onClick={this.props.onClick}>
+          {this.props.children}
+        </div>
       </OverlayTrigger>
     );
   }
 }
+
+export default ButtonTooltip;

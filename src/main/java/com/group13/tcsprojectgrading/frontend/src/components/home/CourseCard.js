@@ -11,6 +11,7 @@ import store from "../../redux/store";
 import {push} from "connected-react-router";
 import classnames from "classnames";
 import globalStyles from "../helpers/global.module.css";
+import ButtonTooltip from "../helpers/ButtonTooltip";
 
 class CourseCard extends Component {
   constructor (props) {
@@ -27,9 +28,10 @@ class CourseCard extends Component {
         <Card.Body className={styles.cardBodyContainer}>
           <div className={styles.cardBodyTitle}>
             <h5>{this.props.data.name}</h5>
-            <div className={classnames(globalStyles.iconButton, styles.cardButtonContainer)} onClick={this.onClickSeeMore}>
+            <ButtonTooltip className={classnames(globalStyles.iconButton, styles.cardButtonContainer)}
+                           content="Go to Course" placement="bottom" onClick={this.onClickSeeMore}>
               <IoArrowForward size={26}/>
-            </div>
+            </ButtonTooltip>
           </div>
           <div className={styles.cardBodyContent}>
             <div>Active in year {(new Date(this.props.data.startAt)).getFullYear()}</div>

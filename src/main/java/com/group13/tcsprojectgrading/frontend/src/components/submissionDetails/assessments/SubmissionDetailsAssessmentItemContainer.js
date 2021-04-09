@@ -6,6 +6,7 @@ import {Link} from "react-router-dom";
 import {IoArrowForward} from "react-icons/io5";
 import classnames from 'classnames';
 import globalStyles from "../../helpers/global.module.css";
+import ButtonTooltip from "../../helpers/ButtonTooltip";
 
 
 class SubmissionDetailsAssessmentItemContainer extends Component {
@@ -30,10 +31,11 @@ class SubmissionDetailsAssessmentItemContainer extends Component {
                   "submission": this.props.submission,
                 }
               }}>
-            <div className={classnames(globalStyles.iconButton, styles.primaryButton)}
+            <ButtonTooltip className={classnames(globalStyles.iconButton, styles.primaryButton)} content="Go to Assessment"
+                           placement="bottom"
             >
               <IoArrowForward size={26}/>
-            </div>
+            </ButtonTooltip>
           </Link>
         </div>
         <div>
