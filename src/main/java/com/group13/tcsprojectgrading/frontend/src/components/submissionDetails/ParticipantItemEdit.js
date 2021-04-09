@@ -4,6 +4,7 @@ import styles from "./submissionDetails.module.css";
 import classnames from "classnames";
 import globalStyles from "../helpers/global.module.css";
 import {IoCopyOutline, IoTrashOutline, IoSwapHorizontal} from "react-icons/io5";
+import ButtonTooltip from "../helpers/ButtonTooltip";
 
 class ParticipantItemEdit extends Component {
   render() {
@@ -14,10 +15,10 @@ class ParticipantItemEdit extends Component {
           <h5>
             {this.props.member.name}
           </h5>
-          <div className={classnames(globalStyles.iconButtonSmall, styles.dangerButton)}
-            onClick={this.props.handleDelete}>
+          <ButtonTooltip className={classnames(globalStyles.iconButtonSmall, styles.dangerButton)}
+            content="Remove Student" placement="bottom" onClick={this.props.handleDelete}>
             <IoTrashOutline size={26}/>
-          </div>
+          </ButtonTooltip>
         </div>
         <h6>sid: {this.props.member.sNumber}</h6>
         {/*<h6>email: {this.props.member.email}</h6>*/}

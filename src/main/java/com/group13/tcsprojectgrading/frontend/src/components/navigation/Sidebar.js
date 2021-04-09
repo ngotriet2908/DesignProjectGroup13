@@ -217,7 +217,6 @@ class Sidebar extends React.Component {
               <IoSettingsOutline className={styles.sidebarIcon} size={26}/>
             </div>
             <span className={styles.sidebarBodyItemRight}>Settings</span>
-            }
           </div>
         );
       }

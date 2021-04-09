@@ -6,6 +6,7 @@ import {BASE} from "../../services/endpoints";
 import {connect} from "react-redux";
 import {IoCloseOutline, IoCheckboxOutline, IoSquareOutline} from "react-icons/io5";
 import classnames from "classnames";
+import ButtonTooltip from "../helpers/ButtonTooltip";
 
 
 class ImportProjectsModal extends Component {
@@ -93,9 +94,10 @@ class ImportProjectsModal extends Component {
         <div className={globalStyles.modalContainer}>
           <div className={globalStyles.modalHeaderContainer}>
             <h2>Import Projects</h2>
-            <div className={globalStyles.modalHeaderContainerButton} onClick={this.onClose}>
+            <ButtonTooltip className={classnames(globalStyles.modalHeaderContainerButton, globalStyles.modalHeaderContainerCloseButton)}
+                           content="Close" placement="top" onClick={this.onClose}>
               <IoCloseOutline size={30}/>
-            </div>
+            </ButtonTooltip>
           </div>
 
           <div className={globalStyles.modalDescriptionContainer}>

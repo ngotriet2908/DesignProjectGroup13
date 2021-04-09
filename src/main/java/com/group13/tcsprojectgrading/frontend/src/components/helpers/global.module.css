@@ -327,9 +327,19 @@
     justify-content: center;
 }
 
+.modalHeaderContainerCloseButton {
+    color: senary;
+}
+
 .modalHeaderContainerButton:hover {
     background-color: moderateGray;
     color: white;
+}
+
+.modalHeaderContainerCloseButton:hover {
+    background-color: senaryShade;
+    color: white;
+
 }
 
 .modalDescriptionContainer {

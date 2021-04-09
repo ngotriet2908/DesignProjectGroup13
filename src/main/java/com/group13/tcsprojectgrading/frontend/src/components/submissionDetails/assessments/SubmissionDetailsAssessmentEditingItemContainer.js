@@ -6,6 +6,7 @@ import {Card, Breadcrumb, Button, ListGroup, ListGroupItem, Form, Modal, Spinner
 import classnames from "classnames";
 import globalStyles from "../../helpers/global.module.css";
 import {IoCopyOutline, IoTrashOutline, IoSwapHorizontal, IoAdd, IoHourglassOutline} from "react-icons/io5";
+import ButtonTooltip from "../../helpers/ButtonTooltip";
 
 class SubmissionDetailsAssessmentEditingItemContainer extends Component {
   constructor(props) {
@@ -58,9 +59,10 @@ class SubmissionDetailsAssessmentEditingItemContainer extends Component {
           </h4>
 
           <div className={styles.buttonGroup}>
-            <div className={classnames(globalStyles.iconButton, styles.dangerButton)} onClick={this.props.handleDelete}>
+            <ButtonTooltip className={classnames(globalStyles.iconButton, styles.dangerButton)}
+                           content="Delete Assessment" placement="bottom" onClick={this.props.handleDelete}>
               <IoTrashOutline size={26}/>
-            </div>
+            </ButtonTooltip>
           </div>
 
         </div>
@@ -80,28 +82,36 @@ class SubmissionDetailsAssessmentEditingItemContainer extends Component {
                       <div className={styles.buttonGroup}>
                         {
                           (participant.isCurrentAssessment)? null :
-                            <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={() => this.props.handleActivateCurrent(this.props.assessment, participant.id)}>
+                            <ButtonTooltip className={classnames(globalStyles.iconButton, styles.primaryButton)}
+                                           content="Set as Current" placement="bottom"
+                                           onClick={() => this.props.handleActivateCurrent(this.props.assessment, participant.id)}>
                               <IoHourglassOutline size={26}/>
-                            </div>
+                            </ButtonTooltip>
                         }
 
                         {
                           (this.props.assessment.members.length <= 1)? null :
-                            <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={() => this.props.handleCreateNew(participant.id)}>
+                            <ButtonTooltip className={classnames(globalStyles.iconButton, styles.primaryButton)}
+                                           content="Create new Assessment for this Student" placement="bottom"
+                                           onClick={() => this.props.handleCreateNew(participant.id)}>
                               <IoAdd size={26}/>
-                            </div>
+                            </ButtonTooltip>
                         }
 
                         {
                           (this.props.assessment.members.length <= 1)? null :
-                            <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={() => this.props.handleClone(this.props.assessment, participant.id)}>
+                            <ButtonTooltip className={classnames(globalStyles.iconButton, styles.primaryButton)}
+                                           content="Copy Assessment for this Student" placement="bottom"
+                                           onClick={() => this.props.handleClone(this.props.assessment, participant.id)}>
                               <IoCopyOutline size={26}/>
-                            </div>
+                            </ButtonTooltip>
                         }
 
-                        <div className={classnames(globalStyles.iconButtonSmall, styles.neuterButton)} onClick={() => this.handleShowMoveModal(participant)}>
+                        <ButtonTooltip className={classnames(globalStyles.iconButton, styles.neuterButton)}
+                                       content="Move Student to another Assessment" placement="bottom"
+                                       onClick={() => this.handleShowMoveModal(participant)}>
                           <IoSwapHorizontal size={26}/>
-                        </div>
+                        </ButtonTooltip>
                       </div>
                     </div>
                     <p>sid: {participant.sNumber}</p>

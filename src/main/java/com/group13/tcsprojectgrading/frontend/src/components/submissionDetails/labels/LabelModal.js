@@ -7,6 +7,7 @@ import styles from "../submissionDetails.module.css";
 import classnames from "classnames";
 import LabelModalCreateLabel from "./LabelModalCreateLabel";
 import {colorToStyles, colorStyles, colors} from "./LabelRow";
+import ButtonTooltip from "../../helpers/ButtonTooltip";
 
 
 class LabelModal extends Component {
@@ -116,9 +117,10 @@ class LabelModal extends Component {
           <div className={globalStyles.modalContainer}>
             <div className={globalStyles.modalHeaderContainer}>
               <h2>Labels</h2>
-              <div className={classnames(globalStyles.modalHeaderContainerButton)} onClick={this.onClose}>
+              <ButtonTooltip className={classnames(globalStyles.modalHeaderContainerButton, globalStyles.modalHeaderContainerCloseButton)}
+                             content="Close" placement="top" onClick={this.onClose}>
                 <IoCloseOutline size={30}/>
-              </div>
+              </ButtonTooltip>
             </div>
 
             <div className={globalStyles.modalDescriptionContainer}>

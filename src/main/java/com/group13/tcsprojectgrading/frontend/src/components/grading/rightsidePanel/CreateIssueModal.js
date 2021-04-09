@@ -7,6 +7,7 @@ import {connect} from "react-redux";
 import {IoCloseOutline} from "react-icons/io5";
 import classnames from "classnames";
 import styles from "../grading.module.css";
+import ButtonTooltip from "../../helpers/ButtonTooltip";
 
 
 class CreateIssueModal extends Component {
@@ -103,9 +104,10 @@ class CreateIssueModal extends Component {
         <div className={globalStyles.modalContainer}>
           <div className={globalStyles.modalHeaderContainer}>
             <h2>Create issue</h2>
-            <div className={globalStyles.modalHeaderContainerButton} onClick={this.onClose}>
+            <ButtonTooltip className={classnames(globalStyles.modalHeaderContainerButton, globalStyles.modalHeaderContainerCloseButton)}
+                           content="Close" placement="top" onClick={this.onClose}>
               <IoCloseOutline size={30}/>
-            </div>
+            </ButtonTooltip>
           </div>
 
           {/*<div className={globalStyles.modalDescriptionContainer}>*/}

@@ -41,7 +41,7 @@ class Issues extends Component {
           <div className={styles.gradeEditorCardFooter}>
             <Can I="edit" this={subject('Submission', (this.props.submission.grader === null)? {id: -1}:this.props.submission.grader)}>
               <ButtonTooltip className={classnames(globalStyles.iconButton, styles.gradingCardTitleButton)}
-                             placement="top" content="Add Issue"
+                             placement="top" content="Create Issue"
                 // onClick={this.props.toggleCreatingState}>
                 onClick={this.props.toggleShow}>
                 <IoAdd size={26}/>

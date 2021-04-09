@@ -97,6 +97,15 @@
     color: primary;
 }
 
+.gradingCardTitleCloseButton {
+    color: senary;
+}
+
+.gradingCardTitleCloseButton:hover {
+    color: white;
+    background-color: senaryShade;
+}
+
 .rubricPanelInnerContainer {
     flex: 1;
     width: 100%;

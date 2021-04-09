@@ -118,6 +118,10 @@
     color: senary;
 }
 
+.dangerButton:hover {
+    background-color: senaryShade;
+}
+
 .neuterButton {
     color: quaternary;
 }

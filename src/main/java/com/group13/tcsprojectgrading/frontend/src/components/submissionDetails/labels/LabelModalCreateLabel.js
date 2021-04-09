@@ -10,6 +10,7 @@ import globalStyles from "../../helpers/global.module.css";
 import classnames from 'classnames';
 import {request} from "../../../services/request";
 import {colors, colorStyles} from "./LabelRow";
+import ButtonTooltip from "../../helpers/ButtonTooltip";
 
 
 class LabelModalCreateLabel extends Component {
@@ -29,8 +30,10 @@ class LabelModalCreateLabel extends Component {
   }
 
   onAccept = () => {
+    let name = "";
+    this.formRef.current.nameInput.value === "" ? name = "Untitled" : name = this.formRef.current.nameInput.value
     let label = {
-      name: this.formRef.current.nameInput.value,
+      name: name,
       description: this.formRef.current.descriptionInput.value,
       color: colors[this.state.selectedColor],
     }
@@ -57,9 +60,10 @@ class LabelModalCreateLabel extends Component {
 
             <h2>Create label</h2>
           </div>
-          <div className={globalStyles.modalHeaderContainerButton} onClick={this.props.closeModal}>
+          <ButtonTooltip className={classnames(globalStyles.modalHeaderContainerButton, globalStyles.modalHeaderContainerCloseButton)}
+                         content="Close" placement="top" onClick={this.onClose}>
             <IoCloseOutline size={30}/>
-          </div>
+          </ButtonTooltip>
         </div>
 
         <div className={globalStyles.modalBodyContainer}>

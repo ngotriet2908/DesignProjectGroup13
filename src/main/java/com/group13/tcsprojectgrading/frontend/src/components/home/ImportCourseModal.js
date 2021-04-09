@@ -7,6 +7,7 @@ import classnames from "classnames";
 import {request} from "../../services/request";
 import {BASE, PROJECT, USER_COURSES} from "../../services/endpoints";
 import {isTeacher} from "../permissions/functions";
+import ButtonTooltip from "../helpers/ButtonTooltip";
 
 class ImportCourseModal extends Component {
   constructor(props) {
@@ -88,9 +89,10 @@ class ImportCourseModal extends Component {
         <div className={globalStyles.modalContainer}>
           <div className={globalStyles.modalHeaderContainer}>
             <h2>Import Courses</h2>
-            <div className={globalStyles.modalHeaderContainerButton} onClick={this.onClose}>
+            <ButtonTooltip className={classnames(globalStyles.modalHeaderContainerButton, globalStyles.modalHeaderContainerCloseButton)}
+                           content="Close" placement="top" onClick={this.onClose}>
               <IoCloseOutline size={30}/>
-            </div>
+            </ButtonTooltip>
           </div>
 
           <div className={globalStyles.modalDescriptionContainer}>

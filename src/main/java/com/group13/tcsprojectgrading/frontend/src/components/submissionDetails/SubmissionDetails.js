@@ -326,12 +326,14 @@ class SubmissionDetails extends Component {
                   </Can>
                     :
                   <div className={styles.buttonGroup}>
-                    <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.toggleShowAddStudentModal}>
+                    <ButtonTooltip className={classnames(globalStyles.iconButton, styles.primaryButton)}
+                                   content="Add Student" placement="top" onClick={this.toggleShowAddStudentModal}>
                       <IoAdd size={26}/>
-                    </div>
-                    <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.toggleAddingParticipant}>
+                    </ButtonTooltip>
+                    <ButtonTooltip className={classnames(globalStyles.iconButton, styles.dangerButton)}
+                                   content="Cancel" placement="top" onClick={this.toggleAddingParticipant}>
                       <IoCloseOutline size={26}/>
-                    </div>
+                    </ButtonTooltip>
                   </div>
                 }
               </div>

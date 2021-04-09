@@ -7,6 +7,7 @@ import classnames from "classnames";
 import {IoCheckboxOutline, IoCloseOutline, IoSquareOutline} from "react-icons/io5";
 import Spinner from "react-bootstrap/Spinner";
 import styles from "./submissionDetails.module.css";
+import ButtonTooltip from "../helpers/ButtonTooltip";
 
 class AddParticipantModal extends Component {
   constructor(props) {
@@ -104,9 +105,10 @@ class AddParticipantModal extends Component {
         <div className={globalStyles.modalContainer}>
           <div className={globalStyles.modalHeaderContainer}>
             <h2>Add student</h2>
-            <div className={classnames(globalStyles.modalHeaderContainerButton)} onClick={this.onClose}>
+            <ButtonTooltip className={classnames(globalStyles.modalHeaderContainerButton, globalStyles.modalHeaderContainerCloseButton)}
+                           content="Close" placement="top" onClick={this.onClose}>
               <IoCloseOutline size={30}/>
-            </div>
+            </ButtonTooltip>
           </div>
 
           <div className={globalStyles.modalDescriptionContainer}>

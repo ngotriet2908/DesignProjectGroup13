@@ -11,6 +11,7 @@ import {request} from "../../../services/request";
 import {IoPencilOutline, IoCloseOutline, IoThumbsUpOutline, IoListOutline} from "react-icons/io5";
 import classnames from 'classnames';
 import globalStyles from "../../helpers/global.module.css";
+import ButtonTooltip from "../../helpers/ButtonTooltip";
 
 
 class GradeEditor extends Component {
@@ -90,20 +91,21 @@ class GradeEditor extends Component {
         <Card className={styles.panelCard}>
           <Card.Body className={styles.gradeViewerBody}>
             <div className={classnames(styles.gradingCardTitle, styles.gradingCardTitleWithButton)}>
-              <h4>Grade editor</h4>
+              <h4>Grade Editor</h4>
 
-              {isCriterion &&
-              <div className={classnames(globalStyles.iconButton, styles.gradingCardTitleButton)}
-                onClick={this.toggleGradeEditor}>
-
-                {isGraded && !this.state.open &&
+              {isCriterion && isGraded && !this.state.open &&
+                <ButtonTooltip className={classnames(globalStyles.iconButton, styles.gradingCardTitleButton)}
+                               content="Edit Grade" placement="bottom"
+                               onClick={this.toggleGradeEditor}>
                   <IoPencilOutline size={26}/>
-                }
-
-                {isGraded && this.state.open &&
+                </ButtonTooltip>
+              }
+              {isCriterion && isGraded && this.state.open &&
+                <ButtonTooltip className={classnames(globalStyles.iconButton, styles.gradingCardTitleCloseButton)}
+                               content="Close" placement="bottom"
+                               onClick={this.toggleGradeEditor}>
                   <IoCloseOutline size={26}/>
-                }
-              </div>
+                </ButtonTooltip>
               }
             </div>
 

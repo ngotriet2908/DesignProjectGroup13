@@ -155,9 +155,10 @@ class RubricOutline extends Component {
                   <IoSaveOutline size={26}/>
                 </ButtonTooltip>
                 {/*</Can>*/}
-                <div className={classnames(globalStyles.iconButton, styles.viewerHeaderIconGray)} onClick={this.onClickCancelButton}>
+                <ButtonTooltip className={classnames(globalStyles.iconButton, styles.viewerHeaderIconRed)}
+                               content="Cancel Editing" placement="top" onClick={this.onClickCancelButton}>
                   <IoCloseOutline size={34}/>
-                </div>
+                </ButtonTooltip>
               </div>)
             }
           </div>

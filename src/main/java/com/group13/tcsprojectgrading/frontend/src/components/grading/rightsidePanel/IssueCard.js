@@ -7,6 +7,7 @@ import globalStyles from "../../helpers/global.module.css";
 import {IoCheckmarkDone, IoChevronDownOutline} from "react-icons/io5";
 import {Can} from "../../permissions/ProjectAbility";
 import { subject } from '@casl/ability';
+import ButtonTooltip from "../../helpers/ButtonTooltip";
 
 
 class IssueCard extends Component {
@@ -75,10 +76,10 @@ class IssueCard extends Component {
             </div>
             {!(this.props.issue.status === "Resolved") &&
             <Can I="edit" this={subject('Submission', (this.props.submission.grader === null)? {id: -1}:this.props.submission.grader)}>
-              <div className={classnames(globalStyles.iconButtonSmall, styles.gradingCardTitleButton)}
-                onClick={this.startResolve}>
+              <ButtonTooltip className={classnames(globalStyles.iconButtonSmall, styles.gradingCardTitleButton)}
+                content="Resolve Issue" placement="top" onClick={this.startResolve}>
                 <IoCheckmarkDone size={26}/>
-              </div>
+              </ButtonTooltip>
             </Can>
             }
           </div>
