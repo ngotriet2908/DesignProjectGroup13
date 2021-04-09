@@ -19,6 +19,9 @@ public interface CourseParticipationRepository extends JpaRepository<CourseParti
     @Lock(LockModeType.PESSIMISTIC_READ)
     CourseParticipation findById_User_IdAndId_Course_Id(Long id_user_id, Long id_course_id);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    CourseParticipation findCourseParticipationById_User_IdAndId_Course_Id(Long id_user_id, Long id_course_id);
+
     @Lock(LockModeType.PESSIMISTIC_READ)
     List<CourseParticipation> findById_Course_IdAndRole_Name(Long id_course_id, String role_name);
 

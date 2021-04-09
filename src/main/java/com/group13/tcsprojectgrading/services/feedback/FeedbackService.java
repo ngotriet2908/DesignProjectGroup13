@@ -53,7 +53,7 @@ public class FeedbackService {
 
     @Transactional(value = Transactional.TxType.MANDATORY)
     public void deleteTemplate(Long templateId) {
-        FeedbackTemplate template = feedbackTemplateRepository.findById(templateId).orElse(null);
+        FeedbackTemplate template = feedbackTemplateRepository.findFeedbackTemplateById(templateId).orElse(null);
         if (template == null) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "template not found"

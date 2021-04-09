@@ -119,6 +119,19 @@ public class AssessmentService {
 
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Assessment createNewAssessment(Assessment assessment) {
+        Assessment assessment1 = this.assessmentRepository.findAssessmentById(assessment.getId()).orElse(null);
+        if (assessment1 != null) {
+            return null;
+        }
+        return this.assessmentRepository.save(assessment);
+    }
+
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public Assessment updateAssessment(Assessment assessment) {
+        Assessment assessment1 = this.assessmentRepository.findAssessmentById(assessment.getId()).orElse(null);
+        if (assessment1 == null) {
+            return null;
+        }
         return this.assessmentRepository.save(assessment);
     }
 
@@ -182,7 +195,7 @@ public class AssessmentService {
      */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Set<User> getSubmissionMembers(Submission submission) {
-        Set<AssessmentLink> links = this.assessmentLinkRepository.findDistinctUserById_Submission(submission);
+        Set<AssessmentLink> links = this.assessmentLinkRepository.findById_Submission(submission);
 
         Set<User> users = new HashSet<>();
         for (AssessmentLink link: links) {
@@ -200,8 +213,18 @@ public class AssessmentService {
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
+    public Set<AssessmentLink> getAssessmentsByProjectAndUserWithLock(Long projectId, User user) {
+        return this.assessmentLinkRepository.findAllById_Submission_Project_IdAndId_User(projectId, user);
+    }
+
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public Set<AssessmentLink> getAssessmentLinksBySubmission(Submission submission) {
         return this.assessmentLinkRepository.findById_Submission(submission);
+    }
+
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public Set<AssessmentLink> getAssessmentLinksBySubmissionWithLock(Submission submission) {
+        return this.assessmentLinkRepository.findAllById_Submission(submission);
     }
 
     /*
@@ -262,6 +285,20 @@ public class AssessmentService {
         return assessment;
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public Assessment getAssessmentWithLock(Long id) {
+        Assessment assessment =  this.assessmentRepository.findAssessmentById(id).orElse(null);
+
+        if (assessment == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Assessment not found"
+            );
+        }
+
+        return assessment;
+    }
+
+
     /*
     Checks if the user has permissions to retrieve the assessment and returns it if so.
      */
@@ -290,13 +327,19 @@ public class AssessmentService {
         return assessmentLinkRepository.findAssessmentLinkById_Submission_IdAndAndId_User_Id(submissionId, userId);
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public AssessmentLink getAssessmentLinkForUserWithLock(Long submissionId, Long userId) throws JsonProcessingException {
+
+        return assessmentLinkRepository.findById_Submission_IdAndAndId_User_Id(submissionId, userId);
+    }
+
     /*
     Populates all fields of Grade, saves it, deactivates all existing grades for the criterion and set the new grade
     as active.
      */
     @Transactional(rollbackOn = Exception.class)
     public Grade addGrade(Long submissionId, Long assessmentId, Grade grade, Long graderId, List<PrivilegeEnum> privileges) throws ResponseStatusException {
-        Assessment assessment = getAssessment(assessmentId);
+        Assessment assessment = getAssessmentWithLock(assessmentId);
 
         if (assessment == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Assessment not found");
@@ -331,7 +374,7 @@ public class AssessmentService {
         grade.setGradedAt(Date.from(Instant.now()));
         grade.setAssessment(assessment);
         grade.setGrader(user);
-
+        this.gradeRepository.findGradesByAssessment_IdAndCriterionId(assessmentId, grade.getCriterionId());
         // deactivate all other grades and set the new one as active
         this.gradeRepository.deactivateAllGrades(assessmentId, grade.getCriterionId());
         grade.setActive(true);
@@ -372,11 +415,12 @@ public class AssessmentService {
         }
 
 
-        Grade grade = this.gradeRepository.findById(gradeId).orElse(null);
+        Grade grade = this.gradeRepository.findGradeById(gradeId).orElse(null);
 
         if (grade == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Grade not found");
         }
+        this.gradeRepository.findGradesByAssessment_IdAndCriterionId(assessmentId, grade.getCriterionId());
 
         // deactivate all other grades and set the selected one as active
         this.gradeRepository.deactivateAllGrades(grade.getAssessment().getId(), grade.getCriterionId());
@@ -442,6 +486,11 @@ public class AssessmentService {
         }
 
         Assessment assessment = this.getAssessment(assessmentId);
+
+        if (assessment == null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "submission not found");
+        }
+
         User creator = this.userService.findById(userId);
         User addressee = null;
         if (issue.getAddressee() != null) {
@@ -486,7 +535,7 @@ public class AssessmentService {
             }
         }
 
-        Issue issue = this.issueRepository.findById(issueId).orElse(null);
+        Issue issue = this.issueRepository.findIssueById(issueId).orElse(null);
 
         if (issue == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Issue not found");
@@ -497,6 +546,7 @@ public class AssessmentService {
         issue = this.issueRepository.save(issue);
         return issue;
     }
+
     @Transactional(value = Transactional.TxType.MANDATORY)
     public AssessmentLink findCurrentAssessmentUser(Project project, User user) {
         return assessmentLinkRepository.findById_UserAndId_Submission_ProjectAndCurrentIsTrue(
@@ -509,6 +559,11 @@ public class AssessmentService {
     public Set<AssessmentLink> findAssessmentLinksByAssessmentId(Long id) {
         return assessmentLinkRepository.findById_Assessment_Id(id);
     }
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public Set<AssessmentLink> findAssessmentLinksByAssessmentIdWithLock(Long id) {
+        return assessmentLinkRepository.findAssessmentLinkById_Assessment_Id(id);
+    }
+
 
     @Transactional(value = Transactional.TxType.MANDATORY)
     public List<Grade> findActiveGradesForAssignment(Assessment assessment) {

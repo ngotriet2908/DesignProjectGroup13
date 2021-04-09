@@ -72,7 +72,7 @@ public class SubmissionService {
                 project.getId(), userId.getId(), date, groupId
         );
         if (currentSubmission != null) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "submission exist");
+            return null;
         } else {
             // update submission
             return this.submissionRepository.save(new Submission(
@@ -93,7 +93,7 @@ public class SubmissionService {
         );
 
         if (existingSubmission != null) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "submission exist");
+            return null;
         } else {
             return this.submissionRepository.save(submission);
         }
@@ -174,8 +174,9 @@ public class SubmissionService {
      */
     @Transactional
     public List<Submission> getSubmissions(Long courseId, Long projectId, Long userId) throws ResponseStatusException {
+        System.out.println("step0");
         Project project = this.projectRepository.findById(projectId).orElse(null);
-
+        System.out.println("step1");
         if (project == null) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Project not found"
@@ -188,6 +189,7 @@ public class SubmissionService {
                     HttpStatus.UNAUTHORIZED, "Unauthorised"
             );
         }
+        System.out.println("step2");
 
         List<Submission> submissions = this.submissionRepository.findSubmissionsByProject(project);
 
@@ -195,6 +197,7 @@ public class SubmissionService {
         for (Submission submission: submissions) {
             this.addSubmissionMembers(submission);
         }
+        System.out.println("step3");
 
         return submissions;
     }
@@ -304,6 +307,36 @@ public class SubmissionService {
         return submission;
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public Submission getSubmissionWithLock(Long submissionId) throws JsonProcessingException, ResponseStatusException {
+//        Project project = this.projectRepository.findById(projectId).orElse(null);
+//
+//        if (project == null) {
+//            throw new ResponseStatusException(
+//                    HttpStatus.NOT_FOUND, "Project not found"
+//            );
+//        }
+
+        // TODO I'm not sure whether to hide the submission or not (only grading?)
+
+        // find submission
+        Submission submission = this.submissionRepository.findSubmissionById(submissionId).orElse(null);
+
+        if (submission == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Submission not found"
+            );
+        }
+
+        // link submission's members
+        submission = this.addSubmissionMembers(submission);
+
+        // link submission's assessments
+        submission = this.addSubmissionAssessments(submission);
+
+        return submission;
+    }
+
     /*
     Populates the "members" field with the list of students who are linked to the submission.
      */
@@ -334,7 +367,7 @@ public class SubmissionService {
     @Transactional
     public void saveLabels(Long projectId, Long graderId, Set<Label> labels, Long submissionId,
                            List<PrivilegeEnum> privileges) throws JsonProcessingException, ResponseStatusException {
-        Submission submission = this.getSubmission(submissionId);
+        Submission submission = this.getSubmissionWithLock(submissionId);
 
         if (submission == null) {
             throw new ResponseStatusException(
@@ -376,7 +409,7 @@ public class SubmissionService {
     */
     @Transactional
     public void assignSubmission(Long submissionId, User grader) throws JsonProcessingException {
-        Submission submission = this.getSubmission(submissionId);
+        Submission submission = this.getSubmissionWithLock(submissionId);
 
         if (submission == null) {
             throw new ResponseStatusException(
@@ -385,7 +418,7 @@ public class SubmissionService {
         }
 
         GradingParticipation grader1 = this.gradingParticipationService
-                .getGradingParticipationByUserAndProject(grader.getId(), submission.getProject().getId());
+                .getGradingParticipationByUserAndProjectWithLock(grader.getId(), submission.getProject().getId());
 
         if (grader1 == null) {
             throw new ResponseStatusException(
@@ -404,7 +437,7 @@ public class SubmissionService {
                                      List<PrivilegeEnum> privileges, Long graderId) throws JsonProcessingException {
 
 //        TODO put locks and check only self remove
-        Submission submission = this.getSubmission(submissionId);
+        Submission submission = this.getSubmissionWithLock(submissionId);
 
         if (submission == null) {
             throw new ResponseStatusException(
@@ -430,7 +463,7 @@ public class SubmissionService {
     public void assessmentManagement(Long courseId, Long projectId, Long submissionId,
                                                  JsonNode object, List<PrivilegeEnum> privileges, Long userId) throws JsonProcessingException, ResponseStatusException {
 
-        Submission submission = getSubmission(submissionId);
+        Submission submission = getSubmissionWithLock(submissionId);
         if (submission == null) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "task not found"
@@ -449,6 +482,11 @@ public class SubmissionService {
             case "new": {
                 Long participantId = object.get("participantId").asLong();
                 CourseParticipation participant = courseParticipationRepository.findById_User_IdAndId_Course_Id(participantId, courseId);
+                if (participant == null) {
+                    throw new ResponseStatusException(
+                            HttpStatus.CONFLICT, "participant not found"
+                    );
+                }
                 this.assessmentService.createNewAssessment(
                         submission,
                         participant.getId().getUser()
@@ -460,6 +498,11 @@ public class SubmissionService {
                 Long source = object.get("source").asLong();
                 Long participantId = object.get("participantId").asLong();
                 CourseParticipation participant = courseParticipationRepository.findById_User_IdAndId_Course_Id(participantId, courseId);
+                if (participant == null) {
+                    throw new ResponseStatusException(
+                            HttpStatus.CONFLICT, "participant not found"
+                    );
+                }
 
                 Assessment sourceAssignment = this.assessmentService.getAssessment(source);
                 Assessment newAssignment = this.assessmentService.createNewAssessment(
@@ -470,7 +513,12 @@ public class SubmissionService {
                                 sourceAssignment.getProject(),
                                 new HashSet<>())
                 );
-                newAssignment = assessmentService.createNewAssessment(newAssignment);
+                newAssignment = assessmentService.updateAssessment(newAssignment);
+                if (newAssignment == null) {
+                    throw new ResponseStatusException(
+                            HttpStatus.CONFLICT, "newAssignment not found"
+                    );
+                }
 
                 Assessment finalNewAssignment = newAssignment;
                 Assessment finalNewAssignment1 = finalNewAssignment;
@@ -492,8 +540,12 @@ public class SubmissionService {
                         .collect(Collectors.toSet());
                 finalNewAssignment.setGrades(grades);
 
-                finalNewAssignment = assessmentService.createNewAssessment(finalNewAssignment);
-
+                finalNewAssignment = assessmentService.updateAssessment(finalNewAssignment);
+                if (finalNewAssignment == null) {
+                    throw new ResponseStatusException(
+                            HttpStatus.CONFLICT, "finalNewAssignment not found"
+                    );
+                }
                 this.assessmentService.cloneAssessment(submission, finalNewAssignment, participant);
                 break;
             }
@@ -501,12 +553,16 @@ public class SubmissionService {
                 Long source = object.get("source").asLong();
                 Long destination = object.get("destination").asLong();
                 Long participantId = object.get("participantId").asLong();
-                Assessment sourceAssignment = assessmentService.getAssessment(source);
-                Assessment destinationAssignment = assessmentService.getAssessment(destination);
+                Assessment sourceAssignment = assessmentService.getAssessmentWithLock(source);
+                Assessment destinationAssignment = assessmentService.getAssessmentWithLock(destination);
+                if (sourceAssignment.getId().equals(destinationAssignment.getId())) {
+                    return;
+                }
+
                 CourseParticipation participant = courseParticipationRepository.findById_User_IdAndId_Course_Id(participantId, courseId);
 
-                Set<AssessmentLink> linkerSrcList = assessmentService.findAssessmentLinksByAssessmentId(source);
-                Set<AssessmentLink> linkerDesList = assessmentService.findAssessmentLinksByAssessmentId(destination);
+                Set<AssessmentLink> linkerSrcList = assessmentService.findAssessmentLinksByAssessmentIdWithLock(source);
+                Set<AssessmentLink> linkerDesList = assessmentService.findAssessmentLinksByAssessmentIdWithLock(destination);
                 AssessmentLink linkerSrc = null;
                 for(AssessmentLink linker : linkerSrcList) {
                     if (linker.getId().getUser().getId().equals(participant.getId().getUser().getId())) {
@@ -521,7 +577,7 @@ public class SubmissionService {
                         linkerSrc == null ||
                         linkerSrcList.size() == 0 ||
                         linkerDesList.size() == 0) {
-                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "not found info");
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "not found info");
                 }
 
                 assessmentService.moveAssessment(linkerSrc, destinationAssignment, linkerSrcList);
@@ -532,7 +588,7 @@ public class SubmissionService {
                 Long source = object.get("source").asLong();
                 Long participantId = object.get("participantId").asLong();
                 CourseParticipation participant = courseParticipationRepository.findById_User_IdAndId_Course_Id(participantId, courseId);
-                Set<AssessmentLink> links = assessmentService.getAssessmentsByProjectAndUser(
+                Set<AssessmentLink> links = assessmentService.getAssessmentsByProjectAndUserWithLock(
                         projectId,
                         participant.getId().getUser()
                 );
@@ -545,7 +601,7 @@ public class SubmissionService {
             }
             case "delete": {
                 Long source = object.get("source").asLong();
-                Set<AssessmentLink> linkers = assessmentService.findAssessmentLinksByAssessmentId(source);
+                Set<AssessmentLink> linkers = assessmentService.findAssessmentLinksByAssessmentIdWithLock(source);
                 for (AssessmentLink linker : linkers) {
                     if (linker.getId().getUser() != null) {
                         throw new ResponseStatusException(HttpStatus.CONFLICT, "cant remove assessment that has participants");
@@ -554,7 +610,7 @@ public class SubmissionService {
                 for (AssessmentLink linker : linkers) {
                     assessmentService.deleteAssessmentLinker(linker);
                 }
-                Assessment assessment = assessmentService.getAssessment(source);
+                Assessment assessment = assessmentService.getAssessmentWithLock(source);
                 if (assessment != null) {
                     assessmentService.deleteAssessment(assessment);
                 } else {
@@ -583,13 +639,13 @@ public class SubmissionService {
                     HttpStatus.NOT_FOUND, "project not found"
             );
         }
-        Submission submission = getSubmission(submissionId);
+        Submission submission = getSubmissionWithLock(submissionId);
         if (submission == null) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "task not found"
             );
         }
-        Assessment assessment = assessmentService.getAssessment(assessmentId);
+        Assessment assessment = assessmentService.getAssessmentWithLock(assessmentId);
         if (assessment == null) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "task not found"
@@ -637,7 +693,7 @@ public class SubmissionService {
                     HttpStatus.NOT_FOUND, "project not found"
             );
         }
-        Submission submission = getSubmission(submissionId);
+        Submission submission = getSubmissionWithLock(submissionId);
         if (submission == null) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "task not found"
@@ -661,7 +717,7 @@ public class SubmissionService {
         }
 
         Set<AssessmentLink> submissionAssessmentLinker = assessmentService
-                .getAssessmentLinksBySubmission(
+                .getAssessmentLinksBySubmissionWithLock(
                         submission);
 
         int participantCount = 0;
@@ -678,7 +734,7 @@ public class SubmissionService {
         }
 
         AssessmentLink assessmentLinker = assessmentService
-                .getAssessmentLinkForUser(submission.getId(), participant.getId().getUser().getId());
+                .getAssessmentLinkForUserWithLock(submission.getId(), participant.getId().getUser().getId());
         if (assessmentLinker == null) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT, "assessment not exists"

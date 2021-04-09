@@ -283,6 +283,11 @@ public class ProjectService {
                         submittedAt,
                         submitter.getName() + " on " + submittedAt.toString());
 
+                // if submission was already stored in db, continue
+                if (submission == null) {
+                    continue;
+                }
+
                 // save comments
                 for (SubmissionComment comment : submissionComments) {
                     comment.setSubmission(submission);
@@ -293,11 +298,6 @@ public class ProjectService {
                 for (SubmissionAttachment attachment : submissionAttachments) {
                     attachment.setSubmission(submission);
                     this.submissionDetailsService.saveAttachment(attachment);
-                }
-
-                // if submission was already stored in db, continue
-                if (submission == null) {
-                    continue;
                 }
 
                 // create an association between the submission, user and assessment
@@ -538,7 +538,7 @@ public class ProjectService {
 
     @Transactional(rollbackOn = Exception.class)
     public Label saveProjectLabel(Label label, Long projectId) throws ResponseStatusException {
-        Project project = getProject(projectId);
+        Project project = getProjectWithLock(projectId);
 
         if (project == null) {
             throw new ResponseStatusException(
@@ -646,7 +646,7 @@ public class ProjectService {
 
     @Transactional(rollbackOn = Exception.class)
     public List<FeedbackTemplate> createFeedbackTemplate(Long projectId, ObjectNode objectNode) throws ResponseStatusException {
-        Project project = getProject(projectId);
+        Project project = getProjectWithLock(projectId);
         if (project == null) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "project not found"
@@ -659,6 +659,7 @@ public class ProjectService {
                 objectNode.get("body").asText(),
                 project
         );
+
         feedbackService.addTemplate(template);
 
         return feedbackService.getTemplatesFromProject(project);
@@ -666,7 +667,7 @@ public class ProjectService {
 
     @Transactional(rollbackOn = Exception.class)
     public List<FeedbackTemplate> updateFeedbackTemplate(Long projectId, Long templateId, ObjectNode objectNode) throws ResponseStatusException {
-        Project project = getProject(projectId);
+        Project project = getProjectWithLock(projectId);
         if (project == null) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "project not found"
@@ -969,12 +970,17 @@ public class ProjectService {
 //                .collect(Collectors.toList());
         return issueRepository.findIssuesByCreatorOrAddressee(user, user)
                 .stream()
-                .peek(issue -> issue.setSubmission(
-                        submissionService
+                .peek(issue -> {
+                        Submission submission = submissionService
                                 .findSubmissionsFromAssessment(
-                                        issue.getAssessment().getId()
-                                )
-                ))
+                                        issue.getAssessment().getId());
+                        if (submission.getProject().getId().equals(projectId)) {
+                            issue.setSubmission(
+                                    submission
+                            );
+                        }
+                })
+                .filter(issue -> issue.getSubmission() != null)
                 .sorted(Comparator.comparingLong(Issue::getId))
                 .collect(Collectors.toList());
     }

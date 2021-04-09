@@ -17,6 +17,9 @@ public interface GradingParticipationRepository extends JpaRepository<GradingPar
     @Lock(LockModeType.PESSIMISTIC_READ)
     GradingParticipation findById_User_IdAndId_Project_Id(Long id_user_id, Long id_project_id);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    GradingParticipation findGradingParticipationById_User_IdAndId_Project_Id(Long id_user_id, Long id_project_id);
+
     @Lock(LockModeType.PESSIMISTIC_READ)
     GradingParticipation findById_UserAndId_Project(User id_user, Project id_project);
 
@@ -25,17 +28,17 @@ public interface GradingParticipationRepository extends JpaRepository<GradingPar
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<GradingParticipation> findAllById_Project(Project id_project);
-
-    @Lock(LockModeType.PESSIMISTIC_READ)
-    @Query(value="select new User(u.id, u.name) " +
-            "from GradingParticipation g, User u " +
-            "where g.id.user.id = u.id and g.id.project.id=?1")
-    List<User> getProjectUsers(Long projectId);
+//
+//    @Lock(LockModeType.PESSIMISTIC_READ)
+//    @Query(value="select new User(u.id, u.name) " +
+//            "from GradingParticipation g, User u " +
+//            "where g.id.user.id = u.id and g.id.project.id=?1")
+//    List<User> getProjectUsers(Long projectId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
    <S extends GradingParticipation> S save(S s);
 
-    @Lock(LockModeType.PESSIMISTIC_READ)
+//    @Lock(LockModeType.PESSIMISTIC_READ)
     @Query(value="select distinct u " +
             "from GradingParticipation g, User u " +
             "left join fetch u.toGrade " +
