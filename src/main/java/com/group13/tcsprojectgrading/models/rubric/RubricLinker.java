@@ -35,6 +35,9 @@ public class RubricLinker {
     @Column(columnDefinition="TEXT")
     private String rubric;
 
+    @Version
+    private Long version;
+
     public RubricLinker() {
     }
 
@@ -62,5 +65,13 @@ public class RubricLinker {
 
     public void setRubric(String rubric) {
         this.rubric = rubric;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }

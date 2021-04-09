@@ -17,9 +17,9 @@ public class Assessment {
     @GeneratedValue(strategy=GenerationType.SEQUENCE)
     private Long id;
 
-    private Integer gradedCount = 0;
-    private Integer finalGrade = null;
-    private Boolean finalGradeManual = false;
+    @Transient
+    private Float finalGrade;
+    private Float manualGrade;
 
     // issues
     @JsonIgnore
@@ -53,22 +53,16 @@ public class Assessment {
         this.id = id;
     }
 
-    public Assessment(Long id, Integer gradedCount, Integer finalGrade, Boolean finalGradeManual, Project project
+    public Assessment(Long id , Project project
             , Set<Grade> grades, List<Issue> issues
     ) {
         this.id = id;
-        this.gradedCount = gradedCount;
-        this.finalGrade = finalGrade;
-        this.finalGradeManual = finalGradeManual;
         this.project = project;
         this.grades = grades;
         this.issues = issues;
     }
 
-    public Assessment(Integer gradedCount, Integer finalGrade, Boolean finalGradeManual, Project project, Set<Grade> grades) {
-        this.gradedCount = gradedCount;
-        this.finalGrade = finalGrade;
-        this.finalGradeManual = finalGradeManual;
+    public Assessment(Project project, Set<Grade> grades) {
         this.project = project;
         this.grades = grades;
     }
@@ -79,30 +73,6 @@ public class Assessment {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Integer getGradedCount() {
-        return gradedCount;
-    }
-
-    public void setGradedCount(Integer gradedCount) {
-        this.gradedCount = gradedCount;
-    }
-
-    public Integer getFinalGrade() {
-        return finalGrade;
-    }
-
-    public void setFinalGrade(Integer finalGrade) {
-        this.finalGrade = finalGrade;
-    }
-
-    public Boolean getFinalGradeManual() {
-        return finalGradeManual;
-    }
-
-    public void setFinalGradeManual(Boolean finalGradeManual) {
-        this.finalGradeManual = finalGradeManual;
     }
 
     public Set<User> getMembers() {
@@ -143,6 +113,22 @@ public class Assessment {
 
     public void setProgress(int progress) {
         this.progress = progress;
+    }
+
+    public Float getFinalGrade() {
+        return finalGrade;
+    }
+
+    public void setFinalGrade(Float finalGrade) {
+        this.finalGrade = finalGrade;
+    }
+
+    public Float getManualGrade() {
+        return manualGrade;
+    }
+
+    public void setManualGrade(Float manualGrade) {
+        this.manualGrade = manualGrade;
     }
 
     @Override

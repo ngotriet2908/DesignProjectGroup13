@@ -38,6 +38,7 @@ class SubmissionDetailsAssessmentItemContainer extends Component {
         </div>
         <div>
           <p>progress: {this.props.assessment.progress}%</p>
+          <p>final grade: {this.props.assessment.finalGrade}</p>
           <p>issues count: {this.props.assessment.issues.length}</p>
         </div>
         <div>

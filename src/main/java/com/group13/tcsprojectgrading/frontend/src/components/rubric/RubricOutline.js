@@ -86,17 +86,28 @@ class RubricOutline extends Component {
       this.props.setEditingRubric(false);
       this.props.resetUpdates();
     } else {
-      request(BASE + "courses/" + this.props.courseId + "/projects/" + this.props.projectId + "/rubric", "PATCH", this.props.updates)
+      request(BASE + "courses/" + this.props.courseId + "/projects/" + this.props.projectId + "/rubric?version=" + this.props.rubric.version, "PATCH", this.props.updates)
         .then(data => {
           console.log(data);
 
-          if (data.status === 200) {
-            this.props.setEditingRubric(false);
-            this.props.saveRubricTemp(null);
-            this.props.resetUpdates();
-          } else {
-            console.log("Error updating rubric.")
+          // if (data.status === 200) {
+          //   return data.json()
+          // } else if (data.status === 409) {
+          //   throw new Error(data.)
+          // }
+          return data.json()
+        })
+        .then(data => {
+          console.log(data)
+          if (data.hasOwnProperty("error")) {
+            alert(Error(data.message))
+            return
           }
+
+          this.props.setEditingRubric(false);
+          this.props.saveRubric(data);
+          this.props.saveRubricTemp(null);
+          this.props.resetUpdates();
         })
         .catch(error => {
           console.error(error.message);

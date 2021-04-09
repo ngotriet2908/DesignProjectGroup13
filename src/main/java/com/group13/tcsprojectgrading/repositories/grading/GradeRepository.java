@@ -28,5 +28,8 @@ public interface GradeRepository extends JpaRepository<Grade, Long>  {
     Optional<Grade> findById(Long id);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
+    void deleteAllByCriterionId(String criterionId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Grade> findGradeById(Long id);
 }

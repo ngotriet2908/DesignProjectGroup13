@@ -67,9 +67,7 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.group13.tcsprojectgrading.controllers.EmailUtils.createEmailWithAttachment;
 import static com.group13.tcsprojectgrading.controllers.EmailUtils.sendMessage;
@@ -433,7 +431,7 @@ public class ProjectService {
     Update the rubric with patches (patches are applied sequentially).
      */
     @Transactional(rollbackOn = Exception.class)
-    public String updateRubric(Long projectId, JsonNode patch) throws JsonProcessingException, ResponseStatusException {
+    public void updateRubric(Long projectId, JsonNode patch, Long version) throws JsonProcessingException, ResponseStatusException {
         Project project = getProject(projectId);
         if (project == null) {
             throw new ResponseStatusException(
@@ -443,9 +441,15 @@ public class ProjectService {
 
         System.out.println("Updating the rubric of project " + projectId + ".");
         Rubric rubric = this.rubricService.getRubricAndLock(projectId);
-
+        if (!rubric.getVersion().equals(version)) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "rubric is not up-to-date"
+            );
+        }
         // apply update and mark affected submissions
         Rubric rubricPatched = this.rubricService.applyUpdate(patch, rubric);
+
+        System.out.println("Commit the rubric of project " + projectId + ".");
         this.rubricService.saveRubric(rubricPatched);
 
         // store update
@@ -458,7 +462,6 @@ public class ProjectService {
         this.rubricService.storeHistory(history);
 
         System.out.println("Updating the rubric of project " + projectId + " finished successfully.");
-        return "Rubric updated";
     }
 
     /*

@@ -7,12 +7,15 @@ import com.group13.tcsprojectgrading.models.grading.AssessmentLink;
 import com.group13.tcsprojectgrading.models.grading.Grade;
 import com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum;
 import com.group13.tcsprojectgrading.models.project.Project;
+import com.group13.tcsprojectgrading.models.rubric.Element;
+import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.models.submissions.Label;
 import com.group13.tcsprojectgrading.models.user.User;
 import com.group13.tcsprojectgrading.models.graders.GradingParticipation;
 import com.group13.tcsprojectgrading.models.grading.Assessment;
 import com.group13.tcsprojectgrading.models.submissions.Submission;
 import com.group13.tcsprojectgrading.repositories.course.CourseParticipationRepository;
+import com.group13.tcsprojectgrading.repositories.grading.GradeRepository;
 import com.group13.tcsprojectgrading.repositories.grading.IssueRepository;
 import com.group13.tcsprojectgrading.repositories.project.ProjectRepository;
 import com.group13.tcsprojectgrading.repositories.submissions.SubmissionRepository;
@@ -44,12 +47,13 @@ public class SubmissionService {
     private final UserService userService;
     private final CourseParticipationRepository courseParticipationRepository;
     private final IssueRepository issueRepository;
+    private final GradeRepository gradeRepository;
 
     @Autowired
     public SubmissionService(SubmissionRepository submissionRepository, ProjectRepository projectRepository,
                              GradingParticipationService gradingParticipationService, RubricService rubricService,
                              @Lazy AssessmentService assessmentService, SubmissionDetailsService submissionDetailsService,
-                             @Lazy UserService userService, CourseParticipationRepository courseParticipationRepository, IssueRepository issueRepository) {
+                             @Lazy UserService userService, CourseParticipationRepository courseParticipationRepository, IssueRepository issueRepository, GradeRepository gradeRepository) {
         this.submissionRepository = submissionRepository;
         this.projectRepository = projectRepository;
         this.gradingParticipationService = gradingParticipationService;
@@ -59,6 +63,7 @@ public class SubmissionService {
         this.userService = userService;
         this.courseParticipationRepository = courseParticipationRepository;
         this.issueRepository = issueRepository;
+        this.gradeRepository = gradeRepository;
     }
 
     /*
@@ -174,9 +179,7 @@ public class SubmissionService {
      */
     @Transactional
     public List<Submission> getSubmissions(Long courseId, Long projectId, Long userId) throws ResponseStatusException {
-        System.out.println("step0");
         Project project = this.projectRepository.findById(projectId).orElse(null);
-        System.out.println("step1");
         if (project == null) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Project not found"
@@ -189,7 +192,6 @@ public class SubmissionService {
                     HttpStatus.UNAUTHORIZED, "Unauthorised"
             );
         }
-        System.out.println("step2");
 
         List<Submission> submissions = this.submissionRepository.findSubmissionsByProject(project);
 
@@ -197,7 +199,6 @@ public class SubmissionService {
         for (Submission submission: submissions) {
             this.addSubmissionMembers(submission);
         }
-        System.out.println("step3");
 
         return submissions;
     }
@@ -352,12 +353,39 @@ public class SubmissionService {
      */
     @Transactional
     public Submission addSubmissionAssessments(Submission submission) {
+        Rubric rubric = rubricService.getRubricById(submission.getProject().getId());
+        List<Element> criteria = rubric.fetchAllCriteria();
+        Map<String, Element> criteriaMap = new HashMap<>();
+        criteria.forEach(element -> criteriaMap.put(element.getContent().getId(), element));
+
         List<Assessment> assessments = this.assessmentService.getAssessmentsBySubmission(submission);
-        submission.setAssessments(assessments
+        submission.setAssessments(
+                assessments
                 .stream()
-                .peek(assessment -> assessment.setIssues(issueRepository.findIssuesByAssessmentId(assessment.getId())))
+                .peek(assessment -> {
+                    if (assessment.getManualGrade() != null) {
+                        assessment.setFinalGrade(assessment.getManualGrade());
+                        return;
+                    }
+
+                    List<Grade> grades = gradeRepository.findGradesByAssessmentAndIsActiveIsTrue(assessment);
+                    assessment.setIssues(issueRepository.findIssuesByAssessmentId(assessment.getId()));
+                    assessment.setProgress((int)(grades.size() *1.0/rubric.getCriterionCount()*100));
+                    assessment.setFinalGrade(
+                            (float) grades.stream()
+                                    .mapToDouble(grade ->
+                                            grade.getGrade()*
+                                                    criteriaMap.get(grade.getCriterionId())
+                                                            .getContent().getGrade().getWeight()
+                                    )
+                                    .reduce(0,
+                                    (grade, grade2) -> grade += grade2
+                            )
+                    );
+                })
                 .collect(Collectors.toList())
         );
+
         return submission;
     }
 
@@ -507,9 +535,6 @@ public class SubmissionService {
                 Assessment sourceAssignment = this.assessmentService.getAssessment(source);
                 Assessment newAssignment = this.assessmentService.createNewAssessment(
                         new Assessment(
-                                sourceAssignment.getGradedCount(),
-                                sourceAssignment.getFinalGrade(),
-                                sourceAssignment.getFinalGradeManual(),
                                 sourceAssignment.getProject(),
                                 new HashSet<>())
                 );

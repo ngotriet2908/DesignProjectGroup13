@@ -18,4 +18,6 @@ public interface RubricLinkerRepository extends JpaRepository<RubricLinker, Rubr
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<RubricLinker> findRubricLinkerById(RubricLinker.Pk pk);
 
+    @Lock(LockModeType.PESSIMISTIC_FORCE_INCREMENT)
+    <S extends RubricLinker> S save(S s);
 }

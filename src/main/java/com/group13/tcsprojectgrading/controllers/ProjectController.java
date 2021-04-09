@@ -12,6 +12,7 @@ import com.group13.tcsprojectgrading.models.feedback.FeedbackLog;
 import com.group13.tcsprojectgrading.models.feedback.FeedbackTemplate;
 import com.group13.tcsprojectgrading.models.grading.Issue;
 import com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum;
+import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.models.submissions.Label;
 import com.group13.tcsprojectgrading.models.user.User;
 import com.group13.tcsprojectgrading.services.course.CourseService;
@@ -21,7 +22,6 @@ import com.group13.tcsprojectgrading.services.project.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -453,6 +453,7 @@ public class ProjectController {
     public String updateRubric(
             @RequestBody JsonNode patch,
             @PathVariable Long projectId,
+            @RequestParam("version") Long version,
             Principal principal) throws JsonPatchApplicationException, JsonProcessingException {
 
         List<PrivilegeEnum> privileges = this.gradingParticipationService
@@ -460,7 +461,9 @@ public class ProjectController {
         if (!(privileges != null && privileges.contains(RUBRIC_WRITE))) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
         }
-        return projectService.updateRubric(projectId, patch);
+        System.out.println("Rubric version the server: " + version);
+        projectService.updateRubric(projectId, patch, version);
+        return projectService.getRubric(projectId);
     }
 
     @GetMapping(
@@ -497,7 +500,8 @@ public class ProjectController {
         String s = new String(file.getBytes(), StandardCharsets.UTF_8);
         System.out.println(s);
 //        TODO can only upload before grading starts, also would criterion id matters ?
-        return projectService.importRubric(projectId, s);
+        projectService.importRubric(projectId, s);
+        return projectService.getRubric(projectId);
     }
 
     @GetMapping(

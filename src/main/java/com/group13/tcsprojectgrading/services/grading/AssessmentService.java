@@ -5,6 +5,7 @@ import com.group13.tcsprojectgrading.models.course.CourseParticipation;
 import com.group13.tcsprojectgrading.models.graders.GradingParticipation;
 import com.group13.tcsprojectgrading.models.grading.*;
 import com.group13.tcsprojectgrading.models.project.Project;
+import com.group13.tcsprojectgrading.models.rubric.Element;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.models.user.User;
 import com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum;
@@ -264,7 +265,8 @@ public class AssessmentService {
                             .filter(issue -> issue.getStatus().equals("unresolved"))
                             .collect(Collectors.toList())
             );
-            assessment.setProgress((int) (assessment.getGradedCount()*1.0/rubric.getCriterionCount()*100));
+            assessment.setProgress((int) (gradeRepository.findGradesByAssessmentAndIsActiveIsTrue(assessment).size()
+                    *1.0/rubric.getCriterionCount()*100));
         }
         return assessments.stream().sorted(Comparator.comparingLong(Assessment::getId)).collect(Collectors.toList());
     }
@@ -282,6 +284,45 @@ public class AssessmentService {
             );
         }
 
+        return assessment;
+    }
+
+    /*
+    Returns a single assessment.
+     */
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public Assessment getAssessmentDetails(Long id, Project project) {
+        Assessment assessment =  this.assessmentRepository.findById(id).orElse(null);
+
+        if (assessment == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Assessment not found"
+            );
+        }
+
+        if (assessment.getManualGrade() != null) {
+            assessment.setFinalGrade(assessment.getManualGrade());
+            return assessment;
+        }
+
+        Rubric rubric = rubricService.getRubricById(project.getId());
+        List<Element> criteria = rubric.fetchAllCriteria();
+        Map<String, Element> criteriaMap = new HashMap<>();
+        criteria.forEach(element -> criteriaMap.put(element.getContent().getId(), element));
+        List<Grade> grades = gradeRepository.findGradesByAssessmentAndIsActiveIsTrue(assessment);
+        assessment.setIssues(issueRepository.findIssuesByAssessmentId(assessment.getId()));
+        assessment.setProgress((int)(grades.size() *1.0/rubric.getCriterionCount()*100));
+        assessment.setFinalGrade(
+                (float) grades.stream()
+                        .mapToDouble(grade ->
+                                grade.getGrade()*
+                                        criteriaMap.get(grade.getCriterionId())
+                                                .getContent().getGrade().getWeight()
+                        )
+                        .reduce(0,
+                                (grade, grade2) -> grade += grade2
+                        )
+        );
         return assessment;
     }
 
@@ -318,7 +359,7 @@ public class AssessmentService {
             }
         }
 
-       return getAssessment(assessmentId);
+       return getAssessmentDetails(assessmentId, submission.getProject());
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
@@ -368,7 +409,22 @@ public class AssessmentService {
             }
         }
 
-        assessment.setGradedCount(assessment.getGradedCount() + 1);
+        Rubric rubric = rubricService.getRubricById(submission.getProject().getId());
+        List<Element> criteria = rubric.fetchAllCriteria();
+        boolean isCriterionInRubric = false;
+        for(Element criterion: criteria) {
+            if (criterion.getContent().getId().equals(grade.getCriterionId())) {
+                isCriterionInRubric = true;
+                break;
+            }
+        }
+
+        if (!isCriterionInRubric) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "No criterion exist"
+            );
+        }
+
         assessment = assessmentRepository.save(assessment);
 
         grade.setGradedAt(Date.from(Instant.now()));

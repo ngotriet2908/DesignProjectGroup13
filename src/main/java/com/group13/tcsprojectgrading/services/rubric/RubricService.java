@@ -5,14 +5,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.flipkart.zjsonpatch.JsonPatch;
+import com.group13.tcsprojectgrading.models.grading.Grade;
 import com.group13.tcsprojectgrading.models.project.Project;
 import com.group13.tcsprojectgrading.models.rubric.RubricHistoryLinker;
 import com.group13.tcsprojectgrading.models.rubric.RubricLinker;
 import com.group13.tcsprojectgrading.models.rubric.*;
+import com.group13.tcsprojectgrading.repositories.grading.GradeRepository;
 import com.group13.tcsprojectgrading.repositories.rubric.RubricHistoryLinkerRepository;
 import com.group13.tcsprojectgrading.repositories.rubric.RubricLinkerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
@@ -24,11 +28,13 @@ import java.util.Stack;
 public class RubricService {
     private final RubricLinkerRepository rubricLinkerRepository;
     private final RubricHistoryLinkerRepository rubricHistoryLinkerRepository;
+    private final GradeRepository gradeRepository;
 
     @Autowired
-    public RubricService(RubricLinkerRepository repository, RubricHistoryLinkerRepository rubricHistoryLinkerRepository) {
+    public RubricService(RubricLinkerRepository repository, RubricHistoryLinkerRepository rubricHistoryLinkerRepository, GradeRepository gradeRepository) {
         this.rubricLinkerRepository = repository;
         this.rubricHistoryLinkerRepository = rubricHistoryLinkerRepository;
+        this.gradeRepository = gradeRepository;
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
@@ -45,7 +51,10 @@ public class RubricService {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             if (linker != null) {
-                return objectMapper.readValue(linker.getRubric(), Rubric.class);
+                System.out.println("Rubric version: " + linker.getVersion());
+                Rubric rubric = objectMapper.readValue(linker.getRubric(), Rubric.class);
+                rubric.setVersion(linker.getVersion());
+                return rubric;
             }
         } catch (JsonProcessingException e) {
             return null;
@@ -70,11 +79,11 @@ public class RubricService {
         updateCriterionCount(rubric);
         updateLastModified(rubric);
         RubricLinker linker = this.rubricLinkerRepository.findById(new RubricLinker.Pk(new Project(rubric.getId()))).orElse(null);
-
         if (linker == null) {
             return null;
         }
 
+        System.out.println("Rubric version: " + linker.getVersion());
         ObjectMapper mapper = new ObjectMapper();
         linker.setRubric(mapper.writeValueAsString(rubric));
 
@@ -105,6 +114,12 @@ public class RubricService {
     public String importRubric(Rubric rubric) throws JsonProcessingException {
         RubricLinker linker = rubricLinkerRepository.findRubricLinkerById(new RubricLinker.Pk(new Project(rubric.getId()))).orElse(null);
         if (linker == null) return null;
+//        if (linker.getVersion() > 0) {
+//            throw new ResponseStatusException(
+//                    HttpStatus.CONFLICT, "cannot import after v0"
+//            );
+//        }
+
         ObjectMapper mapper = new ObjectMapper();
         linker.setRubric(mapper.writeValueAsString(rubric));
         return rubricLinkerRepository.save(linker).getRubric();
@@ -165,7 +180,8 @@ public class RubricService {
     }
 
     // TODO: mark all? mark specific? put in issues? notify? if mark all - stop when first issue below is found
-    public Rubric applyUpdate(JsonNode patches, Rubric rubric) throws JsonProcessingException {
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public Rubric applyUpdate(JsonNode patches, Rubric rubric) throws JsonProcessingException, ResponseStatusException {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode rubricJson = objectMapper.convertValue(rubric, JsonNode.class);
 
@@ -227,12 +243,24 @@ public class RubricService {
                         System.out.println("A section with criteria has been removed. Mark all submissions.");
 
                         // for each criterion
-                        for (JsonNode criterion: criteria) {
-                            // for each assessment in the project check if the criterion is in it
+                        try {
+                            for (JsonNode criterion: criteria) {
+                                // for each assessment in the project check if the criterion is in it
+                                System.out.println("removing grades of criterion: " + criterion.get("content").get("id").asText());
+                                gradeRepository.deleteAllByCriterionId(criterion.get("content").get("id").asText());
+                            }
+                        } catch (Exception e) {
+                            throw new ResponseStatusException(HttpStatus.CONFLICT, "deletion failed");
                         }
                     } else {
                         // it was a criterion
-                        System.out.println("A criterion has been removed. Mark all submissions.");
+                        try {
+                            gradeRepository.deleteAllByCriterionId(element.get("content").get("id").asText());
+                            System.out.println("removing grades of criterion: " + element.get("content").get("id").asText());
+                            System.out.println("A criterion has been removed. Mark all submissions.");
+                        } catch (Exception e) {
+                            throw new ResponseStatusException(HttpStatus.CONFLICT, "deletion failed");
+                        }
                     }
                 }
 
@@ -246,6 +274,7 @@ public class RubricService {
 
         return objectMapper.treeToValue(rubricJson, Rubric.class);
     }
+
 
     public JsonNode findInRubric(JsonNode rubric, String[] path) {
         JsonNode currentArray = null;
