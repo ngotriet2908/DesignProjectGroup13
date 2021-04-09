@@ -59,6 +59,12 @@ public class GradingParticipationService {
         return this.repository.findById_User_IdAndId_Project_Id(userId, projectId);
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public GradingParticipation getGradingParticipationByUserAndProjectWithLock(Long userId, Long projectId) {
+        return this.repository.findGradingParticipationById_User_IdAndId_Project_Id(userId, projectId);
+    }
+
+
     /*
     Returns a list of graders of the project.
      */

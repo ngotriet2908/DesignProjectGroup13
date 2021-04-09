@@ -103,7 +103,7 @@ public class RubricService {
 
     @Transactional(value = Transactional.TxType.MANDATORY)
     public String importRubric(Rubric rubric) throws JsonProcessingException {
-        RubricLinker linker = rubricLinkerRepository.findById(new RubricLinker.Pk(new Project(rubric.getId()))).orElse(null);
+        RubricLinker linker = rubricLinkerRepository.findRubricLinkerById(new RubricLinker.Pk(new Project(rubric.getId()))).orElse(null);
         if (linker == null) return null;
         ObjectMapper mapper = new ObjectMapper();
         linker.setRubric(mapper.writeValueAsString(rubric));
