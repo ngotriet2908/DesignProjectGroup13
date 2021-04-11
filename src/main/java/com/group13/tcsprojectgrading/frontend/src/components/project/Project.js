@@ -166,6 +166,21 @@ class Project extends Component {
       });
   }
 
+  handleUploadGrades = () => {
+    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/uploadGrades`, "GET", null ,"application/octet-stream")
+      .then(response => {
+        if (response.status === 200) {
+          return response.blob()
+        }
+      })
+      .then((data) => {
+        alert("done")
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
+  }
+
   render () {
     if (!this.state.isLoaded) {
       return (
@@ -257,6 +272,10 @@ class Project extends Component {
 
                     <Button variant="lightGreen" onClick={this.handleExcel}>
                           Export Results
+                    </Button>
+
+                    <Button variant="lightGreen" onClick={this.handleUploadGrades}>
+                      Upload Grades To Canvas
                     </Button>
 
                   </Card.Body>

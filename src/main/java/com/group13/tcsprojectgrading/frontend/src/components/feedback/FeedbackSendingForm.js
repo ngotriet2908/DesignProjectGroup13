@@ -13,7 +13,7 @@ class FeedbackSendingForm extends Component {
     }
   }
 
-  handleSendFeedback = (isAll) => {
+  handleSendFeedback = (isAll, feedbackType) => {
     let templateId = this.formRef.current.templateChoice.value
     if (templateId === "null") {
       toast.error("choose one template", {
@@ -28,7 +28,7 @@ class FeedbackSendingForm extends Component {
       return;
     }
 
-    request(`/api/courses/${this.props.params.courseId}/projects/${this.props.params.projectId}/feedback/send/${templateId}?isAll=${isAll}`
+    request(`/api/courses/${this.props.params.courseId}/projects/${this.props.params.projectId}/feedback/send/${templateId}?isAll=${isAll}&type=${feedbackType}`
       , "GET", undefined, undefined, false)
       .then((response) => {
         return response.json()
@@ -106,13 +106,25 @@ class FeedbackSendingForm extends Component {
           </Form.Group>
 
           <div className={styles.sendButtonGroup}>
-            <Button variant="yellow" onClick={() => this.handleSendFeedback(false)}>
-            Send to not sent
+            <Button variant="yellow" onClick={() => this.handleSendFeedback(false, "emailPdf")}>
+            Send to not sent (Email)
               <Badge style={{marginLeft: "0.5rem"}} variant="light">{this.props.pNotSent.length}</Badge>
             </Button>
 
-            <Button variant="lightGreen" onClick={() => this.handleSendFeedback(true)}>
-            Send to all
+            <Button variant="lightGreen" onClick={() => this.handleSendFeedback(true, "emailPdf")}>
+            Send to all (Email)
+              <Badge style={{marginLeft: "0.5rem"}} variant="light">{this.props.pAll.length}</Badge>
+            </Button>
+          </div>
+
+          <div className={styles.sendButtonGroup}>
+            <Button variant="yellow" onClick={() => this.handleSendFeedback(false, "canvasString")}>
+              Send to not sent (Canvas)
+              <Badge style={{marginLeft: "0.5rem"}} variant="light">{this.props.pNotSent.length}</Badge>
+            </Button>
+
+            <Button variant="lightGreen" onClick={() => this.handleSendFeedback(true, "canvasString")}>
+              Send to all (Canvas)
               <Badge style={{marginLeft: "0.5rem"}} variant="light">{this.props.pAll.length}</Badge>
             </Button>
           </div>

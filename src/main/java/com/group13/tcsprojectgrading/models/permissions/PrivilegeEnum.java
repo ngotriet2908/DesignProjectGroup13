@@ -46,6 +46,8 @@ public enum PrivilegeEnum {
     FLAG_EDIT("Flag_edit"),
     FLAG_ASSIGN("Flag_assign"),
 
+    UPLOAD_GRADES("Grades_upload"),
+
     NULL("NULL")
     ;
 

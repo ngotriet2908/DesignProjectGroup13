@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.services.gmail.Gmail;
+import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
+import com.group13.tcsprojectgrading.controllers.CanvasFeedbackUtils;
 import com.group13.tcsprojectgrading.controllers.ExcelUtils;
 import com.group13.tcsprojectgrading.controllers.PdfRubricUtils;
 import com.group13.tcsprojectgrading.controllers.PdfUtils;
@@ -768,6 +770,50 @@ public class ProjectService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public String uploadGradesToCanvas(Long projectId, CanvasApi canvasApi) throws ResponseStatusException {
+        Project project = getProject(projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "project not found"
+            );
+        }
+
+        Rubric rubric = rubricService.getRubricById(projectId);
+        if (rubric == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "rubric not found"
+            );
+        }
+        List<String> queryParams = new ArrayList<>();
+        courseParticipationRepository
+                .findById_Course_IdAndRole_Name(
+                        project.getCourse().getId(),
+                        RoleEnum.STUDENT.getName()
+                )
+                .forEach(student -> {
+                    AssessmentLink assessment = assessmentService
+                            .findCurrentAssessmentUser(project, student.getId().getUser());
+                    if ((assessment != null)
+                            && (assessmentService.findActiveGradesForAssignment(assessment.getId().getAssessment()).size() == rubric.getCriterionCount())) {
+                        Assessment finalAssessment = assessmentService.getAssessmentDetails(assessment.getId().getAssessment().getId(), project);
+                        String studentId = String.valueOf(student.getId().getUser().getId());
+                        String finalGrade = String.format("%.1f", (finalAssessment.getManualGrade() != null)? finalAssessment.getManualGrade() : finalAssessment.getFinalGrade());
+                        String query = String.format("grade_data[%s][posted_grade]=%s", studentId, finalGrade);
+                        System.out.println(query);
+                        queryParams.add(query);
+                    } else {
+                        String studentId = String.valueOf(student.getId().getUser().getId());
+                        String finalGrade = "0";
+                        String query = String.format("grade_data[%s][posted_grade]=%s", studentId, finalGrade);
+                        System.out.println(query);
+                        queryParams.add(query);
+                    }
+                });
+        return canvasApi.getCanvasCoursesApi().uploadGrades(project.getCourse().getId(), project.getId(),queryParams);
+    }
+
+
 //    @Transactional
 //    public ResponseEntity<byte[]> sendFeedbackPdf(String courseId, String projectId, ObjectNode feedback) throws IOException {
 //        Project project = getProjectById(courseId, projectId);
@@ -831,7 +877,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public List<FeedbackLog> sendFeedback(Long projectId, Long templateId, boolean isAll,
+    public List<FeedbackLog> sendFeedbackEmailPdf(Long projectId, Long templateId, boolean isAll,
                                           GoogleAuthorizationCodeFlow flow, Principal principal) throws ResponseStatusException{
         Project project = getProject(projectId);
         if (project == null) {
@@ -868,7 +914,7 @@ public class ProjectService {
             AssessmentLink link = assessmentService.findCurrentAssessmentUser(project, courseParticipation.getId().getUser());
 
             try {
-                if (sendFeedback(project, link, courseParticipation, template, flow, rubric, principal.getName())) {
+                if (sendFeedbackEmail(project, link, courseParticipation, template, flow, rubric, principal.getName())) {
                     feedbackService.addLog(new FeedbackLog(
                             date,
                             link,
@@ -888,7 +934,55 @@ public class ProjectService {
     }
 
     @Transactional
-    public boolean sendFeedback(Project project, AssessmentLink link, CourseParticipation participation,
+    public List<FeedbackLog> sendFeedbackCanvasString(Long projectId, Long templateId, boolean isAll,
+                                                  CanvasApi canvasApi, Principal principal) throws ResponseStatusException{
+        Project project = getProject(projectId);
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "project not found"
+            );
+        }
+
+        FeedbackTemplate template = feedbackService.findTemplateFromId(templateId);
+
+        if (template == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "template not found"
+            );
+        }
+
+        Rubric rubric = rubricService.getRubricById(projectId);
+        if (rubric == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "rubric not found"
+            );
+        }
+
+
+        List<CourseParticipation> participations;
+        if (!isAll) {
+            participations = allFinishedGradedUserNotSent(projectId);
+        } else {
+            participations = allFinishedGradedUser(projectId);
+        }
+        Date date = new Date();
+
+        participations.forEach(courseParticipation -> {
+            AssessmentLink link = assessmentService.findCurrentAssessmentUser(project, courseParticipation.getId().getUser());
+            if (sendFeedbackCanvas(project, link, courseParticipation, template, canvasApi, rubric, principal.getName())) {
+                feedbackService.addLog(new FeedbackLog(
+                        date,
+                        link,
+                        template
+                ));
+            }
+        });
+
+        return feedbackService.getLogs(project);
+    }
+
+    @Transactional
+    public boolean sendFeedbackEmail(Project project, AssessmentLink link, CourseParticipation participation,
                                 FeedbackTemplate template,
                                 GoogleAuthorizationCodeFlow flow,
                                 Rubric rubric,
@@ -923,7 +1017,7 @@ public class ProjectService {
         document.getPdfDocument();
 
         User participant = participation.getId().getUser();
-        Assessment assessment = link.getId().getAssessment();
+        Assessment assessment = assessmentService.getAssessmentDetails(link.getId().getAssessment().getId(), project);
 
         PdfUtils pdfUtils = new PdfUtils(document, rubric, assessment, participation);
 
@@ -942,6 +1036,35 @@ public class ProjectService {
         }
 
         return false;
+    }
+
+    @Transactional
+    public boolean sendFeedbackCanvas(Project project, AssessmentLink link, CourseParticipation participation,
+                                     FeedbackTemplate template,
+                                     CanvasApi canvasApi,
+                                     Rubric rubric,
+                                     String teacherId
+    ) {
+
+        try {
+            User participant = participation.getId().getUser();
+            Assessment assessment = assessmentService.getAssessmentDetails(link.getId().getAssessment().getId(), project);
+
+            String feedback = template.getBody() + "\n";
+            CanvasFeedbackUtils canvasFeedbackUtils = new CanvasFeedbackUtils(feedback, rubric, assessment, participation);
+
+            feedback = canvasFeedbackUtils.generateFeedbackString();
+            System.out.println(feedback);
+            canvasApi.getCanvasUsersApi().sendMessageWithId(
+                    participant.getId(),
+                    null,
+                    template.getSubject(),
+                    feedback
+            );
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
     }
 
     @Transactional

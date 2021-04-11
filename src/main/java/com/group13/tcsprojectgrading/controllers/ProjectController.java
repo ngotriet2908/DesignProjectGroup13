@@ -421,6 +421,7 @@ public class ProjectController {
                                              @PathVariable Long projectId,
                                              @PathVariable Long templateId,
                                              @RequestParam("isAll") boolean isAll,
+                                             @RequestParam("type") String type,
                                              Principal principal) throws JsonProcessingException {
 
         List<PrivilegeEnum> privileges = this.gradingParticipationService
@@ -428,8 +429,14 @@ public class ProjectController {
         if (!(privileges != null && privileges.contains(FEEDBACK_OPEN))) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
         }
-
-        return projectService.sendFeedback(projectId, templateId, isAll, flow, principal);
+        System.out.println(type);
+        if (type.equals("emailPdf")) {
+            return projectService.sendFeedbackEmailPdf(projectId, templateId, isAll, flow, principal);
+        } else if (type.equals("canvasString")) {
+            return projectService.sendFeedbackCanvasString(projectId, templateId, isAll, canvasApi, principal);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "no appropriate type found");
+        }
     }
 
     @GetMapping("/{projectId}/rubric")
@@ -524,6 +531,20 @@ public class ProjectController {
                     HttpStatus.NOT_FOUND, "project not found"
             );
         }
+    }
+
+    @GetMapping(
+            value =  "/{projectId}/uploadGrades"
+    )
+    public String uploadGrades(@PathVariable Long projectId, Principal principal) {
+
+        List<PrivilegeEnum> privileges = this.gradingParticipationService
+                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
+        if (!(privileges != null && privileges.contains(UPLOAD_GRADES))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+        }
+
+        return projectService.uploadGradesToCanvas(projectId, canvasApi);
     }
 
     @GetMapping("/{projectId}/issues")

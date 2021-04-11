@@ -71,7 +71,7 @@ public class SubmissionService {
     already stored.
      */
     @Transactional(value = Transactional.TxType.MANDATORY)
-    public Submission addNewSubmission(Project project, User userId, Long groupId,
+    public Submission   addNewSubmission(Project project, User userId, Long groupId,
                                        Date date, String name) throws ResponseStatusException {
         Submission currentSubmission = this.submissionRepository.findByProject_IdAndSubmitterId_IdAndSubmittedAtAndGroupId(
                 project.getId(), userId.getId(), date, groupId

@@ -3,12 +3,15 @@ package com.group13.tcsprojectgrading.canvas.api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
@@ -77,6 +80,31 @@ public class CanvasApi {
                 .block();
 //        System.out.println(result);
             return result;
+    }
+
+    public String postRequest(URI uri, HttpMethod httpMethod, OAuth2AuthorizedClient authorizedClient, MultiValueMap<String, String> data) {
+        WebClient.UriSpec<WebClient.RequestBodySpec> uriSpec = webClient.method(httpMethod);
+        WebClient.RequestBodySpec bodySpec = uriSpec
+                .uri(uri);
+        bodySpec
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(BodyInserters.fromFormData(data))
+                .attributes(ServletOAuth2AuthorizedClientExchangeFilterFunction.oauth2AuthorizedClient(authorizedClient));
+//        return bodySpec
+//                .retrieve()
+//                .bodyToMono(String.class)
+//                .block();
+        // TODO: catch errors here and in other request functions (!important)
+        System.out.println(uriSpec);
+        String result = bodySpec
+                .retrieve()
+//                    .onStatus(status -> status == HttpStatus.UNAUTHORIZED,
+//                            clientResponse -> Mono.error(new CanvasAuthorisationException("Unauthorised 401."))
+//                    )
+                .bodyToMono(String.class)
+                .block();
+//        System.out.println(result);
+        return result;
     }
 
 

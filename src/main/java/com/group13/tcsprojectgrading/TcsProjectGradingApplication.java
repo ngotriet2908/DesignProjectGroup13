@@ -42,7 +42,8 @@ public class TcsProjectGradingApplication {
                     SUBMISSIONS_SYNC, SUBMISSIONS_READ,
                     SUBMISSION_READ_ALL, SUBMISSION_EDIT_ALL,
                     FEEDBACK_SEND, FEEDBACK_OPEN, FEEDBACK_EDIT,
-                    FLAG_EDIT
+                    FLAG_EDIT,
+                    UPLOAD_GRADES
             );
 
             List<PrivilegeEnum> taPrivilegesEnum = List.of(
