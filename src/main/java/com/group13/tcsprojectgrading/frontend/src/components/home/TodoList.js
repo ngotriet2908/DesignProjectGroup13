@@ -9,34 +9,18 @@ import Typography from "@material-ui/core/Typography";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
+import ListItemAvatar from "@material-ui/core/ListItemAvatar";
+import Avatar from "@material-ui/core/Avatar";
+import AssignmentIcon from '@material-ui/icons/Assignment';
+import store from "../../redux/store";
+import {push} from "connected-react-router";
+import Link from "@material-ui/core/Link";
+import Pluralize from "pluralize";
 
 
 class TodoList extends Component {
   constructor (props) {
     super(props)
-  }
-
-  // TODO remove
-  activity = () => {
-    return(
-      [
-        {
-          name: "Project 1",
-          course: "Test course A (2020)",
-          submissions: 4
-        },
-        {
-          name: "Project 2",
-          course: "Test course B (2020)",
-          submissions: 2
-        },
-        {
-          name: "Project 3",
-          course: "Test course C (2020)",
-          submissions: 21
-        },
-      ]
-    )
   }
 
   render () {
@@ -54,7 +38,7 @@ class TodoList extends Component {
             </div>
             <div className={styles.todoCardBody}>
               <List className={styles.root}>
-                {this.activity().map((task) => {
+                {this.props.tasks.map((task) => {
                   return(
                     TodoItem(task)
                   )
@@ -71,19 +55,42 @@ class TodoList extends Component {
 const TodoItem = (task) => {
   return(
     <ListItem alignItems="flex-start" key={task.name}>
+      <ListItemAvatar>
+        <Avatar>
+          <AssignmentIcon />
+        </Avatar>
+      </ListItemAvatar>
+
       <ListItemText
-        primary={task.name}
+        primary={
+          <Link href="#" onClick={(event) => {
+            event.preventDefault();
+            store.dispatch(push("/app/courses/" +
+              task.course.id +
+              "/projects/" +
+              task.id +
+              "/submissions"));
+          }}>
+            {task.name}
+          </Link>
+        }
         secondary={
           <>
             <Typography
               component="span"
               variant="body1"
-              className={styles.inline}
-              color="primary"
+              style={{display: "block"}}
             >
-               in course {task.course}
+               in {task.course.name}
             </Typography>
-            {" — There are " + task.submissions + " submissions waiting for you… but first you need to make to-do actually work"}
+
+            <Typography
+              component="span"
+              variant="body1"
+              style={{display: "block"}}
+            >
+              {Pluralize('submission', task.gradingTasks, true)} to grade
+            </Typography>
           </>
         }
       />

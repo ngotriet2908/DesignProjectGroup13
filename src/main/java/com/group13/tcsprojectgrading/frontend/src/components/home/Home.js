@@ -155,7 +155,7 @@ class Home extends Component {
 
             <Grid item xs={5}>
               <TodoList
-                data={this.state.tasks}
+                tasks={this.state.tasks}
               />
             </Grid>
           </Grid>

@@ -163,7 +163,7 @@ class Rubric extends Component {
       this.props.setEditingRubric(false);
       this.props.resetUpdates();
     } else {
-      request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/rubric", "PATCH", this.props.updates)
+      request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/rubric?version=" + this.props.rubric.version, "PATCH", this.props.updates)
         .then(data => {
           if (data.status === 200) {
             this.props.setEditingRubric(false);

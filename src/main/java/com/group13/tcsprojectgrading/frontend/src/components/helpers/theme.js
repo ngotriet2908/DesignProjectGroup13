@@ -51,7 +51,7 @@ export const theme = unstable_createMuiStrictModeTheme({
       blue: "#2f5d8a",
     },
     additionalColors: {
-      lightBlue: "rgb(14, 146, 239, 0.18)",
+      lightBlue: "rgba(36,155,241,0.18)",
       yellow: "#ffc13b",
     }
   },

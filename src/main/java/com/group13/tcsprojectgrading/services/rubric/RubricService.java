@@ -171,7 +171,6 @@ public class RubricService {
 
         RubricHistoryLinker linker = rubricHistoryLinkerRepository.findById(history.getId()).orElse(null);
         if (linker == null) {
-//            throw new NullPointerException("null linker")
             linker = new RubricHistoryLinker(history.getId());
         };
 
