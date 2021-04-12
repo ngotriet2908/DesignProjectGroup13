@@ -1,6 +1,5 @@
 package com.group13.tcsprojectgrading.controllers;
 
-
 import com.group13.tcsprojectgrading.models.course.CourseParticipation;
 import com.group13.tcsprojectgrading.models.grading.Assessment;
 import com.group13.tcsprojectgrading.models.grading.Grade;
@@ -18,16 +17,16 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PdfUtils {
-    private final Document document;
+public class CanvasFeedbackUtils {
+    private String feedback;
     private final Rubric rubric;
     private final Assessment assessment;
-    private final Map<String, NodeInfo> nodeInfoMap;
+    private final Map<String, CanvasFeedbackUtils.NodeInfo> nodeInfoMap;
     private final CourseParticipation participation;
     private int maxLevel;
 
-    public PdfUtils(Document document, Rubric rubric, Assessment assessment, CourseParticipation participation) {
-        this.document = document;
+    public CanvasFeedbackUtils(String feedback, Rubric rubric, Assessment assessment, CourseParticipation participation) {
+        this.feedback = feedback;
         this.rubric = rubric;
         this.assessment = assessment;
         this.participation = participation;
@@ -48,70 +47,51 @@ public class PdfUtils {
         return null;
     }
 
-    public Document generatePdfOfFeedback() throws IOException {
+    public String generateFeedbackString() throws IOException {
         if (rubric.getChildren() == null) return null;
-        nodeInfoMap.put("-1", new NodeInfo(0, null, 0, "-1","P", 0, 0));
-        NodeInfo nodeInfo = nodeInfoMap.get("-1");
+        nodeInfoMap.put("-1", new CanvasFeedbackUtils.NodeInfo(0, null, 0, "-1","P", 0, 0));
+        CanvasFeedbackUtils.NodeInfo nodeInfo = nodeInfoMap.get("-1");
 
         for(Element child: rubric.getChildren()) {
             visitNode(child, child);
         }
 
-        PdfFont font = PdfFontFactory.createFont(FontConstants.COURIER);
-        Paragraph header = new Paragraph("Feedback for " + participation.getId().getUser().getName())
-                .setHorizontalAlignment(HorizontalAlignment.CENTER)
-                .setFont(font)
-                .setFontSize(20);
-        addEmptyLine(header, 1);
-        document.add(header);
+        feedback += "\n\n";
+        feedback += "Feedback for " + participation.getId().getUser().getName();
+        feedback += "\n";
 
-        font = PdfFontFactory.createFont(FontConstants.COURIER);
-        header = new Paragraph("Final grade: " + ((assessment.getManualGrade() != null)? assessment.getManualGrade() : assessment.getFinalGrade()))
-                .setFont(font)
-                .setFontSize(20);
-        addEmptyLine(header, 3);
-
-        document.add(header);
+        feedback += "Final grade: " + ((assessment.getManualGrade() != null)? assessment.getManualGrade() : assessment.getFinalGrade());
+        feedback += "\n\n";
 
         for(Element child: rubric.getChildren()) {
             visitWriteNode(child);
         }
-        return document;
+        return feedback;
     }
 
     public void visitWriteNode(Element currentNode) throws IOException {
         RubricContent content = currentNode.getContent();
-        NodeInfo nodeInfo = nodeInfoMap.get(currentNode.getContent().getId());
+        CanvasFeedbackUtils.NodeInfo nodeInfo = nodeInfoMap.get(currentNode.getContent().getId());
         PdfFont font = PdfFontFactory.createFont(FontConstants.COURIER);
-        float fixPadding = 10* (nodeInfo.getLevel() - 1);
+        int fixPadding = 2* (nodeInfo.getLevel() - 1);
         if (content.getType().equals(RubricContent.CRITERION_TYPE)) {
-            Paragraph header = new Paragraph(nodeInfo.label + " " + content.getTitle() + ": " + nodeInfo.getGrade().getGrade())
-                    .setFont(font)
-                    .setPaddingLeft(fixPadding)
-                    .setFontSize(13);
-            document.add(header);
-            //TODO check for null comment
-            Paragraph body = new Paragraph("comment: " + nodeInfo.getGrade().getDescription())
-                    .setFont(font)
-                    .setPaddingLeft(fixPadding + 10)
-                    .setFontSize(12);
-            addEmptyLine(body, 1);
-            document.add(body);
+
+            feedback += " ".repeat(fixPadding) + nodeInfo.label + " " + content.getTitle() + ": " + nodeInfo.getGrade().getGrade();
+            feedback += "\n";
+
+            if (nodeInfo.getGrade().getDescription() != null &&
+                    !nodeInfo.getGrade().getDescription().equals("null") &&
+                    !nodeInfo.getGrade().getDescription().equals("none")
+            ) {
+                feedback += " ".repeat(fixPadding + 2) + "comment: " + nodeInfo.getGrade().getDescription();
+                feedback += "\n\n";
+            }
 
         } else {
-            Paragraph blockBreak = new Paragraph(" ")
-                    .setFont(font)
-                    .setFontSize(20);
-//            addEmptyLine(blockBreak, 1);
-            document.add(blockBreak);
+            feedback += "\n";
 
-            Paragraph header = new Paragraph(nodeInfo.label + " " + content.getTitle() + ": ")
-                    .setFont(font)
-                    .setPaddingLeft(fixPadding)
-                    .setFontSize(15 + 2*(maxLevel - nodeInfo.getLevel()));
-
-            addEmptyLine(header, 1);
-            document.add(header);
+            feedback += " ".repeat(fixPadding) + nodeInfo.label + " " + content.getTitle() + ": ";
+            feedback += "\n";
 
             if (currentNode.getChildren() != null) {
                 for(Element element1: currentNode.getChildren()) {
@@ -126,13 +106,13 @@ public class PdfUtils {
         if (content.getType().equals(RubricContent.CRITERION_TYPE)) {
             Grade grade = findActiveGradeForCriterion(content.getId());
             if (grade != null) {
-                NodeInfo nodeInfo = null;
+                CanvasFeedbackUtils.NodeInfo nodeInfo = null;
 
                 //level 0
                 if (currentNode.getContent().getId().equals(parentNode.getContent().getId())) {
                     nodeInfoMap.get("-1").setCriterionCount(nodeInfoMap.get("-1").getCriterionCount() + 1);
                     maxLevel = Math.max(maxLevel , 1);
-                    nodeInfo = new NodeInfo(
+                    nodeInfo = new CanvasFeedbackUtils.NodeInfo(
                             1,
                             grade,
                             -1,
@@ -140,13 +120,13 @@ public class PdfUtils {
                             "C" + nodeInfoMap.get("-1").getCriterionCount(),
                             0,
                             0
-                            );
+                    );
                 } else if (nodeInfoMap.containsKey(parentNode.getContent().getId())) {
                     maxLevel = Math.max(maxLevel , nodeInfoMap.get(parentNode.getContent().getId()).getLevel() + 1);
 
-                    NodeInfo parentInfo = nodeInfoMap.get(parentNode.getContent().getId());
+                    CanvasFeedbackUtils.NodeInfo parentInfo = nodeInfoMap.get(parentNode.getContent().getId());
                     parentInfo.setCriterionCount(parentInfo.getCriterionCount() + 1);
-                    nodeInfo = new NodeInfo(
+                    nodeInfo = new CanvasFeedbackUtils.NodeInfo(
                             nodeInfoMap.get(parentNode.getContent().getId()).getLevel() + 1,
                             grade
                             ,
@@ -177,14 +157,14 @@ public class PdfUtils {
 
         //Block type
 
-        NodeInfo nodeInfo = null;
+        CanvasFeedbackUtils.NodeInfo nodeInfo = null;
 
         //level 0
         if (currentNode.getContent().getId().equals(parentNode.getContent().getId())) {
             nodeInfoMap.get("-1").setBlockCount(nodeInfoMap.get("-1").getBlockCount() + 1);
             maxLevel = Math.max(maxLevel , 1);
 
-            nodeInfo = new NodeInfo(
+            nodeInfo = new CanvasFeedbackUtils.NodeInfo(
                     1,
                     null,
                     0,
@@ -194,10 +174,10 @@ public class PdfUtils {
                     0
             );
         } else if (nodeInfoMap.containsKey(parentNode.getContent().getId())) {
-            NodeInfo parentInfo = nodeInfoMap.get(parentNode.getContent().getId());
+            CanvasFeedbackUtils.NodeInfo parentInfo = nodeInfoMap.get(parentNode.getContent().getId());
             parentInfo.setBlockCount(parentInfo.getCriterionCount() + 1);
             maxLevel = Math.max(maxLevel , nodeInfoMap.get(parentNode.getContent().getId()).getLevel() + 1);
-            nodeInfo = new NodeInfo(
+            nodeInfo = new CanvasFeedbackUtils.NodeInfo(
                     nodeInfoMap.get(parentNode.getContent().getId()).getLevel() + 1,
                     null,
                     0,

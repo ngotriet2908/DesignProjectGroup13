@@ -16,6 +16,8 @@ public class Rubric {
     private List<Element> children;
     private int criterionCount;
 
+    private Long version;
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date lastModified;
 
@@ -84,6 +86,13 @@ public class Rubric {
         return criterionCount;
     }
 
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
 
     public static void main(String[] args) throws JsonProcessingException {
         // TODO: remove object mapper

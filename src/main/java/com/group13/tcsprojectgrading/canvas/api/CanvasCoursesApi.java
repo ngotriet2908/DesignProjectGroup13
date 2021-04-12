@@ -7,6 +7,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
@@ -355,6 +357,27 @@ public class CanvasCoursesApi {
                     .build(courseId);
 
             return this.canvasApi.sendRequest(uri, HttpMethod.GET, authorizedClient);
+        }
+    }
+
+    public String uploadGrades(Long courseId, Long assignmentId, List<String> queryParams) {
+        OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
+
+        if (authorizedClient == null) {
+            return null;
+        } else {
+            URI uri = UriComponentsBuilder.newInstance()
+                    .scheme(CanvasEndpoints.SCHEME)
+                    .host(CanvasEndpoints.HOST)
+                    .path(CanvasEndpoints.UPLOAD_GRADES_PATH)
+                    .build(courseId, assignmentId);
+
+            MultiValueMap<String, String> grades = new LinkedMultiValueMap();
+            queryParams.forEach(queryParam -> {
+                grades.add(queryParam.split("=")[0], queryParam.split("=")[1]);
+            });
+
+            return this.canvasApi.postRequest(uri, HttpMethod.POST, authorizedClient, grades);
         }
     }
 

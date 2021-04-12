@@ -210,7 +210,13 @@ public class CourseService {
 
             // save user's participation to db
             CourseParticipation participation = new CourseParticipation(user, course, this.roleService.findRoleByName(role.toString()));
-            this.courseParticipationRepository.save(participation);
+            CourseParticipation courseParticipation = courseParticipationRepository.findCourseParticipationById_User_IdAndId_Course_Id(user.getId(), course.getId());
+            if (courseParticipation != null) {
+                courseParticipation.setRole(this.roleService.findRoleByName(role.toString()));
+                this.courseParticipationRepository.save(courseParticipation);
+            } else {
+                this.courseParticipationRepository.save(participation);
+            }
         }
     }
 

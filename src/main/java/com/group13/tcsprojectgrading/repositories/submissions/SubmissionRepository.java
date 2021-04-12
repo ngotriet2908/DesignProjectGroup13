@@ -4,6 +4,7 @@ import com.group13.tcsprojectgrading.models.submissions.Label;
 import com.group13.tcsprojectgrading.models.project.Project;
 import com.group13.tcsprojectgrading.models.submissions.Submission;
 import com.group13.tcsprojectgrading.models.user.User;
+import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
@@ -12,6 +13,7 @@ import org.springframework.data.jpa.repository.Query;
 import javax.persistence.LockModeType;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public interface SubmissionRepository extends JpaRepository<Submission, Long> {
 
@@ -32,6 +34,12 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Submission findByProject_IdAndSubmitterId_IdAndSubmittedAtAndGroupId(Long project_id, Long submitter_id, Date submittedAt, Long groupId);
 
+    @Lock(LockModeType.PESSIMISTIC_READ)
+    Optional<Submission> findById(Long id);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<Submission> findSubmissionById(Long id);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     <S extends Submission> S save(S s);
 
@@ -40,4 +48,7 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
         "SET s.grader=null " +
         "WHERE s.grader NOT IN ?1")
     void dissociateSubmissionsFromUsersNotInList(List<User> graders);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    List<Submission> findAllByGraderIsNotIn(List<User> graders);
 }

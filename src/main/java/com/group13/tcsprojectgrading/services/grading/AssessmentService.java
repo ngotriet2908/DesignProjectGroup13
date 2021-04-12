@@ -5,10 +5,12 @@ import com.group13.tcsprojectgrading.models.course.CourseParticipation;
 import com.group13.tcsprojectgrading.models.graders.GradingParticipation;
 import com.group13.tcsprojectgrading.models.grading.*;
 import com.group13.tcsprojectgrading.models.project.Project;
+import com.group13.tcsprojectgrading.models.rubric.Element;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.models.user.User;
 import com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum;
 import com.group13.tcsprojectgrading.models.submissions.Submission;
+import com.group13.tcsprojectgrading.repositories.feedback.FeedbackLogRepository;
 import com.group13.tcsprojectgrading.repositories.grading.*;
 import com.group13.tcsprojectgrading.repositories.submissions.SubmissionRepository;
 import com.group13.tcsprojectgrading.services.graders.GradingParticipationService;
@@ -52,6 +54,7 @@ public class AssessmentService {
     private final SubmissionService submissionService;
     private final NotificationService notificationService;
     private final RubricService rubricService;
+    private final FeedbackLogRepository feedbackLogRepository;
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -61,7 +64,7 @@ public class AssessmentService {
                              GradeRepository gradeRepository, @Lazy UserService userService,
                              @Lazy IssueRepository issueRepository, IssueStatusRepository issueStatusRepository,
                              SubmissionRepository submissionRepository, GradingParticipationService gradingParticipationService, SettingsService settingsService,
-                             ApplicationEventPublisher applicationEventPublisher, NotificationService notificationService, RubricService rubricService) {
+                             ApplicationEventPublisher applicationEventPublisher, NotificationService notificationService, RubricService rubricService, FeedbackLogRepository feedbackLogRepository) {
         this.assessmentLinkRepository = assessmentLinkRepository;
         this.assessmentRepository = assessmentRepository;
         this.gradeRepository = gradeRepository;
@@ -78,6 +81,7 @@ public class AssessmentService {
 
         this.applicationEventPublisher = applicationEventPublisher;
         this.rubricService = rubricService;
+        this.feedbackLogRepository = feedbackLogRepository;
     }
 
     /*
@@ -119,6 +123,19 @@ public class AssessmentService {
 
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Assessment createNewAssessment(Assessment assessment) {
+        Assessment assessment1 = this.assessmentRepository.findAssessmentById(assessment.getId()).orElse(null);
+        if (assessment1 != null) {
+            return null;
+        }
+        return this.assessmentRepository.save(assessment);
+    }
+
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public Assessment updateAssessment(Assessment assessment) {
+        Assessment assessment1 = this.assessmentRepository.findAssessmentById(assessment.getId()).orElse(null);
+        if (assessment1 == null) {
+            return null;
+        }
         return this.assessmentRepository.save(assessment);
     }
 
@@ -150,6 +167,7 @@ public class AssessmentService {
                 link.isCurrent()
         );
 
+        feedbackLogRepository.deleteAllByLink(link);
         assessmentLinkRepository.delete(link);
         if (assessmentLinks.size() == 1) {
             deleteAssessment(assessment1);
@@ -173,6 +191,8 @@ public class AssessmentService {
         );
 
         link1.getId().setAssessment(assessment);
+
+        feedbackLogRepository.deleteAllByLink(link);
         assessmentLinkRepository.delete(link);
         return assessmentLinkRepository.save(link1);
     }
@@ -182,7 +202,7 @@ public class AssessmentService {
      */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Set<User> getSubmissionMembers(Submission submission) {
-        Set<AssessmentLink> links = this.assessmentLinkRepository.findDistinctUserById_Submission(submission);
+        Set<AssessmentLink> links = this.assessmentLinkRepository.findById_Submission(submission);
 
         Set<User> users = new HashSet<>();
         for (AssessmentLink link: links) {
@@ -200,8 +220,18 @@ public class AssessmentService {
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
+    public Set<AssessmentLink> getAssessmentsByProjectAndUserWithLock(Long projectId, User user) {
+        return this.assessmentLinkRepository.findAllById_Submission_Project_IdAndId_User(projectId, user);
+    }
+
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public Set<AssessmentLink> getAssessmentLinksBySubmission(Submission submission) {
         return this.assessmentLinkRepository.findById_Submission(submission);
+    }
+
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public Set<AssessmentLink> getAssessmentLinksBySubmissionWithLock(Submission submission) {
+        return this.assessmentLinkRepository.findAllById_Submission(submission);
     }
 
     /*
@@ -241,7 +271,8 @@ public class AssessmentService {
                             .filter(issue -> issue.getStatus().equals("unresolved"))
                             .collect(Collectors.toList())
             );
-            assessment.setProgress((int) (assessment.getGradedCount()*1.0/rubric.getCriterionCount()*100));
+            assessment.setProgress((int) (gradeRepository.findGradesByAssessmentAndIsActiveIsTrue(assessment).size()
+                    *1.0/rubric.getCriterionCount()*100));
         }
         return assessments.stream().sorted(Comparator.comparingLong(Assessment::getId)).collect(Collectors.toList());
     }
@@ -263,6 +294,59 @@ public class AssessmentService {
     }
 
     /*
+    Returns a single assessment.
+     */
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public Assessment getAssessmentDetails(Long id, Project project) {
+        Assessment assessment =  this.assessmentRepository.findById(id).orElse(null);
+
+        if (assessment == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Assessment not found"
+            );
+        }
+
+        if (assessment.getManualGrade() != null) {
+            assessment.setFinalGrade(assessment.getManualGrade());
+            return assessment;
+        }
+
+        Rubric rubric = rubricService.getRubricById(project.getId());
+        List<Element> criteria = rubric.fetchAllCriteria();
+        Map<String, Element> criteriaMap = new HashMap<>();
+        criteria.forEach(element -> criteriaMap.put(element.getContent().getId(), element));
+        List<Grade> grades = gradeRepository.findGradesByAssessmentAndIsActiveIsTrue(assessment);
+        assessment.setIssues(issueRepository.findIssuesByAssessmentId(assessment.getId()));
+        assessment.setProgress((int)(grades.size() *1.0/rubric.getCriterionCount()*100));
+        assessment.setFinalGrade(
+                (float) grades.stream()
+                        .mapToDouble(grade ->
+                                grade.getGrade()*
+                                        criteriaMap.get(grade.getCriterionId())
+                                                .getContent().getGrade().getWeight()
+                        )
+                        .reduce(0,
+                                (grade, grade2) -> grade += grade2
+                        )
+        );
+        return assessment;
+    }
+
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public Assessment getAssessmentWithLock(Long id) {
+        Assessment assessment =  this.assessmentRepository.findAssessmentById(id).orElse(null);
+
+        if (assessment == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Assessment not found"
+            );
+        }
+
+        return assessment;
+    }
+
+
+    /*
     Checks if the user has permissions to retrieve the assessment and returns it if so.
      */
     @Transactional
@@ -281,7 +365,7 @@ public class AssessmentService {
             }
         }
 
-       return getAssessment(assessmentId);
+       return getAssessmentDetails(assessmentId, submission.getProject());
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
@@ -290,13 +374,19 @@ public class AssessmentService {
         return assessmentLinkRepository.findAssessmentLinkById_Submission_IdAndAndId_User_Id(submissionId, userId);
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public AssessmentLink getAssessmentLinkForUserWithLock(Long submissionId, Long userId) throws JsonProcessingException {
+
+        return assessmentLinkRepository.findById_Submission_IdAndAndId_User_Id(submissionId, userId);
+    }
+
     /*
     Populates all fields of Grade, saves it, deactivates all existing grades for the criterion and set the new grade
     as active.
      */
     @Transactional(rollbackOn = Exception.class)
     public Grade addGrade(Long submissionId, Long assessmentId, Grade grade, Long graderId, List<PrivilegeEnum> privileges) throws ResponseStatusException {
-        Assessment assessment = getAssessment(assessmentId);
+        Assessment assessment = getAssessmentWithLock(assessmentId);
 
         if (assessment == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Assessment not found");
@@ -325,13 +415,28 @@ public class AssessmentService {
             }
         }
 
-        assessment.setGradedCount(assessment.getGradedCount() + 1);
+        Rubric rubric = rubricService.getRubricById(submission.getProject().getId());
+        List<Element> criteria = rubric.fetchAllCriteria();
+        boolean isCriterionInRubric = false;
+        for(Element criterion: criteria) {
+            if (criterion.getContent().getId().equals(grade.getCriterionId())) {
+                isCriterionInRubric = true;
+                break;
+            }
+        }
+
+        if (!isCriterionInRubric) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "No criterion exist"
+            );
+        }
+
         assessment = assessmentRepository.save(assessment);
 
         grade.setGradedAt(Date.from(Instant.now()));
         grade.setAssessment(assessment);
         grade.setGrader(user);
-
+        this.gradeRepository.findGradesByAssessment_IdAndCriterionId(assessmentId, grade.getCriterionId());
         // deactivate all other grades and set the new one as active
         this.gradeRepository.deactivateAllGrades(assessmentId, grade.getCriterionId());
         grade.setActive(true);
@@ -372,11 +477,12 @@ public class AssessmentService {
         }
 
 
-        Grade grade = this.gradeRepository.findById(gradeId).orElse(null);
+        Grade grade = this.gradeRepository.findGradeById(gradeId).orElse(null);
 
         if (grade == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Grade not found");
         }
+        this.gradeRepository.findGradesByAssessment_IdAndCriterionId(assessmentId, grade.getCriterionId());
 
         // deactivate all other grades and set the selected one as active
         this.gradeRepository.deactivateAllGrades(grade.getAssessment().getId(), grade.getCriterionId());
@@ -442,6 +548,11 @@ public class AssessmentService {
         }
 
         Assessment assessment = this.getAssessment(assessmentId);
+
+        if (assessment == null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "submission not found");
+        }
+
         User creator = this.userService.findById(userId);
         User addressee = null;
         if (issue.getAddressee() != null) {
@@ -486,7 +597,7 @@ public class AssessmentService {
             }
         }
 
-        Issue issue = this.issueRepository.findById(issueId).orElse(null);
+        Issue issue = this.issueRepository.findIssueById(issueId).orElse(null);
 
         if (issue == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Issue not found");
@@ -497,6 +608,7 @@ public class AssessmentService {
         issue = this.issueRepository.save(issue);
         return issue;
     }
+
     @Transactional(value = Transactional.TxType.MANDATORY)
     public AssessmentLink findCurrentAssessmentUser(Project project, User user) {
         return assessmentLinkRepository.findById_UserAndId_Submission_ProjectAndCurrentIsTrue(
@@ -509,6 +621,11 @@ public class AssessmentService {
     public Set<AssessmentLink> findAssessmentLinksByAssessmentId(Long id) {
         return assessmentLinkRepository.findById_Assessment_Id(id);
     }
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public Set<AssessmentLink> findAssessmentLinksByAssessmentIdWithLock(Long id) {
+        return assessmentLinkRepository.findAssessmentLinkById_Assessment_Id(id);
+    }
+
 
     @Transactional(value = Transactional.TxType.MANDATORY)
     public List<Grade> findActiveGradesForAssignment(Assessment assessment) {
@@ -530,6 +647,7 @@ public class AssessmentService {
 
     @Transactional(value = Transactional.TxType.MANDATORY)
     public void deleteAssessmentLinker(AssessmentLink assessmentLink) {
+        feedbackLogRepository.deleteAllByLink(assessmentLink);
         this.assessmentLinkRepository.delete(assessmentLink);
     }
 

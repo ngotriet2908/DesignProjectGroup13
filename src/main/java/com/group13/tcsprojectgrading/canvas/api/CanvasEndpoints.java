@@ -33,6 +33,7 @@ public class CanvasEndpoints {
     public static final String COURSE_SINGLE_ASSIGNMENT_PATH = "/api/v1/courses/{courseId}/assignments/{projectId}";
 
     public static final String COURSE_ASSIGNMENT_GROUPS_PATH = "/api/v1/courses/{courseId}/assignment_groups";
+    public static final String UPLOAD_GRADES_PATH = "/api/v1/courses/{courseId}/assignments/{projectId}/submissions/update_grades";
 
     public static final String SUBMISSIONS_PATH = "/api/v1/courses/{courseId}/assignments/{assignmentId}/submissions";
 

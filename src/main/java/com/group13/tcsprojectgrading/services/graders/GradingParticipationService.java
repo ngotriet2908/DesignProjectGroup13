@@ -45,6 +45,11 @@ public class GradingParticipationService {
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
+    public List<GradingParticipation> getLocksOnAllProjectGraders(Project project) {
+        return this.repository.findAllById_Project(project);
+    }
+
+    @Transactional(value = Transactional.TxType.MANDATORY)
     public void deleteGradingParticipation(GradingParticipation grader) {
         this.repository.delete(grader);
     }
@@ -54,12 +59,26 @@ public class GradingParticipationService {
         return this.repository.findById_User_IdAndId_Project_Id(userId, projectId);
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public GradingParticipation getGradingParticipationByUserAndProjectWithLock(Long userId, Long projectId) {
+        return this.repository.findGradingParticipationById_User_IdAndId_Project_Id(userId, projectId);
+    }
+
+
     /*
     Returns a list of graders of the project.
      */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public List<User> getProjectGradersWithSubmissions(Long projectId) {
-        return this.repository.getProjectUsersAndFetchSubmissions(projectId);
+        return this.repository.getProjectUsersAndFetchSubmissions(projectId)
+                .stream()
+                .peek(
+                        user -> user.setToGrade(user.getToGrade()
+                                .stream()
+                                .filter(submission -> submission.getProject().getId().equals(projectId))
+                                .collect(Collectors.toSet())
+                        )
+                ).collect(Collectors.toList());
     }
 
     /*
@@ -88,6 +107,7 @@ public class GradingParticipationService {
 
     @Transactional(value = Transactional.TxType.MANDATORY)
     public void deleteAllNonTeacherGradingParticipationByProject(Long projectId) {
+        this.repository.findAllById_Project_Id_AndRole_NameNot(projectId, RoleEnum.TEACHER.getName());
         this.repository.deleteAllById_Project_Id_AndRole_NameNot(projectId, RoleEnum.TEACHER.getName());
     }
 

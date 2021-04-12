@@ -30,6 +30,7 @@ import BorderColorIcon from '@material-ui/icons/BorderColor';
 import DescriptionIcon from '@material-ui/icons/Description';
 import FeedbackIcon from '@material-ui/icons/Feedback';
 import ListIcon from '@material-ui/icons/List';
+import BackupIcon from '@material-ui/icons/Backup';
 
 
 class Project extends Component {
@@ -159,6 +160,21 @@ class Project extends Component {
       });
   }
 
+  handleUploadGrades = () => {
+    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/uploadGrades`, "GET", null ,"application/octet-stream")
+      .then(response => {
+        if (response.status === 200) {
+          return response.blob()
+        }
+      })
+      .then((data) => {
+        alert("done")
+      })
+      .catch(error => {
+        console.error(error.message);
+      });
+  }
+
   render () {
     if (!this.state.isLoaded) {
       return (
@@ -261,6 +277,16 @@ class Project extends Component {
                           </Button>
                         </Can>
 
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => store.dispatch(push(this.props.match.url + "/feedback"))}
+                          startIcon={<FeedbackIcon/>}
+                          disableElevation
+                        >
+                          Feedback
+                        </Button>
+
                         <Can I="read" a="Rubric">
                           <Button
                             variant="contained"
@@ -272,7 +298,7 @@ class Project extends Component {
                         Rubric
                           </Button>
                         </Can>
-                    
+
                         <Button
                           variant="contained"
                           color="primary"
@@ -281,6 +307,16 @@ class Project extends Component {
                           disableElevation
                         >
                         Export Results
+                        </Button>
+
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={this.handleUploadGrades}
+                          startIcon={<BackupIcon/>}
+                          disableElevation
+                        >
+                          Upload Grades To Canvas
                         </Button>
                       </CardContent>
                     </Card>

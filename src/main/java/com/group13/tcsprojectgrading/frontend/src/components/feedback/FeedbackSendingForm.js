@@ -29,7 +29,7 @@ class FeedbackSendingForm extends Component {
     }
   }
 
-  handleSendFeedback = (isAll) => {
+  handleSendFeedback = (isAll, feedbackType) => {
     let templateId = this.state.template;
 
     if (templateId === "") {
@@ -45,7 +45,7 @@ class FeedbackSendingForm extends Component {
       return;
     }
 
-    request(`/api/courses/${this.props.params.courseId}/projects/${this.props.params.projectId}/feedback/send/${templateId}?isAll=${isAll}`
+    request(`/api/courses/${this.props.params.courseId}/projects/${this.props.params.projectId}/feedback/send/${templateId}?isAll=${isAll}&type=${feedbackType}`
       , "GET", undefined, undefined, false)
       .then(async (response) => {
         let data = await response.json();

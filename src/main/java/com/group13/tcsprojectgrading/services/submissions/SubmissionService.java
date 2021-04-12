@@ -3,16 +3,17 @@ package com.group13.tcsprojectgrading.services.submissions;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.group13.tcsprojectgrading.models.course.CourseParticipation;
-import com.group13.tcsprojectgrading.models.grading.AssessmentLink;
-import com.group13.tcsprojectgrading.models.grading.Grade;
+import com.group13.tcsprojectgrading.models.grading.*;
 import com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum;
 import com.group13.tcsprojectgrading.models.project.Project;
+import com.group13.tcsprojectgrading.models.rubric.Element;
+import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.models.submissions.Label;
 import com.group13.tcsprojectgrading.models.user.User;
 import com.group13.tcsprojectgrading.models.graders.GradingParticipation;
-import com.group13.tcsprojectgrading.models.grading.Assessment;
 import com.group13.tcsprojectgrading.models.submissions.Submission;
 import com.group13.tcsprojectgrading.repositories.course.CourseParticipationRepository;
+import com.group13.tcsprojectgrading.repositories.grading.GradeRepository;
 import com.group13.tcsprojectgrading.repositories.grading.IssueRepository;
 import com.group13.tcsprojectgrading.repositories.project.ProjectRepository;
 import com.group13.tcsprojectgrading.repositories.submissions.SubmissionRepository;
@@ -44,12 +45,13 @@ public class SubmissionService {
     private final UserService userService;
     private final CourseParticipationRepository courseParticipationRepository;
     private final IssueRepository issueRepository;
+    private final GradeRepository gradeRepository;
 
     @Autowired
     public SubmissionService(SubmissionRepository submissionRepository, ProjectRepository projectRepository,
                              GradingParticipationService gradingParticipationService, RubricService rubricService,
                              @Lazy AssessmentService assessmentService, SubmissionDetailsService submissionDetailsService,
-                             @Lazy UserService userService, CourseParticipationRepository courseParticipationRepository, IssueRepository issueRepository) {
+                             @Lazy UserService userService, CourseParticipationRepository courseParticipationRepository, IssueRepository issueRepository, GradeRepository gradeRepository) {
         this.submissionRepository = submissionRepository;
         this.projectRepository = projectRepository;
         this.gradingParticipationService = gradingParticipationService;
@@ -59,6 +61,7 @@ public class SubmissionService {
         this.userService = userService;
         this.courseParticipationRepository = courseParticipationRepository;
         this.issueRepository = issueRepository;
+        this.gradeRepository = gradeRepository;
     }
 
     /*
@@ -66,13 +69,13 @@ public class SubmissionService {
     already stored.
      */
     @Transactional(value = Transactional.TxType.MANDATORY)
-    public Submission addNewSubmission(Project project, User userId, Long groupId,
+    public Submission   addNewSubmission(Project project, User userId, Long groupId,
                                        Date date, String name) throws ResponseStatusException {
         Submission currentSubmission = this.submissionRepository.findByProject_IdAndSubmitterId_IdAndSubmittedAtAndGroupId(
                 project.getId(), userId.getId(), date, groupId
         );
         if (currentSubmission != null) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "submission exist");
+            return null;
         } else {
             // update submission
             return this.submissionRepository.save(new Submission(
@@ -93,7 +96,7 @@ public class SubmissionService {
         );
 
         if (existingSubmission != null) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "submission exist");
+            return null;
         } else {
             return this.submissionRepository.save(submission);
         }
@@ -175,7 +178,6 @@ public class SubmissionService {
     @Transactional
     public List<Submission> getSubmissions(Long courseId, Long projectId, Long userId) throws ResponseStatusException {
         Project project = this.projectRepository.findById(projectId).orElse(null);
-
         if (project == null) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Project not found"
@@ -295,6 +297,36 @@ public class SubmissionService {
         return submission;
     }
 
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public Submission getSubmissionWithLock(Long submissionId) throws JsonProcessingException, ResponseStatusException {
+//        Project project = this.projectRepository.findById(projectId).orElse(null);
+//
+//        if (project == null) {
+//            throw new ResponseStatusException(
+//                    HttpStatus.NOT_FOUND, "Project not found"
+//            );
+//        }
+
+        // TODO I'm not sure whether to hide the submission or not (only grading?)
+
+        // find submission
+        Submission submission = this.submissionRepository.findSubmissionById(submissionId).orElse(null);
+
+        if (submission == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Submission not found"
+            );
+        }
+
+        // link submission's members
+        submission = this.addSubmissionMembers(submission);
+
+        // link submission's assessments
+        submission = this.addSubmissionAssessments(submission);
+
+        return submission;
+    }
+
     /*
     Populates the "members" field with the list of students who are linked to the submission.
      */
@@ -310,14 +342,81 @@ public class SubmissionService {
      */
     @Transactional
     public Submission addSubmissionAssessments(Submission submission) {
+        Rubric rubric = rubricService.getRubricById(submission.getProject().getId());
+        List<Element> criteria = rubric.fetchAllCriteria();
+        Map<String, Element> criteriaMap = new HashMap<>();
+        criteria.forEach(element -> criteriaMap.put(element.getContent().getId(), element));
+
         List<Assessment> assessments = this.assessmentService.getAssessmentsBySubmission(submission);
-        submission.setAssessments(assessments
+        submission.setAssessments(
+                assessments
                 .stream()
-                .peek(assessment -> assessment.setIssues(issueRepository.findIssuesByAssessmentId(assessment.getId())))
+                .peek(assessment -> {
+                    if (assessment.getManualGrade() != null) {
+                        assessment.setFinalGrade(assessment.getManualGrade());
+                        return;
+                    }
+
+                    List<Grade> grades = gradeRepository.findGradesByAssessmentAndIsActiveIsTrue(assessment);
+                    assessment.setIssues(issueRepository.findIssuesByAssessmentId(assessment.getId()));
+                    assessment.setProgress((int)(grades.size() *1.0/rubric.getCriterionCount()*100));
+                    assessment.setFinalGrade(
+                            (float) grades.stream()
+                                    .mapToDouble(grade ->
+                                            grade.getGrade()*
+                                                    criteriaMap.get(grade.getCriterionId())
+                                                            .getContent().getGrade().getWeight()
+                                    )
+                                    .reduce(0,
+                                    (grade, grade2) -> grade += grade2
+                            )
+                    );
+                })
                 .collect(Collectors.toList())
         );
+
         return submission;
     }
+
+    @Transactional
+    public Submission addTodoSubmissionAssessments(Submission submission) {
+        Rubric rubric = rubricService.getRubricById(submission.getProject().getId());
+        List<Element> criteria = rubric.fetchAllCriteria();
+        Map<String, Element> criteriaMap = new HashMap<>();
+        criteria.forEach(element -> criteriaMap.put(element.getContent().getId(), element));
+
+        List<Assessment> assessments = this.assessmentService.getAssessmentsBySubmission(submission);
+        submission.setAssessments(
+                assessments
+                        .stream()
+                        .peek(assessment -> {
+                            if (assessment.getManualGrade() != null) {
+                                assessment.setFinalGrade(assessment.getManualGrade());
+                                return;
+                            }
+
+                            List<Grade> grades = gradeRepository.findGradesByAssessmentAndIsActiveIsTrue(assessment);
+                            assessment.setIssues(issueRepository.findIssuesByAssessmentIdAndStatus_Name(assessment.getId(), IssueStatusEnum.OPEN.getName()));
+//                            System.out.println("progress = " + grades.size() + "/" + rubric.getCriterionCount());
+                            assessment.setProgress((int)(grades.size() *1.0/rubric.getCriterionCount()*100));
+                            assessment.setFinalGrade(
+                                    (float) grades.stream()
+                                            .mapToDouble(grade ->
+                                                    grade.getGrade()*
+                                                            criteriaMap.get(grade.getCriterionId())
+                                                                    .getContent().getGrade().getWeight()
+                                            )
+                                            .reduce(0,
+                                                    (grade, grade2) -> grade += grade2
+                                            )
+                            );
+                        })
+                        .collect(Collectors.toList())
+        );
+
+        return submission;
+    }
+
 
     /*
     Saves the list of labels for the submission.
@@ -325,7 +424,7 @@ public class SubmissionService {
     @Transactional
     public void saveLabels(Long projectId, Long graderId, Set<Label> labels, Long submissionId,
                            List<PrivilegeEnum> privileges) throws JsonProcessingException, ResponseStatusException {
-        Submission submission = this.getSubmission(submissionId);
+        Submission submission = this.getSubmissionWithLock(submissionId);
 
         if (submission == null) {
             throw new ResponseStatusException(
@@ -352,7 +451,14 @@ public class SubmissionService {
      */
     @Transactional
     public void dissociateSubmissionsFromUsers(List<User> users) {
-        this.submissionRepository.dissociateSubmissionsFromUsersNotInList(users);
+
+//        Obtain write locks on these submissions
+        List<Submission> submissions = submissionRepository.findAllByGraderIsNotIn(users)
+                .stream().peek(submission -> submission.setGrader(null)).collect(Collectors.toList());
+        submissionRepository.saveAll(submissions);
+
+//        TODO check this whether you want to use saveAll or your custom update
+//        this.submissionRepository.dissociateSubmissionsFromUsersNotInList(users);
     }
 
     /*
@@ -360,7 +466,7 @@ public class SubmissionService {
     */
     @Transactional
     public void assignSubmission(Long submissionId, User grader) throws JsonProcessingException {
-        Submission submission = this.getSubmission(submissionId);
+        Submission submission = this.getSubmissionWithLock(submissionId);
 
         if (submission == null) {
             throw new ResponseStatusException(
@@ -369,7 +475,7 @@ public class SubmissionService {
         }
 
         GradingParticipation grader1 = this.gradingParticipationService
-                .getGradingParticipationByUserAndProject(grader.getId(), submission.getProject().getId());
+                .getGradingParticipationByUserAndProjectWithLock(grader.getId(), submission.getProject().getId());
 
         if (grader1 == null) {
             throw new ResponseStatusException(
@@ -388,7 +494,7 @@ public class SubmissionService {
                                      List<PrivilegeEnum> privileges, Long graderId) throws JsonProcessingException {
 
 //        TODO put locks and check only self remove
-        Submission submission = this.getSubmission(submissionId);
+        Submission submission = this.getSubmissionWithLock(submissionId);
 
         if (submission == null) {
             throw new ResponseStatusException(
@@ -414,7 +520,7 @@ public class SubmissionService {
     public void assessmentManagement(Long courseId, Long projectId, Long submissionId,
                                                  JsonNode object, List<PrivilegeEnum> privileges, Long userId) throws JsonProcessingException, ResponseStatusException {
 
-        Submission submission = getSubmission(submissionId);
+        Submission submission = getSubmissionWithLock(submissionId);
         if (submission == null) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "task not found"
@@ -433,6 +539,11 @@ public class SubmissionService {
             case "new": {
                 Long participantId = object.get("participantId").asLong();
                 CourseParticipation participant = courseParticipationRepository.findById_User_IdAndId_Course_Id(participantId, courseId);
+                if (participant == null) {
+                    throw new ResponseStatusException(
+                            HttpStatus.CONFLICT, "participant not found"
+                    );
+                }
                 this.assessmentService.createNewAssessment(
                         submission,
                         participant.getId().getUser()
@@ -444,17 +555,24 @@ public class SubmissionService {
                 Long source = object.get("source").asLong();
                 Long participantId = object.get("participantId").asLong();
                 CourseParticipation participant = courseParticipationRepository.findById_User_IdAndId_Course_Id(participantId, courseId);
+                if (participant == null) {
+                    throw new ResponseStatusException(
+                            HttpStatus.CONFLICT, "participant not found"
+                    );
+                }
 
                 Assessment sourceAssignment = this.assessmentService.getAssessment(source);
                 Assessment newAssignment = this.assessmentService.createNewAssessment(
                         new Assessment(
-                                sourceAssignment.getGradedCount(),
-                                sourceAssignment.getFinalGrade(),
-                                sourceAssignment.getFinalGradeManual(),
                                 sourceAssignment.getProject(),
                                 new HashSet<>())
                 );
-                newAssignment = assessmentService.createNewAssessment(newAssignment);
+                newAssignment = assessmentService.updateAssessment(newAssignment);
+                if (newAssignment == null) {
+                    throw new ResponseStatusException(
+                            HttpStatus.CONFLICT, "newAssignment not found"
+                    );
+                }
 
                 Assessment finalNewAssignment = newAssignment;
                 Assessment finalNewAssignment1 = finalNewAssignment;
@@ -476,8 +594,12 @@ public class SubmissionService {
                         .collect(Collectors.toSet());
                 finalNewAssignment.setGrades(grades);
 
-                finalNewAssignment = assessmentService.createNewAssessment(finalNewAssignment);
-
+                finalNewAssignment = assessmentService.updateAssessment(finalNewAssignment);
+                if (finalNewAssignment == null) {
+                    throw new ResponseStatusException(
+                            HttpStatus.CONFLICT, "finalNewAssignment not found"
+                    );
+                }
                 this.assessmentService.cloneAssessment(submission, finalNewAssignment, participant);
                 break;
             }
@@ -485,12 +607,16 @@ public class SubmissionService {
                 Long source = object.get("source").asLong();
                 Long destination = object.get("destination").asLong();
                 Long participantId = object.get("participantId").asLong();
-                Assessment sourceAssignment = assessmentService.getAssessment(source);
-                Assessment destinationAssignment = assessmentService.getAssessment(destination);
+                Assessment sourceAssignment = assessmentService.getAssessmentWithLock(source);
+                Assessment destinationAssignment = assessmentService.getAssessmentWithLock(destination);
+                if (sourceAssignment.getId().equals(destinationAssignment.getId())) {
+                    return;
+                }
+
                 CourseParticipation participant = courseParticipationRepository.findById_User_IdAndId_Course_Id(participantId, courseId);
 
-                Set<AssessmentLink> linkerSrcList = assessmentService.findAssessmentLinksByAssessmentId(source);
-                Set<AssessmentLink> linkerDesList = assessmentService.findAssessmentLinksByAssessmentId(destination);
+                Set<AssessmentLink> linkerSrcList = assessmentService.findAssessmentLinksByAssessmentIdWithLock(source);
+                Set<AssessmentLink> linkerDesList = assessmentService.findAssessmentLinksByAssessmentIdWithLock(destination);
                 AssessmentLink linkerSrc = null;
                 for(AssessmentLink linker : linkerSrcList) {
                     if (linker.getId().getUser().getId().equals(participant.getId().getUser().getId())) {
@@ -505,7 +631,7 @@ public class SubmissionService {
                         linkerSrc == null ||
                         linkerSrcList.size() == 0 ||
                         linkerDesList.size() == 0) {
-                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "not found info");
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "not found info");
                 }
 
                 assessmentService.moveAssessment(linkerSrc, destinationAssignment, linkerSrcList);
@@ -516,7 +642,7 @@ public class SubmissionService {
                 Long source = object.get("source").asLong();
                 Long participantId = object.get("participantId").asLong();
                 CourseParticipation participant = courseParticipationRepository.findById_User_IdAndId_Course_Id(participantId, courseId);
-                Set<AssessmentLink> links = assessmentService.getAssessmentsByProjectAndUser(
+                Set<AssessmentLink> links = assessmentService.getAssessmentsByProjectAndUserWithLock(
                         projectId,
                         participant.getId().getUser()
                 );
@@ -529,7 +655,7 @@ public class SubmissionService {
             }
             case "delete": {
                 Long source = object.get("source").asLong();
-                Set<AssessmentLink> linkers = assessmentService.findAssessmentLinksByAssessmentId(source);
+                Set<AssessmentLink> linkers = assessmentService.findAssessmentLinksByAssessmentIdWithLock(source);
                 for (AssessmentLink linker : linkers) {
                     if (linker.getId().getUser() != null) {
                         throw new ResponseStatusException(HttpStatus.CONFLICT, "cant remove assessment that has participants");
@@ -538,7 +664,7 @@ public class SubmissionService {
                 for (AssessmentLink linker : linkers) {
                     assessmentService.deleteAssessmentLinker(linker);
                 }
-                Assessment assessment = assessmentService.getAssessment(source);
+                Assessment assessment = assessmentService.getAssessmentWithLock(source);
                 if (assessment != null) {
                     assessmentService.deleteAssessment(assessment);
                 } else {
@@ -567,13 +693,13 @@ public class SubmissionService {
                     HttpStatus.NOT_FOUND, "project not found"
             );
         }
-        Submission submission = getSubmission(submissionId);
+        Submission submission = getSubmissionWithLock(submissionId);
         if (submission == null) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "task not found"
             );
         }
-        Assessment assessment = assessmentService.getAssessment(assessmentId);
+        Assessment assessment = assessmentService.getAssessmentWithLock(assessmentId);
         if (assessment == null) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "task not found"
@@ -621,7 +747,7 @@ public class SubmissionService {
                     HttpStatus.NOT_FOUND, "project not found"
             );
         }
-        Submission submission = getSubmission(submissionId);
+        Submission submission = getSubmissionWithLock(submissionId);
         if (submission == null) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "task not found"
@@ -645,7 +771,7 @@ public class SubmissionService {
         }
 
         Set<AssessmentLink> submissionAssessmentLinker = assessmentService
-                .getAssessmentLinksBySubmission(
+                .getAssessmentLinksBySubmissionWithLock(
                         submission);
 
         int participantCount = 0;
@@ -662,7 +788,7 @@ public class SubmissionService {
         }
 
         AssessmentLink assessmentLinker = assessmentService
-                .getAssessmentLinkForUser(submission.getId(), participant.getId().getUser().getId());
+                .getAssessmentLinkForUserWithLock(submission.getId(), participant.getId().getUser().getId());
         if (assessmentLinker == null) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT, "assessment not exists"
