@@ -21,6 +21,9 @@ public interface GradingParticipationRepository extends JpaRepository<GradingPar
     GradingParticipation findGradingParticipationById_User_IdAndId_Project_Id(Long id_user_id, Long id_project_id);
 
     @Lock(LockModeType.PESSIMISTIC_READ)
+    List<GradingParticipation> findAllById_User(User id_user);
+
+    @Lock(LockModeType.PESSIMISTIC_READ)
     GradingParticipation findById_UserAndId_Project(User id_user, Project id_project);
 
     @Lock(LockModeType.PESSIMISTIC_READ)

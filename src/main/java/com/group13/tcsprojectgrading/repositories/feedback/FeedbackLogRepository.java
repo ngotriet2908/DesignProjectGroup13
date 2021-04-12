@@ -16,4 +16,7 @@ public interface FeedbackLogRepository extends JpaRepository<FeedbackLog, Long> 
 
     @Lock(LockModeType.PESSIMISTIC_READ)
     public List<FeedbackLog> findFeedbackLogsByLink_Id_Submission_ProjectOrderBySendAtDesc(Project project);
+
+    @Lock(LockModeType.WRITE)
+    public void deleteAllByLink(AssessmentLink link);
 }

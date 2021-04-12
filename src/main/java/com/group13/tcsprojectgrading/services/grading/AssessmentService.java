@@ -10,6 +10,7 @@ import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.models.user.User;
 import com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum;
 import com.group13.tcsprojectgrading.models.submissions.Submission;
+import com.group13.tcsprojectgrading.repositories.feedback.FeedbackLogRepository;
 import com.group13.tcsprojectgrading.repositories.grading.*;
 import com.group13.tcsprojectgrading.repositories.submissions.SubmissionRepository;
 import com.group13.tcsprojectgrading.services.graders.GradingParticipationService;
@@ -53,6 +54,7 @@ public class AssessmentService {
     private final SubmissionService submissionService;
     private final NotificationService notificationService;
     private final RubricService rubricService;
+    private final FeedbackLogRepository feedbackLogRepository;
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -62,7 +64,7 @@ public class AssessmentService {
                              GradeRepository gradeRepository, @Lazy UserService userService,
                              @Lazy IssueRepository issueRepository, IssueStatusRepository issueStatusRepository,
                              SubmissionRepository submissionRepository, GradingParticipationService gradingParticipationService, SettingsService settingsService,
-                             ApplicationEventPublisher applicationEventPublisher, NotificationService notificationService, RubricService rubricService) {
+                             ApplicationEventPublisher applicationEventPublisher, NotificationService notificationService, RubricService rubricService, FeedbackLogRepository feedbackLogRepository) {
         this.assessmentLinkRepository = assessmentLinkRepository;
         this.assessmentRepository = assessmentRepository;
         this.gradeRepository = gradeRepository;
@@ -79,6 +81,7 @@ public class AssessmentService {
 
         this.applicationEventPublisher = applicationEventPublisher;
         this.rubricService = rubricService;
+        this.feedbackLogRepository = feedbackLogRepository;
     }
 
     /*
@@ -164,6 +167,7 @@ public class AssessmentService {
                 link.isCurrent()
         );
 
+        feedbackLogRepository.deleteAllByLink(link);
         assessmentLinkRepository.delete(link);
         if (assessmentLinks.size() == 1) {
             deleteAssessment(assessment1);
@@ -187,6 +191,8 @@ public class AssessmentService {
         );
 
         link1.getId().setAssessment(assessment);
+
+        feedbackLogRepository.deleteAllByLink(link);
         assessmentLinkRepository.delete(link);
         return assessmentLinkRepository.save(link1);
     }
@@ -641,6 +647,7 @@ public class AssessmentService {
 
     @Transactional(value = Transactional.TxType.MANDATORY)
     public void deleteAssessmentLinker(AssessmentLink assessmentLink) {
+        feedbackLogRepository.deleteAllByLink(assessmentLink);
         this.assessmentLinkRepository.delete(assessmentLink);
     }
 

@@ -1,5 +1,6 @@
 package com.group13.tcsprojectgrading.repositories.grading;
 
+import com.group13.tcsprojectgrading.models.grading.IssueStatus;
 import com.group13.tcsprojectgrading.models.user.User;
 import com.group13.tcsprojectgrading.models.grading.Issue;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,6 +14,9 @@ import java.util.UUID;
 public interface IssueRepository extends JpaRepository<Issue, Long> {
     @Lock(LockModeType.PESSIMISTIC_READ)
     List<Issue> findIssuesByAssessmentId(Long assessmentId);
+
+    @Lock(LockModeType.PESSIMISTIC_READ)
+    List<Issue> findIssuesByAssessmentIdAndStatus_Name(Long assessmentId, String statusName);
 
     @Lock(LockModeType.PESSIMISTIC_READ)
     Optional<Issue> findById(Long aLong);

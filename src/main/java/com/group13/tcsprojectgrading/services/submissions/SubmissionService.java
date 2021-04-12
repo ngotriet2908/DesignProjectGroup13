@@ -3,8 +3,7 @@ package com.group13.tcsprojectgrading.services.submissions;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.group13.tcsprojectgrading.models.course.CourseParticipation;
-import com.group13.tcsprojectgrading.models.grading.AssessmentLink;
-import com.group13.tcsprojectgrading.models.grading.Grade;
+import com.group13.tcsprojectgrading.models.grading.*;
 import com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum;
 import com.group13.tcsprojectgrading.models.project.Project;
 import com.group13.tcsprojectgrading.models.rubric.Element;
@@ -12,7 +11,6 @@ import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.models.submissions.Label;
 import com.group13.tcsprojectgrading.models.user.User;
 import com.group13.tcsprojectgrading.models.graders.GradingParticipation;
-import com.group13.tcsprojectgrading.models.grading.Assessment;
 import com.group13.tcsprojectgrading.models.submissions.Submission;
 import com.group13.tcsprojectgrading.repositories.course.CourseParticipationRepository;
 import com.group13.tcsprojectgrading.repositories.grading.GradeRepository;
@@ -388,6 +386,46 @@ public class SubmissionService {
 
         return submission;
     }
+
+    @Transactional
+    public Submission addTodoSubmissionAssessments(Submission submission) {
+        Rubric rubric = rubricService.getRubricById(submission.getProject().getId());
+        List<Element> criteria = rubric.fetchAllCriteria();
+        Map<String, Element> criteriaMap = new HashMap<>();
+        criteria.forEach(element -> criteriaMap.put(element.getContent().getId(), element));
+
+        List<Assessment> assessments = this.assessmentService.getAssessmentsBySubmission(submission);
+        submission.setAssessments(
+                assessments
+                        .stream()
+                        .peek(assessment -> {
+                            if (assessment.getManualGrade() != null) {
+                                assessment.setFinalGrade(assessment.getManualGrade());
+                                return;
+                            }
+
+                            List<Grade> grades = gradeRepository.findGradesByAssessmentAndIsActiveIsTrue(assessment);
+                            assessment.setIssues(issueRepository.findIssuesByAssessmentIdAndStatus_Name(assessment.getId(), IssueStatusEnum.OPEN.getName()));
+//                            System.out.println("progress = " + grades.size() + "/" + rubric.getCriterionCount());
+                            assessment.setProgress((int)(grades.size() *1.0/rubric.getCriterionCount()*100));
+                            assessment.setFinalGrade(
+                                    (float) grades.stream()
+                                            .mapToDouble(grade ->
+                                                    grade.getGrade()*
+                                                            criteriaMap.get(grade.getCriterionId())
+                                                                    .getContent().getGrade().getWeight()
+                                            )
+                                            .reduce(0,
+                                                    (grade, grade2) -> grade += grade2
+                                            )
+                            );
+                        })
+                        .collect(Collectors.toList())
+        );
+
+        return submission;
+    }
+
 
     /*
     Saves the list of labels for the submission.

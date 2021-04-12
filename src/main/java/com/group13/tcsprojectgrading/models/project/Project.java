@@ -17,6 +17,7 @@ import com.group13.tcsprojectgrading.models.submissions.Submission;
 import javax.persistence.*;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 @JsonAppend(attrs = {
         @JsonAppend.Attr(value = "privileges")
@@ -53,6 +54,12 @@ public class Project {
     @JsonIgnore
     @OneToMany(mappedBy = "project")
     private List<FeedbackTemplate> feedbackTemplates;
+
+    @Transient
+    private Long gradingTasks;
+
+    @Transient
+    private Long issues;
 
     public Project() {
     }
@@ -157,13 +164,29 @@ public class Project {
         return feedbackTemplates;
     }
 
+    public Long getGradingTasks() {
+        return gradingTasks;
+    }
+
+    public void setGradingTasks(Long gradingTasks) {
+        this.gradingTasks = gradingTasks;
+    }
+
     public void setFeedbackTemplates(List<FeedbackTemplate> feedbackTemplates) {
         this.feedbackTemplates = feedbackTemplates;
     }
 
+    public Long getIssues() {
+        return issues;
+    }
+
+    public void setIssues(Long issues) {
+        this.issues = issues;
+    }
+
     /*
-       Serialiser for the main information of the course (without details).
-        */
+           Serialiser for the main information of the course (without details).
+            */
     public static class ProjectShortSerialiser extends JsonSerializer<Project> {
         @Override
         public void serialize(Project project, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {

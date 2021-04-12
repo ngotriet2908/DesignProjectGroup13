@@ -15,7 +15,7 @@ class HomeTaskCard extends Component {
   }
 
   onClickSeeMore = () => {
-    store.dispatch(push(`${URL_PREFIX}/${COURSES}/${this.props.data.course.id}/projects/${this.props.data.project.id}/submissions`));
+    store.dispatch(push(`${URL_PREFIX}/${COURSES}/${this.props.data.course.id}/projects/${this.props.data.id}/submissions`));
   }
 
   render() {
@@ -23,14 +23,15 @@ class HomeTaskCard extends Component {
       <Card className={styles.card}>
         <Card.Body className={styles.cardBodyContainer}>
           <div className={styles.cardBodyTitle}>
-            <h5>{this.props.data.project.name}</h5>
+            <h5>{this.props.data.name}</h5>
             <div className={classnames(globalStyles.iconButton, styles.cardButtonContainer)} onClick={this.onClickSeeMore}>
               <IoArrowForward size={26}/>
             </div>
           </div>
           <div className={styles.cardBodyContent}>
             <div>Course: {this.props.data.course.name}</div>
-            <div>Number of tasks: {this.props.data.submissions}</div>
+            <div>Number of tasks: {this.props.data.gradingTasks}</div>
+            <div>Number of opened issues: {this.props.data.issues}</div>
           </div>
         </Card.Body>
       </Card>

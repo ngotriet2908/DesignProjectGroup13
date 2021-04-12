@@ -70,7 +70,15 @@ public class GradingParticipationService {
      */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public List<User> getProjectGradersWithSubmissions(Long projectId) {
-        return this.repository.getProjectUsersAndFetchSubmissions(projectId);
+        return this.repository.getProjectUsersAndFetchSubmissions(projectId)
+                .stream()
+                .peek(
+                        user -> user.setToGrade(user.getToGrade()
+                                .stream()
+                                .filter(submission -> submission.getProject().getId().equals(projectId))
+                                .collect(Collectors.toSet())
+                        )
+                ).collect(Collectors.toList());
     }
 
     /*

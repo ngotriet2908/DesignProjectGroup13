@@ -91,40 +91,8 @@ class UsersController {
     }
 
     @GetMapping(value = "/to-do")
-    protected List<Project> getTasks(Principal principal) throws JsonProcessingException {
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        List<Submission> submissions = userService.findSubmissionsForGraderAll(principal.getName());
-//        Map<Project, List<Submission>> projectListMap = new HashMap<>();
-//
-//        for(Submission submission : submissions) {
-//            if (!projectListMap.containsKey(submission.getProject())) {
-//                List<Submission> tasks1 = new ArrayList<>();
-//                tasks1.add(submission);
-//                projectListMap.put(submission.getProject(), tasks1);
-//            } else {
-//                projectListMap.get(submission.getProject()).add(submission);
-//            }
-//        }
-//
-//        ArrayNode arrayNode = objectMapper.createArrayNode();
-//
-//        for(Map.Entry<Project, List<Submission>> entry: projectListMap.entrySet()) {
-//            ObjectNode node = objectMapper.createObjectNode();
-//
-//            String courseString = this.canvasApi.getCanvasCoursesApi().getUserCourse(entry.getKey().getCourseId());
-//            String projectResponse = this.canvasApi.getCanvasCoursesApi().getCourseProject(entry.getKey().getCourseId(), entry.getKey().getProjectId());
-//
-//            node.set("course", objectMapper.readTree(courseString));
-//            node.set("project", objectMapper.readTree(projectResponse));
-//            node.put("submissions", entry.getValue().size());
-//            node.put("progress", (int)(Math.random()*100));
-//
-//            arrayNode.add(node);
-//        }
-//
-//        return arrayNode;
+    protected Collection<Project> getTasks(Principal principal) throws JsonProcessingException {
 
-//        return this.projectService.getToDoList(Long.valueOf(principal.getName()));
-        return new ArrayList<>();
+        return userService.getTodoForUser(Long.valueOf(principal.getName()));
     }
 }
