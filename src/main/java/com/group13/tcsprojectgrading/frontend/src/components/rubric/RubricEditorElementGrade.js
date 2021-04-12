@@ -2,6 +2,12 @@ import React, { Component } from 'react'
 import {connect} from "react-redux";
 import {alterGrade} from "../../redux/rubric/actions";
 import styles from "./rubric.module.css";
+import FormControl from "@material-ui/core/FormControl";
+import FilledInput from "@material-ui/core/FilledInput";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import FormHelperText from "@material-ui/core/FormHelperText";
+import TextField from "@material-ui/core/TextField";
+import Grid from "@material-ui/core/Grid";
 
 class RubricEditorElementGrade extends Component {
   constructor (props) {
@@ -44,47 +50,72 @@ class RubricEditorElementGrade extends Component {
     this.props.alterGrade(this.props.id, newGrade, this.props.currentPath + "/content/grade");
   }
 
-  // onBlurDefault = () => {
-  //   if (this.props.data.min === "") {
-  //
-  //   }
-  // }
-
   render () {
     return (
       <div className={`${styles.viewerSectionContainer} ${styles.viewerGradeSectionContainer}`}>
         <div className={styles.viewerSectionTitle}>
           <h4>Grade</h4>
         </div>
-        <div className={styles.viewerGradeSectionContent}>
-          <div>
-            <label htmlFor="gradeMin">
-            Min:
-            </label>
-            <input type="number" id="gradeMin" value={this.props.data.min} onChange={this.onChangeMinGrade}/>
-          </div>
+        <Grid container spacing={1} className={styles.viewerGradeSectionContent} >
+          <Grid item xs={3}>
+            <TextField
+              label="Minimum"
+              type="number"
+              InputLabelProps={{
+                shrink: true,
+              }}
+              InputProps={{
+                startAdornment: <InputAdornment position="start">Pts</InputAdornment>,
+              }}
+              variant="outlined"
+              value={this.props.data.min}
+              onChange={this.onChangeMinGrade}
+            />
+          </Grid>
 
-          <div>
-            <label htmlFor="gradeMax">
-            Max:
-            </label>
-            <input type="number" id="gradeMax" value={this.props.data.max} onChange={this.onChangeMaxGrade}/>
-          </div>
+          <Grid item xs={3}>
+            <TextField
+              label="Maximum"
+              type="number"
+              InputLabelProps={{
+                shrink: true,
+              }}
+              InputProps={{
+                startAdornment: <InputAdornment position="start">Pts</InputAdornment>,
+              }}
+              variant="outlined"
+              value={this.props.data.max}
+              onChange={this.onChangeMaxGrade}
+            />
+          </Grid>
 
-          <div>
-            <label htmlFor="gradeStep">
-            Step:
-            </label>
-            <input type="number" id="gradeStep" value={this.props.data.step} onChange={this.onChangeStepGrade}/>
-          </div>
+          <Grid item xs={3}>
+            <TextField
+              label="Step"
+              type="number"
+              InputLabelProps={{
+                shrink: true,
+              }}
+              variant="outlined"
+              value={this.props.data.step}
+              onChange={this.onChangeStepGrade}
+            />
+          </Grid>
 
-          <div>
-            <label htmlFor="gradeWeight">
-              Weight (coefficient):
-            </label>
-            <input type="number" id="gradeWeight" value={this.props.data.weight} onChange={this.onChangeWeight}/>
-          </div>
-        </div>
+          <Grid item xs={3}>
+            <TextField
+              label="Weight"
+              type="number"
+              InputLabelProps={{
+                shrink: true,
+              }}
+              variant="outlined"
+              value={this.props.data.weight}
+              onChange={this.onChangeWeight}
+              helperText="Between 0 and 1"
+            />
+          </Grid>
+        </Grid>
       </div>
     )
   }

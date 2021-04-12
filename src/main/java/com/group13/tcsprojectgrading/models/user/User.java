@@ -195,6 +195,7 @@ public class User {
             jsonGenerator.writeNumberField("id", user.getId());
             jsonGenerator.writeStringField("name", user.getName());
             jsonGenerator.writeStringField("sNumber", user.getsNumber());
+            jsonGenerator.writeStringField("avatar", user.getAvatar());
             jsonGenerator.writeEndObject();
         }
     }
@@ -219,6 +220,7 @@ public class User {
             jsonGenerator.writeNumberField("id", user.getId());
             jsonGenerator.writeStringField("name", user.getName());
             jsonGenerator.writeStringField("sNumber", user.getsNumber());
+            jsonGenerator.writeStringField("avatar", user.getAvatar());
             jsonGenerator.writeBooleanField("isCurrentAssessment", user.isCurrent());
             jsonGenerator.writeEndObject();
         }

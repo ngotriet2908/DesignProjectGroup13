@@ -86,11 +86,13 @@ public class CourseService {
     public void importCourses(ArrayNode courses, Long userId) throws IOException, ResponseStatusException {
         // for each course that was added
         for (JsonNode courseToImport: courses) {
-            // TODO: users should submit only course ids, rest info should be fetched here directly
             long id = courseToImport.get("id").asLong();
 
-            String name = courseToImport.get("name").asText();
-            String date = courseToImport.get("start_at").asText();
+            // TODO what if no such course exists?
+            JsonNode courseCanvas = Json.getObjectReader().readTree(this.canvasApi.getCanvasCoursesApi().getUserCourse(id));
+
+            String name = courseCanvas.get("name").asText();
+            String date = courseCanvas.get("start_at").asText();
 
             TemporalAccessor accessor = DateTimeFormatter.ISO_INSTANT.parse(date);
             Instant i = Instant.from(accessor);
@@ -99,6 +101,7 @@ public class CourseService {
             // create course
             Course course = new Course(id, name, startAt);
             if (courseRepository.existsById(course.getId())) {
+                // TODO
                 throw new ResponseStatusException(
                         HttpStatus.CONFLICT, "Course exist"
                 );
@@ -333,7 +336,7 @@ public class CourseService {
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
-    public List<User> getCourseParticipants(Long courseId) throws ResponseStatusException {
+    public List<User> getCourseUsers(Long courseId) throws ResponseStatusException {
         Optional<Course> courseOptional = this.courseRepository.findById(courseId);
 
         if (courseOptional.isEmpty()) {
@@ -417,6 +420,26 @@ public class CourseService {
     }
 
     @Transactional
+    public List<User> getCourseTAsAsUsers(Long courseId) {
+        Course courseOptional = this.courseRepository.findById(courseId).orElse(null);
+
+        if (courseOptional == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Course not found"
+            );
+        }
+
+        List<CourseParticipation> courseParticipationList =
+                this.courseParticipationRepository.findById_Course_IdAndRole_Name(courseId, RoleEnum.TA.toString());
+        List<User> users = new ArrayList<>();
+        for (CourseParticipation courseParticipation : courseParticipationList) {
+            users.add(courseParticipation.getId().getUser());
+        }
+
+        return users;
+    }
+
+    @Transactional
     public List<User> getCourseTeachersAndTAsAsUsers(Long courseId) {
         Course course = this.courseRepository.findById(courseId).orElse(null);
 
@@ -441,7 +464,7 @@ public class CourseService {
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
-    public User getCourseParticipant(Long courseId, Long userId) throws ResponseStatusException {
+    public User getCourseUser(Long courseId, Long userId) throws ResponseStatusException {
         Optional<Course> courseOptional = this.courseRepository.findById(courseId);
 
         if (courseOptional.isEmpty()) {

@@ -3,25 +3,42 @@ import React, { Component } from 'react'
 import styles from './rubric.module.css'
 import {connect} from "react-redux";
 import {addBlock, addCriterion, deleteElement, setCurrentPath, setSelectedElement} from "../../redux/rubric/actions";
-import {IoEllipsisVerticalOutline, IoChevronForwardOutline, IoPricetagOutline} from "react-icons/io5";
 import {createNewBlock, createNewCriterion, isBlock, removeElement} from "./helpers";
 import classnames from "classnames";
 import globalStyles from "../helpers/global.module.css";
-import Dropdown from "react-bootstrap/Dropdown";
-import {CustomToggle} from "./RubricOutline";
+import Menu from "@material-ui/core/Menu";
+import MenuItem from "@material-ui/core/MenuItem";
+import IconButton from "@material-ui/core/IconButton";
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import GradeIcon from '@material-ui/icons/Grade';
+import withTheme from "@material-ui/core/styles/withTheme";
+
 
 class RubricOutlineElement extends Component {
   constructor (props) {
     super(props);
 
     this.state = {
-      showMenu: false,
+      anchorElement: null
     }
   }
 
   onClick = () => {
     console.log(this.props.path);
     this.props.onClickElement(this.props.data.content.id, this.props.path);
+  }
+
+   handleMenuClose = () => {
+     this.setState({
+       anchorElement: null
+     })
+   };
+
+  handleMenuOpen = (event) => {
+    this.setState({
+      anchorElement: event.currentTarget,
+    })
   }
 
   render () {
@@ -36,54 +53,66 @@ class RubricOutlineElement extends Component {
         <div className={classnames(styles.outlineElement)} style={{paddingLeft: `${this.props.padding}rem`}}>
           <div className={classnames(styles.outlineElementLeft, isBlock(this.props.data.content.type) && styles.outlineElementLeftBlock)}>
             {isBlock(this.props.data.content.type) ?
-              <div className={classnames(styles.outlineElementIcon,
-                !this.props.collapsed && styles.outlineElementIconRotated)}>
-                <IoChevronForwardOutline onClick={this.props.onClickBlockCollapse}/>
-              </div>
+              <ChevronRightIcon
+                className={classnames(styles.outlineElementIcon,
+                  !this.props.collapsed && styles.outlineElementIconRotated)}
+                onClick={this.props.onClickBlockCollapse}
+              />
               :
-              <div className={classnames(styles.outlineElementIcon)}>
-                <IoPricetagOutline/>
-              </div>
+              <GradeIcon
+                className={classnames(styles.outlineElementIcon)}
+                style={{color: this.props.theme.palette.secondary.main}}
+              />
             }
-            <div>
+            <div className={styles.outlineElementText}>
               {this.props.data.content.title}
             </div>
           </div>
 
           {this.props.isEditing &&
-              <div className={styles.outlineElementRight}>
-                <Dropdown onClick={(event) => {event.stopPropagation();}}>
-                  <Dropdown.Toggle as={CustomToggle}>
-                    <IoEllipsisVerticalOutline size={26}/>
-                  </Dropdown.Toggle>
+          <div className={styles.outlineElementRight}>
+            <IconButton aria-label="more" onClick={this.handleMenuOpen}>
+              <MoreVertIcon fontSize="small"/>
+            </IconButton>
 
-                  <Dropdown.Menu>
-                    {isBlock(this.props.data.content.type) &&
-                      <>
-                        <Dropdown.Item onClick={() => createNewCriterion(
-                          this.props,
-                          this.props.path,
-                          this.props.data.content.id,
-                          this.props.data.children.length
-                        )}>
-                        Add criterion
-                        </Dropdown.Item>
-                        <Dropdown.Item onClick={() => createNewBlock(
-                          this.props,
-                          this.props.path,
-                          this.props.data.content.id,
-                          this.props.data.children.length)}>
-                        Add section
-                        </Dropdown.Item>
-                      </>
-                    }
+            <Menu
+              id="rubric-element-menu"
+              anchorEl={this.state.anchorElement}
+              keepMounted
+              open={Boolean(this.state.anchorElement)}
+              onClose={this.handleMenuClose}
+            >
+              {isBlock(this.props.data.content.type) && [(
+                <MenuItem
+                  key={"addCriterion"}
+                  onClick={() => createNewCriterion(
+                    this.props,
+                    this.props.path,
+                    this.props.data.content.id,
+                    this.props.data.children.length
+                  )}
+                >
+                  Add criterion
+                </MenuItem>),
+              (
+                <MenuItem
+                  key={"addSection"}
+                  onClick={() => createNewBlock(
+                    this.props,
+                    this.props.path,
+                    this.props.data.content.id,
+                    this.props.data.children.length)}
+                >
+                    Add section
+                </MenuItem>)
+              ]}
 
-                    <Dropdown.Item onClick={() => removeElement(this.props)}>
-                      Delete
-                    </Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown>
-              </div>
+              <MenuItem
+                onClick={() => removeElement(this.props)}>
+                Delete
+              </MenuItem>
+            </Menu>
+          </div>
           }
         </div>
       </div>
@@ -108,4 +137,4 @@ const actionCreators = {
   deleteElement,
 }
 
-export default connect(mapStateToProps, actionCreators)(RubricOutlineElement)
+export default connect(mapStateToProps, actionCreators)(withTheme(RubricOutlineElement))

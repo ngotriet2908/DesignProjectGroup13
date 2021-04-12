@@ -1,6 +1,5 @@
 @value primary, secondary, ternary, primaryShade, moderateGray, pinkishGray from '../helpers/colors.css';
 
-
 /* sidebar */
 .sidebar {
     position: fixed;
@@ -9,21 +8,27 @@
     top: 0;
     bottom: 0;
     left: 0;
-
     z-index: 69;
 
-    width: 20rem;
+    overflow: hidden;
 
     background-color: white;
 
     border-right: 1px solid pinkishGray;
-    transition: all .1s ease-out;
+
+    border-collapse: separate;
+
+    transition: width .1s ease-in-out;
+    will-change: width;
 
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-
     box-sizing: content-box;
+}
+
+.sidebarShown {
+    width: 20rem;
 }
 
 .sidebarHidden {
@@ -35,6 +40,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+
     justify-content: space-between;
 
     padding: 2rem 1rem 3.6rem 1rem;
@@ -42,7 +48,7 @@
 }
 
 .sidebarHidden .sidebarHeader {
-    justify-content: center;
+    justify-content: flex-end;
 }
 
 .sidebarHeader img, .sidebarHeaderButton {
@@ -64,7 +70,6 @@
 
 .sidebarHeaderButton {
     color: #4c4c4c;
-    /*transform: rotate(90deg);*/
 }
 
 .sidebarHidden .sidebarHeaderButton {
@@ -74,21 +79,19 @@
 .sidebarBody {
     margin-top: 1rem;
     padding: 1rem 0.5rem;
-    transition: all .1s ease-out;
 }
 
 .sidebarBodyItem {
     padding: 0.5rem;
-    font-size: 1.3rem;
-    border-radius: 5px;
+    font-size: 1.2rem;
+
+    border-radius: 0.5rem;
 
     display: flex;
     flex-direction: row;
-    align-items: flex-end;
+    align-items: center;
 
     cursor: pointer;
-    transition: all .1s ease-out;
-
     margin: 1rem 0;
 }
 
@@ -97,12 +100,8 @@
 }
 
 .sidebarBody .sidebarBodyItem:hover {
-    background-color: primaryShade;
+    background-color: rgb(11, 23, 34);
     color: white;
-}
-
-.sidebarIcon {
-    /*color: moderateGray;*/
 }
 
 .sidebarBody .sidebarBodyItem:hover .sidebarIcon {
@@ -114,12 +113,13 @@
 }
 
 .sidebarBodyItemActive {
-    background-color: primary;
+    background-color: #2f5d8a;
     color: white;
 }
 
 .sidebarBodyItemLeft {
     width: 26px;
+    height: 26px;
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -143,16 +143,12 @@
     flex-direction: row;
     align-items: center;
 
-    /*background-color: #1f2328;*/
-    /*border-top: 1px solid #e7eaee;*/
     height: 10rem;
-
     /*color: white;*/
 }
 
 .sidebarFooterInner {
     padding: 12px;
-    transition: all .1s ease-out;
     width: 100%;
 }
 
@@ -160,6 +156,8 @@
     border-radius: 0;
     padding: 0;
     cursor: default;
+
+    align-items: center;
 }
 
 .sidebarFooter .sidebarBodyItemLeft {
@@ -184,7 +182,6 @@
     align-items: center;
     justify-content: space-between;
     white-space: nowrap;
-
     flex-wrap: nowrap;
 }
 

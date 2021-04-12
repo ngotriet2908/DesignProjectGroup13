@@ -1,12 +1,24 @@
-import {Button, Spinner, Modal, Alert} from 'react-bootstrap'
 import React, {Component} from "react";
 import {request} from "../../services/request";
 import {BASE, PROJECT, USER_COURSES} from "../../services/endpoints";
 import {connect} from "react-redux";
-import {IoCloseOutline, IoCheckboxOutline, IoSquareOutline, IoReturnUpBack, IoAddOutline} from "react-icons/io5";
 import classnames from 'classnames';
 import globalStyles from "../helpers/global.module.css";
 import {Can} from "../permissions/ProjectAbility";
+import CustomModal from "../helpers/CustomModal";
+import AssignmentReturnIcon from "@material-ui/icons/AssignmentReturn";
+import withTheme from "@material-ui/core/styles/withTheme";
+import Button from "@material-ui/core/Button";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemAvatar from "@material-ui/core/ListItemAvatar";
+import Avatar from "@material-ui/core/Avatar";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import {IconButton} from "@material-ui/core";
+import CheckCircleIcon from "@material-ui/icons/CheckCircle";
+import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
+import List from "@material-ui/core/List";
+import Pluralize from "pluralize";
 
 
 class AssignSubmissionModal extends Component {
@@ -23,6 +35,7 @@ class AssignSubmissionModal extends Component {
     // set the selected grader
     this.setState({
       selected: this.props.currentGrader,
+      isLoaded: true
     })
   }
 
@@ -54,6 +67,12 @@ class AssignSubmissionModal extends Component {
     })
   }
 
+  handleGraderClick = (grader) => {
+    this.setState(prevState => ({
+      selected: grader,
+    }))
+  }
+
   disassociateSubmission = () => {
     request(`${BASE}courses/${this.props.routeParams.courseId}/projects/${this.props.routeParams.projectId}/submissions/${this.props.submission.id}/dissociate`,
       "POST",
@@ -68,132 +87,81 @@ class AssignSubmissionModal extends Component {
     })
   }
 
-  handleGraderClick = (grader) => {
-    this.setState(prevState => ({
-      selected: grader,
-    }))
-  }
-
-  createFirstRow = () => {
-    let result = [];
-
-    result.push(
-      <div className={
-        classnames(globalStyles.modalBodyContainerRow,
-          this.props.choice == null && globalStyles.modalBodyContainerRowActive)
-      } onClick={() => this.props.setModalAssignChoice(null)}
-      key="unassigned">
-        {this.props.choice == null ?
-          <IoCheckboxOutline size={16}/>
-          :
-          <IoSquareOutline size={16}/>
+  body = () => {
+    return (
+      <>
+        {this.props.graders.length === 0 &&
+            <div className={classnames(globalStyles.modalBodyContainerRow, globalStyles.modalBodyContainerRowEmpty)}>
+              No graders available in this project
+            </div>
         }
-        <span>Unassigned</span>
-      </div>
+
+        <List>
+          {this.props.graders.map(grader => {
+            const eq = this.state.selected != null && this.state.selected.id === grader.id;
+
+            return(
+              <ListItem key={grader.id}>
+                <ListItemAvatar>
+                  <Avatar
+                    alt={grader.name}
+                    src={grader.avatar.includes("avatar-50") ? "" : grader.avatar}
+                  />
+                </ListItemAvatar>
+
+                <ListItemText
+                  primary={
+                    <span>{grader.name}</span>
+                  }
+                  secondary={
+                    <span>{Pluralize( 'submission', grader.submissions.length, true)}</span>
+                  }
+                />
+
+                <ListItemSecondaryAction>
+                  <IconButton edge="end" aria-label="delete" onClick={() => this.handleGraderClick(grader)}>
+                    {eq ?
+                      <CheckCircleIcon style={{color: this.props.theme.palette.success.main}}/>
+                      :
+                      <RadioButtonUncheckedIcon/>
+                    }
+                  </IconButton>
+                </ListItemSecondaryAction>
+              </ListItem>
+            )
+          })}
+        </List>
+      </>
     )
-
-    if (this.props.currentGrader != null) {
-      // const eq = this.props.choice != null && this.props.choice.id === this.props.currentGrader.id;
-      //
-      // result.push(
-      //   <div className={classnames(globalStyles.modalBodyContainerRow,
-      //     eq && globalStyles.modalBodyContainerRowActive)}
-      //   onClick={() => this.props.setModalAssignChoice(this.props.currentGrader)}
-      //   key="current">
-      //     {eq ?
-      //       <IoCheckboxOutline size={16}/>
-      //       :
-      //       <IoSquareOutline size={16}/>
-      //     }
-      //     <span>{this.props.currentGrader.name} - {this.props.currentGrader.groups.length} task(s)</span>
-      //   </div>
-      // )
-    }
-
-    return result;
   }
 
   render() {
     return(
-      <Modal
-        centered
-        backdrop="static"
-        size="lg"
-        onShow={this.onShow}
+      <CustomModal
         show={this.props.show}
-        onHide={this.onClose}
-        animation={false}
-      >
+        onClose={this.props.toggleShow}
+        onShow={this.onShow}
+        onAccept={this.onAccept}
+        title={"Assign"}
+        description={`Choose a person who will be responsible for grading the submission '${(this.props.submission != null)? this.props.submission.name : null}' or leave the submission unassigned.`}
+        body={this.body()}
+        isLoaded={this.state.isLoaded}
 
-        <div className={globalStyles.modalContainer}>
-          <div className={globalStyles.modalHeaderContainer}>
-            <h2>Assign</h2>
-            <div className={classnames(globalStyles.modalHeaderContainerButton)} onClick={this.onClose}>
-              <IoCloseOutline size={30}/>
-            </div>
-          </div>
+        additionalAction={
+          this.props.currentGrader != null &&
 
-          <Can I="edit" a="ManageGraders">
-
-            <div className={globalStyles.modalDescriptionContainer}>
-              <div>
-                Choose a person who will be responsible for grading the submission <b>'{(this.props.submission != null)? this.props.submission.name : null}'</b> or leave the submission unassigned.
-              </div>
-            </div>
-
-
-            {/* body */}
-            <div className={globalStyles.modalBodyContainer}>
-              {/*{this.createFirstRow()}*/}
-
-              {this.props.graders.length === 0 &&
-              <div className={classnames(globalStyles.modalBodyContainerRow, globalStyles.modalBodyContainerRowEmpty)}>
-                No graders available in this project
-              </div>
-              }
-
-              {this.props.graders
-                // .filter((grader) => {
-                // return (this.props.currentGrader == null) || (grader.id !== this.props.currentGrader.id)
-              // })
-                .map((grader) => {
-                  const eq = this.state.selected != null && this.state.selected.id === grader.id;
-
-                  return (
-                    <div className={classnames(globalStyles.modalBodyContainerRow, eq && globalStyles.modalBodyContainerRowActive)}
-                      key={grader.id}
-                      onClick={() => this.handleGraderClick(grader)}>
-                      {eq ?
-                        <IoCheckboxOutline size={16}/>
-                        :
-                        <IoSquareOutline size={16}/>
-                      }
-                      <span>{grader.name} - {grader.submissions.length} submission(s)</span>
-                    </div>
-                  )
-                })
-              }
-            </div>
-          </Can>
-          {/* footer */}
-          <div className={classnames(globalStyles.modalFooterContainer, this.props.currentGrader && globalStyles.modalFooterContainerSpaceBetween)}>
-            {this.props.currentGrader &&
-              <div>
-                <Button variant="red" onClick={this.disassociateSubmission}><IoReturnUpBack size={20}/> Return submission</Button>
-              </div>
-            }
-            <div className={globalStyles.modalFooterContainerButtonGroup}>
-              <Button variant="linkLightGray" onClick={this.onClose}>Cancel</Button>
-              <Can I="edit" a="ManageGraders">
-                <Button variant="lightGreen" onClick={this.onAccept}>Save</Button>
-              </Can>
-
-            </div>
-          </div>
-        </div>
-      </Modal>
+          <Button
+            disableElevation
+            onClick={this.disassociateSubmission}
+            style={{backgroundColor: this.props.theme.palette.error.main, color: "white"}}
+            startIcon={<AssignmentReturnIcon/>}
+          >
+            Return submission
+          </Button>
+        }
+      />
     )
   }
 }
 
-export default connect(null, null)(AssignSubmissionModal)
+export default connect(null, null)(withTheme(AssignSubmissionModal))

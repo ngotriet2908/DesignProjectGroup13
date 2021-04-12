@@ -1,22 +1,36 @@
 import React, { Component } from 'react'
 import styles from '../grading.module.css'
 import {request} from "../../../services/request";
-import {Button, Form, Card, Badge} from "react-bootstrap";
 import classnames from "classnames";
 import globalStyles from "../../helpers/global.module.css";
-import {IoCheckmarkDone, IoChevronDownOutline} from "react-icons/io5";
 import {Can} from "../../permissions/ProjectAbility";
 import { subject } from '@casl/ability';
+import Chip from "@material-ui/core/Chip";
+import withTheme from "@material-ui/core/styles/withTheme";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
+import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
+import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
+import IconButton from "@material-ui/core/IconButton";
+import TextField from "@material-ui/core/TextField";
+import Button from "@material-ui/core/Button";
+import Grid from "@material-ui/core/Grid";
+import DescriptionIcon from '@material-ui/icons/Description';
+import Tooltip from "@material-ui/core/Tooltip";
+import LinkIcon from '@material-ui/icons/Link';
+import ContactMailIcon from '@material-ui/icons/ContactMail';
 
 
 class IssueCard extends Component {
   constructor(props) {
     super(props);
+
     this.state = {
       isExpanded: false,
       isSolving: false,
+
+      solution: ""
     }
-    this.formRef = React.createRef()
   }
 
   expandHandler = () => {
@@ -28,8 +42,10 @@ class IssueCard extends Component {
   }
 
   submitSolution = () => {
-    let solution = {
-      solution: this.formRef.current.solutionInput.value
+    let solution = this.state.solution;
+
+    if (solution === "") {
+      return;
     }
 
     request(`/api/courses/${this.props.routeParams.courseId}/projects/${this.props.routeParams.projectId}/submissions/${this.props.routeParams.submissionId}/assessments/${this.props.routeParams.assessmentId}/issues/${this.props.issue.id}/resolve`,
@@ -51,6 +67,8 @@ class IssueCard extends Component {
     this.setState({
       isSolving: false,
       isExpanded: false,
+
+      solution: ""
     })
   }
 
@@ -63,88 +81,140 @@ class IssueCard extends Component {
 
   render() {
     return (
-      <Card className={classnames(styles.issueCard, this.state.isExpanded && styles.issuesCardExpanded)}>
-        <div className={styles.issueCardTitle}>
-          <h5>
-            {this.props.issue.subject}
-          </h5>
-          <div className={styles.gradeEditorCardFooter}>
-            <div className={classnames(globalStyles.iconButtonSmall, styles.gradingCardTitleButton, styles.issuesCardExpandButton)}
-              onClick={this.expandHandler}>
-              <IoChevronDownOutline size={26}/>
+      <Card className={classnames(styles.issueCard, this.state.isExpanded && styles.issuesCardExpanded, globalStyles.cardShadow)}>
+        <CardContent>
+          <div className={styles.issueCardTitle}>
+            <h5>
+              {this.props.issue.subject}
+            </h5>
+            <div className={styles.gradeEditorCardFooter}>
+              <IconButton onClick={this.expandHandler} className={styles.issuesCardExpandButton} size={"small"}>
+                <KeyboardArrowDownIcon/>
+              </IconButton>
+
+              {!(this.props.issue.status === "Resolved") &&
+              <Can I="edit" this={subject('Submission', (this.props.submission.grader === null)? {id: -1}:this.props.submission.grader)}>
+                <IconButton onClick={this.startResolve} size={"small"}>
+                  <CheckCircleOutlineIcon style={{color: this.props.theme.palette.success.main}}/>
+                </IconButton>
+              </Can>
+              }
             </div>
-            {!(this.props.issue.status === "Resolved") &&
-            <Can I="edit" this={subject('Submission', (this.props.submission.grader === null)? {id: -1}:this.props.submission.grader)}>
-              <div className={classnames(globalStyles.iconButtonSmall, styles.gradingCardTitleButton)}
-                onClick={this.startResolve}>
-                <IoCheckmarkDone size={26}/>
-              </div>
-            </Can>
+          </div>
+
+          <div className={styles.issueCardBadges}>
+            {(this.props.issue.status === "Resolved")?
+              <Chip
+                label={"Resolved"}
+                size="small"
+                style={{backgroundColor: this.props.theme.palette.labels["green"]}}
+                className={classnames(globalStyles.label)}
+              />
+              :
+              <Chip
+                style={{backgroundColor: this.props.theme.palette.labels["red"]}}
+                label={"Open"}
+                size="small"
+                className={classnames(globalStyles.label)}
+              />
             }
           </div>
-        </div>
 
-        <div className={styles.issueCardBadges}>
-          {(this.props.issue.status === "Resolved")?
-            <Badge className={styles.badge} variant="success">Resolved</Badge> :
-            <Badge className={styles.badge} variant="danger">Open</Badge>
+          <Grid container>
+
+            <Grid item sm={12}>
+              Opened by {this.props.issue.creator.name}
+            </Grid>
+
+            {(this.state.isExpanded) &&
+              <>
+                <Grid item sm={6}>
+                  <div className={classnames(globalStyles.flexRow, globalStyles.flexRowWithIcon)}>
+                    <Tooltip title="Description">
+                      <DescriptionIcon style={{color: this.props.theme.palette.primary.main}}/>
+                    </Tooltip>
+                    <span>{this.props.issue.description}</span>
+                  </div>
+                </Grid>
+
+                {(this.props.issue.hasOwnProperty("reference")) &&
+                <Grid item sm={6}>
+                  <div className={classnames(globalStyles.flexRow, globalStyles.flexRowWithIcon)}>
+                    <Tooltip title="Refers to">
+                      <LinkIcon style={{color: this.props.theme.palette.primary.main}}/>
+                    </Tooltip>
+                    <span>{this.props.issue.reference.subject}</span>
+                  </div>
+                </Grid>
+                }
+
+                {(this.props.issue.hasOwnProperty("addressee")) &&
+                  <Grid item sm={6}>
+                    <div className={classnames(globalStyles.flexRow, globalStyles.flexRowWithIcon)}>
+                      <Tooltip title="Addressee">
+                        <ContactMailIcon style={{color: this.props.theme.palette.primary.main}}/>
+                      </Tooltip>
+                      <span>{this.props.issue.addressee.name}</span>
+                    </div>
+                  </Grid>
+                }
+              </>
+            }
+
+          </Grid>
+
+          {this.state.isExpanded && this.props.issue.hasOwnProperty("solution") &&
+
+            <div className={styles.issueCardSolution}>
+              <h5>Solution</h5>
+              <div>
+                {this.props.issue.solution}
+              </div>
+            </div>
+
           }
-        </div>
-          
-        {(this.state.isExpanded)?
-          (
-            <div>
-              <div>
-                Opened by <b>{this.props.issue.creator.name}</b>
-                {/*about <b>{this.props.issue.subject}</b>.*/}
-              </div>
 
-              {/*<div>Subject: {this.props.issue.subject}</div>*/}
-              <div>Description: {this.props.issue.description}</div>
+          {this.props.issue.status !== "Resolved" && this.state.isSolving &&
+            <div className={styles.issueCardSolution}>
+              <h5>Solution</h5>
 
-              {(this.props.issue.hasOwnProperty("reference")) &&
-                  <div>Refers to <b>{this.props.issue.reference.subject}</b></div>
-              }
-
-              {(this.props.issue.hasOwnProperty("addressee")) &&
-                  <div>Addressee: {this.props.issue.addressee.name}</div>
-              }
-
-              {(this.props.issue.hasOwnProperty("solution")) &&
-                  <div>Solution: {this.props.issue.solution}</div>
-              }
-            </div>
-          ):
-          (
-            <div>
-              <div>
-                {/* todo: target vs subject */}
-                Opened by <b>{this.props.issue.creator.name}</b>
-                {/*about <b>{this.props.issue.subject}</b>.*/}
-              </div>
-            </div>
-          )
-        }
-
-        {this.props.issue.status !== "Resolved" && this.state.isSolving &&
-          <div className={styles.issueCardSolution}>
-            <h5>Solution</h5>
-            <Form ref={this.formRef}>
-              <Form.Group controlId="solutionInput" className={styles.gradeEditorCardItem}>
-                <Form.Control as="textarea" rows={3} placeholder="Enter your response to the issue"/>
-              </Form.Group>
+              <TextField
+                label="Solution"
+                placeholder="Enter response to the issue here"
+                multiline
+                variant="outlined"
+                className={styles.gradeEditorCardItem}
+                fullWidth
+                rows={2}
+                value={this.state.solution}
+                onChange={(event) => this.setState({solution: event.target.value})}
+              />
 
               <div className={styles.gradeEditorCardFooter}>
-                <Button className={styles.gradeEditorCardButton} variant="linkLightGray"
-                  onClick={this.cancelResolve}>Cancel</Button>
-                <Button className={styles.gradeEditorCardButton} variant="lightGreen" onClick={this.submitSolution}>Save</Button>
+                <Button
+                  className={styles.gradeEditorCardButton}
+                  onClick={this.cancelResolve}
+                  disableElevation
+                >
+                              Cancel
+                </Button>
+                <Button
+                  className={styles.gradeEditorCardButton}
+                  variant="contained"
+                  color="primary"
+                  onClick={this.submitSolution}
+                  disableElevation
+                >
+                              Save
+                </Button>
               </div>
-            </Form>
-          </div>
-        }
+              
+            </div>
+          }
+        </CardContent>
       </Card>
     );
   }
 }
 
-export default IssueCard
+export default withTheme(IssueCard);

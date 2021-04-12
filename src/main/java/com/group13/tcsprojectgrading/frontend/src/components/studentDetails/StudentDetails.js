@@ -2,62 +2,61 @@ import React, {Component} from "react";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
-import {Breadcrumb, Spinner, Button, ListGroup, ListGroupItem, Card, Badge} from "react-bootstrap";
-import styles from "../submissionDetails/submissionDetails.module.css";
+import styles from "./studentDetails.module.css";
 import globalStyles from "../helpers/global.module.css";
 import classnames from "classnames";
 import store from "../../redux/store";
 import {push} from "connected-react-router";
 import {connect} from "react-redux";
-import {toast} from "react-toastify";
 import {setCurrentLocation} from "../../redux/navigation/actions";
-import {IoAdd, IoPencilOutline, IoCloseOutline} from "react-icons/io5";
 import Breadcrumbs from "../helpers/Breadcrumbs";
 import {URL_PREFIX} from "../../services/config";
-import Masonry from 'react-masonry-css'
-import {IoArrowForward, IoTrashOutline} from "react-icons/io5";
 import {ability, Can, updateAbility} from "../permissions/ProjectAbility";
 import { subject } from '@casl/ability';
+import CircularProgress from "@material-ui/core/CircularProgress";
+import StickyHeader from "../helpers/StickyHeader";
+import Button from "@material-ui/core/Button";
+import SyncIcon from "@material-ui/icons/Sync";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
+import PermIdentityIcon from '@material-ui/icons/PermIdentity';
+import EmailIcon from '@material-ui/icons/Email';
+import Table from "@material-ui/core/Table";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
+import TableCell from "@material-ui/core/TableCell";
+import TableFilter from "../helpers/TableFilter";
+import TableBody from "@material-ui/core/TableBody";
+import Avatar from "@material-ui/core/Avatar";
+import Link from "@material-ui/core/Link";
+import TableContainer from "@material-ui/core/TableContainer";
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
+import IconButton from "@material-ui/core/IconButton";
+import Grid from "@material-ui/core/Grid";
+import withTheme from "@material-ui/core/styles/withTheme";
 
-const masonryBreakpointColumns = {
-  default: 2,
-  1000: 1,
-};
 
 class StudentDetails extends Component {
   constructor(props) {
     super(props);
     this.state = {
       submissions:[],
-      participant: {},
+      student: {},
       course: {},
       project: {},
+
       isLoaded: false,
-      isEditing: false,
     }
   }
 
   deleteHandler = (submission) => {
-    request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${submission.id}/removeParticipant/${this.state.participant.id}?returnAllSubmissions=true`, "DELETE")
-      .then(response => {
-        return response.json()
-      })
-      .then(data => {
-        if (data.hasOwnProperty("error")) {
-          console.log(data.status)
-          console.log(data.message)
-          // alert(data.message)
-          toast.error(data.message, {
-            position: "top-center",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-          });
-          return
-        }
+    request(
+      `${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/submissions/${submission.id}/removeParticipant/${this.state.student.id}?returnAllSubmissions=true`,
+      "DELETE")
+      .then(async response => {
+        let data = await response.json();
+
         this.setState({
           submissions: data
         })
@@ -67,20 +66,12 @@ class StudentDetails extends Component {
       });
   }
 
-  toggleEditing = () => {
-    this.setState(prev => {
-      return {
-        isEditing: !prev.isEditing
-      }
-    })
-  }
-
   componentDidMount() {
     this.props.setCurrentLocation(LOCATIONS.student);
     Promise.all([
       request(BASE + "courses/" + this.props.match.params.courseId),
       request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId),
-      request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/participants/${this.props.match.params.studentId}`)
+      request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/students/${this.props.match.params.studentId}`)
     ])
       .then(async ([res1, res2, res3]) => {
         const course = await res1.json();
@@ -90,16 +81,13 @@ class StudentDetails extends Component {
         if (project.privileges !== null) {
           updateAbility(ability, project.privileges, this.props.user)
           console.log(ability)
-          // console.log(ability.can('view',"AdminToolbar"))
-          // console.log(ability.can('read',"Submissions"))
         } else {
           console.log("No privileges found.")
         }
 
-        // console.log(data);
         this.setState({
           submissions: data.submissions,
-          participant: data.id.user,
+          student: data.id.user,
           isLoaded: true,
           course: course,
           project: project
@@ -111,18 +99,16 @@ class StudentDetails extends Component {
   }
 
   render() {
-    if (this.state.isLoading) {
-      return(
-        <div className={globalStyles.container}>
-          <Spinner className={globalStyles.spinner} animation="border" role="status">
-            <span className="sr-only">Loading...</span>
-          </Spinner>
+    if (!this.state.isLoaded) {
+      return (
+        <div className={globalStyles.screenContainer}>
+          <CircularProgress className={globalStyles.spinner}/>
         </div>
       )
     }
 
     return (
-      <div className={globalStyles.container}>
+      <>
         <Breadcrumbs>
           <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumbs.Item>
           <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id))}>
@@ -131,103 +117,101 @@ class StudentDetails extends Component {
           <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id + "/projects/" + this.state.project.id))}>
             {this.state.project.name}
           </Breadcrumbs.Item>
-          <Breadcrumbs.Item onClick={() => store.dispatch(push(`${URL_PREFIX}/courses/${this.state.course.id}/projects/${this.state.project.id}/participants`))}>
-            Participants
+          <Breadcrumbs.Item onClick={() => store.dispatch(push(`${URL_PREFIX}/courses/${this.state.course.id}/projects/${this.state.project.id}/students`))}>
+            Students
           </Breadcrumbs.Item>
           <Breadcrumbs.Item active>
-            {this.state.participant.name}
+            {this.state.student.name}
           </Breadcrumbs.Item>
         </Breadcrumbs>
 
-        <div className={classnames(globalStyles.titleContainer, styles.titleContainer)}>
-          <h1>{this.state.participant.name}</h1>
-        </div>
+        <StickyHeader
+          title={this.state.student.name}
+        />
 
-        <div className={classnames(styles.container)}>
-          <Masonry
-            breakpointCols={masonryBreakpointColumns}
-            className={styles.submissionsMasonryGrid}
-            columnClassName={styles.submissionsMasonryColumn}>
+        <div className={globalStyles.innerScreenContainer}>
 
-            <div className={styles.section}>
-              <div className={styles.sectionTitle}>
-                <h3 className={styles.sectionTitleH}>Participant Details</h3>
-              </div>
-              <div className={styles.sectionContent}>
+          <div className={styles.section}>
+            <Card className={classnames(globalStyles.cardShadow)}>
+              <CardContent>
+                <h4>Student's Information</h4>
 
-                <Card>
-                  <Card.Body>
-                    <Card.Title>
-                      Participant Info
-                    </Card.Title>
-                    <h6>Name: {this.state.participant.name}</h6>
-                    <h6>sid: {this.state.participant.sNumber}</h6>
-                    <h6>email: {this.state.participant.email}</h6>
-                  </Card.Body>
-                </Card>
-              </div>
+                <Grid
+                  container
+                  className={classnames(globalStyles.cardBodyContent)}
+                >
+                  <Grid item sm={6}>
+                    <div className={classnames(globalStyles.flexRow, globalStyles.flexRowWithIcon)}>
+                      <PermIdentityIcon style={{color: this.props.theme.palette.primary.main}}/> <span>{this.state.student.sNumber}</span>
+                    </div>
+                  </Grid>
+
+                  <Grid item sm={6}>
+                    <div className={classnames(globalStyles.flexRow, globalStyles.flexRowWithIcon)}>
+                      <EmailIcon style={{color: this.props.theme.palette.primary.main}}/> <span>{this.state.student.email}</span>
+                    </div>
+                  </Grid>
+                </Grid>
+
+              </CardContent>
+            </Card>
+          </div>
+
+
+          <div className={styles.section}>
+            <div className={globalStyles.sectionTitle}>
+              <h2>Submissions</h2>
             </div>
 
-            <div className={styles.section}>
-              <div className={classnames(styles.sectionTitle, styles.sectionTitleWithButton)}>
-                <h3 className={styles.sectionTitleH}>Submissions</h3>
-                {(!this.state.isEditing)?
-                  <Button variant="lightGreen" onClick={this.toggleEditing}><IoPencilOutline size={20}/> Edit</Button>
-                  :
-                  <div className={styles.buttonGroup}>
-                    {/*<div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.handleAddParticipant}>*/}
-                    {/*  <IoAdd size={26}/>*/}
-                    {/*</div>*/}
-                    <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.toggleEditing}>
-                      <IoCloseOutline size={26}/>
-                    </div>
-                  </div>
-                }
-              </div>
-              <div className={styles.sectionContent}>
-                <Card>
-                  <Card.Body>
-                    <Card.Title>
-                      Submissions
-                    </Card.Title>
-                    {this.state.submissions.map((submission) => {
+            <TableContainer component={Card} className={classnames(styles.submissionTable, globalStyles.cardShadow)}>
+              <Table aria-label="submissions table">
+                <TableHead className={styles.tableHeader}>
+                  <TableRow>
+                    <TableCell>Name</TableCell>
+                    <TableCell align="center">Submission #</TableCell>
+                    <TableCell align="center">Is current</TableCell>
+                    <TableCell align="center">{""}</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody className={styles.tableBody}>
+                  {this.state.submissions
+                    .map((submission) => {
                       return (
-                        <Card>
-                          <Card.Body>
-                            <div className={styles.memberAssessmentHeader}>
-                              <h5>
-                                {submission.name}
-                              </h5>
-                              {(this.state.isEditing)?
-                                <Can I="edit" this={subject('Submission', (submission.grader === null)? {id: -1}:submission.grader)}>
-                                  <div className={classnames(globalStyles.iconButton, styles.dangerButton)}
-                                    onClick={() => this.deleteHandler(submission)}>
-                                    <IoTrashOutline size={26}/>
-                                  </div>
-                                </Can>
-                                :
-                                <div className={classnames(globalStyles.iconButton)}
-                                  onClick={() => store.dispatch(push(this.props.match.url.split("/").slice(0, this.props.match.url.split("/").length - 2).join("/") + "/submissions/"+ submission.id))}>
-                                  <IoArrowForward size={26}/>
-                                </div>
-                              }
-                            </div>
-
-                            <h6>id: {submission.id}</h6>
-                            {/*<h6>name: {submission.name}</h6>*/}
-                            <h6>contains current assessment: {submission.containsCurrentAssessment.toString()}</h6>
-                          </Card.Body>
-                        </Card>
+                        <TableRow key={submission.id} hover>
+                          <TableCell component="td" scope="row">
+                            <Link href="#" color="primary" onClick={(event) => {
+                              event.preventDefault();
+                              store.dispatch(push(this.props.match.url.split("/").slice(0, this.props.match.url.split("/").length - 2).join("/") + "/submissions/"+ submission.id))
+                            }}>
+                              {submission.name}
+                            </Link>
+                          </TableCell>
+                          <TableCell align="center" component="td" scope="row">
+                            {submission.id}
+                          </TableCell>
+                          <TableCell align="center" component="td" scope="row">
+                            {submission.containsCurrentAssessment &&
+                              <CheckCircleIcon style={{color: "green"}}/>
+                            }
+                          </TableCell>
+                          <TableCell align="center" component="td" scope="row">
+                            <IconButton
+                              size="medium"
+                              onClick={() => this.deleteHandler(submission)}
+                              // TODO!! disable if only one stuent in submission : disabled={submission.}
+                            >
+                              <DeleteOutlineIcon style={{color: "red"}}/>
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
                       )
                     })}
-                  </Card.Body>
-                </Card>
-              </div>
-            </div>
-
-          </Masonry>
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 }
@@ -242,4 +226,4 @@ const actionCreators = {
   setCurrentLocation
 }
 
-export default connect(mapStateToProps, actionCreators)(StudentDetails)
+export default connect(mapStateToProps, actionCreators)(withTheme(StudentDetails))

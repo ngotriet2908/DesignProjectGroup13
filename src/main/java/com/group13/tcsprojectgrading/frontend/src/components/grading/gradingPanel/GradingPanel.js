@@ -1,9 +1,7 @@
 import React, { Component } from 'react'
 import styles from '../grading.module.css'
-import {connect} from "react-redux";
 import GradeEditor from "./GradeEditor";
 import GradeViewer from "./GradeViewer";
-import Card from "react-bootstrap/Card";
 import {Can} from "../../permissions/ProjectAbility";
 import { subject } from '@casl/ability';
 
@@ -26,14 +24,4 @@ class GradingPanel extends Component {
   }
 }
 
-const mapStateToProps = state => {
-  return {
-
-  };
-};
-
-const actionCreators = {
-
-}
-
-export default connect(mapStateToProps, actionCreators)(GradingPanel)
+export default GradingPanel;

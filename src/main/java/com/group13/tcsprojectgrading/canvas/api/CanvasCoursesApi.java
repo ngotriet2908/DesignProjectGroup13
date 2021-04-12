@@ -48,6 +48,7 @@ public class CanvasCoursesApi {
                     .scheme(CanvasEndpoints.SCHEME)
                     .host(CanvasEndpoints.HOST)
                     .path(CanvasEndpoints.COURSE_URL)
+                    .queryParam("include[]", "image_url")
                     .build(courseId);
 
             return this.canvasApi.sendRequest(uri, HttpMethod.GET, authorizedClient);

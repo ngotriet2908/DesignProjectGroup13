@@ -50,9 +50,6 @@ class RubricUploadModal extends Component {
   render() {
     return(
       <Modal
-        // centered
-        // backdrop="static"
-        // size="lg"
         show={this.props.show}
         onHide={this.onClose}
         animation={false}
@@ -64,10 +61,6 @@ class RubricUploadModal extends Component {
               <IoCloseOutline size={30}/>
             </div>
           </div>
-
-          {/*<div className={globalStyles.modalDescriptionContainer}>*/}
-          {/*  <div>Upload a rubric.</div>*/}
-          {/*</div>*/}
 
           <div className={globalStyles.modalBodyContainer}>
             <Form>

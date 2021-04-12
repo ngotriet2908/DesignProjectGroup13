@@ -1,13 +1,9 @@
-import {Button, Spinner, Modal, Alert, Form} from 'react-bootstrap'
 import React, {Component} from "react";
 import {request} from "../../services/request";
-import {BASE, PROJECT, USER_COURSES} from "../../services/endpoints";
 import {connect} from "react-redux";
-import {IoCloseOutline, IoCheckboxOutline, IoSquareOutline, IoReturnUpBack, IoAddOutline} from "react-icons/io5";
-import classnames from 'classnames';
-import globalStyles from "../helpers/global.module.css";
-import {Can} from "../permissions/ProjectAbility";
-import {toast} from "react-toastify";
+import styles from "../grading/grading.module.css";
+import TextField from "@material-ui/core/TextField";
+import CustomModal from "../helpers/CustomModal";
 
 
 class CreateTemplateModal extends Component {
@@ -16,21 +12,26 @@ class CreateTemplateModal extends Component {
 
     this.state = {
       isLoaded: false,
-    }
 
-    this.formRef = React.createRef();
+      name: "",
+      subject: "",
+      body: ""
+    }
   }
 
-  onShow = () => {
-    // this.setState({
-    //   selected: this.props.currentGrader,
-    // })
+  componentDidMount() {
+    this.setState({
+      isLoaded: true
+    })
   }
 
   onClose = () => {
     this.setState({
       isLoaded: false,
-      selected: {},
+
+      name: "",
+      subject: "",
+      body: ""
     })
 
     this.props.toggleShow();
@@ -38,9 +39,9 @@ class CreateTemplateModal extends Component {
 
   onAccept = () => {
     let body = {
-      "name": this.formRef.current.formName.value,
-      "subject": this.formRef.current.formSubject.value,
-      "body": this.formRef.current.formBody.value,
+      name: this.state.name,
+      subject: this.state.subject,
+      body: this.state.body,
     }
 
     request(`/api/courses/${this.props.routeParams.courseId}/projects/${this.props.routeParams.projectId}/feedback/templates`
@@ -59,59 +60,57 @@ class CreateTemplateModal extends Component {
       })
   }
 
+  body = () => {
+    return (
+      <>
+        <TextField
+          className={styles.modalRow}
+          label="Name"
+          placeholder="Enter name"
+          variant="outlined"
+          fullWidth
+          value={this.state.name}
+          onChange={(event) => this.setState({name: event.target.value})}
+        />
+
+        <TextField
+          className={styles.modalRow}
+          label="Subject"
+          placeholder="Enter subject"
+          variant="outlined"
+          fullWidth
+          value={this.state.subject}
+          onChange={(event) => this.setState({subject: event.target.value})}
+        />
+
+        <TextField
+          className={styles.modalRow}
+          label="Body"
+          placeholder="Enter body text"
+          multiline
+          variant="outlined"
+          fullWidth
+          rows={3}
+          value={this.state.body}
+          onChange={(event) => this.setState({body: event.target.value})}
+        />
+      </>
+    )
+  }
+
+
   render() {
     return(
-      <Modal
-        centered
-        backdrop="static"
-        size="lg"
-        onShow={this.onShow}
+      <CustomModal
         show={this.props.show}
-        onHide={this.onClose}
-        animation={false}
-      >
-
-        <div className={globalStyles.modalContainer}>
-          <div className={globalStyles.modalHeaderContainer}>
-            <h2>Create template</h2>
-            <div className={classnames(globalStyles.modalHeaderContainerButton)} onClick={this.onClose}>
-              <IoCloseOutline size={30}/>
-            </div>
-          </div>
-          <div className={globalStyles.modalDescriptionContainer}>
-            <div>
-                Create an email message body template that can be used to send feedback to students.
-            </div>
-          </div>
-
-          {/* body */}
-          <div className={globalStyles.modalBodyContainer}>
-            <Form ref={this.formRef}>
-              <Form.Group controlId="formName">
-                <Form.Label>Name</Form.Label>
-                <Form.Control type="text" placeholder="Enter template name" />
-              </Form.Group>
-
-              <Form.Group controlId="formSubject">
-                <Form.Label>Subject</Form.Label>
-                <Form.Control type="text" placeholder="Enter template subject" />
-              </Form.Group>
-
-              <Form.Group controlId="formBody">
-                <Form.Label>Body</Form.Label>
-                <Form.Control as="textarea" rows={3} placeholder="Enter template body" />
-              </Form.Group>
-            </Form>
-          </div>
-
-          <div className={classnames(globalStyles.modalFooterContainer, this.props.currentGrader && globalStyles.modalFooterContainerSpaceBetween)}>
-            <div className={globalStyles.modalFooterContainerButtonGroup}>
-              <Button variant="linkLightGray" onClick={this.onClose}>Cancel</Button>
-              <Button variant="lightGreen" onClick={this.onAccept}>Save</Button>
-            </div>
-          </div>
-        </div>
-      </Modal>
+        onClose={this.props.toggleShow}
+        onShow={this.onShow}
+        onAccept={this.onAccept}
+        title={"Create template"}
+        description={"Create an email message body template that can be used to send feedback to students."}
+        body={this.body()}
+        isLoaded={this.state.isLoaded}
+      />
     )
   }
 }

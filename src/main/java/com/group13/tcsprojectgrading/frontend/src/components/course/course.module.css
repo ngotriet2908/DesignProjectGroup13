@@ -1,12 +1,12 @@
 @value primary, secondary, ternary, quaternary, quinary, ultraLightGray, primaryShade, lightGray, darkishGray, moderateGray from '../helpers/colors.css';
 
-.container {
+.screenContainer {
     display: grid;
     grid-template-columns: 47% 47%;
     column-gap: 6%;
 }
 
-.container > * {
+.screenContainer > * {
     grid-column: 1 / 2;
 }
 
@@ -17,7 +17,9 @@
 }
 
 
-
+.projectCard {
+    height: 8rem;
+}
 
 .editProjectsModalCard {
     margin-bottom: 2rem;

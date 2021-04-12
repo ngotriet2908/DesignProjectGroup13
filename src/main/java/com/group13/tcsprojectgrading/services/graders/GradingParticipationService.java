@@ -63,6 +63,14 @@ public class GradingParticipationService {
     }
 
     /*
+    Returns a list of graders of the project.
+     */
+    @Transactional(value = Transactional.TxType.MANDATORY)
+    public List<User> getProjectGradersWithSubmissionsAndRoles(Long projectId) {
+        return this.repository.getProjectUsersAndFetchSubmissions(projectId);
+    }
+
+    /*
     Removes specified graders from the project.
      */
     @Transactional(value = Transactional.TxType.MANDATORY)

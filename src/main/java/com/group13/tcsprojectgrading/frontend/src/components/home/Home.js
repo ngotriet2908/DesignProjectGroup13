@@ -7,21 +7,23 @@ import {BASE, USER_COURSES, USER_INFO, USER_TASKS} from "../../services/endpoint
 import {USER_RECENT} from "../../services/endpoints";
 import {connect} from "react-redux";
 import {saveUserSelf} from "../../redux/user/actions";
-import {Spinner} from "react-bootstrap";
-import Breadcrumbs from "../helpers/Breadcrumbs";
 import {setCurrentLocation} from "../../redux/navigation/actions";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
-import SectionContainer from "./SectionContainer";
 import CourseCard from "./CourseCard";
-import ProjectCard from "./ProjectCard";
-import HomeTaskCard from "./HomeTaskCard";
-import Button from 'react-bootstrap/Button'
-
-
 import globalStyles from '../helpers/global.module.css';
-import {IoCheckboxOutline, IoFileTrayOutline, IoCloudDownloadOutline, IoPencilOutline} from "react-icons/io5";
-import {Can} from "../permissions/CoursePageAbility";
-import ImportCourseModal from "./ImportCourseModal";
+
+import ImportCoursesModal from "./ImportCoursesModal";
+import TodoList from "./TodoList";
+import StickyHeader from "../helpers/StickyHeader";
+
+import CircularProgress from "@material-ui/core/CircularProgress";
+import Button from "@material-ui/core/Button";
+import Breadcrumbs from "../helpers/Breadcrumbs";
+import classnames from "classnames";
+import Grid from "@material-ui/core/Grid";
+import ImportExportIcon from '@material-ui/icons/ImportExport';
+import EmptyCourseCard from "./EmptyCourseCard";
+
 
 class Home extends Component {
   constructor (props) {
@@ -52,11 +54,14 @@ class Home extends Component {
     ])
       .then(async([res1, res2, res3, res4]) => {
         const user = await res1.json();
-        const courses = await res2.json();
+        let courses = await res2.json();
         const recent = await res3.json();
         const tasks = await res4.json();
 
         this.props.saveUserSelf(user);
+
+        // TODO remove
+        // courses = Array(10).fill(courses).flat()
 
         this.setState({
           recentProjects: recent,
@@ -93,65 +98,76 @@ class Home extends Component {
   render () {
     if (!this.state.isLoaded) {
       return (
-        <div className={globalStyles.container}>
-          <Spinner className={globalStyles.spinner} animation="border" role="status">
-            <span className="sr-only">Loading...</span>
-          </Spinner>
+        <div className={globalStyles.screenContainer}>
+          <CircularProgress className={globalStyles.spinner}/>
         </div>
       )
     }
 
     return (
-      <div className={globalStyles.container}>
+      <>
         <Breadcrumbs>
           <Breadcrumbs.Item active>Home</Breadcrumbs.Item>
         </Breadcrumbs>
 
-        <div className={globalStyles.titleContainer}>
-          <h1>Hi, {this.props.user && this.props.user.name}!</h1>
+        <StickyHeader title={`Hi, ${this.props.user && this.props.user.name}!`}/>
+
+        <div className={globalStyles.innerScreenContainer}>
+          {/* left column */}
+          <Grid container spacing={8}>
+            <Grid item xs={7} className={styles.leftColumn}>
+
+              <div className={classnames(globalStyles.sectionContainer)}>
+                <div className={classnames(globalStyles.sectionTitle, globalStyles.sectionTitleWithButtonSpread)}>
+
+                  <h2 className={globalStyles.sectionTitleH}>Courses</h2>
+
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={this.toggleShowImportModal}
+                    startIcon={<ImportExportIcon/>}
+                    disableElevation
+                  >
+                  Import
+                  </Button>
+                </div>
+
+                <Grid container spacing={3}>
+                  {this.state.courses.map((course, index) => (
+                    <Grid key={index} item sm={6} lg={6}>
+                      <CourseCard data={course}/>
+                    </Grid>
+                  ))}
+
+                  {this.state.courses.length === 0 &&
+                  <Grid item sm={6} lg={6}>
+                    <EmptyCourseCard
+                      action={this.toggleShowImportModal}
+                      description={"Import course"}
+                      className={styles.courseCard}
+                    />
+                  </Grid>
+                  }
+                </Grid>
+              </div>
+            </Grid>
+
+            <Grid item xs={5}>
+              <TodoList
+                data={this.state.tasks}
+              />
+            </Grid>
+          </Grid>
         </div>
 
-        <div className={styles.container}>
-          <SectionContainer
-            title={"Your courses"}
-            data={this.state.courses}
-            emptyText={"You are not participating in any course."}
-            Component={CourseCard}
-            spreadButton={true}
-            button={
-              <Button variant="lightGreen" onClick={this.toggleShowImportModal}>
-                <IoCloudDownloadOutline size={20}/> Import
-              </Button>
-            }
-            EmptyIcon={IoFileTrayOutline}
-          />
-
-          <SectionContainer
-            title={"To-Do list"}
-            data={this.state.tasks}
-            // emptyText={"Your tasks will appear here when they are assigned to you."}
-            emptyText={"Nothing to do"}
-            Component={HomeTaskCard}
-            className={styles.tasksContainer}
-            EmptyIcon={IoCheckboxOutline}
-          />
-
-          <SectionContainer
-            title={"Recent activity"}
-            data={this.state.recentProjects}
-            emptyText={"Interact with projects to see your recent activity here."}
-            Component={ProjectCard}
-            EmptyIcon={IoFileTrayOutline}
-          />
-        </div>
-
-        <ImportCourseModal
+        <ImportCoursesModal
           show={this.state.showImportModal}
           toggleShow={this.toggleShowImportModal}
           imported={this.state.courses}
           refresh={this.reloadCourses}
         />
-      </div>
+      </>
     )
   }
 }

@@ -11,6 +11,7 @@ import com.group13.tcsprojectgrading.models.rubric.RubricLinker;
 import com.group13.tcsprojectgrading.models.rubric.*;
 import com.group13.tcsprojectgrading.repositories.rubric.RubricHistoryLinkerRepository;
 import com.group13.tcsprojectgrading.repositories.rubric.RubricLinkerRepository;
+import com.group13.tcsprojectgrading.services.Json;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -75,8 +76,7 @@ public class RubricService {
             return null;
         }
 
-        ObjectMapper mapper = new ObjectMapper();
-        linker.setRubric(mapper.writeValueAsString(rubric));
+        linker.setRubric(Json.getObjectWriter().writeValueAsString(rubric));
 
         return getRubricFromLinker(this.rubricLinkerRepository.save(linker));
     }
@@ -91,8 +91,7 @@ public class RubricService {
             return null;
         }
 
-        ObjectMapper mapper = new ObjectMapper();
-        linker = new RubricLinker(rubric.getId(), mapper.writeValueAsString(rubric));
+        linker = new RubricLinker(rubric.getId(), Json.getObjectWriter().writeValueAsString(rubric));
         return getRubricFromLinker(this.rubricLinkerRepository.save(linker));
     }
 
@@ -105,8 +104,8 @@ public class RubricService {
     public String importRubric(Rubric rubric) throws JsonProcessingException {
         RubricLinker linker = rubricLinkerRepository.findById(new RubricLinker.Pk(new Project(rubric.getId()))).orElse(null);
         if (linker == null) return null;
-        ObjectMapper mapper = new ObjectMapper();
-        linker.setRubric(mapper.writeValueAsString(rubric));
+
+        linker.setRubric(Json.getObjectWriter().writeValueAsString(rubric));
         return rubricLinkerRepository.save(linker).getRubric();
     }
 
@@ -153,8 +152,8 @@ public class RubricService {
 //            throw new NullPointerException("null linker")
             linker = new RubricHistoryLinker(history.getId());
         };
-        ObjectMapper mapper = new ObjectMapper();
-        linker.setRubricHistory(mapper.writeValueAsString(history));
+
+        linker.setRubricHistory(Json.getObjectWriter().writeValueAsString(history));
         rubricHistoryLinkerRepository.save(linker);
     }
 
@@ -241,7 +240,6 @@ public class RubricService {
                 updateArray.add(update);
                 JsonPatch.applyInPlace(updateArray, rubricJson);
             }
-
         }
 
         return objectMapper.treeToValue(rubricJson, Rubric.class);

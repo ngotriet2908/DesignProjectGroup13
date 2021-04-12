@@ -1,17 +1,20 @@
 import React, {Component} from "react";
-import {IoCheckboxOutline, IoCloseOutline, IoSquareOutline} from "react-icons/io5";
 import classnames from "classnames";
 import {request} from "../../services/request";
 import {BASE, PROJECT, USER_COURSES} from "../../services/endpoints";
-import {isTeacher} from "../permissions/functions";
 import globalStyles from '../helpers/global.module.css';
-import Modal from "react-bootstrap/Modal";
-import Spinner from "react-bootstrap/Spinner";
-import {IoCheckmarkSharp} from "react-icons/io5";
-import Button from "react-bootstrap/Button";
-import {colorToStyles} from "../submissionDetails/labels/LabelRow";
-import {setCurrentLocation} from "../../redux/navigation/actions";
 import {connect} from "react-redux";
+import CustomModal from "../helpers/CustomModal";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemAvatar from "@material-ui/core/ListItemAvatar";
+import Avatar from "@material-ui/core/Avatar";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import {IconButton} from "@material-ui/core";
+import CheckCircleIcon from "@material-ui/icons/CheckCircle";
+import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
+import List from "@material-ui/core/List";
+import withTheme from "@material-ui/core/styles/withTheme";
 
 
 class GradersModal extends Component {
@@ -32,7 +35,7 @@ class GradersModal extends Component {
 
   fetchGraders = () => {
     Promise.all([
-      request(`/api/courses/${this.props.routeParams.courseId}/graders`)
+      request(`/api/courses/${this.props.routeParams.courseId}/graders?ta=true`)
     ])
       .then(async([res1]) => {
         const graders = await res1.json();
@@ -40,10 +43,6 @@ class GradersModal extends Component {
         let selected = graders.filter(grader => {
           return this.props.currentGraders.find(currentGrader => {return currentGrader.id === grader.id})
         })
-
-        // let selected = labels.filter(label => {
-        //   return this.props.currentLabels.find(currentLabel => {return currentLabel.id === label.id})
-        // })
 
         // load submission
         this.setState({
@@ -110,79 +109,68 @@ class GradersModal extends Component {
     }
   }
 
+  body = () => {
+    return (
+      <>
+        {this.state.graders.length === 0 &&
+        <div className={classnames(globalStyles.modalBodyContainerRow, globalStyles.modalBodyContainerRowEmpty)}>
+          No TAs participating in this project
+        </div>
+        }
+
+        <List>
+          {this.state.graders.map(grader => {
+            let isSelected = this.state.selected.find(selectedGrader => {
+              return selectedGrader.id === grader.id;
+            })
+
+            let isUser = this.props.user.id === grader.id;
+
+            return(
+              <ListItem key={grader.id} disabled={isUser}>
+                <ListItemAvatar>
+                  <Avatar
+                    alt={grader.name}
+                    src={grader.avatar.includes("avatar-50") ? "" : grader.avatar}
+                  />
+                </ListItemAvatar>
+
+                <ListItemText
+                  primary={
+                    <span>{grader.name} {isUser && " (you)"}</span>
+                  }
+                />
+
+                <ListItemSecondaryAction>
+                  <IconButton edge="end" aria-label="delete" onClick={() => this.handleGraderClick(grader, isSelected, isUser)}>
+                    {isSelected ?
+                      <CheckCircleIcon style={{color: this.props.theme.palette.success.main}}/>
+                      :
+                      <RadioButtonUncheckedIcon/>
+                    }
+                  </IconButton>
+                </ListItemSecondaryAction>
+              </ListItem>
+            )
+          })}
+        </List>
+      </>
+    )
+  }
+
   render() {
     return(
-      <Modal
-        centered
-        backdrop="static"
-        size="lg"
-        onShow={this.fetchGraders}
+
+      <CustomModal
         show={this.props.show}
-        onHide={this.onClose}
-        animation={false}
-      >
-        <div className={globalStyles.modalContainer}>
-          <div className={globalStyles.modalHeaderContainer}>
-            <h2>Graders</h2>
-            <div className={classnames(globalStyles.modalHeaderContainerButton)} onClick={this.onClose}>
-              <IoCloseOutline size={30}/>
-            </div>
-          </div>
-
-          <div className={globalStyles.modalDescriptionContainer}>
-            <div>Select people responsible for grading. All assigned submissions of the removed graders will be moved to the 'unassigned' list.</div>
-          </div>
-
-          {!this.state.isLoaded ?
-            <div className={globalStyles.modalSpinnerContainer}>
-              <Spinner className={globalStyles.modalSpinner} animation="border" role="status">
-                <span className="sr-only">Loading...</span>
-              </Spinner>
-            </div>
-            :
-          //body
-            <div className={globalStyles.modalBodyContainer}>
-
-              {this.state.graders.length === 0 &&
-              <div className={classnames(globalStyles.modalBodyContainerRow, globalStyles.modalBodyContainerRowEmpty)}>
-                No graders available in this project
-              </div>
-              }
-
-              {this.state.graders.map(grader => {
-                let isSelected = this.state.selected.find(selectedGrader => {
-                  return selectedGrader.id === grader.id;
-                })
-
-                let isUser = this.props.user.id === grader.id;
-
-                return(
-                  <div className={classnames(globalStyles.modalBodyContainerRow,
-                    isSelected && globalStyles.modalBodyContainerRowActive,
-                    isUser && globalStyles.modalBodyContainerRowActiveDisabled)
-                  } key={grader.id}
-                  onClick={() => this.handleGraderClick(grader, isSelected, isUser)}>
-                    {isSelected ?
-                      <IoCheckboxOutline size={16}/>
-                      :
-                      <IoSquareOutline size={16}/>
-                    }
-                    <span>{grader.name}</span>
-                  </div>
-                )
-              })}
-
-            </div>
-          }
-
-          <div className={classnames(globalStyles.modalFooterContainer)}>
-            <div className={globalStyles.modalFooterContainerButtonGroup}>
-              <Button variant="linkLightGray" onClick={this.onClose}>Cancel</Button>
-              <Button variant="lightGreen" onClick={this.onAccept}>Save</Button>
-            </div>
-          </div>
-        </div>
-      </Modal>
+        onClose={this.props.toggleShow}
+        onShow={this.fetchGraders}
+        onAccept={this.onAccept}
+        title={"Graders"}
+        description={"Select people responsible for grading. All assigned submissions of the removed graders will be moved to the 'unassigned' list."}
+        body={this.body()}
+        isLoaded={this.state.isLoaded}
+      />
     )
   }
 }
@@ -197,4 +185,4 @@ const mapStateToProps = state => {
   };
 };
 
-export default connect(mapStateToProps, actionCreators)(GradersModal)
+export default connect(mapStateToProps, actionCreators)(withTheme(GradersModal))

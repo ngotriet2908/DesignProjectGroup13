@@ -82,9 +82,30 @@ public class ProjectController {
         }
     }
 
-    @RequestMapping(value = "/{projectId}/participants", method = RequestMethod.GET, produces = "application/json")
+//    @RequestMapping(value = "/{projectId}/students", method = RequestMethod.GET, produces = "application/json")
+//    @ResponseBody
+//    protected List<CourseParticipation> getProjectStudents(@PathVariable Long courseId, @PathVariable Long projectId, Principal principal) throws JsonProcessingException, ParseException {
+//
+//        List<PrivilegeEnum> privileges = this.gradingParticipationService
+//                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
+//        if (!(privileges != null && privileges.contains(PROJECT_READ))) {
+//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+//        }
+//
+//        return this.projectService.getProjectParticipantsWithSubmissions(courseId, projectId);
+//    }
+
+    @RequestMapping(
+            value = "/{projectId}/students",
+            method = RequestMethod.GET,
+            produces = "application/json"
+    )
     @ResponseBody
-    protected List<CourseParticipation> getProjectParticipants(@PathVariable Long courseId, @PathVariable Long projectId, Principal principal) throws JsonProcessingException, ParseException {
+    protected ResponseEntity<?> getProjectStudentsP(
+            @PathVariable Long courseId,
+            @PathVariable Long projectId,
+            Principal principal,
+            @RequestParam(name = "submissions", required = false) String includeSubmissions) {
 
         List<PrivilegeEnum> privileges = this.gradingParticipationService
                 .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
@@ -92,31 +113,24 @@ public class ProjectController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
         }
 
-        return this.projectService.getProjectParticipantsWithSubmissions(courseId, projectId);
-    }
-
-    @RequestMapping(value = "/{projectId}/participants/students", method = RequestMethod.GET, produces = "application/json")
-    @ResponseBody
-    protected List<User> getProjectStudents(@PathVariable Long courseId, @PathVariable Long projectId, Principal principal) throws JsonProcessingException, ParseException {
-
-        List<PrivilegeEnum> privileges = this.gradingParticipationService
-                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
-        if (!(privileges != null && privileges.contains(PROJECT_READ))) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        if (includeSubmissions != null && includeSubmissions.equals("true")) {
+            List<CourseParticipation> students = this.projectService.getProjectParticipantsWithSubmissions(courseId, projectId);
+            return new ResponseEntity<>(students, HttpStatus.OK);
+        } else {
+            List<User> students = this.courseService
+                    .getCourseStudents(courseId)
+                    .stream()
+                    .map(participation -> participation.getId().getUser())
+                    .collect(Collectors.toList());
+            return new ResponseEntity<>(students, HttpStatus.OK);
         }
-
-        return this.courseService
-                .getCourseStudents(courseId)
-                .stream()
-                .map(participation -> participation.getId().getUser())
-                .collect(Collectors.toList());
     }
 
-    @RequestMapping(value = "/{projectId}/participants/{participantId}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/{projectId}/students/{studentId}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     protected CourseParticipation getProjectParticipant(@PathVariable Long courseId,
                                                         @PathVariable Long projectId,
-                                                        @PathVariable Long participantId,
+                                                        @PathVariable Long studentId,
                                                         Principal principal) throws JsonProcessingException, ParseException {
 
         List<PrivilegeEnum> privileges = this.gradingParticipationService
@@ -125,7 +139,7 @@ public class ProjectController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
         }
 
-        return this.projectService.getProjectParticipant(courseId, projectId, participantId);
+        return this.projectService.getProjectStudent(courseId, projectId, studentId);
     }
 
     /*
@@ -232,53 +246,6 @@ public class ProjectController {
         return this.projectService.saveProjectLabel(label, projectId);
     }
 
-
-//    @PostMapping(value = "/{projectId}/feedback")
-//    @ResponseBody
-//    protected void sendFeedback(@PathVariable Long courseId,
-//                                @PathVariable Long projectId,
-//                                @RequestBody ObjectNode feedback,
-//                                Principal principal) {
-//        Project project = projectService.getProject(projectId);
-//        if (project == null) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.NOT_FOUND, "entity not found"
-//            );
-//        }
-//
-//        List<PrivilegeEnum> privileges = this.gradingParticipationService
-//                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
-//        if (!(privileges != null && privileges.contains(FEEDBACK_SEND))) {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
-//        }
-//
-//        long id = feedback.get("id").asLong();
-//        boolean isGroup = feedback.get("isGroup").asBoolean();
-//        String body = feedback.get("body").asText();
-//        String subject = feedback.get("subject").asText();
-//
-//        this.canvasApi.getCanvasUsersApi().sendMessageWithId(
-//                (!isGroup)? id: null,
-//                (isGroup)? id: null,
-//                subject,
-//                body
-//        );
-//    }
-
-//    @PostMapping(value = "/{projectId}/feedbackPdf")
-//    @ResponseBody
-//    protected ResponseEntity<byte[]> sendFeedbackPdf(@PathVariable Long courseId,
-//                                                     @PathVariable Long projectId,
-//                                                     @RequestBody ObjectNode feedback,
-//                                                     Principal principal) throws IOException, ParseException {
-//        List<PrivilegeEnum> privileges = securityService
-//                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), courseId, projectId);
-//        if (!(privileges != null && privileges.contains(FEEDBACK_SEND))) {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
-//        }
-////        return projectService.sendFeedbackPdf(courseId, projectId, feedback);
-//    }
-
     @GetMapping(
             value = "/{projectId}/downloadRubric",
             produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
@@ -297,32 +264,6 @@ public class ProjectController {
 
         return projectService.downloadRubric(courseId, projectId);
     }
-
-//    @PostMapping(value = "/{projectId}/feedbackEmail")
-//    @ResponseBody
-//    protected ResponseEntity<?> sendFeedbackEmail(@PathVariable Long courseId,
-//                                        @PathVariable Long projectId,
-//                                        @RequestBody ObjectNode feedback,
-//                                        Principal principal) throws IOException, ParseException, GeneralSecurityException, MessagingException {
-//
-//        List<PrivilegeEnum> privileges = securityService
-//                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), courseId, projectId);
-//        if (!(privileges != null && privileges.contains(FEEDBACK_SEND))) {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
-//        }
-//
-//        String id = feedback.get("id").asText();
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        JsonNode jsonNode = objectMapper.readTree(this.canvasApi.getCanvasUsersApi().getAccountWithId(id));
-//        if (projectService.sendFeedbackEmail(courseId, projectId,
-//                feedback, Long.valueOf(principal.getName()), flow,
-//                jsonNode.get("primary_email").asText()
-//        )) {
-//            return ResponseEntity.ok().build();
-//        } else {
-//            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Cannot send email");
-//        }
-//    }
 
     @GetMapping(value = "/{projectId}/feedback/templates")
     @ResponseBody

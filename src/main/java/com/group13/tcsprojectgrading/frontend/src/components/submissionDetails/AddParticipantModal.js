@@ -1,12 +1,15 @@
-import {Button, Modal, Form, InputGroup, FormControl, Card, Alert, ListGroup} from 'react-bootstrap'
 import React, {Component} from "react";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
 import globalStyles from "../helpers/global.module.css";
 import classnames from "classnames";
-import {IoCheckboxOutline, IoCloseOutline, IoSquareOutline} from "react-icons/io5";
-import Spinner from "react-bootstrap/Spinner";
 import styles from "./submissionDetails.module.css";
+import CustomModal from "../helpers/CustomModal";
+import FormControl from "@material-ui/core/FormControl";
+import InputLabel from "@material-ui/core/InputLabel";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
+
 
 class AddParticipantModal extends Component {
   constructor(props) {
@@ -14,9 +17,11 @@ class AddParticipantModal extends Component {
 
     this.state = {
       isLoaded: false,
-    }
+      students: [],
 
-    this.formRef = React.createRef();
+      selectedStudent: "",
+      selectedAssessment: "",
+    }
   }
 
   searchArray(students, student) {
@@ -36,7 +41,7 @@ class AddParticipantModal extends Component {
   }
 
   fetchStudents = () => {
-    request(`${BASE}courses/${this.props.routeParams.courseId}/projects/${this.props.routeParams.projectId}/participants/students`)
+    request(`${BASE}courses/${this.props.routeParams.courseId}/projects/${this.props.routeParams.projectId}/students`)
       .then(async response => {
         let data = await response.json();
 
@@ -62,13 +67,13 @@ class AddParticipantModal extends Component {
   }
 
   onAccept = () => {
-    let studentId = this.formRef.current.studentSelector.value
-
-    if (studentId === "null") {
+    if (this.state.selectedStudent == null || this.state.selectedAssessment == null
+    || this.state.selectedStudent === "" || this.state.selectedStudent === "") {
       return;
     }
 
-    let assessmentId = this.formRef.current.assessmentSelector.value
+    let studentId = this.state.selectedStudent;
+    let assessmentId = this.state.selectedAssessment;
 
     request(`${BASE}courses/${this.props.routeParams.courseId}/projects/${this.props.routeParams.projectId}/submissions/${this.props.routeParams.submissionId}/addParticipant/${studentId}/${assessmentId}`,
       "POST")
@@ -90,84 +95,86 @@ class AddParticipantModal extends Component {
       });
   }
 
+  body = () => {
+    return(
+      <>
+        <FormControl
+          variant="outlined"
+          className={styles.modalRow}
+          fullWidth
+        >
+          <InputLabel>Student</InputLabel>
+          <Select
+            labelId="select student"
+            id="select student"
+            value={this.state.selectedStudent}
+            onChange={event => this.setState({
+              selectedStudent: event.target.value
+            })}
+            label="Student"
+          >
+            <MenuItem value="">
+              <em>None</em>
+            </MenuItem>
+            {this.state.students.map(student => {
+              return(
+                <MenuItem
+                  key={student.id}
+                  value={student.id}
+                >
+                  {student.name}
+                </MenuItem>
+              )
+            })}
+          </Select>
+        </FormControl>
+
+        <FormControl
+          variant="outlined"
+          className={styles.modalRow}
+          fullWidth
+        >
+          <InputLabel>Grading sheet</InputLabel>
+          <Select
+            labelId="select assessment"
+            id="select assessment"
+            value={this.state.selectedAssessment}
+            onChange={event => this.setState({
+              selectedAssessment: event.target.value
+            })}
+            label="Grading sheet"
+          >
+            <MenuItem value="">
+              <em>None</em>
+            </MenuItem>
+            {this.props.currentAssessments.map(assessment => {
+              return(
+                <MenuItem
+                  key={assessment.id}
+                  value={assessment.id}
+                >
+                  Grading sheet #{assessment.id}
+                </MenuItem>
+              )
+            })}
+          </Select>
+        </FormControl>
+      </>
+    )
+  }
+
   render() {
     return(
-      <Modal
-        centered
-        backdrop="static"
-        size="lg"
-        onShow={this.fetchStudents}
+      <CustomModal
         show={this.props.show}
-        onHide={this.onClose}
-        animation={false}
-      >
-        <div className={globalStyles.modalContainer}>
-          <div className={globalStyles.modalHeaderContainer}>
-            <h2>Add student</h2>
-            <div className={classnames(globalStyles.modalHeaderContainerButton)} onClick={this.onClose}>
-              <IoCloseOutline size={30}/>
-            </div>
-          </div>
-
-          <div className={globalStyles.modalDescriptionContainer}>
-            <div>Manually associate a student with a submission.</div>
-          </div>
-
-          {!this.state.isLoaded ?
-            <div className={globalStyles.modalSpinnerContainer}>
-              <Spinner className={globalStyles.modalSpinner} animation="border" role="status">
-                <span className="sr-only">Loading...</span>
-              </Spinner>
-            </div>
-            :
-            //body
-            <div className={globalStyles.modalBodyContainer}>
-              <Form ref={this.formRef} className={styles.gradeEditorContentContainer}>
-                <Form.Group controlId="studentSelector" className={styles.gradeEditorCardItem}>
-                  <Form.Label>Select student</Form.Label>
-                  <Form.Control as="select">
-                    <option value={"null"}>None</option>
-                    {this.state.students.map((student) => {
-                      return (
-                        <option
-                          value={student.id}
-                          key={student.id}
-                        >
-                          {student.name}
-                        </option>
-                      )
-                    })}
-                  </Form.Control>
-                </Form.Group>
-
-                <Form.Group controlId="assessmentSelector" className={styles.gradeEditorCardItem}>
-                  <Form.Label>Select assessment</Form.Label>
-                  <Form.Control as="select">
-                    {this.props.currentAssessments.map((assessment) => {
-                      return (
-                        <option
-                          value={assessment.id}
-                          key={assessment.id}
-                        >
-                          {assessment.id}
-                        </option>
-                      )
-                    })}
-                  </Form.Control>
-                </Form.Group>
-
-              </Form>
-            </div>
-          }
-
-          <div className={classnames(globalStyles.modalFooterContainer)}>
-            <div className={globalStyles.modalFooterContainerButtonGroup}>
-              <Button variant="linkLightGray" onClick={this.onClose}>Cancel</Button>
-              <Button variant="lightGreen" onClick={this.onAccept}>Save</Button>
-            </div>
-          </div>
-        </div>
-      </Modal>
+        onClose={this.props.toggleShow}
+        onShow={this.fetchStudents}
+        onAccept={this.onAccept}
+        title={"Add student"}
+        description={"Link a student to the submission"}
+        body={this.body()}
+        isLoaded={this.state.isLoaded}
+      />
     )
   }
 }

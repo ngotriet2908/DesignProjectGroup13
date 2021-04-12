@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import styles from '../grading.module.css'
 import {connect} from "react-redux";
 import RubricOutline from "./RubricOutline";
-import Card from "react-bootstrap/Card";
 import RubricViewer from "./RubricViewer";
 import {
   addBlock, addCriterion,
@@ -14,6 +13,15 @@ import {
   setEditingRubric,
   setSelectedElement
 } from "../../../redux/rubric/actions";
+import Card from "@material-ui/core/Card";
+import classnames from "classnames";
+import globalStyles from "../../helpers/global.module.css";
+import CardContent from "@material-ui/core/CardContent";
+import {isCriterion} from "../../rubric/helpers";
+import KeyboardArrowLeftIcon from '@material-ui/icons/KeyboardArrowLeft';
+import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
+import {IconButton} from "@material-ui/core";
+import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace';
 
 
 class RubricPanel extends Component {
@@ -33,56 +41,95 @@ class RubricPanel extends Component {
 
   handlePrevCriterion = (id) => {
     let nextId = -1
-    console.log(id)
+
     this.props.rubricCriteria.forEach((criterion, i) => {
       if (criterion.id === id) {
         nextId = i - 1
       }
     })
+
     if (nextId >= 0) {
-      console.log("next: " + this.props.rubricCriteria[nextId].id)
       this.props.setSelectedElement(this.props.rubricCriteria[nextId].id);
-      // this.props.toggleOutlineHidden();
     }
   }
 
   handleNextCriterion = (id) => {
+    if (id === this.props.rubric.id) {
+      if (!this.outlineHidden) {
+        this.toggleOutlineHidden()
+      }
+
+      this.props.setSelectedElement(this.props.rubricCriteria[0].id);
+      return;
+    }
+
     let nextId = -1
-    console.log(id)
+
     this.props.rubricCriteria.forEach((criterion, i) => {
       if (criterion.id === id) {
         nextId = i + 1
       }
     })
+
     if (nextId >= 0 && nextId < this.props.rubricCriteria.length) {
-      console.log("next: " + this.props.rubricCriteria[nextId].id)
       this.props.setSelectedElement(this.props.rubricCriteria[nextId].id);
-      // this.props.toggleOutlineHidden();
     }
   }
 
   render () {
     return (
       <div className={styles.rubricPanelContainer}>
-        <Card className={styles.panelCard}>
-          <Card.Body className={styles.gradeViewerBody}>
+        <Card className={classnames(styles.panelCard, globalStyles.cardShadow)}>
+          <CardContent className={styles.gradeViewerBody}>
             <div className={styles.gradingCardTitle}>
-              <h4>Rubric</h4>
+              {!this.state.isOutlineHidden ?
+                <h4>Rubric</h4>
+                :
+                <IconButton
+                  onClick={() => this.toggleOutlineHidden()}
+                >
+                  <KeyboardBackspaceIcon/>
+                </IconButton>
+              }
+
+              <div className={styles.buttonGroup}>
+                <IconButton
+                  onClick={() => this.handlePrevCriterion(this.props.selectedElement)}
+                  disabled={
+                    this.props.selectedElement == null ||
+                    this.props.rubricCriteria.length === 0 ||
+                    this.props.rubricCriteria[0].id === this.props.selectedElement ||
+                    this.props.selectedElement === this.props.rubric.id
+                  }
+                >
+                  <KeyboardArrowLeftIcon/>
+                </IconButton>
+
+                <IconButton
+                  onClick={() => this.handleNextCriterion(this.props.selectedElement)}
+                  disabled={
+                    this.props.selectedElement == null ||
+                    this.props.rubricCriteria.length === 0 ||
+                    this.props.rubricCriteria[this.props.rubricCriteria.length - 1].id === this.props.selectedElement
+                  }
+                >
+                  <KeyboardArrowRightIcon/>
+                </IconButton>
+              </div>
             </div>
+
             <div className={styles.rubricPanelInnerContainer}>
-              {/*{!this.state.isOutlineHidden ?*/}
-              <RubricOutline rubricCriteria={this.props.rubricCriteria} outlineHidden={this.state.isOutlineHidden} toggleOutlineHidden={this.toggleOutlineHidden}/>
-              {/*:*/}
-              <RubricViewer rubricCriteria={this.props.rubricCriteria}
-                            firstCritId={(this.props.rubricCriteria.length === 0)? "null" : this.props.rubricCriteria[0].id}
-                            lastCritId={(this.props.rubricCriteria.length === 0)? "null" : this.props.rubricCriteria[this.props.rubricCriteria.length - 1].id}
-                            handlePrevCriterion = {this.handlePrevCriterion}
-                            handleNextCriterion = {this.handleNextCriterion}
-                            outlineHidden={this.state.isOutlineHidden}
-                            toggleOutlineHidden={this.toggleOutlineHidden}/>
-              {/*}*/}
+              <RubricOutline
+                outlineHidden={this.state.isOutlineHidden}
+                toggleOutlineHidden={this.toggleOutlineHidden}
+              />
+
+              <RubricViewer
+                outlineHidden={this.state.isOutlineHidden}
+                toggleOutlineHidden={this.toggleOutlineHidden}
+              />
             </div>
-          </Card.Body>
+          </CardContent>
         </Card>
       </div>
     )

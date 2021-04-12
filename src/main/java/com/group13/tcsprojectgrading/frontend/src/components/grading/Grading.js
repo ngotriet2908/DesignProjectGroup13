@@ -3,7 +3,6 @@ import styles from './grading.module.css'
 import ControlBar from "./controlBar/ControlBar";
 import {saveRubric, setSelectedElement} from "../../redux/rubric/actions";
 import {connect} from "react-redux";
-import {Spinner} from "react-bootstrap";
 
 import globalStyles from '../helpers/global.module.css';
 import {createAssessment} from "../../redux/rubric/functions";
@@ -16,6 +15,9 @@ import {Can, ability, updateAbility} from "../permissions/ProjectAbility";
 import RubricPanel from "./rubricPanel/RubricPanel";
 import GradingPanel from "./gradingPanel/GradingPanel";
 import RightsidePanel from "./rightsidePanel/RightsidePanel";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import Grid from "@material-ui/core/Grid";
+import classnames from 'classnames';
 
 
 class Grading extends Component {
@@ -74,17 +76,9 @@ class Grading extends Component {
         if (project.privileges !== null) {
           updateAbility(ability, project.privileges, this.props.user)
           console.log(ability)
-          // console.log(ability.can('view',"AdminToolbar"))
-          // console.log(ability.can('read',"Submissions"))
         } else {
           console.log("No privileges found.")
         }
-        // let user = submission.grader;
-        // if (user !== null && user.privileges !== null) {
-        //   updateAbility(ability, user.privileges, user)
-        // } else {
-        //   console.log("No grader or privileges found.")
-        // }
 
         // initialise (empty) state for input fields
         this.props.saveTempAssessment(createAssessment(rubric));
@@ -110,11 +104,9 @@ class Grading extends Component {
 
   render () {
     if (!this.state.isLoaded) {
-      return(
-        <div className={globalStyles.container}>
-          <Spinner className={globalStyles.spinner} animation="border" role="status">
-            <span className="sr-only">Loading...</span>
-          </Spinner>
+      return (
+        <div className={globalStyles.screenContainer}>
+          <CircularProgress className={globalStyles.spinner}/>
         </div>
       )
     }
@@ -123,18 +115,19 @@ class Grading extends Component {
       <>
         <ControlBar
           submission={this.state.submission}
-          // flagSubmission={null}
-          // addFlag={this.handleAddFlag}
-          // removeFlag={this.handleRemoveFlag}
-          // createFlagHandler={this.createFlagHandler}
-          // removeFlagHandler={this.removeFlagHandler}
         />
 
-        <div className={styles.container}>
-          <RubricPanel match={this.props.match} rubricCriteria={this.state.rubricCriteria}/>
-          <GradingPanel submission={this.state.submission} match={this.props.match}/>
-          <RightsidePanel user={this.props.user} submission={this.state.submission} routeParams={this.props.match.params}/>
-        </div>
+        <Grid container className={classnames(globalStyles.innerScreenContainer, styles.screenContainer)}>
+          <Grid item xs={4}>
+            <RubricPanel match={this.props.match} rubricCriteria={this.state.rubricCriteria}/>
+          </Grid>
+          <Grid item xs={4}>
+            <GradingPanel submission={this.state.submission} match={this.props.match}/>
+          </Grid>
+          <Grid item xs={4}>
+            <RightsidePanel user={this.props.user} submission={this.state.submission} routeParams={this.props.match.params}/>
+          </Grid>
+        </Grid>
 
       </>
     )

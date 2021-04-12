@@ -18,7 +18,7 @@ module.exports = {
         use: ['source-map-loader']
       },
       {
-        test: /\.(mjs|js|jsx)?$/,
+        test: /\.(mjs|js|jsx)$/,
         exclude: /(node_modules|bower_components)/,
         use: [{
           loader: 'babel-loader',
@@ -34,15 +34,12 @@ module.exports = {
         ]
       },
       {
-        test: /\.(sass|css|scss)$/,
-        // exclude: /node_modules/,
-        include: [
-          path.resolve(__dirname, 'node_modules/react-loader-spinner/dist/loader/css/'),
-          path.resolve(__dirname, 'node_modules/@draft-js-plugins/static-toolbar/lib/'),
-          path.resolve(__dirname, 'node_modules/draft-js/dist/'),
-          path.resolve(__dirname, 'node_modules/@draft-js-plugins/hashtag/lib/'),
-          path.resolve(__dirname, 'src/'),
-        ],
+        test: /\.css$/,
+        exclude: /\.module\.css/,
+        use: [ 'style-loader', 'css-loader' ]
+      },
+      {
+        test: /\.(module.css|sass|scss)$/,
         use: [
           'style-loader',
           {

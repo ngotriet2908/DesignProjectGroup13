@@ -4,26 +4,28 @@ import {BASE} from "../../services/endpoints";
 
 import styles from "./course.module.css";
 
-import Spinner from "react-bootstrap/Spinner";
 import store from "../../redux/store";
 import {push} from "connected-react-router";
 import {URL_PREFIX} from "../../services/config";
 import EditProjectsModal from "./ImportProjectsModal";
 import Breadcrumbs from "../helpers/Breadcrumbs";
-import ProjectCard from "../home/ProjectCard";
-import {IoCloudDownloadOutline, IoSyncOutline} from "react-icons/io5";
-import StatsCard from "../home/StatsCard";
+import ProjectCard from "./ProjectCard";
 import {Can, ability, updateAbilityCoursePage} from "../permissions/CoursePageAbility";
 import {connect} from "react-redux";
 import {deleteCurrentCourse, saveCurrentCourse} from "../../redux/courses/actions";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 import {setCurrentLocation} from "../../redux/navigation/actions";
-import SectionContainer from "../home/SectionContainer";
 
 import globalStyles from '../helpers/global.module.css';
-import {IoFileTrayOutline} from "react-icons/io5";
 import classnames from 'classnames';
-import {Button} from "react-bootstrap";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import StickyHeader from "../helpers/StickyHeader";
+import Button from "@material-ui/core/Button";
+import ImportExportIcon from "@material-ui/icons/ImportExport";
+
+import SyncIcon from '@material-ui/icons/Sync';
+import Grid from "@material-ui/core/Grid";
+import EmptyCourseCard from "../home/EmptyCourseCard";
 
 
 class Course extends Component {
@@ -54,10 +56,8 @@ class Course extends Component {
     ])
       .then(async([res1, res2]) => {
         const course = await res1.json();
-        // const stats = await res2.json();
 
         updateAbilityCoursePage(ability, course.role)
-        console.log(ability)
         this.props.saveCurrentCourse(course);
 
         course.projects.forEach((project, index, array) => {
@@ -141,78 +141,75 @@ class Course extends Component {
 
   render () {
     if (!this.state.isLoaded) {
-      return(
-        <div className={globalStyles.container}>
-          <Spinner className={globalStyles.spinner} animation="border" role="status">
-            <span className="sr-only">Loading...</span>
-          </Spinner>
+      return (
+        <div className={globalStyles.screenContainer}>
+          <CircularProgress className={globalStyles.spinner}/>
         </div>
       )
     }
 
     return (
-      <div className={globalStyles.container}>
-
+      <>
         <Breadcrumbs>
           <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumbs.Item>
           <Breadcrumbs.Item active>{this.state.course.name}</Breadcrumbs.Item>
         </Breadcrumbs>
 
-        <div className={classnames(globalStyles.titleContainer, styles.titleContainer, this.state.syncing && globalStyles.titleContainerIconActive)}>
-          <div className={globalStyles.titleContainerLeft}>
-            <h1>{this.state.course.name}</h1>
-            <span>{(new Date(this.state.course.startAt)).getFullYear()}</span>
-          </div>
+        <StickyHeader
+          title={this.state.course.name}
+          buttons={
+            <Can I="sync" a="Course">
+              <Button
+                variant="contained"
+                color="primary"
+                className={globalStyles.titleActiveButton}
+                onClick={this.syncCourseHandler}
+                startIcon={<SyncIcon/>}
+                disableElevation
+              >
+                Sync
+              </Button>
+            </Can>
+          }
+        />
 
-          <Can I="sync" a="Course">
-            <Button variant="lightGreen" className={globalStyles.titleActiveButton} onClick={this.syncCourseHandler}>
-              <IoSyncOutline size={20}/> Sync
-            </Button>
-          </Can>
-        </div>
+        <div className={globalStyles.innerScreenContainer}>
+          {/* projects */}
+          <div className={classnames(globalStyles.sectionContainer)}>
+            <div className={classnames(globalStyles.sectionTitle, globalStyles.sectionTitleWithButtonSpread)}>
+              <h2 className={globalStyles.sectionTitleH}>Projects</h2>
 
-        <div className={styles.container}>
-          <SectionContainer
-            className={styles.section}
-            title={"Course projects"}
-            data={
-              this.state.course.projects
-            }
-            emptyText={"No projects imported in this course. Click on the button to import course projects"}
-            Component={ProjectCard}
-            spreadButton={true}
-            button={
               <Can I="write" a="Projects">
-                <Button variant="lightGreen" onClick={this.toggleShowModal}>
-                  <IoCloudDownloadOutline size={20}/> Import
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={this.toggleShowModal}
+                  startIcon={<ImportExportIcon/>}
+                  disableElevation
+                >
+                Import
                 </Button>
               </Can>
-            }
-            EmptyIcon={IoFileTrayOutline}
-          />
 
-          <Can I="read" a="Statistic">
-            <div className={globalStyles.sectionContainer}>
-              <div className={[globalStyles.sectionTitle, globalStyles.sectionTitleWithButton].join(" ")}>
-                <h3 className={globalStyles.sectionTitleH}>Course statistics</h3>
-              </div>
-
-              {/*<ul className={styles.ul}>*/}
-              {/*{this.state.stats.map(stat => {*/}
-              {/*  return (*/}
-              {/*    <li className={styles.li} key={stat.title}>*/}
-              {/*      <Statistic title ={stat.title}*/}
-              {/*        type={stat.type}*/}
-              {/*        data={stat.data}*/}
-              {/*        unit={stat.unit}/>*/}
-              {/*    </li>*/}
-              {/*  );*/}
-              {/*})}*/}
-
-              <StatsCard data={this.state.stats}/>
-              {/*</ul>*/}
             </div>
-          </Can>
+
+            <Grid container spacing={3}>
+              {this.state.course.projects.map((course, index) => (
+                <Grid key={index} item sm={6} lg={4}>
+                  <ProjectCard data={course}/>
+                </Grid>
+              ))}
+              {this.state.course.projects.length === 0 &&
+              <Grid item sm={6} lg={4}>
+                <EmptyCourseCard
+                  action={this.toggleShowModal}
+                  description={"Import project"}
+                  className={styles.projectCard}
+                />
+              </Grid>
+              }
+            </Grid>
+          </div>
 
           <EditProjectsModal
             show={this.state.showModal}
@@ -222,7 +219,7 @@ class Course extends Component {
           />
 
         </div>
-      </div>
+      </>
     )
   }
 }

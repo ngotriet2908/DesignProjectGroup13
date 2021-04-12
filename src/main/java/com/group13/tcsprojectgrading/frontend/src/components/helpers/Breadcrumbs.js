@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import styles from "./breadcrumbs.module.css";
-import {IoChevronForward} from "react-icons/io5";
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 
 class Breadcrumbs extends Component {
   constructor(props) {
@@ -21,7 +21,7 @@ class Breadcrumbs extends Component {
                 {child}
                 {index !== this.props.children.length - 1 &&
               <span className={styles.breadcrumbsArrow}>
-                <IoChevronForward size={18}/>
+                <ChevronRightIcon/>
               </span>
                 }
               </div>

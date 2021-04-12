@@ -1,9 +1,11 @@
 /* light green */
-@value primary: #2a9d8f;
+/*@value primary: #2a9d8f;*/
+@value primary: #2f5d8a;
 @value primaryShade: #268d81;
 
 /* yellow */
-@value secondary: #e9c46a;
+/*@value secondary: #e9c46a;*/
+@value secondary: #822433;
 @value secondaryShade: #d7b761;
 
 /* dark green */
@@ -19,22 +21,12 @@
 @value senary: #e63946;
 @value senaryShade: #d4333f;
 
-/* light gray */
-/*@value lightGray: #f2f5fa;*/
-/*@value ultraLightGray: #eceff1;*/
-/*@value ultraLightGray: #f1f4f5;*/
+/* gray */
 @value ultraLightGray: #f7f8fb;
-
 @value pinkishGray: #efeae9;
-
 @value lightGray: #e0e1e5;
-
-/* dark gray / light black */
-/*@value darkishGray: #4c4c4c;*/
 @value darkishGray: #5b5b5b;
-
 @value moderateGray: #cacaca;
-
 
 /* just a colour picker for intellij */
 .iAmASimpleColourPickerThatIsHereOnlyForEasyColourPicking {

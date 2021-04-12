@@ -1,13 +1,19 @@
 import React, { Component } from 'react'
 
-import styles from '../grading.module.css'
+// import styles from '../grading.module.css'
+import styles from '../../rubric/rubric.module.css'
+import gradingStyles from '../grading.module.css'
 import {connect} from "react-redux";
 import {addBlock, addCriterion, deleteElement, setCurrentPath, setSelectedElement} from "../../../redux/rubric/actions";
 import {isBlock, isCriterion} from "../../rubric/helpers";
 import classnames from "classnames";
 import globalStyles from "../../helpers/global.module.css";
-import {IoChevronForwardOutline, IoCheckmarkSharp, IoPricetagOutline} from "react-icons/io5";
 import {getGrade, isGraded} from "./helpers";
+import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import GradeIcon from "@material-ui/icons/Grade";
+import CheckIcon from '@material-ui/icons/Check';
+import withTheme from "@material-ui/core/styles/withTheme";
+
 
 class RubricOutlineElement extends Component {
   constructor (props) {
@@ -23,7 +29,6 @@ class RubricOutlineElement extends Component {
   }
 
   render () {
-    // const graded = isGraded(this.props.grades, this.props.data.content.id);
     const activeGrade = getGrade(this.props.grades, this.props.data.content.id)
 
     return (
@@ -36,19 +41,22 @@ class RubricOutlineElement extends Component {
           <div className={classnames(styles.outlineElementLeft, isBlock(this.props.data.content.type) && styles.outlineElementLeftBlock)}>
 
             {isBlock(this.props.data.content.type) ?
-              <div className={classnames(styles.outlineElementIcon,
-                !this.props.collapsed && styles.outlineElementIconRotated)}>
-                <IoChevronForwardOutline size={22} onClick={this.props.onClickBlockCollapse}/>
-              </div>
+              <ChevronRightIcon
+                className={classnames(styles.outlineElementIcon,
+                  !this.props.collapsed && styles.outlineElementIconRotated)}
+                onClick={this.props.onClickBlockCollapse}
+              />
               :
               (activeGrade != null ?
-                <div className={classnames(styles.outlineElementIcon, styles.outlineElementIconGraded)}>
-                  <IoCheckmarkSharp size={22}/>
-                </div>
+                <CheckIcon
+                  className={classnames(styles.outlineElementIcon)}
+                  style={{color: this.props.theme.palette.success.main}}
+                />
                 :
-                <div className={classnames(styles.outlineElementIcon)}>
-                  <IoPricetagOutline size={22}/>
-                </div>
+                <GradeIcon
+                  className={classnames(styles.outlineElementIcon)}
+                  style={{color: this.props.theme.palette.secondary.main}}
+                />
               )
             }
 
@@ -58,7 +66,10 @@ class RubricOutlineElement extends Component {
           </div>
 
           {isCriterion(this.props.data.content.type) && activeGrade != null &&
-          <div className={classnames(styles.outlineElementGrade)}>
+          <div
+            className={classnames(gradingStyles.outlineElementGrade)}
+            style={{color: this.props.theme.palette.primary.main}}
+          >
             <div>
               {activeGrade.grade}
             </div>
@@ -88,4 +99,4 @@ const actionCreators = {
   deleteElement,
 }
 
-export default connect(mapStateToProps, actionCreators)(RubricOutlineElement)
+export default connect(mapStateToProps, actionCreators)(withTheme(RubricOutlineElement));

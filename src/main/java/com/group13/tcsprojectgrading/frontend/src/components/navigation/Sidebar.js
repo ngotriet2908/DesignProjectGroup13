@@ -1,5 +1,4 @@
 import React from "react";
-import {Nav} from "react-bootstrap";
 import styles from "./navigation.module.css"
 import store from "../../redux/store";
 import {goBack, push} from "connected-react-router";
@@ -7,44 +6,39 @@ import {URL_PREFIX} from "../../services/config";
 import {request} from "../../services/request";
 import {connect} from "react-redux";
 import {removeUserSelf} from "../../redux/user/actions";
-import {
-  IoHomeOutline,
-  IoGrid,
-  IoLogOutOutline,
-  IoMenuSharp,
-  IoBookOutline,
-  IoCreateOutline,
-  IoReturnDownBackOutline,
-  IoPencilSharp,
-  IoListOutline,
-  IoReaderOutline,
-  IoSettingsOutline,
-  IoPersonOutline,
-  IoSchool
-} from "react-icons/io5";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 import classnames from 'classnames';
+import {HOST} from "../../services/endpoints";
+import {toggleSidebarHidden} from "../../redux/navigation/actions";
+
+import MenuIcon from '@material-ui/icons/Menu';
+import MenuOpenIcon from '@material-ui/icons/MenuOpen';
+import HomeIcon from '@material-ui/icons/Home';
+import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace';
+import ImportContactsIcon from '@material-ui/icons/ImportContacts';
+import AssignmentIcon from '@material-ui/icons/Assignment';
+import SettingsIcon from '@material-ui/icons/Settings';
+import ListIcon from '@material-ui/icons/List';
+import GradeIcon from '@material-ui/icons/Grade';
+import AllInboxIcon from '@material-ui/icons/AllInbox';
+import ListAltIcon from '@material-ui/icons/ListAlt';
+import PeopleIcon from '@material-ui/icons/People';
+import CreateIcon from '@material-ui/icons/Create';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import withTheme from "@material-ui/core/styles/withTheme";
+
 
 class Sidebar extends React.Component {
   constructor (props) {
     super(props);
-
-    this.state = {
-      isHidden: true,
-    }
   }
 
   onClickHideSidebar = () => {
-    this.setState((prevState) => ({
-      isHidden: !prevState.isHidden,
-    }));
+    this.props.toggleSidebarHidden();
   }
 
   onClickLogo = () => {
     store.dispatch(push(URL_PREFIX + "/"))
-    this.setState({
-      isHidden: true,
-    })
   }
 
   onClickSignOut = () => {
@@ -60,210 +54,105 @@ class Sidebar extends React.Component {
       });
   }
 
-  tabs = () => {
-    let result;
+  createTab = (key, onClick, Icon, classNames) => {
+    // let isActive = classNames.includes(styles.sidebarBodyItemActive)
 
-    result = []
+    return(
+      <div
+        key={key}
+        className={classnames(styles.sidebarBodyItem, ...classNames)}
+        onClick={onClick}
+        // style={isActive ? {
+        //   backgroundColor: this.props.theme.palette.primary.main,
+        //   color: "white"
+        // } : {}}
+      >
+        <div className={styles.sidebarBodyItemLeft}>
+          <Icon className={styles.sidebarIcon} />
+        </div>
+        {!this.props.sidebarHidden &&
+          <span className={styles.sidebarBodyItemRight}>
+            {key}
+          </span>
+        }
+      </div>
+    )
+  }
+
+  tabs = () => {
+    let result = [];
 
     if (this.props.location !== LOCATIONS.home) {
       result.push(
-        <div key="back" className={`${styles.sidebarBodyItem}`} onClick={() => store.dispatch(goBack())}>
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoReturnDownBackOutline className={styles.sidebarIcon} size={26}/>
-          </div>
-          {!this.state.isHidden &&
-            <span className={styles.sidebarBodyItemRight}>
-                  Back
-            </span>
-          }
-        </div>
+        this.createTab("Back", () => store.dispatch(goBack()), KeyboardBackspaceIcon, [])
       )
     } else {
       result.push(
-        <div key="back" className={classnames(styles.sidebarBodyItem, styles.sidebarBodyItemHidden)} onClick={() => store.dispatch(goBack())}>
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoReturnDownBackOutline className={styles.sidebarIcon} size={26}/>
-          </div>
-          {!this.state.isHidden &&
-            <span className={styles.sidebarBodyItemRight}>
-                  Back
-            </span>
-          }
-        </div>
+        this.createTab("Back", () => store.dispatch(goBack()), KeyboardBackspaceIcon, [styles.sidebarBodyItemHidden])
       )
     }
 
     if  (this.props.location === LOCATIONS.home) {
       // home
       result.push(
-        <div key="home" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={this.onClickLogo}>
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoHomeOutline className={styles.sidebarIcon} size={26}/>
-          </div>
-          {!this.state.isHidden &&
-        <span className={styles.sidebarBodyItemRight}>
-                  Home
-        </span>
-          }
-        </div>
+        this.createTab("Home", () => this.onClickLogo(), HomeIcon, [styles.sidebarBodyItemActive])
       )
     } else {
       result.push(
-        <div key="home" className={`${styles.sidebarBodyItem}`} onClick={this.onClickLogo}>
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoHomeOutline className={styles.sidebarIcon} size={26}/>
-          </div>
-          {!this.state.isHidden &&
-          <span className={styles.sidebarBodyItemRight}>
-                  Home
-          </span>
-          }
-        </div>
+        this.createTab("Home", () => this.onClickLogo(), HomeIcon, [])
       )
     }
 
     if (this.props.location === LOCATIONS.course) {
       // course
       result.push(
-        (<div key="course" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {}}>
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoBookOutline className={styles.sidebarIcon} size={26}/>
-          </div>
-          {!this.state.isHidden &&
-          <span className={styles.sidebarBodyItemRight}>
-                    Course
-          </span>
-          }
-        </div>)
+        this.createTab("Course", () => {}, ImportContactsIcon, [styles.sidebarBodyItemActive])
       )
     } else if (this.props.location === LOCATIONS.project) {
       // project
       result.push(
-        (<div key="project" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {}}>
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoCreateOutline className={styles.sidebarIcon} size={26}/>
-          </div>
-          {!this.state.isHidden &&
-            <span className={styles.sidebarBodyItemRight}>
-                    Project
-            </span>
-          }
-        </div>)
+        this.createTab("Project", () => {}, AssignmentIcon, [styles.sidebarBodyItemActive])
       )
 
       result.push(
-        <div key="settings" className={`${styles.sidebarBodyItem}`}
-          onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.props.courseId + "/projects/" + this.props.projectId + "/settings"))}
-        >
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoSettingsOutline className={styles.sidebarIcon} size={26}/>
-          </div>
-          {!this.state.isHidden &&
-          <span className={styles.sidebarBodyItemRight}>
-                  Settings
-          </span>
-          }
-        </div>
+        this.createTab("Settings",
+          () => store.dispatch(push(URL_PREFIX + "/courses/" + this.props.courseId + "/projects/" + this.props.projectId + "/settings")),
+          SettingsIcon, [])
       )
     } else if (this.props.location === LOCATIONS.rubric) {
       // rubric
       result.push(
-        (<div key="rubric" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {}}>
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoGrid className={styles.sidebarIcon} size={26}/>
-          </div>
-          {!this.state.isHidden &&
-            <span className={styles.sidebarBodyItemRight}>
-                    Rubric
-            </span>
-          }
-        </div>)
+        this.createTab("Rubric", () => {}, ListIcon, [styles.sidebarBodyItemActive])
       )
     } else if (this.props.location === LOCATIONS.grading) {
       // grading
       result.push(
-        (<div key="grading" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
-        }}>
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoPencilSharp className={styles.sidebarIcon} size={26}/>
-          </div>
-          {!this.state.isHidden &&
-            <span className={styles.sidebarBodyItemRight}>
-                    Grading
-            </span>
-          }
-        </div>)
+        this.createTab("Grading", () => {}, GradeIcon, [styles.sidebarBodyItemActive])
       )
     } else if (this.props.location === LOCATIONS.submissions) {
       // submissions
       result.push(
-        (<div key="submissions" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
-        }}>
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoListOutline className={styles.sidebarIcon} size={26}/>
-          </div>
-          {!this.state.isHidden &&
-          <span className={styles.sidebarBodyItemRight}>
-                    Submissions
-          </span>
-          }
-        </div>)
+        this.createTab("Submissions", () => {}, AllInboxIcon, [styles.sidebarBodyItemActive])
       )
     } else if (this.props.location === LOCATIONS.submission) {
       // submission
       result.push(
-        (<div key="submission" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {
-        }}>
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoReaderOutline className={styles.sidebarIcon} size={26}/>
-          </div>
-          {!this.state.isHidden &&
-          <span className={styles.sidebarBodyItemRight}>
-                    Submission
-          </span>
-          }
-        </div>)
+        this.createTab("Submission", () => {}, ListAltIcon, [styles.sidebarBodyItemActive])
       )
     } else if (this.props.location === LOCATIONS.settings) {
+
       result.push(
-        <div key="settings" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`}
-          onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.props.courseId + "/projects/" + this.props.projectId + "/settings"))}
-        >
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoSettingsOutline className={styles.sidebarIcon} size={26}/>
-          </div>
-          {!this.state.isHidden &&
-          <span className={styles.sidebarBodyItemRight}>
-                  Settings
-          </span>
-          }
-        </div>
-      );
+        this.createTab("Settings",
+          () => store.dispatch(push(URL_PREFIX + "/courses/" + this.props.courseId + "/projects/" + this.props.projectId + "/settings")),
+          SettingsIcon, [styles.sidebarBodyItemActive])
+      )
     } else if (this.props.location === LOCATIONS.graders) {
       result.push(
-        <div key="graders" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {}}>
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoPersonOutline className={styles.sidebarIcon} size={26}/>
-          </div>
-          {!this.state.isHidden &&
-            <span className={styles.sidebarBodyItemRight}>
-                  Graders
-            </span>
-          }
-        </div>
+        this.createTab("Graders", () => {}, CreateIcon, [styles.sidebarBodyItemActive])
       )
     } else if (this.props.location === LOCATIONS.students) {
       result.push(
-        <div key="students" className={`${styles.sidebarBodyItem} ${styles.sidebarBodyItemActive}`} onClick={() => {}}>
-          <div className={styles.sidebarBodyItemLeft}>
-            <IoSchool className={styles.sidebarIcon} size={26}/>
-          </div>
-          {!this.state.isHidden &&
-          <span className={styles.sidebarBodyItemRight}>
-                  Students
-          </span>
-          }
-        </div>
+        this.createTab("Students", () => {}, PeopleIcon, [styles.sidebarBodyItemActive])
       )
     }
 
@@ -271,30 +160,25 @@ class Sidebar extends React.Component {
   }
 
   render() {
-    let className = `${styles.sidebar}`;
-    if (this.state.isHidden) {
-      className += ` ${styles.sidebarHidden}`;
-    }
-
     return (
-      <div className={className}>
-
+      <div className={classnames(styles.sidebar, this.props.sidebarHidden ? styles.sidebarHidden : styles.sidebarShown)}>
         <div className={styles.sidebarInnerContainer}>
           <div className={styles.sidebarHeader}>
-            {!this.state.isHidden &&
+            {!this.props.sidebarHidden &&
             <div className={styles.sidebarHeaderLeft}>
               <img
-                src="http://localhost:8080/img/logo.png"
+                src={HOST + "/img/logo.png"}
                 alt="logo"
-                onClick={this.onClickLogo}/>
+                onClick={this.onClickLogo}
+              />
             </div>
             }
 
             <div className={styles.sidebarHeaderButton} onClick={this.onClickHideSidebar}>
-              {this.state.isHidden ?
-                <IoMenuSharp size={26}/>
+              {!this.props.sidebarHidden ?
+                <MenuOpenIcon size={32}/>
                 :
-                <IoMenuSharp size={26}/>
+                <MenuIcon size={32}/>
               }
             </div>
           </div>
@@ -312,11 +196,13 @@ class Sidebar extends React.Component {
                 <img height="40" width="40" src={this.props.user.avatar} alt={"profile picture"}/>
                 }
               </div>
-              {!this.state.isHidden &&
+              {!this.props.sidebarHidden &&
                 <div className={styles.sidebarBodyItemRight}>
-                  {this.props.user && this.props.user.name}
+                  <span>
+                    {this.props.user && this.props.user.name}
+                  </span>
                   <div className={styles.sideBarFooterSignOutButton} onClick={this.onClickSignOut}>
-                    <IoLogOutOutline size={26}/>
+                    <ExitToAppIcon/>
                   </div>
                 </div>
               }
@@ -334,8 +220,14 @@ const mapStateToProps = state => {
     user: state.users.self,
     location: state.navigation.location,
     courseId: state.navigation.course,
-    projectId: state.navigation.project
+    projectId: state.navigation.project,
+    sidebarHidden: state.navigation.sidebarHidden,
   };
 };
 
-export default connect(mapStateToProps, {removeUser: removeUserSelf})(Sidebar)
+const actionCreators = {
+  removeUser: removeUserSelf,
+  toggleSidebarHidden
+}
+
+export default connect(mapStateToProps, actionCreators)(withTheme(Sidebar))

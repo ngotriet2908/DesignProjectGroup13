@@ -1,4 +1,4 @@
-import {SET_CURRENT_COURSE_AND_PROJECT, SET_CURRENT_LOCATION} from "../actionTypes";
+import {SET_CURRENT_COURSE_AND_PROJECT, SET_CURRENT_LOCATION, TOGGLE_SIDEBAR_HIDDEN} from "../actionTypes";
 
 export const LOCATIONS = Object.freeze(
   {
@@ -21,6 +21,7 @@ const initialState = {
   location: LOCATIONS.home,
   course: null,
   project: null,
+  sidebarHidden: true,
 };
 
 export default function(state = initialState, action) {
@@ -29,6 +30,12 @@ export default function(state = initialState, action) {
     return {
       ...state,
       location: action.payload
+    };
+  }
+  case TOGGLE_SIDEBAR_HIDDEN: {
+    return {
+      ...state,
+      sidebarHidden: !state.sidebarHidden
     };
   }
   case SET_CURRENT_COURSE_AND_PROJECT: {

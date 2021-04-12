@@ -3,11 +3,10 @@ import styles from '../grading.module.css'
 import {connect} from "react-redux";
 
 import globalStyles from '../../helpers/global.module.css';
-import Card from "react-bootstrap/Card";
-import {request} from "../../../services/request";
 
 import classnames from 'classnames';
-import {IoCheckboxOutline, IoPlayForwardOutline, IoFileTrayOutline, IoSquareOutline} from "react-icons/io5";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
 
 
 class FinalGrade extends Component {
@@ -23,7 +22,7 @@ class FinalGrade extends Component {
     return(
       <div className={styles.finalGradeContainer}>
         <Card className={styles.panelCard}>
-          <Card.Body className={styles.gradeViewerBody}>
+          <CardContent className={styles.gradeViewerBody}>
             <div className={styles.gradingCardTitle}>
               <h4>Total grade</h4>
             </div>
@@ -34,11 +33,11 @@ class FinalGrade extends Component {
               </div>
               :
               <div className={styles.gradeViewerNotGraded}>
-                <IoPlayForwardOutline size={40}/>
+                {/*<IoPlayForwardOutline size={40}/>*/}
                 <h6>Grading not finished</h6>
               </div>
             }
-          </Card.Body>
+          </CardContent>
         </Card>
       </div>
     )

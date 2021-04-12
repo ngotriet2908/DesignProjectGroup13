@@ -1,5 +1,4 @@
 import React, {Component} from "react";
-import {IoCheckboxOutline, IoCloseOutline, IoSquareOutline} from "react-icons/io5";
 import classnames from "classnames";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
@@ -92,7 +91,7 @@ class BulkModal extends Component {
           <div className={globalStyles.modalHeaderContainer}>
             <h2>Bulk assign</h2>
             <div className={classnames(globalStyles.modalHeaderContainerButton)} onClick={this.onClose}>
-              <IoCloseOutline size={30}/>
+              {/*<IoCloseOutline size={30}/>*/}
             </div>
           </div>
 

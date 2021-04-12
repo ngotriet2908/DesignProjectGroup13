@@ -1,0 +1,30 @@
+.section {
+    margin: 2rem 0 1rem 0;
+}
+
+/* table */
+.submissionTable {
+    padding: 1rem;
+}
+
+.tableHeader th {
+    background-color: rgb(244, 246, 248);
+    border: none;
+    font-weight: 500;
+    color: rgb(99, 115, 129);
+}
+
+.tableHeader th:first-child {
+    border-radius: 0.5rem 0 0 0.5rem;
+}
+.tableHeader th:last-child {
+    border-radius: 0 0.5rem 0.5rem 0;
+}
+
+.tableBody td {
+    border: none;
+}
+
+.tableAvatarColumn {
+    width: 1rem;
+}

@@ -2,8 +2,6 @@ import React, {Component} from "react";
 import styles from "./students.module.css";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
-import {Spinner, ButtonGroup, DropdownButton, Dropdown, FormControl} from "react-bootstrap";
-import StudentCard from "./StudentCard";
 import {setCurrentLocation} from "../../redux/navigation/actions";
 import {connect} from "react-redux";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
@@ -14,15 +12,36 @@ import store from "../../redux/store";
 import {push} from "connected-react-router";
 import {URL_PREFIX} from "../../services/config";
 import {ability, updateAbility} from "../permissions/ProjectAbility";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import StickyHeader from "../helpers/StickyHeader";
+import TextField from "@material-ui/core/TextField";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import SearchIcon from '@material-ui/icons/Search';
+import TableContainer from "@material-ui/core/TableContainer";
+import Table from "@material-ui/core/Table";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
+import TableCell from "@material-ui/core/TableCell";
+import TableBody from "@material-ui/core/TableBody";
+import Card from "@material-ui/core/Card";
+import Avatar from "@material-ui/core/Avatar";
+import Link from "@material-ui/core/Link";
+import TableFilter from "../helpers/TableFilter";
+
 
 class Students extends Component {
   constructor(props) {
     super(props);
+
+    this.submissionsFilterOptions = ["All", "Has submissions", "Has no submissions"];
+
     this.state = {
       participants: [],
       project: {},
       isLoaded: false,
-      filterChoice: "All",
+
+      submissionsFilterChoice: 0,
+
       searchString: "",
     }
   }
@@ -31,20 +50,20 @@ class Students extends Component {
     this.props.setCurrentLocation(LOCATIONS.submissions);
 
     Promise.all([
-      request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/participants`),
+      request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/students?submissions=true`),
       request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}`),
       request(BASE + "courses/" + this.props.match.params.courseId),
     ])
       .then(async ([res1, res2, res3]) =>  {
-        const students = await res1.json();
+        let students = await res1.json();
         const project = await res2.json();
         const course = await res3.json();
 
+        // TODO remove
+        // students = Array(10).fill(students).flat()
+
         if (project.privileges !== null) {
           updateAbility(ability, project.privileges, this.props.user)
-          console.log(ability)
-          // console.log(ability.can('view',"AdminToolbar"))
-          // console.log(ability.can('read',"Submissions"))
         } else {
           console.log("No privileges found.")
         }
@@ -68,13 +87,21 @@ class Students extends Component {
   }
 
   filterParticipantDropDown = (user) => {
-    let filter = this.state.filterChoice
-    if (filter === "All") return true;
-    if (filter === "Has submissions") return user.submissions.length > 0;
-    if (filter === "Has no submissions") return user.submissions.length === 0;
-    // if (filter === "group") return group.isGroup;
-    // if (filter === "individual") return !group.isGroup;
-    return false
+    let filter = this.state.submissionsFilterChoice;
+
+    if (filter === 0) {
+      return true;
+    }
+
+    if (filter === 1) {
+      return user.submissions.length > 0;
+    }
+
+    if (filter === 2) {
+      return user.submissions.length === 0;
+    }
+
+    return false;
   }
 
   filterParticipantSearchChange = (student) => {
@@ -102,17 +129,15 @@ class Students extends Component {
 
   render () {
     if (!this.state.isLoaded) {
-      return(
-        <div className={globalStyles.container}>
-          <Spinner className={globalStyles.spinner} animation="border" role="status">
-            <span className="sr-only">Loading...</span>
-          </Spinner>
+      return (
+        <div className={globalStyles.screenContainer}>
+          <CircularProgress className={globalStyles.spinner}/>
         </div>
       )
     }
 
     return(
-      <div className={globalStyles.container}>
+      <>
         <Breadcrumbs>
           <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumbs.Item>
           <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id ))}>{this.state.course.name}</Breadcrumbs.Item>
@@ -120,61 +145,88 @@ class Students extends Component {
           <Breadcrumbs.Item active>Students</Breadcrumbs.Item>
         </Breadcrumbs>
 
-        <div className={classnames(globalStyles.titleContainer, styles.titleContainer, this.state.syncing && styles.titleContainerIconActive)}>
-          <h1>Students</h1>
-        </div>
+        <StickyHeader
+          title="Students"
+        />
 
-        <div className={styles.container}>
-          <div>
-            <h3>Student List</h3>
-          </div>
-
+        <div className={globalStyles.innerScreenContainer}>
           <div className={styles.toolbar}>
-            <FormControl className={classnames(globalStyles.searchBar, styles.groupsSearchBar)}
-              type="text"
-              placeholder="Search with student name, student id, email"
-              onChange={this.handleSearchChange}/>
-
-            <DropdownButton
-              as={ButtonGroup}
-              key={"primary"}
-              id={`dropdown-Primary`}
-              variant={"lightGreen"}
-              title={"Filter"}
-              onSelect={this.onFilterSelectHandler}
-            >
-
-              {["All", "divider", "Has submissions", "Has no submissions"].map((filterS) => {
-                if (filterS === "divider") {
-                  return <Dropdown.Divider key={filterS}/>
-                } else if (filterS === this.state.filterChoice) {
-                  return <Dropdown.Item variant="lightGreen" key={filterS} eventKey={filterS} active>{filterS}</Dropdown.Item>
-                } else {
-                  return <Dropdown.Item key={filterS} eventKey={filterS}>{filterS}</Dropdown.Item>
-                }
-              })}
-            </DropdownButton>
+            <TextField
+              id="outlined-search"
+              className={styles.searchBar}
+              placeholder="Search by student name, email address or student number"
+              type="search"
+              variant="outlined"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon style={{color: "gray"}} />
+                  </InputAdornment>
+                ),
+              }}
+              onChange={this.handleSearchChange}
+              fullWidth
+            />
           </div>
 
-          <div>
-            {
-              this.state.students
-                .filter((student) => {
-                  return this.filterParticipantDropDown(student) && this.filterParticipantSearchChange(student.id.user);
-                })
-                .sort((s1, s2) => s1.id.user.name.localeCompare(s2.id.user.name))
-                .map((student) => {
-                  return (
-                    <StudentCard
-                      key={student.id.user.id}
-                      match={this.props.match}
-                      student={student}/>
-                  )
-                })}
-          </div>
+          <TableContainer component={Card} className={classnames(styles.studentTable, globalStyles.cardShadow)}>
+            <Table aria-label="students table">
+              <TableHead className={styles.tableHeader}>
+                <TableRow>
+                  <TableCell className={styles.tableAvatarColumn}>{""}</TableCell>
+                  <TableCell>Name</TableCell>
+                  <TableCell>sNumber</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell align="right">
+                    <TableFilter
+                      options={this.submissionsFilterOptions}
+                      selected={this.state.submissionsFilterChoice}
+                      setSelected={(index) => this.setState({submissionsFilterChoice: index})}
+                      size={"small"}
+                    />
+                    <span style={{display: "inline-block"}}>Submissions</span>
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody className={styles.tableBody}>
+                {this.state.students
+                  .filter((student) => {
+                    return this.filterParticipantDropDown(student) && this.filterParticipantSearchChange(student.id.user);
+                  })
+                  .sort((s1, s2) => s1.id.user.name.localeCompare(s2.id.user.name))
+                  .map((student) => {
+                    return (
+                      <TableRow key={student.id.user.id} hover>
+                        <TableCell scope="row">
+                          <Avatar
+                            alt={student.id.user.name}
+                            src={student.id.user.avatar.includes("avatar-50") ? "" : student.id.user.avatar}
+                          />
+                        </TableCell>
+                        <TableCell component="td" scope="row">
+
+                          <Link href="#" color="primary" onClick={(event) => {
+                            event.preventDefault();
+                            store.dispatch(push(this.props.match.url +"/"+ student.id.user.id))
+                          }}>
+                            {student.id.user.name}
+                          </Link>
+                        </TableCell>
+                        <TableCell component="td" scope="row">
+                          {student.id.user.sNumber}
+                        </TableCell>
+                        <TableCell component="td" scope="row">
+                          {student.id.user.email}
+                        </TableCell>
+                        <TableCell align="right">{student.submissions.length}</TableCell>
+                      </TableRow>
+                    )
+                  })}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </div>
-
-      </div>
+      </>
     )
   }
 }

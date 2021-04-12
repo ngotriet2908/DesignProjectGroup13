@@ -1,11 +1,18 @@
-import {Button, Spinner, Modal} from 'react-bootstrap'
 import React, {Component} from "react";
 import globalStyles from '../helpers/global.module.css';
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
 import {connect} from "react-redux";
-import {IoCloseOutline, IoCheckboxOutline, IoSquareOutline} from "react-icons/io5";
 import classnames from "classnames";
+import CustomModal from "../helpers/CustomModal";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import {IconButton} from "@material-ui/core";
+import withTheme from "@material-ui/core/styles/withTheme";
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@material-ui/icons/CheckBox';
 
 
 class ImportProjectsModal extends Component {
@@ -21,8 +28,6 @@ class ImportProjectsModal extends Component {
   }
 
   fetchProjects = () => {
-    // console.log(this.props.imported);
-
     request(`${BASE}courses/${this.props.currentCourse.id}/projects/all`)
       .then(async(response) => {
         let projects = await response.json();
@@ -56,6 +61,10 @@ class ImportProjectsModal extends Component {
   }
 
   onAccept = () => {
+    this.setState({
+      isLoaded: false,
+    })
+
     let body = this.state.selected.map((selectedProject) => {
       console.log(selectedProject);
 
@@ -70,7 +79,10 @@ class ImportProjectsModal extends Component {
       body
     )
       .then((response) => {
-        // console.log(response);
+        this.setState({
+          isLoaded: true,
+        })
+
         this.props.toggleShow();
         this.props.refresh();
       })
@@ -79,83 +91,65 @@ class ImportProjectsModal extends Component {
       });
   }
 
-  render() {
+  body = () => {
     return(
-      <Modal
-        centered
-        backdrop="static"
-        size="lg"
-        onShow={this.fetchProjects}
-        show={this.props.show}
-        onHide={this.onClose}
-        animation={false}
-      >
-        <div className={globalStyles.modalContainer}>
-          <div className={globalStyles.modalHeaderContainer}>
-            <h2>Import Projects</h2>
-            <div className={globalStyles.modalHeaderContainerButton} onClick={this.onClose}>
-              <IoCloseOutline size={30}/>
-            </div>
-          </div>
-
-          <div className={globalStyles.modalDescriptionContainer}>
-            <div>Select projects to import from the list below</div>
-          </div>
-
-          {!this.state.isLoaded ?
-            <div className={globalStyles.modalSpinnerContainer}>
-              <Spinner className={globalStyles.modalSpinner} animation="border" role="status">
-                <span className="sr-only">Loading...</span>
-              </Spinner>
+      <>
+        <div className={globalStyles.modalBodyContainer}>
+          {/* courses */}
+          {(this.state.projects.length === 0 ||
+            this.state.projects.filter((course) => {
+              return !this.props.imported.find((importedProject) => importedProject.id === course.id);
+            }).length === 0) ?
+            <div className={classnames(globalStyles.modalBodyContainerRow, globalStyles.modalBodyContainerRowEmpty)}>
+              No projects available for import
             </div>
             :
-            //body
-            <div className={globalStyles.modalBodyContainer}>
-              {/* courses */}
-              {(this.state.projects.length === 0 ||
-                this.state.projects.filter((course) => {
-                  return !this.props.imported.find((importedProject) => importedProject.id == course.id);
-                }).length === 0) ?
-                <div className={classnames(globalStyles.modalBodyContainerRow, globalStyles.modalBodyContainerRowEmpty)}>
-                  No courses available for import
-                </div>
-                :
-                (this.state.projects
-                  .filter((project) => {
-                    return !this.props.imported.find((importedProject) => importedProject.id == project.id);
-                  })
-                  .map((project) => {
-                    const selected = this.state.selected.find((selectedProject) => selectedProject.id == project.id);
 
-                    return (
-                      <div
-                        className={classnames(globalStyles.modalBodyContainerRow, selected && globalStyles.modalBodyContainerRowActive)}
-                        key={project.id}
-                        onClick={
-                          () => this.toggleSelected(project)
-                        }>
-                        {selected ?
-                          <IoCheckboxOutline size={16}/>
-                          :
-                          <IoSquareOutline size={16}/>
-                        }
-                        <span>{project.name}</span>
-                      </div>
-                    )
-                  })
-                )
+            <List>
+              {this.state.projects
+                .filter((project) => {
+                  return !this.props.imported.find((importedProject) => importedProject.id === project.id);
+                })
+                .map((project) => {
+                  const selected = this.state.selected.find((selectedProject) => selectedProject.id === project.id);
+
+                  return (
+                    <ListItem key={project.id}>
+                      <ListItemText
+                        primary={project.name}
+                      />
+                      <ListItemSecondaryAction>
+                        <IconButton edge="end" aria-label="delete" onClick={() => this.toggleSelected(project)}>
+                          {selected ?
+                            <CheckBoxIcon style={{color: this.props.theme.palette.success.main}}/>
+                            :
+                            <CheckBoxOutlineBlankIcon/>
+                          }
+                        </IconButton>
+                      </ListItemSecondaryAction>
+                    </ListItem>
+                  )
+                })
               }
-            </div>
+            </List>
           }
-
-          <div className={globalStyles.modalFooterContainer}>
-            <div className={globalStyles.modalFooterContainerButtonGroup}>
-              <Button variant="linkLightGray" onClick={this.onClose}>Cancel</Button>
-              <Button variant="lightGreen" onClick={this.onAccept}>Import</Button>
-            </div>
-          </div>
         </div>
-      </Modal>
+      </>
+    )
+  }
+
+  render() {
+    return(
+      <CustomModal
+        show={this.props.show}
+        onClose={this.props.toggleShow}
+        onShow={this.fetchProjects}
+        onAccept={this.onAccept}
+        title={"Import projects"}
+        description={"Choose projects to import from the list below"}
+        body={this.body()}
+        isLoaded={this.state.isLoaded}
+      />
     )
   }
 }
@@ -166,4 +160,4 @@ const mapStateToProps = state => {
   };
 };
 
-export default connect(mapStateToProps, null)(ImportProjectsModal)
+export default connect(mapStateToProps, null)(withTheme(ImportProjectsModal))

@@ -38,6 +38,12 @@ public interface GradingParticipationRepository extends JpaRepository<GradingPar
             "where g.id.user.id = u.id and g.id.project.id=?1")
     List<User> getProjectUsersAndFetchSubmissions(Long projectId);
 
+    @Query(value="select distinct u " +
+            "from GradingParticipation g, User u " +
+            "left join fetch u.toGrade " +
+            "where g.id.user.id = u.id and g.id.project.id=?1")
+    List<User> getProjectUsersAndFetchSubmissionsAndRoles(Long projectId);
+
     @Modifying(clearAutomatically=true)
     void deleteAllById_UserInAndId_ProjectId(Collection<User> id_user, Long id_project_id);
 

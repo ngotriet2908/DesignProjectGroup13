@@ -1,23 +1,32 @@
 import React, {Component} from "react";
-import StudentList from "./StudentList";
-import {Breadcrumb, Button, Spinner, InputGroup, Form, Card, Modal, ListGroup} from "react-bootstrap";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
 import styles from "./feedback.module.css";
 import store from "../../redux/store";
 import {URL_PREFIX} from "../../services/config";
-import { saveAs } from 'file-saver';
 import globalStyles from "../helpers/global.module.css";
-import TemplatesContainer from "./TemplatesContainer";
 import classnames from "classnames";
-import TemplatesEditContainer from "./TemplatesEditContainer";
-import {IoPencilOutline, IoAdd, IoCloseOutline, IoFileTrayOutline} from "react-icons/io5";
-import FeedbackSendingForm from "./FeedbackSendingForm";
 import Breadcrumbs from "../helpers/Breadcrumbs";
 import {push} from "connected-react-router";
-import EmptyCard from "../home/EmptyCard";
-import AssignSubmissionModal from "../assign/AssignSubmissionModal";
 import CreateTemplateModal from "./CreateTemplateModal";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import StickyHeader from "../helpers/StickyHeader";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
+import IconButton from "@material-ui/core/IconButton";
+import AddIcon from '@material-ui/icons/Add';
+import Grid from "@material-ui/core/Grid";
+import EmptyCourseCard from "../home/EmptyCourseCard";
+import EditIcon from '@material-ui/icons/Edit';
+import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
+import withTheme from "@material-ui/core/styles/withTheme";
+import InputLabel from "@material-ui/core/InputLabel";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
+import FormControl from "@material-ui/core/FormControl";
+import FeedbackSendingForm from "./FeedbackSendingForm";
+import TemplateCard from "./TemplateCard";
+
 
 class Feedback extends Component {
   constructor(props) {
@@ -25,16 +34,14 @@ class Feedback extends Component {
     this.state = {
       users: [],
 
-      participantsNotSent: [],
-      participantsAll: [],
+      studentsNotSent: [],
+      studentsAll: [],
 
       course: {},
       project: {},
       templates: [],
 
-      // isCreatingTemplate: false,
       isLoaded: false,
-      // isEditingTemplates: false,
 
       showCreateTemplateModal: false,
     }
@@ -52,8 +59,8 @@ class Feedback extends Component {
       .then(async([res1, res2, res3, res4, res5]) => {
         const project = await res1.json();
         const templates = await res2.json();
-        const participantsNotSent = await res3.json();
-        const participantsAll = await res4.json();
+        const studentsNotSent = await res3.json();
+        const studentsAll = await res4.json();
         const course = await res5.json();
 
         this.setState({
@@ -61,8 +68,8 @@ class Feedback extends Component {
           project: project,
           course: course,
           isLoaded: true,
-          participantsNotSent: participantsNotSent,
-          participantsAll: participantsAll
+          studentsNotSent: studentsNotSent,
+          studentsAll: studentsAll
         })
       })
       .catch(error => {
@@ -100,17 +107,15 @@ class Feedback extends Component {
 
   render() {
     if (!this.state.isLoaded) {
-      return(
-        <div className={globalStyles.container}>
-          <Spinner className={globalStyles.spinner} animation="border" role="status">
-            <span className="sr-only">Loading...</span>
-          </Spinner>
+      return (
+        <div className={globalStyles.screenContainer}>
+          <CircularProgress className={globalStyles.spinner}/>
         </div>
       )
     }
 
     return (
-      <div className={globalStyles.container}>
+      <>
         <Breadcrumbs>
           <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumbs.Item>
           <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id ))}>{this.state.course.name}</Breadcrumbs.Item>
@@ -118,63 +123,54 @@ class Feedback extends Component {
           <Breadcrumbs.Item active>Feedback</Breadcrumbs.Item>
         </Breadcrumbs>
 
-        <div className={classnames(globalStyles.titleContainer, styles.titleContainer, this.state.syncing && styles.titleContainerIconActive)}>
-          <h1>Feedback</h1>
-        </div>
+        <StickyHeader
+          title={"Feedback"}
+        />
 
-        <div className={classnames(styles.container)}>
-          <div className={styles.section}>
-            <div className={classnames(styles.sectionTitle, styles.sectionTitleWithButton)}>
-              <h3 className={styles.sectionTitleH}>Templates</h3>
-              {(!this.state.isEditingTemplates) ?
-                <Button variant="lightGreen" onClick={this.toggleShowCreateTemplateModal}><IoAdd size={20}/> Add</Button>
-                :
-                <div className={styles.buttonGroup}>
-                  <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.handleToggleCreatingTemplates}>
-                    <IoAdd size={26}/>
-                  </div>
-                  <div className={classnames(globalStyles.iconButton, styles.primaryButton)} onClick={this.handleToggleEditingTemplates}>
-                    <IoCloseOutline size={26}/>
-                  </div>
+        <div className={globalStyles.innerScreenContainer}>
+          <Grid container spacing={8}>
+            <Grid item xs={7}>
+              <div className={classnames(globalStyles.sectionContainer)}>
+                <div className={classnames(globalStyles.sectionTitle, globalStyles.sectionTitleWithButtonSpread)}>
+                  <h2 className={globalStyles.sectionTitleH}>Templates</h2>
+
+                  <IconButton
+                    onClick={this.toggleShowCreateTemplateModal}
+                  >
+                    <AddIcon/>
+                  </IconButton>
                 </div>
-              }
-            </div>
 
-            <div className={styles.sectionContent}>
-              {this.state.templates.length === 0 &&
-                <EmptyCard data={"No templates"} icon={IoFileTrayOutline}/>
-              }
-
-
-              {(this.state.isEditingTemplates)?
-                <TemplatesEditContainer params={this.props.match.params} isCreating={this.state.isCreatingTemplate} updateTemplates={this.updateTemplatesHandler} toggleCreating={this.handleToggleCreatingTemplates} toggleEditing={this.handleToggleEditingTemplates} templates={this.state.templates}/>
-                :
-                <TemplatesContainer templates={this.state.templates}/>
-              }
-            </div>
-          </div>
-        </div>
-
-        <div className={classnames(styles.container)}>
-          <div className={styles.section}>
-            <div className={classnames(styles.sectionTitle, styles.sectionTitleWithButton)}>
-              <h3 className={styles.sectionTitleH}>Send feedback</h3>
-            </div>
-
-            <div className={styles.sectionContent}>
-              <Card>
-                <Card.Body>
-                  <FeedbackSendingForm
-                    params={this.props.match.params}
-                    templates={this.state.templates}
-                    pAll={this.state.participantsAll}
-                    pNotSent={this.state.participantsNotSent}
+                {this.state.templates.map((template, index) => (
+                  <TemplateCard
+                    key={template.id}
+                    template={template}
                   />
-                </Card.Body>
-              </Card>
-            </div>
 
-          </div>
+                ))}
+
+                {this.state.templates.length === 0 &&
+                <EmptyCourseCard
+                  action={this.toggleShowCreateTemplateModal}
+                  description={"Create template"}
+                  className={styles.templateCard}
+                />
+                }
+
+              </div>
+            </Grid>
+
+            {/* right */}
+            <Grid item xs={5}>
+              <FeedbackSendingForm
+                templates={this.state.templates}
+                params={this.props.match.params}
+                all={this.state.studentsAll}
+                notSent={this.state.studentsNotSent}
+              />
+            </Grid>
+
+          </Grid>
         </div>
 
         <CreateTemplateModal
@@ -183,9 +179,9 @@ class Feedback extends Component {
           routeParams={this.props.match.params}
           updateTemplates={this.updateTemplatesHandler}
         />
-      </div>
+      </>
     )
   }
 }
 
-export default Feedback;
+export default withTheme(Feedback);

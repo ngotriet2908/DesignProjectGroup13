@@ -1,12 +1,13 @@
 import React, { Component } from 'react'
 import styles from '../grading.module.css'
 import {connect} from "react-redux";
-import Card from "react-bootstrap/Card";
 import {request} from "../../../services/request";
 import Issues from "./Issues";
 import classnames from 'classnames';
 import CreateIssueModal from "./CreateIssueModal";
-import RightsidePanel from "./RightsidePanel";
+import globalStyles from "../../helpers/global.module.css";
+import CardContent from "@material-ui/core/CardContent";
+import Card from "@material-ui/core/Card";
 
 
 class IssuesViewer extends Component {
@@ -72,18 +73,17 @@ class IssuesViewer extends Component {
 
     return (
       <div className={styles.issuesContainer}>
-        <Card className={styles.panelCard}>
-          <Card.Body className={classnames(styles.gradeViewerBody)}>
+        <div className={classnames(styles.panelCard)}>
+          <div className={styles.gradeViewerBody}>
             <Issues
               submission={this.props.submission}
               updateIssue={this.updateIssue}
               issues={this.state.issues}
               routeParams={this.props.routeParams}
-              toggleCreatingState={this.updateIsCreating}
               toggleShow={this.toggleShowModal}
             />
-          </Card.Body>
-        </Card>
+          </div>
+        </div>
 
         <CreateIssueModal
           user={this.props.user}

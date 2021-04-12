@@ -1,95 +1,128 @@
 import React, {Component} from "react";
-import {Badge, Card, OverlayTrigger, Tooltip, ListGroup} from "react-bootstrap";
 import {push} from "connected-react-router";
 import styles from "./submissions.module.css"
-import {IoArrowForward} from "react-icons/io5";
 import store from "../../redux/store";
 import classnames from "classnames";
 import globalStyles from "../helpers/global.module.css";
 import {colorToStyles} from "../submissionDetails/labels/LabelRow";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
+import Grid from "@material-ui/core/Grid";
+import EmailIcon from "@material-ui/icons/Email";
+import ScheduleIcon from '@material-ui/icons/Schedule';
+import withTheme from "@material-ui/core/styles/withTheme";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemAvatar from "@material-ui/core/ListItemAvatar";
+import Avatar from "@material-ui/core/Avatar";
+import ListItemText from "@material-ui/core/ListItemText";
+import Tooltip from "@material-ui/core/Tooltip";
+import PeopleOutlineIcon from '@material-ui/icons/PeopleOutline';
+import Chip from "@material-ui/core/Chip";
+import Link from "@material-ui/core/Link";
 
 
 class SubmissionsOverviewCard extends Component {
   render() {
     return (
-      <Card className={styles.submissionCard}>
-        <Card.Body>
+      <Card className={classnames(globalStyles.cardShadow, styles.submissionCard)}>
+        <CardContent>
           <div className={styles.submissionCardTitle}>
-            <h4>
-              {this.props.submission.name}
-            </h4>
+            <Link href="#" color="primary" onClick={(event) => {
+              event.preventDefault();
+              store.dispatch(push("/app/courses/" +
+                this.props.routeParams.courseId +
+                "/projects/" +
+                this.props.routeParams.projectId +
+                "/submissions/" +
+                this.props.submission.id));
+            }}>
+              <h4>
+                {this.props.submission.name}
+              </h4>
+            </Link>
 
-            <div className={styles.submissionCardHeaderButtonContainer}>
-              <div className={classnames(globalStyles.iconButton)}
-                onClick={() => store.dispatch(push("/app/courses/" + this.props.routeParams.courseId + "/projects/" + this.props.routeParams.projectId + "/submissions/" + this.props.submission.id))}>
-                <IoArrowForward size={26}/>
-              </div>
-            </div>
           </div>
 
           <div className={styles.submissionCardLabels}>
             {
-              (this.props.submission.groupId != null)?
-                <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant="green">Group</Badge> :
-                <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant="tomato">Individual</Badge>
+              (this.props.submission.grader != null && this.props.submission.grader.id === this.props.user.id)
+                ?
+                <Chip
+                  label={"Assigned to you"}
+                  style={{backgroundColor: this.props.theme.palette.labels["blue"]}}
+                  className={classnames(globalStyles.label)}
+                />
+                :
+                <Chip
+                  label={"Not assigned to you"}
+                />
             }
 
-            {/*{*/}
-            {/*  (this.props.submission.progress <= 0)?*/}
-            {/*    <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant="tomato">Not started</Badge> :*/}
-            {/*    (this.props.submission.progress < 100)?*/}
-            {/*      <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant="orange">In progress</Badge> :*/}
-            {/*      <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant="green">Graded</Badge>*/}
-            {/*}*/}
-
-            {
-              (this.props.submission.grader != null && this.props.submission.grader.id === this.props.user.id)?
-                <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant="green">Assigned to you</Badge> :
-                <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant="tomato">Not assigned to you</Badge>
-            }
-
-            {/*{*/}
-            {/*  (this.props.submission.issuesCount > 0) &&*/}
-            {/*    <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant="tomato">Has issues</Badge>*/}
-            {/*}*/}
-
-            {(this.props.submission.labels.map((label) => {
+            {this.props.submission.labels.map((label) => {
               return (
-                // <OverlayTrigger
-                //   key={flag.id}
-                //   placement="bottom"
-                //   delay={{ show: 250, hide: 400 }}
-                //   overlay={(props) => (
-                //     <Tooltip id={flag.id} {...props}>
-                //       {flag.description}
-                //     </Tooltip>)
-                //   }>
-                // <Badge className={classnames(globalStyles.label, globalStyles.labelSmall)} variant={label.variant}>{label.name}</Badge>
-                <Badge key={label.id} className={classnames(globalStyles.label, globalStyles.labelSmall, colorToStyles[label.color])} variant={label.color}>{label.name}</Badge>
-                // </OverlayTrigger>
-              )}))}
+                <Chip
+                  key={label.id}
+                  className={classnames(globalStyles.label)}
+                  label={label.name}
+                  style={{
+                    backgroundColor: this.props.theme.palette.labels[label.color]
+                  }}
+                />
+              )
+            })}
+
           </div>
 
           <div className={styles.submissionCardBody}>
-            <p>Submitted on {(new Date(this.props.submission.submittedAt)).toDateString()}</p>
-            {/*<p>Progress: {this.props.submission.progress}%</p>*/}
-            <ListGroup>
-              {/*<p>Members:</p>*/}
-              {this.props.submission.members.map((member) => {
+            <Grid
+              container
+              className={classnames(globalStyles.cardBodyContent, styles.cardBodyContent)}
+            >
+              <Grid item sm={6}>
+                <div className={classnames(globalStyles.flexRow, globalStyles.flexRowWithIcon)}>
+                  <Tooltip title="Submitted at">
+                    <ScheduleIcon style={{color: this.props.theme.palette.primary.main}}/>
+                  </Tooltip>
+                  <span>{(new Date(this.props.submission.submittedAt)).toDateString()} at {(new Date(this.props.submission.submittedAt)).toLocaleTimeString('it-IT')}</span>
+                </div>
+              </Grid>
+
+              <Grid item sm={6}>
+                <div className={classnames(globalStyles.flexRow, globalStyles.flexRowWithIcon)}>
+                  <Tooltip title="Group or individual submission">
+                    <PeopleOutlineIcon style={{color: this.props.theme.palette.primary.main}}/>
+                  </Tooltip>
+                  <span>{this.props.submission.groupId != null ? "Group": "Individual"}</span>
+                </div>
+              </Grid>
+            </Grid>
+
+            <h5>Students</h5>
+            <List
+              className={globalStyles.horizontalList}
+            >
+              {this.props.submission.members.map((student) => {
                 return (
-                  <ListGroup.Item key={member.id}>
-                    <div className={styles.memberItem}>
-                      <h6>name: {member.name}</h6>
-                      <h6>sid: {member.sNumber}</h6>
-                    </div>
-                  </ListGroup.Item>)
+                  <ListItem key={student.id}>
+                    <ListItemAvatar>
+                      <Avatar
+                        alt={student.name}
+                        src={student.avatar.includes("avatar-50") ? "" : student.id.user.avatar}
+                      />
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={student.name}
+                      secondary={`s${student.sNumber}`}/>
+                  </ListItem>
+                )
               })}
-            </ListGroup>
+            </List>
           </div>
-        </Card.Body>
+        </CardContent>
       </Card>
     );
   }
 }
 
-export default SubmissionsOverviewCard
+export default withTheme(SubmissionsOverviewCard)

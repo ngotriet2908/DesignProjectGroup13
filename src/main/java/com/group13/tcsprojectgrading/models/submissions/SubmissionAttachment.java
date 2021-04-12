@@ -67,7 +67,7 @@ public class SubmissionAttachment {
         @Override
         public void serialize(SubmissionAttachment attachment, JsonGenerator jsonGenerator,
                               SerializerProvider serializerProvider) throws IOException {
-            jsonGenerator.writeRaw(attachment.getAttachment());
+            jsonGenerator.writeRawValue(attachment.getAttachment());
         }
     }
 }

@@ -1,19 +1,26 @@
 import React, { Component } from 'react'
-import {Dropdown, DropdownButton, ButtonGroup} from "react-bootstrap";
 import IssueCard from "./IssueCard";
 import styles from "../grading.module.css";
 import classnames from "classnames";
 import globalStyles from "../../helpers/global.module.css";
-import {IoAdd} from "react-icons/io5";
 import {Can} from "../../permissions/ProjectAbility";
 import { subject } from '@casl/ability';
+import AddIcon from '@material-ui/icons/Add';
+import IconButton from "@material-ui/core/IconButton";
+import TableFilter from "../../helpers/TableFilter";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
+import EmptyCourseCard from "../../home/EmptyCourseCard";
 
 
 class Issues extends Component {
   constructor(props) {
     super(props);
+
+    this.filterOptions = ["All", "Resolved", "Open"]
+
     this.state = {
-      filterChoice: "All"
+      filterChoice: 0
     }
   }
 
@@ -24,7 +31,7 @@ class Issues extends Component {
   }
 
   filterIssueDropDown = (issue) => {
-    let filter = this.state.filterChoice;
+    let filter = this.filterOptions[this.state.filterChoice];
 
     if (filter === "All") {
       return true;
@@ -35,42 +42,32 @@ class Issues extends Component {
   render() {
     return (
       <>
-        <div className={classnames(styles.gradingCardTitle, styles.gradingCardTitleWithButton)}>
+        <div className={classnames(styles.gradingCardTitle, styles.gradingCardTitleWithButton, styles.issuesTitle)}>
           <h4>Issues</h4>
           <div className={styles.gradeEditorCardFooter}>
             <Can I="edit" this={subject('Submission', (this.props.submission.grader === null)? {id: -1}:this.props.submission.grader)}>
-              <div className={classnames(globalStyles.iconButton, styles.gradingCardTitleButton)}
-                // onClick={this.props.toggleCreatingState}>
-                onClick={this.props.toggleShow}>
-                <IoAdd size={26}/>
-              </div>
+              <IconButton onClick={this.props.toggleShow}>
+                <AddIcon/>
+              </IconButton>
             </Can>
-            <DropdownButton
-              as={ButtonGroup}
-              key={"primary"}
-              id={`dropdown-Primary`}
-              variant={"lightGreen"}
-              title={"Filter"}
-              onSelect={this.onFilterSelectHandler}
-            >
-              {["All", "divider", "Resolved", "Open"].map((filterS) => {
-                if (filterS === "divider") {
-                  return <Dropdown.Divider key={filterS}/>
-                } else if (filterS === this.state.filterChoice) {
-                  return <Dropdown.Item key={filterS} eventKey={filterS} active>{filterS}</Dropdown.Item>
-                } else {
-                  return <Dropdown.Item key={filterS} eventKey={filterS}>{filterS}</Dropdown.Item>
-                }
-              })}
-            </DropdownButton>
+
+            <TableFilter
+              options={this.filterOptions}
+              selected={this.state.filterChoice}
+              setSelected={(index) => this.setState({filterChoice: index})}
+              size={"medium"}
+            />
+
           </div>
         </div>
 
-        <div className={classnames(styles.gradeEditorContentContainer, styles.gradeViewerBodyScroll)}>
+        <div className={classnames(styles.gradeViewerBodyScroll)}>
           {this.props.issues.length === 0 &&
-          <div className={classnames(globalStyles.modalBodyContainerRow, globalStyles.modalBodyContainerRowEmpty)}>
-            No issues
-          </div>
+            <EmptyCourseCard
+              action={this.props.toggleShow}
+              description={"Create issue"}
+              className={styles.issueCard}
+            />
           }
 
           {this.props.issues

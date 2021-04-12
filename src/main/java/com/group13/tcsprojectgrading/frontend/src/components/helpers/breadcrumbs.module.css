@@ -5,7 +5,12 @@
     justify-content: flex-start;
     align-items: flex-end;
 
-    padding: 1rem 0;
+    /*padding: 1rem 0;*/
+    height: 2rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+
+    padding: 0 2rem;
 }
 
 .breadcrumbsActive {

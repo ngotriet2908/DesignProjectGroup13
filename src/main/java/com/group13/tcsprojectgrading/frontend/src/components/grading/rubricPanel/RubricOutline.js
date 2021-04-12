@@ -15,14 +15,14 @@ import {
 } from "../../../redux/rubric/actions";
 import globalStyles from "../../helpers/global.module.css";
 import classnames from "classnames";
-import {IoLogoTux} from "react-icons/io5";
+import InboxIcon from '@material-ui/icons/Inbox';
 
 
 class RubricOutline extends Component {
   constructor (props) {
     super(props);
 
-    this.padding = 0;
+    this.padding = -2;
     this.path = "";
   }
 
@@ -34,9 +34,6 @@ class RubricOutline extends Component {
     console.log(id)
     this.props.setSelectedElement(id);
     this.props.toggleOutlineHidden();
-
-    // open grading for the selected criterion
-    // this.props.setCurrentPath(path);
   }
 
   render () {
@@ -44,7 +41,7 @@ class RubricOutline extends Component {
       <div className={classnames(styles.outlineContainer, this.props.outlineHidden && styles.outlineContainerHidden)}>
         {this.props.rubric.children.length === 0 ?
           <div className={styles.gradeViewerNotGraded}>
-            <IoLogoTux size={40}/>
+            <InboxIcon fontSize={"large"}/>
             <h6>Rubric is empty</h6>
           </div>
           :

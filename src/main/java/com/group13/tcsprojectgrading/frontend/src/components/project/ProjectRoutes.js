@@ -3,7 +3,6 @@ import {Redirect, Route, Switch} from "react-router-dom";
 import Project from "./Project";
 import Rubric from "../rubric/Rubric";
 import GraderManagement from "../assign/GraderManagement";
-import Groups from "../groups/Groups";
 import Grading from "../grading/Grading";
 import Feedback from "../feedback/Feedback";
 import Submissions from "../submissions/Submissions";

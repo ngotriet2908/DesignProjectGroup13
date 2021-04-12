@@ -112,19 +112,5 @@ public class AssessmentLink {
     public void setFeedbackLogs(List<FeedbackLog> feedbackLogs) {
         this.feedbackLogs = feedbackLogs;
     }
-
-    //    /*
-//    Serialises
-//    */
-//    public static class MembersSerialiser extends JsonSerializer<AssessmentLink> {
-//        @Override
-//        public void serialize(AssessmentLink link, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-//            jsonGenerator.writeStartObject();
-//
-////            jsonGenerator.writeNumberField("id", course.getId());
-////            jsonGenerator.writeStringField("name", course.getName());
-//            jsonGenerator.writeEndObject();
-//        }
-//    }
 }
 

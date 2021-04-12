@@ -76,7 +76,7 @@ export const createNewCriterion = (props, path, id, childrenLength) => {
       title: "Default criterion's title",
       text: "You can edit this text in the edit mode.",
       grade: {
-        min: 0,
+        min: 1,
         max: 10,
         step: 1,
         weight: 1.0

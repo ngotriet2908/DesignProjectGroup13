@@ -2,14 +2,10 @@ import React, {Component} from "react";
 import styles from "../project/project.module.css";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
-import {Button, DropdownButton, ButtonGroup, Dropdown} from 'react-bootstrap'
 import {URL_PREFIX} from "../../services/config";
-import {v4 as uuidv4} from "uuid";
 import {connect} from "react-redux";
-import {Spinner} from "react-bootstrap";
 import store from "../../redux/store";
 import {push} from "connected-react-router";
-import Card from "react-bootstrap/Card";
 import {deleteRubric, saveRubric} from "../../redux/rubric/actions";
 
 import {setCurrentCourseAndProject, setCurrentLocation} from "../../redux/navigation/actions";
@@ -17,14 +13,24 @@ import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 import Breadcrumbs from "../helpers/Breadcrumbs";
 
 import globalStyles from '../helpers/global.module.css';
-import {IoSyncOutline, IoHelpCircleOutline} from "react-icons/io5";
 import {Can, ability, updateAbility} from "../permissions/ProjectAbility";
 import classnames from "classnames";
-import OverlayTrigger from "react-bootstrap/OverlayTrigger";
-import Tooltip from "react-bootstrap/Tooltip";
 import * as FileSaver from 'file-saver';
-import Masonry from 'react-masonry-css'
 import IssuesProject from "./issues/IssuesProject";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import StickyHeader from "../helpers/StickyHeader";
+import Button from "@material-ui/core/Button";
+import SyncIcon from "@material-ui/icons/Sync";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
+import ImportExportIcon from "@material-ui/icons/ImportExport";
+import Grid from "@material-ui/core/Grid";
+import PeopleAltIcon from '@material-ui/icons/PeopleAlt';
+import BorderColorIcon from '@material-ui/icons/BorderColor';
+import DescriptionIcon from '@material-ui/icons/Description';
+import FeedbackIcon from '@material-ui/icons/Feedback';
+import ListIcon from '@material-ui/icons/List';
+
 
 class Project extends Component {
   constructor(props) {
@@ -51,21 +57,11 @@ class Project extends Component {
 
     Promise.all([
       request(BASE + "courses/" + courseId + "/projects/" + projectId),
-      request(BASE + "courses/" + courseId + "/projects/" + projectId + "/issues"),
-      // request(`${BASE}courses/${courseId}/projects/${projectId}/stats/submissions`),
-      // request(`${BASE}courses/${courseId}/projects/${projectId}/stats/grades`),
-      // request(`${BASE}courses/${courseId}/projects/${projectId}/stats/groups`),
+      // request(BASE + "courses/" + courseId + "/projects/" + projectId + "/issues"),
     ])
       .then(async([res1, res2]) => {
         const project = await res1.json();
-        const issues = await res2.json();
-
-        // console.log(project);
-
-        // const statsSubmissions = await res2.json();
-        // const statsGrades = await res3.json();
-
-        // const stats = [statsSubmissions].concat(statsGrades)//.concat(statsGroups);
+        // const issues = await res2.json();
 
         this.props.saveRubric(project.rubric);
 
@@ -78,12 +74,9 @@ class Project extends Component {
 
         this.setState({
           project: project,
-          // course: project.course,
-          // stats: stats,
-          // grader: project.grader,
           isLoaded: true,
           syncing: false,
-          issues: issues
+          issues: []
         });
       })
       .catch(error => {
@@ -169,16 +162,14 @@ class Project extends Component {
   render () {
     if (!this.state.isLoaded) {
       return (
-        <div className={globalStyles.container}>
-          <Spinner className={globalStyles.spinner} animation="border" role="status">
-            <span className="sr-only">Loading...</span>
-          </Spinner>
+        <div className={globalStyles.screenContainer}>
+          <CircularProgress className={globalStyles.spinner}/>
         </div>
-      );
+      )
     }
 
     return (
-      <div className={globalStyles.container}>
+      <div className={globalStyles.screenContainer}>
         <Breadcrumbs>
           <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumbs.Item>
           <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.project.course.id ))}>
@@ -189,116 +180,117 @@ class Project extends Component {
           </Breadcrumbs.Item>
         </Breadcrumbs>
 
-        <div className={classnames(globalStyles.titleContainer, this.state.syncing && globalStyles.titleContainerIconActive)}>
-          <h1>{this.state.project.name}</h1>
-
-          <div className={styles.titleContainerButtons}>
+        <StickyHeader
+          title={this.state.project.name}
+          buttons={
             <Can I="sync" a="Submissions">
-              <Button className={globalStyles.titleActiveButton} variant="lightGreen" onClick={this.syncHandler}>
-                <IoSyncOutline size={20}/> Sync
+              <Button
+                variant="contained"
+                color="primary"
+                className={globalStyles.titleActiveButton}
+                onClick={this.syncHandler}
+                startIcon={<SyncIcon/>}
+                disableElevation
+              >
+                Sync
               </Button>
             </Can>
+          }
+        />
 
-            {/*<OverlayTrigger*/}
-            {/*  placement={'left'}*/}
-            {/*  overlay={*/}
-            {/*    <Tooltip className={styles.questionTooltip}>*/}
-            {/*      Click on the sync button to update the course's user list and students' submissions.*/}
-            {/*    </Tooltip>*/}
-            {/*  }*/}
-            {/*>*/}
-            {/*  <div className={styles.questionTooltipContainer}>*/}
-            {/*    <IoHelpCircleOutline size={25}/>*/}
-            {/*  </div>*/}
-            {/*</OverlayTrigger>*/}
+        <div className={globalStyles.innerScreenContainer}>
+          <Grid container spacing={6}>
 
-          </div>
-        </div>
-
-        <div className={styles.container}>
-          <Can I="view" a="AdminToolbar">
-            <div className={classnames(globalStyles.sectionContainer)}>
-              <div className={classnames(globalStyles.sectionTitle, globalStyles.sectionTitleWithButton)}>
-                <h3 className={globalStyles.sectionTitleH}>
+            <Can I="view" a="AdminToolbar">
+              <Grid item xs={6}>
+                <div className={classnames(globalStyles.sectionContainer)}>
+                  <div className={classnames(globalStyles.sectionTitle, globalStyles.sectionTitleWithButton)}>
+                    <h3 className={globalStyles.sectionTitleH}>
                       Administration
-                </h3>
-              </div>
+                    </h3>
+                  </div>
 
-              <div className={globalStyles.sectionFlexContainer}>
-                <Card className={styles.card}>
-                  <Card.Body className={classnames(styles.cardBody, styles.administrationSectionContainerBody)}>
-                    <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/students"))}>
-                            Students
-                    </Button>
+                  <div className={globalStyles.sectionFlexContainer}>
+                    <Card className={classnames(styles.card, globalStyles.cardShadow)}>
+                      <CardContent
+                        className={classnames(styles.cardBody, styles.administrationSectionContainerBody)}
+                      >
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => store.dispatch(push(this.props.match.url + "/students"))}
+                          startIcon={<PeopleAltIcon/>}
+                          disableElevation
+                        >
+                      Students
+                        </Button>
 
-                    <Can I="read" a="Submissions">
-                      <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/submissions"))}>
-                            Submissions
-                      </Button>
-                    </Can>
+                        <Can I="read" a="Submissions">
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => store.dispatch(push(this.props.match.url + "/submissions"))}
+                            startIcon={<DescriptionIcon/>}
+                            disableElevation
+                          >
+                        Submissions
+                          </Button>
+                        </Can>
 
-                    <Can I="open" a="ManageGraders">
-                      <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/graders"))}>
-                            Graders
-                      </Button>
-                    </Can>
+                        <Can I="open" a="ManageGraders">
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => store.dispatch(push(this.props.match.url + "/graders"))}
+                            startIcon={<BorderColorIcon/>}
+                            disableElevation
+                          >
+                        Graders
+                          </Button>
+                        </Can>
 
-                    <Can I="open" a="Feedback">
-                      <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/feedback"))}>
-                              Feedback
-                      </Button>
-                    </Can>
+                        <Can I="open" a="Feedback">
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => store.dispatch(push(this.props.match.url + "/feedback"))}
+                            startIcon={<FeedbackIcon/>}
+                            disableElevation
+                          >
+                        Feedback
+                          </Button>
+                        </Can>
 
-                    <Can I="read" a="Rubric">
-                      <Button variant="lightGreen" onClick={() => store.dispatch(push(this.props.match.url + "/rubric"))}>
-                                Rubric
-                      </Button>
-                    </Can>
+                        <Can I="read" a="Rubric">
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => store.dispatch(push(this.props.match.url + "/rubric"))}
+                            startIcon={<ListIcon/>}
+                            disableElevation
+                          >
+                        Rubric
+                          </Button>
+                        </Can>
+                    
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={this.handleExcel}
+                          startIcon={<ImportExportIcon/>}
+                          disableElevation
+                        >
+                        Export Results
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </Grid>
+            </Can>
 
-                    <Button variant="lightGreen" onClick={this.handleExcel}>
-                          Export Results
-                    </Button>
-
-                  </Card.Body>
-                </Card>
-              </div>
-            </div>
-          </Can>
-
-          {/*<Can I="read" a="Statistic">*/}
-          {/*  <div className={[globalStyles.sectionContainer, styles.statisticSectionContainer].join(" ")}>*/}
-          {/*    <div className={[globalStyles.sectionTitle, globalStyles.sectionTitleWithButton].join(" ")}>*/}
-          {/*      <h3 className={globalStyles.sectionTitleH}>*/}
-          {/*        Statistics*/}
-          {/*      </h3>*/}
-          {/*    </div>*/}
-          {/*    <Card>*/}
-          {/*      <Card.Body>*/}
-          {/*        Here comes the Stats*/}
-          {/*        /!*<CardColumns className={styles.stats}>*!/*/}
-          {/*        /!*  {testStats.map(stat => {*!/*/}
-          {/*        /!*    return (*!/*/}
-          {/*        /!*      <Statistic title={stat.title}*!/*/}
-          {/*        /!*        type={stat.type}*!/*/}
-          {/*        /!*        data={stat.data}*!/*/}
-          {/*        /!*        unit={stat.unit}/>*!/*/}
-          {/*        /!*    );*!/*/}
-          {/*        /!*  }).concat(this.state.stats.map((stat, index) => {*!/*/}
-          {/*        /!*    return (*!/*/}
-          {/*        /!*      <Statistic title={stat.title}*!/*/}
-          {/*        /!*        key={index}*!/*/}
-          {/*        /!*        type={stat.type}*!/*/}
-          {/*        /!*        data={stat.data}*!/*/}
-          {/*        /!*        unit={stat.unit}/>*!/*/}
-          {/*        /!*    );*!/*/}
-          {/*        /!*  }))}*!/*/}
-          {/*        /!*</CardColumns>*!/*/}
-          {/*      </Card.Body>*/}
-          {/*    </Card>*/}
-          {/*  </div>*/}
-          {/*</Can>*/}
-
-          <IssuesProject routeMatch={this.props.match} user={this.props.user} issues={this.state.issues}/>
+            {/*<IssuesProject routeMatch={this.props.match} user={this.props.user} issues={this.state.issues}/>*/}
+          </Grid>
         </div>
       </div>
     )

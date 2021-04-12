@@ -1,16 +1,18 @@
 import React, { Component } from 'react'
-import PropTypes from 'prop-types'
-
-import Card from 'react-bootstrap/Card'
 
 import styles from './home.module.css'
 import {URL_PREFIX} from "../../services/config";
 import {COURSES} from "../../services/endpoints";
-import {IoArrowForward} from "react-icons/io5";
 import store from "../../redux/store";
 import {push} from "connected-react-router";
 import classnames from "classnames";
 import globalStyles from "../helpers/global.module.css";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
+import AccessTimeIcon from '@material-ui/icons/AccessTime';
+import PersonIcon from '@material-ui/icons/Person';
+import Link from "@material-ui/core/Link";
+
 
 class CourseCard extends Component {
   constructor (props) {
@@ -23,52 +25,29 @@ class CourseCard extends Component {
 
   render () {
     return (
-      <Card className={[styles.card, styles.cardCourse].join(" ")}>
-        <Card.Body className={styles.cardBodyContainer}>
+      <Card elevation={1} className={classnames(styles.courseCard, globalStyles.cardShadow)}>
+        <CardContent>
           <div className={styles.cardBodyTitle}>
-            <h5>{this.props.data.name}</h5>
-            <div className={classnames(globalStyles.iconButton, styles.cardButtonContainer)} onClick={this.onClickSeeMore}>
-              <IoArrowForward size={26}/>
-            </div>
+            <Link href="#" color="primary" onClick={(event) => {
+              event.preventDefault();
+              this.onClickSeeMore();
+            }}>
+              <h4>{this.props.data.name}</h4>
+            </Link>
+
           </div>
           <div className={styles.cardBodyContent}>
-            <div>Active in year {(new Date(this.props.data.startAt)).getFullYear()}</div>
-            {/*<div className={styles.cardButtonContainer}>*/}
-            {/*  <div onClick={this.onClickSeeMore}>*/}
-            {/*    <IoArrowForward size={26}/>*/}
-            {/*  </div>*/}
-            {/*</div>*/}
+            <div className={classnames(globalStyles.flexRow, globalStyles.flexRowWithIcon)}>
+              <AccessTimeIcon/> <span>Active in {(new Date(this.props.data.startAt)).getFullYear()}</span>
+            </div>
+            <div className={classnames(globalStyles.flexRow, globalStyles.flexRowWithIcon)}>
+              <PersonIcon/> <span>3 students</span>
+            </div>
           </div>
-          {/*/!*<div className={styles.cardBodyCorner}>*!/</div>*/}
-        </Card.Body>
+        </CardContent>
       </Card>
     )
   }
-
-  // render () {
-  //   return (
-  //     <Card className={[styles.card, styles.cardCourse].join(" ")}>
-  //       <Card.Body className={styles.cardBodyContainer}>
-  //         <div className={styles.cardContentContainer}>
-  //           {/*<span className={[styles.cardContentType, styles.cardContentTypeCourse].join(" ")}>Course</span>*/}
-  //           <h5>{this.props.data.name}</h5>
-  //           <div>Active in year {(new Date(this.props.data.start_at)).getFullYear()}</div>
-  //         </div>
-  //         <div className={styles.cardButtonContainer}>
-  //           <div onClick={this.onClickSeeMore}>
-  //             <IoArrowForward size={26}/>
-  //           </div>
-  //         </div>
-  //
-  //         {/*/!*<div className={styles.cardBodyCorner}>*!/</div>*/}
-  //       </Card.Body>
-  //     </Card>
-  //   )
-  // }
 }
 
-CourseCard.propTypes = {
-  data: PropTypes.object
-}
-
-export default CourseCard
+export default CourseCard;

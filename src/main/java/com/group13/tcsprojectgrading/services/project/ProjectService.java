@@ -67,9 +67,7 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.group13.tcsprojectgrading.controllers.EmailUtils.createEmailWithAttachment;
 import static com.group13.tcsprojectgrading.controllers.EmailUtils.sendMessage;
@@ -170,7 +168,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public CourseParticipation getProjectParticipant(Long courseId, Long projectId, Long participantId) throws ResponseStatusException{
+    public CourseParticipation getProjectStudent(Long courseId, Long projectId, Long participantId) throws ResponseStatusException{
         CourseParticipation courseParticipation = courseParticipationRepository.findById_User_IdAndId_Course_Id(participantId, courseId);
         User user = userService.findById(participantId);
 
@@ -186,7 +184,7 @@ public class ProjectService {
             );
         }
 
-        courseParticipation.setSubmissions(submissionService.getSubmissionFromParticipants(projectId, user));
+        courseParticipation.setSubmissions(this.submissionService.getSubmissionFromStudents(projectId, user));
         return courseParticipation;
     }
 
@@ -240,11 +238,8 @@ public class ProjectService {
 
         // for each submission
         for (JsonNode submissionNode : submissionsArray) {
-//            try {
-//                Thread.sleep(1000);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
+            System.out.println(submissionNode);
+
             // 'unsubmitted' submission
             if (submissionNode.get("workflow_state").asText().equals("unsubmitted")) {
                 continue;
@@ -266,15 +261,23 @@ public class ProjectService {
 
             // get all submission attachments
             List<SubmissionAttachment> submissionAttachments = new ArrayList<>();
-            for (JsonNode node : submissionNode.get("attachments")) {
-                submissionAttachments.add(new SubmissionAttachment(node.toString()));
+
+            if (submissionNode.has("attachments")) {
+                for (JsonNode node : submissionNode.get("attachments")) {
+                    submissionAttachments.add(new SubmissionAttachment(node.toString()));
+                }
             }
 
             // if it's not a group submission
             if (submissionNode.get("group").get("id") == null || submissionNode.get("group").get("id").asText().equals("null")) {
-                TemporalAccessor accessor = DateTimeFormatter.ISO_INSTANT.parse(submissionNode.get("submitted_at").asText());
-                Instant i = Instant.from(accessor);
-                Date submittedAt = Date.from(i);
+                Date submittedAt;
+                if (!submissionNode.has("submitted_at") && !submissionNode.get("submitted_at").isNull()) {
+                    TemporalAccessor accessor = DateTimeFormatter.ISO_INSTANT.parse(submissionNode.get("submitted_at").asText());
+                    Instant i = Instant.from(accessor);
+                    submittedAt = Date.from(i);
+                } else {
+                    submittedAt = null;
+                }
 
                 // create a new submission
                 Submission submission = this.submissionService.addNewSubmission(
@@ -282,7 +285,9 @@ public class ProjectService {
                         submitter,
                         null,
                         submittedAt,
-                        submitter.getName() + " on " + submittedAt.toString());
+//                        submitter.getName() + " " + submittedAt.toString()
+                        submitter.getName()
+                );
 
                 // save comments
                 for (SubmissionComment comment : submissionComments) {
@@ -305,16 +310,22 @@ public class ProjectService {
                 this.assessmentService.createNewAssessmentWithLink(submission, submitter, project);
             } else {
                 if (!groupToSubmission.containsKey(submissionNode.get("group").get("id").asLong())) {
-                    TemporalAccessor accessor = DateTimeFormatter.ISO_INSTANT.parse(submissionNode.get("submitted_at").asText());
-                    Instant i = Instant.from(accessor);
-                    Date submittedAt = Date.from(i);
+                    Date submittedAt;
+                    if (!submissionNode.has("submitted_at") && !submissionNode.get("submitted_at").isNull()) {
+                        TemporalAccessor accessor = DateTimeFormatter.ISO_INSTANT.parse(submissionNode.get("submitted_at").asText());
+                        Instant i = Instant.from(accessor);
+                        submittedAt = Date.from(i);
+                    } else {
+                        submittedAt = null;
+                    }
 
                     // create a new submission
                     Submission submission = new Submission(
                             submitter,
                             submissionNode.get("group").get("id").asLong(),
                             project,
-                            submissionNode.get("group").get("name").asText() + " on " + submittedAt.toString(),
+//                            submissionNode.get("group").get("name").asText() + " on " + submittedAt.toString(),
+                            submissionNode.get("group").get("name").asText(),
                             submittedAt
                     );
 
@@ -475,8 +486,7 @@ public class ProjectService {
                     HttpStatus.NOT_FOUND, "rubric not found"
             );
         } else {
-            ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.writeValueAsString(rubric);
+            return Json.getObjectWriter().writeValueAsString(rubric);
         }
     }
 
@@ -513,8 +523,7 @@ public class ProjectService {
                     HttpStatus.NOT_FOUND, "rubric not found"
             );
         } else {
-            ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.writeValueAsString(rubric).getBytes(StandardCharsets.UTF_8);
+            return Json.getObjectWriter().writeValueAsString(rubric).getBytes(StandardCharsets.UTF_8);
         }
     }
 

@@ -7,6 +7,9 @@ import Main from "./src/components/Main";
 import "!style-loader!css-loader!react-toastify/dist/ReactToastify.css"
 import {ToastContainer} from 'react-toastify'
 import { PersistGate } from 'redux-persist/integration/react'
+import { StylesProvider } from '@material-ui/core/styles';
+import { ThemeProvider } from '@material-ui/styles';
+import {theme} from "./src/components/helpers/theme";
 
 
 class App extends React.Component {
@@ -16,7 +19,11 @@ class App extends React.Component {
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
             <ConnectedRouter history={history}>
-              <Main/>
+              <ThemeProvider theme={theme}>
+                <StylesProvider injectFirst>
+                  <Main/>
+                </StylesProvider>
+              </ThemeProvider>
               <ToastContainer/>
             </ConnectedRouter>
           </PersistGate>

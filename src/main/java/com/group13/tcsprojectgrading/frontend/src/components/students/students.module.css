@@ -1,6 +1,6 @@
 @value primary, secondary, ternary, quaternary, quinary, ultraLightGray, primaryShade, lightGray, senary, darkishGray, moderateGray from '../helpers/colors.css';
 
-.container {
+.screenContainer {
     margin-top: 2rem;
 }
 
@@ -9,21 +9,38 @@
     padding-top: 1rem;
     padding-bottom: 1rem;
     margin-bottom: 1rem;
-    border-bottom: 1px solid lightGray;
-}
-
-.toolbar > *:last-child {
-    margin-left: 0.5rem;
-}
-
-.groupsSearchBar {
-    margin-right: 0.5rem;
-    width: 100%;
 }
 
 .toolbarButton {
     margin-top: 1rem;
     display: flex;
+}
+
+/* table */
+.studentTable {
+    padding: 1rem;
+}
+
+.tableHeader th {
+    background-color: rgb(244, 246, 248);
+    border: none;
+    font-weight: 500;
+    color: rgb(99, 115, 129);
+}
+
+.tableHeader th:first-child {
+    border-radius: 0.5rem 0 0 0.5rem;
+}
+.tableHeader th:last-child {
+    border-radius: 0 0.5rem 0.5rem 0;
+}
+
+.tableBody td {
+    border: none;
+}
+
+.tableAvatarColumn {
+    width: 1rem;
 }
 
 

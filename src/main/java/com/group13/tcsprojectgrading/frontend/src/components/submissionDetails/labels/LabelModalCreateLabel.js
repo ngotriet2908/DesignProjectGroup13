@@ -1,15 +1,16 @@
 import React, {Component} from "react";
 import styles from "../submissionDetails.module.css";
-import {Form, ListGroupItem} from "react-bootstrap";
-import OverlayTrigger from "react-bootstrap/OverlayTrigger";
-import Badge from "react-bootstrap/Badge";
-import Tooltip from "react-bootstrap/Tooltip";
-import Button from "react-bootstrap/Button";
-import {IoAdd, IoChevronBack, IoCheckmark, IoCloseOutline, IoCheckmarkSharp} from "react-icons/io5";
 import globalStyles from "../../helpers/global.module.css";
 import classnames from 'classnames';
 import {request} from "../../../services/request";
-import {colors, colorStyles} from "./LabelRow";
+import {colors} from "./LabelRow";
+import withTheme from "@material-ui/core/styles/withTheme";
+import IconButton from "@material-ui/core/IconButton";
+import CloseIcon from "@material-ui/icons/Close";
+import TextField from "@material-ui/core/TextField";
+import Button from "@material-ui/core/Button";
+import DoneIcon from '@material-ui/icons/Done';
+import KeyboardArrowLeftIcon from '@material-ui/icons/KeyboardArrowLeft';
 
 
 class LabelModalCreateLabel extends Component {
@@ -19,6 +20,8 @@ class LabelModalCreateLabel extends Component {
 
     this.state = {
       selectedColor: 0,
+      name: "",
+      description: ""
     }
   }
 
@@ -30,8 +33,8 @@ class LabelModalCreateLabel extends Component {
 
   onAccept = () => {
     let label = {
-      name: this.formRef.current.nameInput.value,
-      description: this.formRef.current.descriptionInput.value,
+      name: this.state.name,
+      description: "",
       color: colors[this.state.selectedColor],
     }
 
@@ -49,61 +52,80 @@ class LabelModalCreateLabel extends Component {
     return (
       <>
         <div className={globalStyles.modalHeaderContainer}>
+          <IconButton onClick={this.props.toggleIsCreating}>
+            <KeyboardArrowLeftIcon/>
+          </IconButton>
+
+          <h2>Create label</h2>
+
+          <IconButton aria-label="close" className={globalStyles.modalCloseButton} onClick={this.onClose}>
+            <CloseIcon/>
+          </IconButton>
+        </div>
+
+        <div className={globalStyles.modalDescriptionContainer}>
           <div>
-            <div className={classnames(globalStyles.iconButton, styles.gradingCardTitleButton)}
-              onClick={this.props.toggleIsCreating}>
-              <IoChevronBack size={26}/>
-            </div>
-
-            <h2>Create label</h2>
-          </div>
-          <div className={globalStyles.modalHeaderContainerButton} onClick={this.props.closeModal}>
-            <IoCloseOutline size={30}/>
+                  Create a new shiny label
           </div>
         </div>
 
+        {/* body */}
         <div className={globalStyles.modalBodyContainer}>
-          <Form ref={this.formRef}>
-            <Form.Group controlId="nameInput">
-              <Form.Label>Name</Form.Label>
-              <Form.Control type="text" placeholder="Name" />
-            </Form.Group>
 
-            <Form.Group controlId="descriptionInput">
-              <Form.Label>Description</Form.Label>
-              <Form.Control as="textarea" rows={3} placeholder="Enter a description here"/>
-            </Form.Group>
+          <TextField
+            className={styles.modalRow}
+            label="Name"
+            placeholder="Enter name"
+            variant="outlined"
+            fullWidth
+            value={this.state.name}
+            onChange={(event) => this.setState({name: event.target.value})}
+          />
 
-            <Form.Group controlId="colorSelector">
-              <Form.Label>Color</Form.Label>
+          {/*<TextField*/}
+          {/*  className={styles.modalRow}*/}
+          {/*  label="Description"*/}
+          {/*  placeholder="Enter description of the issue"*/}
+          {/*  multiline*/}
+          {/*  variant="outlined"*/}
+          {/*  fullWidth*/}
+          {/*  rows={3}*/}
+          {/*  value={this.state.description}*/}
+          {/*  onChange={(event) => this.setState({description: event.target.value})}*/}
+          {/*/>*/}
 
-              <div className={styles.labelModalCreateColorsContainer}>
-                {colors.map((color, index) => {
-                  const isSelected = this.state.selectedColor === index;
+          <div className={styles.labelModalCreateColorsContainer}>
+            {colors.map((color, index) => {
+              const isSelected = this.state.selectedColor === index;
 
-                  return(
-                    <div key={index} className={classnames(styles.labelModalCreateColor, colorStyles[index])} onClick={() => this.handleColorClick(index)}>
-                      {isSelected &&
-                        <IoCheckmarkSharp size={20}/>
-                      }
-                    </div>
-                  )
-                })}
-              </div>
+              return(
+                <div
+                  key={index}
+                  className={classnames(styles.labelModalCreateColor)}
+                  style={{
+                    backgroundColor: this.props.theme.palette.labels[color]
+                  }}
+                  onClick={() => this.handleColorClick(index)}>
+                  {isSelected &&
+                  <DoneIcon/>
+                  }
+                </div>
+              )
+            })}
+          </div>
 
-            </Form.Group>
-
-          </Form>
         </div>
 
-        <div className={globalStyles.modalFooterContainer}>
-          <div className={globalStyles.modalFooterContainerButtonGroup}>
-            <Button variant="lightGreen" onClick={this.onAccept}>Create</Button>
-          </div>
+        {/* footer */}
+        <div className={classnames(globalStyles.modalFooterContainer)}>
+
+          <Button variant="contained" color="primary" disableElevation onClick={this.onAccept}>
+                Create
+          </Button>
         </div>
       </>
-    );
+    )
   }
 }
 
-export default LabelModalCreateLabel
+export default withTheme(LabelModalCreateLabel);

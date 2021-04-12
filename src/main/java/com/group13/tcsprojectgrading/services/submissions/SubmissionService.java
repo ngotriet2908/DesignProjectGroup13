@@ -236,15 +236,6 @@ public class SubmissionService {
     public Submission getSubmissionController(Long projectId, Long submissionId,
                                     List<PrivilegeEnum> privileges,
                                     Long graderId) throws JsonProcessingException, ResponseStatusException {
-//        Project project = this.projectRepository.findById(projectId).orElse(null);
-//
-//        if (project == null) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.NOT_FOUND, "Project not found"
-//            );
-//        }
-
-        // TODO I'm not sure whether to hide the submission or not (only grading?)
 
         // find submission
         Submission submission = this.submissionRepository.findById(submissionId).orElse(null);
@@ -682,20 +673,20 @@ public class SubmissionService {
         if (!returnAll) {
             return getSubmission(submissionId);
         } else {
-            return getSubmissionFromParticipants(projectId, userService.findById(participantId));
+            return getSubmissionFromStudents(projectId, userService.findById(participantId));
         }
 
 //        return resultNode
     }
 
     @Transactional
-    public List<Submission> getSubmissionFromParticipants(Long projectId, User user) throws ResponseStatusException {
+    public List<Submission> getSubmissionFromStudents(Long projectId, User user) throws ResponseStatusException {
         Set<AssessmentLink> links = assessmentService.getAssessmentsByProjectAndUser(projectId, user);
-        System.out.println(links.size());
         List<Submission> submissions = new ArrayList<>();
 
         links.forEach(assessmentLink -> {
             boolean flag = false;
+
             for(Submission submission: submissions) {
                 if (submission.getId().equals(assessmentLink.getId().getSubmission().getId())) {
                     flag = true;
@@ -705,6 +696,7 @@ public class SubmissionService {
                     }
                 }
             }
+
             if (!flag) {
                 Submission submission = assessmentLink.getId().getSubmission();
                 submission.setContainsCurrentAssessment(assessmentLink.isCurrent());

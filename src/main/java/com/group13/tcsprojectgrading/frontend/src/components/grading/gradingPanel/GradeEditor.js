@@ -1,16 +1,21 @@
 import React, { Component } from 'react'
 import styles from '../grading.module.css'
-import Card from "react-bootstrap/Card";
 import {connect} from "react-redux";
 import {findById} from "../../../redux/rubric/functions";
 import {isCriterion as isCriterionChecker} from "../../rubric/helpers";
-import Button from "react-bootstrap/Button";
 import {alterTempAssessmentGrade, saveGrade} from "../../../redux/grading/actions";
 import {findCriterion} from "../../../redux/grading/functions";
 import {request} from "../../../services/request";
-import {IoPencilOutline, IoCloseOutline, IoThumbsUpOutline, IoListOutline} from "react-icons/io5";
 import classnames from 'classnames';
 import globalStyles from "../../helpers/global.module.css";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
+import IconButton from "@material-ui/core/IconButton";
+import EditIcon from '@material-ui/icons/Edit';
+import CloseIcon from '@material-ui/icons/Close';
+import Button from "@material-ui/core/Button";
+import ListIcon from '@material-ui/icons/List';
+import TextField from "@material-ui/core/TextField";
 
 
 class GradeEditor extends Component {
@@ -87,57 +92,85 @@ class GradeEditor extends Component {
 
     return (
       <div className={styles.gradeEditorContainer}>
-        <Card className={styles.panelCard}>
-          <Card.Body className={styles.gradeViewerBody}>
+        <Card className={classnames(styles.panelCard, globalStyles.cardShadow)}>
+          <CardContent className={styles.gradeViewerBody}>
             <div className={classnames(styles.gradingCardTitle, styles.gradingCardTitleWithButton)}>
               <h4>Grade editor</h4>
 
-              {isCriterion &&
-              <div className={classnames(globalStyles.iconButton, styles.gradingCardTitleButton)}
-                onClick={this.toggleGradeEditor}>
+              {isCriterion && isGraded && !this.state.open &&
+                  <IconButton onClick={this.toggleGradeEditor}>
+                    <EditIcon/>
+                  </IconButton>
+              }
 
-                {isGraded && !this.state.open &&
-                  <IoPencilOutline size={26}/>
-                }
-
-                {isGraded && this.state.open &&
-                  <IoCloseOutline size={26}/>
-                }
-              </div>
+              {isCriterion && isGraded && this.state.open &&
+                <IconButton onClick={this.toggleGradeEditor}>
+                  <CloseIcon/>
+                </IconButton>
               }
             </div>
 
             {isCriterion ?
               (!isGraded || this.state.open ?
                 <div className={styles.gradeEditorContentContainer}>
-                  <div className={styles.gradeEditorCardItem}>
-                    Grade
-                    <input type="number" value={this.props.criterion.grade} onChange={this.onChangeGrade}/>
-                  </div>
-                  <div className={classnames(styles.gradeEditorCardItem, styles.gradeEditorCardItemFill)}>
-                    Notes (optional)
-                    <textarea placeholder={"Provide explanation for the grade or any additional notes that will be visible to students"} value={this.props.criterion.comment} onChange={this.onChangeComment}/>
-                  </div>
+                  <TextField
+                    label="Grade"
+                    variant="outlined"
+                    type={"number"}
+                    onChange={this.onChangeGrade}
+                    value={this.props.criterion.grade}
+                    className={styles.gradeEditorCardItem}
+                    fullWidth
+                  />
+
+                  <TextField
+                    label="Notes (optional)"
+                    variant="outlined"
+                    placeholder={"Provide explanation for the grade or any additional notes that will be visible to students"}
+                    value={this.props.criterion.comment}
+                    onChange={this.onChangeComment}
+                    className={classnames(styles.gradeEditorCardItem, styles.gradeEditorCardItemFill)}
+                    InputProps={{
+                      className: classnames(styles.gradeEditorCardItemFill)
+                    }}
+                    // rows={2}
+                    fullWidth
+                    multiline
+                  />
+
                   <div className={styles.gradeEditorCardFooter}>
-                    <Button className={styles.gradeEditorCardButton} variant="linkLightGray"
-                      onClick={this.resetGrade}>Clear</Button>
-                    <Button className={styles.gradeEditorCardButton} variant="lightGreen" onClick={this.handleSaveGrade}>Save</Button>
+                    <Button
+                      className={styles.gradeEditorCardButton}
+                      onClick={this.resetGrade}
+                      disableElevation
+                    >
+                      Clear
+                    </Button>
+                    <Button
+                      className={styles.gradeEditorCardButton}
+                      variant="contained"
+                      color="primary"
+                      onClick={this.handleSaveGrade}
+                      disableElevation
+                    >
+                      Save
+                    </Button>
                   </div>
+
                 </div>
                 :
                 <div className={styles.gradeEditorGradedContainer}>
-                  <IoThumbsUpOutline size={40}/>
                   <h6>
                     Graded! Click on the pencil button to regrade
                   </h6>
                 </div>)
               :
               <div className={styles.gradeViewerNotGraded}>
-                <IoListOutline size={40}/>
+                <ListIcon fontSize="large" />
                 <h6>Choose a criterion</h6>
               </div>
             }
-          </Card.Body>
+          </CardContent>
         </Card>
       </div>
     )

@@ -4,16 +4,18 @@ import styles from './rubric.module.css'
 import {connect} from "react-redux";
 
 import RubricOutline from "./RubricOutline";
-import RubricEditor from "./RubricEditor";
-import RubricBottomBar from "./RubricBottomBar";
 
 import {request} from "../../services/request";
 import {BASE } from "../../services/endpoints";
-import {Form} from 'react-bootstrap'
 
-import {resetUpdates, saveRubric, saveRubricTemp, setCurrentPath, setSelectedElement} from "../../redux/rubric/actions";
-import {Spinner} from "react-bootstrap";
-import RubricViewer from "./RubricViewer";
+import {
+  resetUpdates,
+  saveRubric,
+  saveRubricTemp,
+  setCurrentPath,
+  setEditingRubric,
+  setSelectedElement
+} from "../../redux/rubric/actions";
 
 import globalStyles from '../helpers/global.module.css';
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
@@ -22,6 +24,21 @@ import {setCurrentLocation} from "../../redux/navigation/actions";
 import {Can, ability, updateAbility} from "../permissions/ProjectAbility";
 import classnames from 'classnames';
 import * as FileSaver from 'file-saver';
+import CircularProgress from "@material-ui/core/CircularProgress";
+import Breadcrumbs from "../helpers/Breadcrumbs";
+import StickyHeader from "../helpers/StickyHeader";
+import Grid from "@material-ui/core/Grid";
+import RubricPaper from "./RubricPaper";
+import Button from "@material-ui/core/Button";
+import IconButton from "@material-ui/core/IconButton";
+import EditIcon from '@material-ui/icons/Edit';
+import GetAppIcon from '@material-ui/icons/GetApp';
+import PictureAsPdfIcon from '@material-ui/icons/PictureAsPdf';
+import PublishIcon from '@material-ui/icons/Publish';
+import SaveIcon from '@material-ui/icons/Save';
+import withTheme from "@material-ui/core/styles/withTheme";
+import RubricUploadModal from "./RubricUploadModal";
+
 
 class Rubric extends Component {
   constructor (props) {
@@ -29,7 +46,9 @@ class Rubric extends Component {
 
     this.state = {
       isLoaded: false,
-      project: {}
+      project: {},
+
+      showUploadModal: false,
     }
   }
 
@@ -115,7 +134,6 @@ class Rubric extends Component {
   }
 
   exportRubricFile = () => {
-    console.log("download")
     request(`${BASE}courses/${this.props.match.params.courseId}/projects/${this.props.match.params.projectId}/rubric/downloadFile`, "GET", null ,"application/octet-stream")
       .then(response => {
         if (response.status === 200) {
@@ -132,31 +150,153 @@ class Rubric extends Component {
       });
   }
 
+  onClickEdit = () => {
+    // get rubric backup
+    let rubricBackup = this.props.rubric;
+    this.props.saveRubricTemp(rubricBackup);
+    this.props.setEditingRubric(true);
+  }
+
+  onClickSaveButton = () => {
+    if (this.props.updates.length === 0) {
+      this.props.saveRubricTemp(null);
+      this.props.setEditingRubric(false);
+      this.props.resetUpdates();
+    } else {
+      request(BASE + "courses/" + this.props.match.params.courseId + "/projects/" + this.props.match.params.projectId + "/rubric", "PATCH", this.props.updates)
+        .then(data => {
+          if (data.status === 200) {
+            this.props.setEditingRubric(false);
+            this.props.saveRubricTemp(null);
+            this.props.resetUpdates();
+          } else {
+            console.log("Error updating rubric.")
+          }
+        })
+        .catch(error => {
+          console.error(error.message);
+        });
+    }
+  }
+
+  onClickCancelButton = () => {
+    // get rubric backup
+    let rubricBackup = this.props.rubricTemp;
+
+    this.props.setSelectedElement(rubricBackup.id);
+    this.props.saveRubricTemp(null);
+    this.props.saveRubric(rubricBackup);
+    this.props.setEditingRubric(false);
+  }
+
+  controlButtons = () => {
+    return(
+      <div className={classnames(styles.outlineHeaderContainer)}>
+        {!this.props.isEditing ?
+          (<div className={styles.outlineHeaderButtonContainer}>
+            <Can I="write" a="Rubric">
+              <IconButton aria-label="edit" onClick={this.onClickEdit}>
+                <EditIcon />
+              </IconButton>
+            </Can>
+
+            <Can I="download" a="Rubric">
+              <IconButton aria-label="export" onClick={this.exportRubricFile}>
+                <GetAppIcon />
+              </IconButton>
+            </Can>
+
+            <Can I="write" a="Rubric">
+              <IconButton aria-label="import" onClick={this.toggleShowUploadModal}>
+                <PublishIcon />
+              </IconButton>
+            </Can>
+
+            <Can I="download" a="Rubric">
+              <IconButton aria-label="pdf" onClick={this.downloadRubric}>
+                <PictureAsPdfIcon />
+              </IconButton>
+            </Can>
+          </div>)
+          :
+          (<div className={styles.outlineHeaderButtonContainer}>
+            <Can I="write" a="Rubric">
+              <Button
+                variant="contained"
+                onClick={this.onClickCancelButton}
+                disableElevation
+              >
+                Cancel
+              </Button>
+
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={this.onClickSaveButton}
+                startIcon={<SaveIcon/>}
+                disableElevation
+              >
+                Save
+              </Button>
+            </Can>
+          </div>)
+        }
+      </div>
+    )
+  }
+
+  // upload rubric modal
+
+  toggleShowUploadModal = () => {
+    this.setState(prevState => ({
+      showUploadModal: !prevState.showUploadModal
+    }))
+  }
+
   render () {
     if (!this.state.isLoaded) {
-      return(
-        <div className={globalStyles.container}>
-          <Spinner className={globalStyles.spinner} animation="border" role="status">
-            <span className="sr-only">Loading...</span>
-          </Spinner>
+      return (
+        <div className={globalStyles.screenContainer}>
+          <CircularProgress className={globalStyles.spinner}/>
         </div>
       )
     }
 
     return (
-      <div className={classnames(styles.container)}>
-        <div className={styles.outline}>
-          <RubricOutline exportRubricFile={this.exportRubricFile} downloadRubric={this.downloadRubric} courseId={this.props.match.params.courseId} projectId={this.props.match.params.projectId}/>
-        </div>
+      <>
+        <Breadcrumbs>
+          <Breadcrumbs.Item active>Home</Breadcrumbs.Item>
+        </Breadcrumbs>
 
-        <div className={styles.editor}>
-          {this.props.isEditing ?
-            <RubricEditor/>
-            :
-            <RubricViewer downloadRubric={this.downloadRubric}/>
+        <StickyHeader
+          title={"Rubric"}
+          buttons={
+            this.controlButtons()
           }
-        </div>
-      </div>
+        />
+
+        <Grid className={classnames(globalStyles.innerScreenContainer, styles.mainContainer)} container>
+          <Grid item xs={5}>
+            <RubricOutline
+              courseId={this.props.match.params.courseId}
+              projectId={this.props.match.params.projectId}
+              handleEdit={this.onClickEdit}
+            />
+          </Grid>
+
+          <Grid item xs={7}>
+            <RubricPaper/>
+          </Grid>
+        </Grid>
+
+        <RubricUploadModal
+          show={this.state.showUploadModal}
+          toggleShow={this.toggleShowUploadModal}
+          updateRubric={this.props.saveRubric}
+          courseId={this.props.match.params.courseId}
+          projectId={this.props.match.params.projectId}
+        />
+      </>
     )
   }
 }
@@ -164,7 +304,10 @@ class Rubric extends Component {
 const mapStateToProps = state => {
   return {
     rubric: state.rubric.rubric,
+    selectedElement: state.rubric.selectedElement,
     isEditing: state.rubric.isEditing,
+    rubricTemp: state.rubric.rubricTemp,
+    updates: state.rubric.updates,
     user: state.users.self,
   };
 };
@@ -175,10 +318,11 @@ const actionCreators = {
   setSelectedElement,
   setCurrentLocation,
   resetUpdates,
-  setCurrentPath
+  setCurrentPath,
+  setEditingRubric
 }
 
-export default connect(mapStateToProps, actionCreators)(Rubric)
+export default connect(mapStateToProps, actionCreators)(withTheme(Rubric));
 
 
 

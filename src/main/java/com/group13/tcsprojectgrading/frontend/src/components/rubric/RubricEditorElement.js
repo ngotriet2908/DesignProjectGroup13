@@ -10,13 +10,14 @@ import {
   alterTitle, deleteAllElements, deleteElement, setCurrentPath,
   setSelectedElement
 } from "../../redux/rubric/actions";
+import classnames from 'classnames';
 
 import PropTypes from 'prop-types';
 import {isBlock, isCriterion} from "./helpers";
-import RubricEditorElementChildren from "./RubricEditorElementChildren";
 import RubricEditorElementGrade from "./RubricEditorElementGrade";
-import {IoListOutline, IoTrashBinOutline} from "react-icons/io5";
 import debounce from "lodash/debounce"
+import FormatAlignLeftIcon from "@material-ui/icons/FormatAlignLeft";
+import TextField from "@material-ui/core/TextField";
 
 class RubricEditorElement extends Component {
   constructor (props) {
@@ -32,15 +33,10 @@ class RubricEditorElement extends Component {
     // rubric's header
     if (!this.props.data.hasOwnProperty("content")) {
       return(
-        <div className={styles.viewerContainer}>
-          <div className={styles.viewerHeader}>
-            <h2>Rubric</h2>
-          </div>
-
-          <div className={styles.viewerBodyEmpty}>
-            <IoListOutline size={40}/>
-            <h6>Choose a criterion</h6>
-          </div>
+        <div className={styles.viewerBodyEmpty}>
+          <FormatAlignLeftIcon/>
+          {/* todo 'create a criterion' */}
+          <p>Choose a criterion</p>
         </div>
       )
     }
@@ -57,17 +53,22 @@ class RubricEditorElement extends Component {
         </div>
 
         <div className={styles.viewerSectionContainer}>
-          <div className={styles.viewerSectionTitle}>
-            <h4>Title</h4>
-          </div>
-          <input type="text" name="title" value={this.props.data.content.title} onChange={this.onChangeTitle}/>
+          <TextField
+            id="outlined-basic"
+            label="Title"
+            variant="outlined"
+            value={this.props.data.content.title}
+            onChange={this.onChangeTitle}
+            className={styles.viewerSectionContainerField}
+          />
         </div>
 
         {isCriterion(this.props.data.content.type) &&
-        <div className={styles.viewerSectionContainer}>
-          <div className={styles.viewerSectionTitle}>
-            <h4>Text</h4>
-          </div>
+        <div className={classnames(styles.viewerSectionContainer, styles.viewerSectionContainerQuill)}>
+          {/*<div className={styles.viewerSectionTitle}>*/}
+          {/*  <h4>Text</h4>*/}
+          {/*</div>*/}
+
           <RubricEditorRichText
             elementId={this.props.data.content.id}
             key={this.props.data.content.id}

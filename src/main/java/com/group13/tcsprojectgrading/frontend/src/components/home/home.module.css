@@ -1,30 +1,19 @@
 @value primary, secondary, ultraLightGray, ternary, quaternary, quinary, primaryShade, lightGray from '../helpers/colors.css';
 
-.container {
-    display: grid;
-    grid-template-columns: 47% 47%;
-    column-gap: 6%;
+.screenContainer {
+    position: relative;
+    padding: 0 2rem 0 2rem;
+    flex: 1;
 }
 
-/* card */
-.card {
-    position:relative;
-    width: 100%;
-    margin-bottom: 1rem;
-
-    min-height: 10rem;
+.cardCourse {
+    /*width: 20rem;*/
+    height: 12rem;
 }
 
 .cardBodyContainer {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-}
-
-.cardBodyContent {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-end;
     justify-content: space-between;
 }
 
@@ -60,7 +49,6 @@
     width: 100%;
     text-align: center;
     border: 2px dashed rgba(0,0,0,.125);
-
     min-height: 10rem;
 }
 
@@ -82,4 +70,53 @@
 .emptyCardContentIcon {
     color: secondary;
     margin-bottom: 1rem;
+}
+
+
+
+/* left column */
+
+
+/* course card */
+.courseContainerContent {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.emptyCard {
+    cursor: pointer;
+}
+
+.courseCard {
+    height: 12rem;
+}
+
+
+/* to-do sidebar */
+.todoContainer {
+    position: sticky;
+
+    top: 3rem;
+    right: 0;
+
+    margin-top: 1rem;
+    padding: 5rem 0 0 0;
+
+    min-height: 30rem;
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.todoCard {
+    /*width: 30rem;*/
+    flex: 1;
+    height: 100%;
+}
+
+.todoCardBody {
+
 }

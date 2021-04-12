@@ -1,22 +1,21 @@
 @value primary, secondary, ternary, quaternary, quinary, senary, senaryShade, pinkishGray, ultraLightGray, primaryShade, lightGray, darkishGray, moderateGray from '../helpers/colors.css';
 
-.container {
+.screenContainer {
     width: 100%;
     position: relative;
     margin-top: 5rem;
-    min-height: calc(100% - 5rem);
-    background-color: ultraLightGray;
+    height: calc(100% - 5rem);
 
-    display: flex;
-    flex-direction: row;
+    box-sizing: border-box;
 
+    padding: 0 0.25rem;
+}
+
+.screenContainer > * {
     box-sizing: border-box;
 }
 
-.container > * {
-    box-sizing: border-box;
-}
-
+/* control bar */
 .controlBarContainer {
     position: fixed;
     top: 0;
@@ -31,8 +30,6 @@
     border-bottom: 1px solid #dfdfdf;
 }
 
-
-/* control bar */
 .controlBarBody {
     width: 100%;
     height: 100%;
@@ -40,6 +37,10 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+}
+
+.controlBarBody h4 {
+    margin: 0;
 }
 
 .controlBarButton {
@@ -61,10 +62,8 @@
 /* rubric panel */
 .rubricPanelContainer {
     width: 100%;
-    /*border-right: 1px solid #dfdfdf;*/
-    /*margin: 0.5rem 0.25rem 0.5rem 0.5rem;*/
     padding: 0.5rem;
-    flex: 2 2;
+    height: 100%;
 }
 
 .panelCard {
@@ -76,6 +75,7 @@
 .gradingCardTitle {
     margin-bottom: 0.5rem;
     height: 48px;
+
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -119,13 +119,11 @@
     height: 100%;
     width: 100%;
 
-    overflow: scroll;
+    overflow: auto;
     white-space: nowrap;
     text-overflow: ellipsis;
     position: relative;
-    /*margin-top: 1rem;*/
 
-    /*flex: 1;*/
     display: flex;
     flex-direction: column;
 
@@ -227,7 +225,6 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    color: primary;
 }
 
 /* rubric viewer */
@@ -258,7 +255,7 @@
 }
 
 .rubricViewerHeader h3 {
-    margin: 0 0 0 0.3rem;
+    margin: 0;
 }
 
 .rubricViewerSectionContainer {
@@ -289,9 +286,9 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    padding: 0.5rem;
 
-    flex: 1 1;
+    padding: 0.5rem;
+    height: 100%;
 }
 
 /* grade editor */
@@ -313,7 +310,7 @@
 }
 
 .gradeViewerBodyScroll {
-    overflow: scroll;
+    overflow: auto;
 }
 
 .gradeEditorContentContainer {
@@ -326,34 +323,14 @@
     margin-bottom: 1rem;
 }
 
-.gradeEditorCardItem input, .gradeEditorCardItem textarea, .gradeEditorCardItem select {
-    box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-
-    cursor: text;
-    padding: 6px 12px;
-
-    width: 100%;
-
-    margin-top: 0.3rem;
-}
-
-.gradeEditorCardItem label {
-    margin: 0;
-}
-
 .gradeEditorCardItemFill {
     flex: 1;
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
 }
 
-.gradeEditorCardItemFill textarea {
-    /*height: 100%;*/
-    /*box-sizing: border-box;*/
-    flex: 1;
-}
 
 .gradeEditorCardFooter {
     display: flex;
@@ -414,10 +391,11 @@
 /* grade viewer */
 .gradeViewerContainer {
     flex: 1;
-    margin-top: 0.5rem;
+    margin-top: 1rem;
 }
 
 .gradeViewerBody {
+    height: 100%;
     display: flex;
     flex-direction: column;
 }
@@ -427,7 +405,7 @@
     border-radius: 0.5rem;
     margin: 0.5rem 0;
 
-    border: 1px solid moderateGray;
+    /*border: 1px solid moderateGray;*/
 
     cursor: pointer;
 
@@ -437,7 +415,7 @@
 }
 
 .gradeViewerRowActive {
-    border: 1px solid primary;
+    /*border: 1px solid primary;*/
 }
 .gradeViewerRowActive .gradeViewerRowIcon {
     color: primary;
@@ -446,10 +424,6 @@
 
 .gradeViewerRowIcon {
     margin-right: 1rem;
-}
-
-.gradeViewerRowContent {
-
 }
 
 .gradeViewerRowExplanation {
@@ -473,6 +447,15 @@
 }
 
 
+.gradingPanelContainer {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+
+    padding: 0.5rem;
+    height: 100%;
+}
+
 
 
 
@@ -481,17 +464,28 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    padding: 0.5rem;
+
+    height: 100%;
+
+    /*padding: 0.5rem;*/
     flex: 1 1;
+    /*overflow: hidden;*/
 }
 
 /* issues */
 .issuesContainer {
     flex: 3;
+    /*overflow-y: auto;*/
+}
+
+.issuesTitle {
+    margin: 0.5rem;
 }
 
 .issueCard {
-    padding: 1rem;
+    min-height: 6rem;
+    width: calc(100% - 1rem);
+    margin: 0.5rem;
 }
 
 .issueCard:not(:last-child) {
@@ -517,7 +511,7 @@
 }
 
 .issueCardBadges {
-    margin-bottom: 0.3rem;
+    margin: 0.5rem 0;
 }
 
 .issuesCardExpanded {
@@ -525,12 +519,7 @@
 }
 
 .issuesCardExpandButton svg {
-    color: #5b5b5b;
     transition: transform .1s ease-in-out;
-}
-
-.issuesCardExpandButton:hover svg {
-    color: white;
 }
 
 .issuesCardExpanded .issuesCardExpandButton svg {
@@ -538,17 +527,17 @@
 }
 
 .issueCardSolution {
-    margin-top: 0.5rem;
+    margin-top: 1rem;
 }
 
 .issueCardSolution h5 {
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.5rem;
 }
 
-/*.badge {*/
-/*    margin-left: 0.5rem;*/
-/*}*/
-
+/* modal */
+.modalRow:not(:last-child) {
+    margin-bottom: 1rem;
+}
 
 
 /* final grade */
@@ -556,6 +545,7 @@
     margin-top: 0.5rem;
     flex: 1;
 }
+
 
 
 

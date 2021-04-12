@@ -9,11 +9,11 @@ import NotFound from "./error/NotFound";
 import CourseRoutes from "./course/CourseRoutes";
 import styles from "./main.module.css";
 import Sidebar from "./navigation/Sidebar";
-import {Spinner} from "react-bootstrap";
 
 import globalStyles from './helpers/global.module.css';
-import store from "../redux/store";
-import {push} from "connected-react-router";
+import classnames from 'classnames';
+import {connect} from "react-redux";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 
 class Main extends React.Component {
@@ -31,7 +31,7 @@ class Main extends React.Component {
 
   signIn = () => {
     request("/api/auth/session")
-      .then(response => {
+      .then(() => {
         // this.props.setAuthState(true);
         this.setState({
           isLoaded: true,
@@ -48,10 +48,8 @@ class Main extends React.Component {
   render() {
     if (!this.state.isLoaded) {
       return(
-        <div className={globalStyles.container}>
-          <Spinner className={globalStyles.spinner} animation="border" role="status">
-            <span className="sr-only">Loading...</span>
-          </Spinner>
+        <div className={globalStyles.screenContainer}>
+          <CircularProgress className={globalStyles.spinner}/>
         </div>
       )
     }
@@ -62,17 +60,18 @@ class Main extends React.Component {
           <SignIn/>
         </Route>
         <Route>
-          <div className={styles.container}>
+          <div className={globalStyles.appContainer}>
             <Sidebar/>
-            <div className={styles.contentContainer}>
+            <div className={classnames(globalStyles.mainContainer, !this.props.sidebarHidden ? styles.contentContainerShifted : styles.contentContainerStable)}>
               <Switch>
                 <Route path={URL_PREFIX + "/courses/:courseId"} component={CourseRoutes}/>
+
                 <Route exact path={URL_PREFIX + "/"}>
                   <Home/>
                 </Route>
+
                 <Route>
                   <Redirect to={URL_PREFIX + "/404/"}/>
-                  {/*{store.dispatch(push(URL_PREFIX + "/404/"))}*/}
                   <NotFound/>
                 </Route>
               </Switch>
@@ -84,4 +83,10 @@ class Main extends React.Component {
   }
 }
 
-export default Main;
+const mapStateToProps = state => {
+  return {
+    sidebarHidden: state.navigation.sidebarHidden,
+  };
+};
+
+export default connect(mapStateToProps, null)(Main)

@@ -10,16 +10,15 @@
     padding-top: 1rem;
     padding-bottom: 1rem;
     margin-bottom: 1rem;
-    border-bottom: 1px solid lightGray;
 }
 
-/*.toolbar > *:last-child {*/
-/*    margin-left: 0.5rem;*/
-/*}*/
-
-.groupsSearchBar {
-    width: 100%;
+.filter {
+    min-width: 10rem;
+    margin-left: 0.5rem;
 }
+
+
+
 
 /* grader card */
 .graderContainer {
@@ -35,11 +34,28 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    /*margin-bottom: 1rem;*/
+    margin-bottom: 1rem;
+}
+
+.graderBodyContainerCollapsed .graderHeader {
+    margin-bottom: 0;
 }
 
 .graderHeader h4 {
     margin: 0;
+    display: inline-block;
+}
+
+.graderHeaderTitle {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+}
+
+.graderHeaderSecondary {
+    color: gray;
+    font-size: 1.2rem;
+    margin-left: 1rem;
 }
 
 .graderHeaderButtonContainer {
@@ -50,11 +66,6 @@
 
 .graderHeaderButtonContainer > button {
     margin-right: 0.5rem;
-}
-
-.collapseButton:hover {
-    color: inherit;
-    background-color: ultraLightGray;
 }
 
 .graderContent {
@@ -91,11 +102,38 @@
     padding: 0.7rem 0;
 }
 
-/*.grayButton {*/
-/*    color: */
-/*}*/
 
 
+
+
+/* table */
+/* table */
+.table {
+    /*padding: 1rem;*/
+}
+
+.tableHeader th {
+    background-color: rgb(244, 246, 248);
+    border: none;
+    font-weight: 500;
+    color: rgb(99, 115, 129);
+}
+
+.tableHeader th:first-child {
+    border-radius: 0.5rem 0 0 0.5rem;
+}
+.tableHeader th:last-child {
+    border-radius: 0 0.5rem 0.5rem 0;
+}
+
+.tableBody td {
+    border: none;
+}
+
+.emptyTable {
+    border-radius: 0.5rem;
+    margin: 2rem 0 1rem 0.5rem;
+}
 
 
 

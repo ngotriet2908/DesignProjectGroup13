@@ -1,6 +1,6 @@
 @value primary, secondary, ternary, quaternary, quinary, ultraLightGray, primaryShade, lightGray, senary, darkishGray, moderateGray from '../helpers/colors.css';
 
-.container {
+.screenContainer {
     padding: 2rem;
     width: 100%;
 }
@@ -35,6 +35,7 @@
 }
 
 .submissionCardLabels {
+    margin-top: 1rem;
     margin-bottom: 1rem;
 }
 
@@ -47,36 +48,14 @@
     padding-top: 1rem;
     padding-bottom: 1rem;
     margin-bottom: 1rem;
-    border-bottom: 1px solid lightGray;
 }
 
-.toolbar > *:last-child {
+.filter {
+    min-width: 10rem;
     margin-left: 0.5rem;
 }
 
-.groupsSearchBar {
-    margin-right: 0.5rem;
-    width: 100%;
-}
-
-.toolbarButton {
-    margin-top: 1rem;
-    display: flex;
-}
-
-:global(.dropdown-item.active) {
-    background-color: primary;
-}
-
-:global(.dropdown-item:active) {
-    background-color: primary;
-}
-
 /* list */
-
-.submissionCard {
-    width: 100%;
-}
 
 .submissionCard:not(:last-child) {
     /*margin-bottom: 0.5rem;*/
@@ -132,8 +111,8 @@
     background-color: senary;
 }
 
-.submissionCardBody {
-
+.cardBodyContent {
+    margin: 1rem 0 2rem 0;
 }
 
 .goTaskButton {

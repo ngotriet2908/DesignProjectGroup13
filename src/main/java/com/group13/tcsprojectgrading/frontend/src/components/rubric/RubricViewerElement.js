@@ -2,16 +2,10 @@ import React, { Component } from 'react'
 
 import styles from './rubric.module.css'
 import {connect} from "react-redux";
-import {isBlock, isCriterion} from "./helpers";
-import Button from "react-bootstrap/Button";
+import {isCriterion} from "./helpers";
 import {saveRubric, saveRubricTemp, setEditingRubric} from "../../redux/rubric/actions";
 import RubricViewerElementGrade from "./RubricViewerElementGrade";
-import RubricViewerElementChildren from "./RubricViewerElementChildren";
-import {Can, ability, updateAbility} from "../permissions/ProjectAbility";
-import {IoPencil, IoCloudDownloadOutline, IoListOutline} from "react-icons/io5";
-import {request} from "../../services/request";
-import {BASE} from "../../services/endpoints";
-import { saveAs } from 'file-saver';
+import FormatAlignLeftIcon from '@material-ui/icons/FormatAlignLeft';
 
 
 class RubricViewerElement extends Component {
@@ -19,27 +13,14 @@ class RubricViewerElement extends Component {
     super(props);
   }
 
-  onClickEdit = () => {
-    // get rubric backup
-    let rubricBackup = this.props.rubric;
-    this.props.saveRubricTemp(rubricBackup);
-    this.props.setEditingRubric(true);
-  }
-
   render () {
     // rubric's header
     if (!this.props.data.hasOwnProperty("content")) {
       return(
-        <div className={styles.viewerContainer}>
-          <div className={styles.viewerHeader}>
-            <h2>Rubric</h2>
-          </div>
-
-          <div className={styles.viewerBodyEmpty}>
-            <IoListOutline size={40}/>
-            <h6>Choose a criterion</h6>
-          </div>
-          {/*<RubricViewerElementChildren data={this.props.data}/>*/}
+        <div className={styles.viewerBodyEmpty}>
+          <FormatAlignLeftIcon/>
+          {/* todo 'create a criterion' */}
+          <p>Choose a criterion</p>
         </div>
       )
     }
@@ -74,10 +55,6 @@ class RubricViewerElement extends Component {
         {isCriterion(this.props.data.content.type) && this.props.data.content.grade &&
           <RubricViewerElementGrade id={this.props.data.content.id} data={this.props.data.content.grade}/>
         }
-
-        {isBlock(this.props.data.content.type) &&
-        <RubricViewerElementChildren data={this.props.data}/>
-        }
       </div>
     )
   }
@@ -85,9 +62,7 @@ class RubricViewerElement extends Component {
 
 const mapStateToProps = state => {
   return {
-    // isEditing: state.rubric.isEditing,
     rubric: state.rubric.rubric,
-    // selectedElement: state.rubric.selectedElement
   };
 };
 

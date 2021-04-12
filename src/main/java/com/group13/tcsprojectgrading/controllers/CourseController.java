@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.security.Principal;
 import java.text.ParseException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/courses")
@@ -41,7 +42,7 @@ class CourseController {
     Returns the list of courses that were imported and are available in the app's database
      */
     @RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
-    protected ResponseEntity<List<Course>> courses(Principal principal) throws JsonProcessingException {
+    protected ResponseEntity<List<Course>> getCourses(Principal principal) throws JsonProcessingException {
         List<Course> courses = this.courseService.getCourses(Long.valueOf(principal.getName()));
         return new ResponseEntity<>(courses, HttpStatus.OK);
     }
@@ -111,19 +112,6 @@ class CourseController {
         return this.courseService.getCourse(courseId, Long.valueOf(principal.getName()));
     }
 
-//    @RequestMapping(value = "/{courseId}/participants", method = RequestMethod.GET, produces = "application/json")
-//    @ResponseBody
-//    protected List<CourseParticipation> getProjectParticipants(@PathVariable Long courseId, Principal principal) throws JsonProcessingException, ParseException {
-//
-////        List<PrivilegeEnum> privileges = this.GradingParticipationService
-////                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
-////        if (!(privileges != null && privileges.contains(PROJECT_READ))) {
-////            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
-////        }
-//
-//        return this.courseService.getCourseStudents(courseId);
-//    }
-
     /*
     Returns all projects that the user can import (i.e. the list of course's projects from Canvas)
      */
@@ -162,21 +150,28 @@ class CourseController {
     Returns all teachers and TAs participating in the course.
      */
     @RequestMapping(value = "/{courseId}/graders", method = RequestMethod.GET, produces = "application/json")
-    protected List<User> getCourseUsers(
+    protected ResponseEntity<?> getCourseUsers(
             @PathVariable Long courseId,
             @RequestParam(required = false) Long id,
-            Principal principal
+            Principal principal,
+            @RequestParam(name = "ta", required = false) String tas
     ) {
 
         RoleEnum roleEnum = this.courseService.getCourseRole(courseId, Long.valueOf(principal.getName()));
         if (!(roleEnum != null &&
                 ((roleEnum.equals(RoleEnum.TEACHER)) ||
-//                (roleEnum.equals(RoleEnum.TA)) ||
                 (roleEnum.equals(RoleEnum.TA_GRADING)))
         )) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
         }
 
-        return this.courseService.getCourseTeachersAndTAsAsUsers(courseId);
+        if (tas != null && tas.equals("true")) {
+            List<User> graders = this.courseService.getCourseTAsAsUsers(courseId);
+            return new ResponseEntity<>(graders, HttpStatus.OK);
+        } else {
+            List<User> graders = this.courseService.getCourseTeachersAndTAsAsUsers(courseId);
+            return new ResponseEntity<>(graders, HttpStatus.OK);
+        }
+
     }
 }

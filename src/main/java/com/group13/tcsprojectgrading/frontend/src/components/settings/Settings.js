@@ -3,7 +3,6 @@ import styles from "./settings.module.css";
 import {URL_PREFIX} from "../../services/config";
 
 import {connect} from "react-redux";
-import {Spinner} from "react-bootstrap";
 import store from "../../redux/store";
 import {push} from "connected-react-router";
 import {deleteRubric, saveRubric} from "../../redux/rubric/actions";
@@ -13,9 +12,17 @@ import Breadcrumbs from "../helpers/Breadcrumbs";
 
 import globalStyles from '../helpers/global.module.css';
 import classnames from "classnames";
-import Card from "react-bootstrap/Card";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
 import {request} from "../../services/request";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import StickyHeader from "../helpers/StickyHeader";
+import {Can} from "../permissions/CoursePageAbility";
+import Button from "@material-ui/core/Button";
+import SyncIcon from "@material-ui/icons/Sync";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
+import Switch from "@material-ui/core/Switch";
+import Grid from "@material-ui/core/Grid";
 
 class Settings extends Component {
   constructor(props) {
@@ -94,16 +101,14 @@ class Settings extends Component {
   render () {
     if (!this.state.isLoaded) {
       return (
-        <div className={globalStyles.container}>
-          <Spinner className={globalStyles.spinner} animation="border" role="status">
-            <span className="sr-only">Loading...</span>
-          </Spinner>
+        <div className={globalStyles.screenContainer}>
+          <CircularProgress className={globalStyles.spinner}/>
         </div>
-      );
+      )
     }
 
     return (
-      <div className={globalStyles.container}>
+      <>
         <Breadcrumbs>
           <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumbs.Item>
           <Breadcrumbs.Item active>
@@ -111,47 +116,50 @@ class Settings extends Component {
           </Breadcrumbs.Item>
         </Breadcrumbs>
 
-        <div className={globalStyles.titleContainer}>
-          <h1>Settings</h1>
-        </div>
+        <StickyHeader
+          title={"Settings"}
+        />
 
-        <div className={styles.container}>
+        <div className={globalStyles.innerScreenContainer}>
+
           <div className={classnames(globalStyles.sectionContainer)}>
             <div className={classnames(globalStyles.sectionTitle, styles.sectionTitleWithButton)}>
               <h3 className={globalStyles.sectionTitleH}>Notifications</h3>
             </div>
 
             <div className={classnames(styles.sectionBody)}>
-              <Card>
-                <Card.Body>
-                  <div className={styles.notificationsRow}>
-                    <h5>Rubric</h5>
-                    <label className={styles.switch}>
-                      <input
-                        type="checkbox"
-                        checked={!!this.state.settings.rubricNotificationsEnabled}
-                        onChange={this.toggleRubricNotificationsEnabled}
-                      />
-                      <span className={styles.slider}/>
-                    </label>
-                  </div>
-                  <div className={styles.notificationsRow}>
-                    <h5>Issues</h5>
-                    <label className={styles.switch}>
-                      <input
-                        type="checkbox"
-                        checked={!!this.state.settings.issuesNotificationsEnabled}
-                        onChange={this.toggleIssuesNotificationsEnabled}
-                      />
-                      <span className={styles.slider}/>
-                    </label>
-                  </div>
-                </Card.Body>
-              </Card>
+              <Grid container>
+                <Grid item xs={6}>
+                  <Card className={globalStyles.cardShadow}>
+                    <CardContent>
+                      {/*<div className={styles.notificationsRow}>*/}
+                      {/*  <h5>Rubric</h5>*/}
+
+                      {/*  <Switch*/}
+                      {/*    checked={!!this.state.settings.rubricNotificationsEnabled}*/}
+                      {/*    onChange={this.toggleRubricNotificationsEnabled}*/}
+                      {/*    color="primary"*/}
+                      {/*  />*/}
+
+                      {/*</div>*/}
+
+                      <div className={styles.notificationsRow}>
+                        <h5>Issues</h5>
+
+                        <Switch
+                          checked={!!this.state.settings.issuesNotificationsEnabled}
+                          onChange={this.toggleIssuesNotificationsEnabled}
+                          color="primary"
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              </Grid>
             </div>
           </div>
         </div>
-      </div>
+      </>
     )
   }
 }

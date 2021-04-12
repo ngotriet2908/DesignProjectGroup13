@@ -1,12 +1,15 @@
-import {Button, Spinner, Modal, Form} from 'react-bootstrap'
 import React, {Component} from "react";
 import globalStyles from '../../helpers/global.module.css';
 import {request} from "../../../services/request";
-import {BASE} from "../../../services/endpoints";
 import {connect} from "react-redux";
-import {IoCloseOutline} from "react-icons/io5";
 import classnames from "classnames";
 import styles from "../grading.module.css";
+import FormControl from "@material-ui/core/FormControl";
+import InputLabel from "@material-ui/core/InputLabel";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
+import CustomModal from "../../helpers/CustomModal";
+import TextField from "@material-ui/core/TextField";
 
 
 class CreateIssueModal extends Component {
@@ -15,12 +18,17 @@ class CreateIssueModal extends Component {
 
     this.state = {
       isLoaded: false,
-    }
 
-    this.formRef = React.createRef();
+      reference: "",
+      subject: "",
+      description: "",
+      addressee: "",
+
+      users: [],
+    }
   }
 
-  fetchIssues = () => {
+  fetchGraders = () => {
     Promise.all([
       request(`/api/courses/${this.props.routeParams.courseId}/projects/${this.props.routeParams.projectId}/graders`)
     ])
@@ -62,15 +70,25 @@ class CreateIssueModal extends Component {
 
   onClose = () => {
     this.props.toggleShow();
+
+    this.setState({
+      isLoaded: false,
+
+      reference: "",
+      subject: "",
+      description: "",
+      addressee: "",
+
+      users: [],
+    })
   }
 
   onAccept = () => {
     let issue = {
-      // target: this.formRef.current.targetSelector.value.split("/")[0],
-      reference: this.formRef.current.refSelector.value,
-      subject: this.formRef.current.subjectInput.value === "" ? "No title" : this.formRef.current.subjectInput.value,
-      description: this.formRef.current.descriptionInput.value,
-      addressee: Number(this.formRef.current.addresseeSelector.value),
+      reference: this.state.reference,
+      subject: this.state.subject === "" ? "No title" : this.state.subject,
+      description: this.state.description,
+      addressee: Number(this.state.addressee),
     }
 
     this.setState({
@@ -89,99 +107,108 @@ class CreateIssueModal extends Component {
       })
   }
 
+  body = () => {
+    return (
+      <>
+        <FormControl
+          variant="outlined"
+          className={styles.modalRow}
+          fullWidth
+        >
+          <InputLabel>Reference issue</InputLabel>
+          <Select
+            value={this.state.reference}
+            onChange={event => this.setState({
+              reference: event.target.value
+            })}
+            label="Reference issue"
+          >
+            <MenuItem value="">
+              <em>None</em>
+            </MenuItem>
+            {this.props.issues.map(issue => {
+              return(
+                <MenuItem
+                  key={issue.id}
+                  value={issue.id}
+                >
+                  {issue.subject}
+                </MenuItem>
+              )
+            })}
+          </Select>
+        </FormControl>
+
+        <FormControl
+          variant="outlined"
+          className={styles.modalRow}
+          fullWidth
+        >
+          <InputLabel>Addressee</InputLabel>
+          <Select
+            value={this.state.addressee}
+            onChange={event => this.setState({
+              addressee: event.target.value
+            })}
+            label="Addressee"
+          >
+            <MenuItem value="">
+              <em>None</em>
+            </MenuItem>
+            {this.state.users.map((grader) => {
+              let p1 = (this.props.submission.grader != null && this.props.submission.grader.id === grader.id)? "(grader)": null
+              let p2 = (this.props.user.id === grader.id)? "(you)": null
+
+              return(
+                <MenuItem
+                  key={grader.id}
+                  value={grader.id}
+                >
+                  {grader.name} {p1} {p2}
+                </MenuItem>
+              )
+
+            })}
+          </Select>
+        </FormControl>
+
+        <TextField
+          className={styles.modalRow}
+          label="Subject"
+          placeholder="Enter subject"
+          variant="outlined"
+          fullWidth
+          value={this.state.subject}
+          onChange={(event) => this.setState({subject: event.target.value})}
+        />
+
+        <TextField
+          className={styles.modalRow}
+          label="Description"
+          placeholder="Enter description of the issue"
+          multiline
+          variant="outlined"
+          fullWidth
+          rows={3}
+          value={this.state.description}
+          onChange={(event) => this.setState({description: event.target.value})}
+        />
+      </>
+    )
+  }
+
   render() {
     return(
-      <Modal
-        centered
-        backdrop="static"
-        size="lg"
-        onShow={this.fetchIssues}
+      <CustomModal
         show={this.props.show}
-        onHide={this.onClose}
-        animation={false}
-      >
-        <div className={globalStyles.modalContainer}>
-          <div className={globalStyles.modalHeaderContainer}>
-            <h2>Create issue</h2>
-            <div className={globalStyles.modalHeaderContainerButton} onClick={this.onClose}>
-              <IoCloseOutline size={30}/>
-            </div>
-          </div>
-
-          {/*<div className={globalStyles.modalDescriptionContainer}>*/}
-          {/*  <div>Select projects to import from the list below</div>*/}
-          {/*</div>*/}
-
-          {!this.state.isLoaded ?
-            <div className={globalStyles.modalSpinnerContainer}>
-              <Spinner className={globalStyles.modalSpinner} animation="border" role="status">
-                <span className="sr-only">Loading...</span>
-              </Spinner>
-            </div>
-            :
-            //body
-            <div className={globalStyles.modalBodyContainer}>
-              <Form ref={this.formRef} className={styles.gradeEditorContentContainer}>
-                {/*<Form.Group controlId="targetSelector" className={styles.gradeEditorCardItem}>*/}
-                {/*  <Form.Label>Select target</Form.Label>*/}
-                {/*  <Form.Control as="select">*/}
-                {/*    <option value={this.props.routeParams.assessmentId +"/2/this assessment"}>this assessment</option>*/}
-                {/*    {this.getAllElements(this.props.rubric).map((element) => {*/}
-                {/*      return (*/}
-                {/*        <option key={element.id} value={element.id +"/"+element.type + "/" + element.name}>{element.name}</option>*/}
-                {/*      )*/}
-                {/*    })}*/}
-                {/*  </Form.Control>*/}
-                {/*</Form.Group>*/}
-
-                <Form.Group controlId="refSelector" className={styles.gradeEditorCardItem}>
-                  <Form.Label>Select reference issue</Form.Label>
-                  <Form.Control as="select">
-                    <option value={"null"}>no reference</option>
-                    {this.props.issues.map((issue) => {
-                      return (
-                        <option key={issue.id} value={issue.id}>{issue.subject}</option>
-                      )
-                    })}
-                  </Form.Control>
-                </Form.Group>
-
-                <Form.Group controlId="addresseeSelector" className={styles.gradeEditorCardItem}>
-                  <Form.Label>Select Addressee</Form.Label>
-                  <Form.Control as="select">
-                    {/*<option value={"null"}>no addressee</option>*/}
-                    {this.state.users.map((grader) => {
-                      let p1 = (this.props.submission.grader != null && this.props.submission.grader.id === grader.id)? "(grader)": null
-                      let p2 = (this.props.user.id === grader.id)? "(you)": null
-                      return (
-                        <option key={grader.id} value={grader.id}>{grader.name} {p1} {p2} </option>
-                      )
-                    })}
-                  </Form.Control>
-                </Form.Group>
-
-                <Form.Group controlId="subjectInput" className={styles.gradeEditorCardItem}>
-                  <Form.Label>Subject</Form.Label>
-                  <Form.Control type="text" placeholder="Enter subject" />
-                </Form.Group>
-
-                <Form.Group controlId="descriptionInput" className={classnames(styles.gradeEditorCardItem, styles.gradeEditorCardItemFill)}>
-                  <Form.Label>Description</Form.Label>
-                  <Form.Control as="textarea" rows={3} placeholder="Enter description of the issue"/>
-                </Form.Group>
-              </Form>
-              
-            </div>
-          }
-
-          <div className={globalStyles.modalFooterContainer}>
-            <div className={globalStyles.modalFooterContainerButtonGroup}>
-              <Button variant="linkLightGray" onClick={this.onClose}>Cancel</Button>
-              <Button variant="lightGreen" onClick={this.onAccept}>Create</Button>
-            </div>
-          </div>
-        </div>
-      </Modal>
+        onClose={this.props.toggleShow}
+        onShow={this.fetchGraders}
+        onAccept={this.onAccept}
+        title={"Create issue"}
+        description={"Initiate a new issue"}
+        body={this.body()}
+        isLoaded={this.state.isLoaded}
+      />
     )
   }
 }

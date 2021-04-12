@@ -1,14 +1,13 @@
 import React, { Component } from 'react'
 
 import styles from './rubric.module.css'
-import {connect} from "react-redux";
 import RubricOutlineElement from "./RubricOutlineElement";
 import classnames from "classnames";
 
 class RubricOutlineGroup extends Component {
   constructor (props) {
     super(props);
-    this.padding = this.props.padding + 1.4;
+    this.padding = this.props.padding + 2;
   }
 
   render () {
@@ -36,7 +35,6 @@ class RubricOutlineInnerGroup extends Component {
     super(props);
 
     this.state = {
-      // collapsed: !this.props.data.children,
       collapsed: false,
     }
   }
@@ -69,17 +67,8 @@ class RubricOutlineInnerGroup extends Component {
   }
 }
 
-const mapStateToProps = state => {
-  return {
 
-  };
-};
-
-const actionCreators = {
-
-}
-
-export default connect(mapStateToProps, actionCreators)(RubricOutlineGroup)
+export default RubricOutlineGroup;
 
 
 

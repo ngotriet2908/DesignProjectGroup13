@@ -1,6 +1,5 @@
 import styles from "./assign.module.css";
 import React, {Component} from "react";
-import {Button, FormControl, Spinner} from 'react-bootstrap'
 import {request} from "../../services/request";
 import {BASE, PROJECT, USER_COURSES} from "../../services/endpoints";
 import store from "../../redux/store";
@@ -9,7 +8,6 @@ import {push} from "connected-react-router";
 import globalStyles from "../helpers/global.module.css";
 import Breadcrumbs from "../helpers/Breadcrumbs";
 import classnames from "classnames";
-import {IoPencilOutline} from "react-icons/io5";
 import Grader from "./Grader";
 import AssignSubmissionModal from "./AssignSubmissionModal";
 import {LOCATIONS} from "../../redux/navigation/reducers/navigation";
@@ -18,6 +16,16 @@ import {connect} from "react-redux";
 import GradersModal from "./GradersModal";
 import BulkModal from "./BulkModal";
 import {Can, ability, updateAbility} from "../permissions/ProjectAbility";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import StickyHeader from "../helpers/StickyHeader";
+import Button from "@material-ui/core/Button";
+import SyncIcon from "@material-ui/icons/Sync";
+
+import EditIcon from '@material-ui/icons/Edit';
+import TextField from "@material-ui/core/TextField";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import SearchIcon from "@material-ui/icons/Search";
+import Filter from "../helpers/Filter";
 
 
 class GraderManagement extends Component {
@@ -42,10 +50,6 @@ class GraderManagement extends Component {
 
       // search
       searchQuery: "",
-
-      // //bulk assign tasks modal
-      // modalBulkAssignShow: false,
-      // modalBulkAssignObj: null,
     }
   }
 
@@ -193,17 +197,15 @@ class GraderManagement extends Component {
 
   render () {
     if (!this.state.isLoaded) {
-      return(
-        <div className={globalStyles.container}>
-          <Spinner className={globalStyles.spinner} animation="border" role="status">
-            <span className="sr-only">Loading...</span>
-          </Spinner>
+      return (
+        <div className={globalStyles.screenContainer}>
+          <CircularProgress className={globalStyles.spinner}/>
         </div>
       )
     }
 
     return (
-      <div className={globalStyles.container}>
+      <>
         <Breadcrumbs>
           <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/"))}>Home</Breadcrumbs.Item>
           <Breadcrumbs.Item onClick={() => store.dispatch(push(URL_PREFIX + "/courses/" + this.state.course.id ))}>{this.state.course.name}</Breadcrumbs.Item>
@@ -211,125 +213,101 @@ class GraderManagement extends Component {
           <Breadcrumbs.Item active>Graders</Breadcrumbs.Item>
         </Breadcrumbs>
 
-        {/*{(!this.state.alertShow)? null :*/}
-        {/*  <Alert variant="success" onClose={() => {this.setState({alertShow:false})}} dismissible>*/}
-        {/*    <p>*/}
-        {/*      {this.state.alertBody}*/}
-        {/*    </p>*/}
-        {/*  </Alert>*/}
-        {/*}*/}
+        <StickyHeader
+          title={"Graders"}
+          buttons={
+            <Can I="edit" a="ManageGraders">
+              <Button
+                variant="contained"
+                color="primary"
+                className={globalStyles.titleActiveButton}
+                onClick={this.toggleShowGradersModal}
+                startIcon={<EditIcon/>}
+                disableElevation
+              >
+                Edit graders
+              </Button>
+            </Can>
+          }
+        />
 
-        <div className={classnames(globalStyles.titleContainer, styles.titleContainer)}>
-          <h1>Graders</h1>
-          <Can I="edit" a="ManageGraders">
-            <Button variant="lightGreen" onClick={this.toggleShowGradersModal}><IoPencilOutline size={20}/> Edit graders</Button>
-          </Can>
-        </div>
+        <div className={globalStyles.innerScreenContainer}>
 
-        {/*  /!*<Button className={styles.manageTaToolbarButton}*!/*/}
-        {/*  /!*  variant="primary" onClick={null}>*!/*/}
-        {/*  /!*   Sort*!/*/}
-        {/*  /!*</Button>*!/*/}
+          <div className={styles.toolbar}>
+            <TextField
+              id="outlined-search"
+              placeholder="Search by student name, group name or grader's name"
+              type="search"
+              variant="outlined"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon style={{color: "gray"}} />
+                  </InputAdornment>
+                ),
+              }}
+              onChange={this.handleSearchChange}
+              fullWidth
+            />
 
-        <div>
-          <h3>Grader List</h3>
-        </div>
-
-        <div className={styles.toolbar}>
-          <FormControl
-            className={classnames(globalStyles.searchBar, styles.groupsSearchBar)}
-            type="text"
-            placeholder="Search by a group or grader's name"
-            onChange={this.handleSearchChange}/>
-
-          {/*<DropdownButton*/}
-          {/*  as={ButtonGroup}*/}
-          {/*  key={"primary"}*/}
-          {/*  id={`dropdown-Primary`}*/}
-          {/*  variant={"lightGreen"}*/}
-          {/*  title={"Group Filter"}*/}
-          {/*  onSelect={this.onFilterGroupSelectHandler}*/}
-          {/*>*/}
-
-          {/*  {["All", "divider", "Group", "Individual"].map((filterS) => {*/}
-          {/*    if (filterS === "divider") {*/}
-          {/*      return <Dropdown.Divider key={filterS}/>*/}
-          {/*    } else if (filterS === this.state.filterGroupChoice) {*/}
-          {/*      return <Dropdown.Item variant="lightGreen" key={filterS} eventKey={filterS} active>{filterS}</Dropdown.Item>*/}
-          {/*    } else {*/}
-          {/*      return <Dropdown.Item key={filterS} eventKey={filterS}>{filterS}</Dropdown.Item>*/}
-          {/*    }*/}
-          {/*  })}*/}
-          {/*</DropdownButton>*/}
-
-          {/*<DropdownButton*/}
-          {/*  as={ButtonGroup}*/}
-          {/*  key={"assigned-primary"}*/}
-          {/*  id={`assigned-dropdown-Primary`}*/}
-          {/*  variant={"lightGreen"}*/}
-          {/*  title={"Assigned Filter"}*/}
-          {/*  onSelect={this.onFilterAssignedSelectHandler}*/}
-          {/*>*/}
-
-          {/*  {["All", "divider", "Yours", "Not yours"].map((filterS) => {*/}
-          {/*    if (filterS === "divider") {*/}
-          {/*      return <Dropdown.Divider key={filterS}/>*/}
-          {/*    } else if (filterS === this.state.filterAssignedChoice) {*/}
-          {/*      return <Dropdown.Item key={filterS} eventKey={filterS} active>{filterS}</Dropdown.Item>*/}
-          {/*    } else {*/}
-          {/*      return <Dropdown.Item key={filterS} eventKey={filterS}>{filterS}</Dropdown.Item>*/}
-          {/*    }*/}
-          {/*  })}*/}
-          {/*</DropdownButton>*/}
-        </div>
+            {/*<Filter*/}
+            {/*  options={this.assignedFilterOptions}*/}
+            {/*  selected={this.state.filterAssignedChoice}*/}
+            {/*  setSelected={(value) => {this.setState({filterAssignedChoice: value})}}*/}
+            {/*  label="Assigned"*/}
+            {/*  className={styles.filter}*/}
+            {/*/>*/}
+          </div>
 
 
-        {/* assigned */}
-        <div className={styles.gradersContainer}>
-          {this.state.graders
-            .filter((grader) => {
-              let filterString = this.state.searchQuery.toLowerCase()
-              return (grader.name.toLowerCase().includes(filterString)
+          {/* assigned */}
+          <div className={styles.gradersContainer}>
+            {this.state.graders
+              .filter((grader) => {
+                let filterString = this.state.searchQuery.toLowerCase()
+                return (grader.name.toLowerCase().includes(filterString)
                 || grader.submissions.reduce(((result, submission) => result || submission.name.toLowerCase().includes(filterString)), false))
-            })
-            .map(grader => {
-              return (
-                <Grader
-                  key={grader.id}
-                  grader={grader}
-                  name={grader.name}
-                  submissions={grader.submissions}
-                  toggleShow={this.toggleShowAssignModal}
-                />
-              )
-            })}
-        </div>
+              })
+              .map(grader => {
+                return (
+                  <Grader
+                    key={grader.id}
+                    grader={grader}
+                    name={grader.name}
+                    submissions={grader.submissions}
+                    toggleShow={this.toggleShowAssignModal}
+                    routeParams={this.props.match.params}
+                    user={this.props.user}
+                    reloadPage={() => {
+                      this.setState({
+                        isLoaded: false,
+                      })
+                      this.fetchData()
+                    }}
+                  />
+                )
+              })}
+          </div>
 
-        {/* not assigned */}
-        <div className={styles.notAssignedContainer}>
-          <Grader
-            grader={null}
-            name={"Not assigned"}
-            submissions={this.state.unassigned}
-            toggleShow={this.toggleShowAssignModal}
-            toggleShowBulk={this.toggleShowBulkModal}
-          />
+          {/* not assigned */}
+          <div className={styles.notAssignedContainer}>
+            <Grader
+              grader={null}
+              name={"Not assigned"}
+              submissions={this.state.unassigned}
+              toggleShow={this.toggleShowAssignModal}
+              toggleShowBulk={this.toggleShowBulkModal}
+              routeParams={this.props.match.params}
+              user={this.props.user}
+              reloadPage={() => {
+                this.setState({
+                  isLoaded: false,
+                })
+                this.fetchData()
+              }}
+            />
+          </div>
         </div>
-
-        {/*<Modal show={this.state.modalGraderShow} onHide={this.modalGraderHandleClose}>*/}
-        {/*  <Modal.Header closeButton>*/}
-        {/*    <Modal.Title>Are you sure?</Modal.Title>*/}
-        {/*  </Modal.Header>*/}
-        {/*  <Modal.Body>You are returning {(this.state.modalGraderObj != null)? this.state.modalGraderObj.name : null}'s tasks. This action can't be undone</Modal.Body>*/}
-        {/*  <Modal.Footer>*/}
-        {/*    <Button variant="secondary" onClick={this.modalGraderHandleClose}>*/}
-        {/*      Close*/}
-        {/*    </Button>*/}
-        {/*    <Button variant="primary" onClick={this.modalGraderHandleAccept}>*/}
-        {/*      Return tasks*/}
-        {/*    </Button>*/}
-        {/*  </Modal.Footer>*/}
-        {/*</Modal>*/}
 
         {/* assign submissions modal */}
         <AssignSubmissionModal
@@ -368,8 +346,7 @@ class GraderManagement extends Component {
           // onClose={this.modalBulkAssignHandleClose}
           // onAccept={this.modalBulkAssignHandleAccept}
         />
-
-      </div>
+      </>
     )
   }
 }
