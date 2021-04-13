@@ -3,9 +3,7 @@ import styles from "../../project/project.module.css";
 import globalStyles from "../../helpers/global.module.css";
 import classnames from "classnames";
 import IssueProjectCard from "./IssueProjectCard";
-import {Card, Button, DropdownButton, ButtonGroup, Dropdown} from 'react-bootstrap'
-import EmptyCard from "../../home/EmptyCard";
-import {IoCheckboxOutline} from "react-icons/io5";
+
 
 class IssuesProject extends Component {
   constructor(props) {
@@ -107,7 +105,8 @@ class IssuesProject extends Component {
                     this.filterIssueOriginDropDown(issue)
 
           }).length === 0 &&
-              <EmptyCard data={"No issues"} icon={IoCheckboxOutline} className={styles.stretchHeight}/>
+            <div>d</div>
+            // <EmptyCard data={"No issues"} icon={IoCheckboxOutline} className={styles.stretchHeight}/>
           }
 
           {this.props.issues

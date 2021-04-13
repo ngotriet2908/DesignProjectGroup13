@@ -11,19 +11,11 @@ import {push} from "connected-react-router";
 import CreateTemplateModal from "./CreateTemplateModal";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import StickyHeader from "../helpers/StickyHeader";
-import Card from "@material-ui/core/Card";
-import CardContent from "@material-ui/core/CardContent";
 import IconButton from "@material-ui/core/IconButton";
 import AddIcon from '@material-ui/icons/Add';
 import Grid from "@material-ui/core/Grid";
 import EmptyCourseCard from "../home/EmptyCourseCard";
-import EditIcon from '@material-ui/icons/Edit';
-import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 import withTheme from "@material-ui/core/styles/withTheme";
-import InputLabel from "@material-ui/core/InputLabel";
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
-import FormControl from "@material-ui/core/FormControl";
 import FeedbackSendingForm from "./FeedbackSendingForm";
 import TemplateCard from "./TemplateCard";
 
@@ -156,7 +148,6 @@ class Feedback extends Component {
                   className={styles.templateCard}
                 />
                 }
-
               </div>
             </Grid>
 

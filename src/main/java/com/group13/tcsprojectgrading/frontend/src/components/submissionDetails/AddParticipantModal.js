@@ -68,7 +68,7 @@ class AddParticipantModal extends Component {
 
   onAccept = () => {
     if (this.state.selectedStudent == null || this.state.selectedAssessment == null
-    || this.state.selectedStudent === "" || this.state.selectedStudent === "") {
+    || this.state.selectedStudent === "" || this.state.selectedAssessment === "") {
       return;
     }
 

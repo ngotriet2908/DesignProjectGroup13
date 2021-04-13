@@ -3,9 +3,6 @@ import classnames from "classnames";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
 import globalStyles from '../helpers/global.module.css';
-import Modal from "react-bootstrap/Modal";
-import Spinner from "react-bootstrap/Spinner";
-import Button from "react-bootstrap/Button";
 import {connect} from "react-redux";
 
 
@@ -78,56 +75,58 @@ class BulkModal extends Component {
 
   render() {
     return(
-      <Modal
-        centered
-        backdrop="static"
-        size="lg"
-        onShow={this.onShow}
-        show={this.props.show}
-        onHide={this.onClose}
-        animation={false}
-      >
-        <div className={globalStyles.modalContainer}>
-          <div className={globalStyles.modalHeaderContainer}>
-            <h2>Bulk assign</h2>
-            <div className={classnames(globalStyles.modalHeaderContainerButton)} onClick={this.onClose}>
-              {/*<IoCloseOutline size={30}/>*/}
-            </div>
-          </div>
+      <div></div>
 
-          <div className={globalStyles.modalDescriptionContainer}>
-            <div>Text here.</div>
-          </div>
-
-          {!this.state.isLoaded ?
-            <div className={globalStyles.modalSpinnerContainer}>
-              <Spinner className={globalStyles.modalSpinner} animation="border" role="status">
-                <span className="sr-only">Loading...</span>
-              </Spinner>
-            </div>
-            :
-            //body
-            <div className={globalStyles.modalBodyContainer}>
-
-              {this.props.graders.length === 0 &&
-              <div className={classnames(globalStyles.modalBodyContainerRow, globalStyles.modalBodyContainerRowEmpty)}>
-                No graders available in the project
-              </div>
-              }
-
-
-
-            </div>
-          }
-
-          <div className={classnames(globalStyles.modalFooterContainer)}>
-            <div className={globalStyles.modalFooterContainerButtonGroup}>
-              <Button variant="linkLightGray" onClick={this.onClose}>Cancel</Button>
-              <Button variant="lightGreen" onClick={this.onAccept}>Assign</Button>
-            </div>
-          </div>
-        </div>
-      </Modal>
+    // <Modal
+    //   centered
+    //   backdrop="static"
+    //   size="lg"
+    //   onShow={this.onShow}
+    //   show={this.props.show}
+    //   onHide={this.onClose}
+    //   animation={false}
+    // >
+    //   <div className={globalStyles.modalContainer}>
+    //     <div className={globalStyles.modalHeaderContainer}>
+    //       <h2>Bulk assign</h2>
+    //       <div className={classnames(globalStyles.modalHeaderContainerButton)} onClick={this.onClose}>
+    //         {/*<IoCloseOutline size={30}/>*/}
+    //       </div>
+    //     </div>
+    //
+    //     <div className={globalStyles.modalDescriptionContainer}>
+    //       <div>Text here.</div>
+    //     </div>
+    //
+    //     {!this.state.isLoaded ?
+    //       <div className={globalStyles.modalSpinnerContainer}>
+    //         <Spinner className={globalStyles.modalSpinner} animation="border" role="status">
+    //           <span className="sr-only">Loading...</span>
+    //         </Spinner>
+    //       </div>
+    //       :
+    //       //body
+    //       <div className={globalStyles.modalBodyContainer}>
+    //
+    //         {this.props.graders.length === 0 &&
+    //         <div className={classnames(globalStyles.modalBodyContainerRow, globalStyles.modalBodyContainerRowEmpty)}>
+    //           No graders available in the project
+    //         </div>
+    //         }
+    //
+    //
+    //
+    //       </div>
+    //     }
+    //
+    //     <div className={classnames(globalStyles.modalFooterContainer)}>
+    //       <div className={globalStyles.modalFooterContainerButtonGroup}>
+    //         <Button variant="linkLightGray" onClick={this.onClose}>Cancel</Button>
+    //         <Button variant="lightGreen" onClick={this.onAccept}>Assign</Button>
+    //       </div>
+    //     </div>
+    //   </div>
+    // </Modal>
     )
   }
 }

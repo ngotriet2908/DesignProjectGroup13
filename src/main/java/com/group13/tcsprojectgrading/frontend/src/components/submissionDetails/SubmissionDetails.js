@@ -16,7 +16,6 @@ import {toast} from 'react-toastify'
 import LabelRow from "./labels/LabelRow";
 import LabelModal from "./labels/LabelModal";
 import {ability, Can, updateAbility} from "../permissions/ProjectAbility";
-import { subject } from '@casl/ability';
 import CircularProgress from "@material-ui/core/CircularProgress";
 import StickyHeader from "../helpers/StickyHeader";
 import Button from "@material-ui/core/Button";
@@ -45,6 +44,10 @@ import Link from "@material-ui/core/Link";
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import Pluralize from 'pluralize';
+import MenuItem from "@material-ui/core/MenuItem";
+import Menu from "@material-ui/core/Menu";
+import MoveStudentModal from "./MoveStudentModal";
+import MoveStudentMenu from "./MoveStudentMenu";
 
 
 class SubmissionDetails extends Component {
@@ -60,11 +63,13 @@ class SubmissionDetails extends Component {
       isAssessmentEditing: false,
       isAddingParticipant: false,
 
-      // participantModalShow: false,
-
       showLabelModal: false,
 
       showAddStudentModal: false,
+
+      showMoveStudentModal: false,
+      currentStudent: null,
+      currentAssessment: null,
     }
   }
 
@@ -142,9 +147,11 @@ class SubmissionDetails extends Component {
     })
   }
 
-  setAssessment = (data) => {
+  setAssessments = (data) => {
     let stateCopy = {...this.state.submission}
+
     stateCopy.assessments = data
+
     this.setState({
       submission: stateCopy
     })
@@ -177,10 +184,28 @@ class SubmissionDetails extends Component {
   }
 
   // Add student modal
+
   toggleShowAddStudentModal = () => {
     this.setState(prevState => ({
       showAddStudentModal: !prevState.showAddStudentModal
     }))
+  }
+
+  // Move student modal
+
+  toggleShowMoveStudentModal = () => {
+    this.setState(prevState => ({
+      showMoveStudentModal: !prevState.showMoveStudentModal
+    }))
+  }
+
+  showMoveStudentModal = (student, assessment) => {
+    this.setState({
+      currentStudent: student,
+      currentAssessment: assessment,
+
+      showMoveStudentModal: true,
+    })
   }
 
   // converts bytes to KB, MB etc.
@@ -196,7 +221,6 @@ class SubmissionDetails extends Component {
 
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
   }
-
 
   render() {
     if (!this.state.isLoaded) {
@@ -362,11 +386,14 @@ class SubmissionDetails extends Component {
                             }
                           />
 
-                          <ListItemSecondaryAction>
-                            <IconButton edge="end" aria-label="delete" onClick={() => this.deleteParticipantHandler(student)}>
-                              <DeleteOutlineIcon style={{color: "red"}}/>
-                            </IconButton>
-                          </ListItemSecondaryAction>
+                          {this.state.submission.members.length > 1 &&
+                            <ListItemSecondaryAction>
+                              <IconButton edge="end" aria-label="delete"
+                                onClick={() => this.deleteParticipantHandler(student)}>
+                                <DeleteOutlineIcon style={{color: "red"}}/>
+                              </IconButton>
+                            </ListItemSecondaryAction>
+                          }
                         </ListItem>
                       )
                     })}
@@ -504,7 +531,7 @@ class SubmissionDetails extends Component {
                             assessment.id + "/grading"));
                         }}>
                           <h4>
-                            Grading sheet #{this.state.submission.id}
+                            Grading sheet #{assessment.id}
                           </h4>
                         </Link>
                       </div>
@@ -573,12 +600,17 @@ class SubmissionDetails extends Component {
                                   </Tooltip>
                                   }
 
-                                  <IconButton
-                                    edge="end" aria-label="more"
-                                    onClick={() => {}}
-                                  >
-                                    <MoreVertIcon/>
-                                  </IconButton>
+                                  {(assessment.members.length > 1 || !student.isCurrentAssessment || this.state.submission.assessments.length > 1) &&
+                                    <MoveStudentMenu
+                                      student={student}
+                                      assessment={assessment}
+                                      toggleShowMoveStudentModal={this.toggleShowMoveStudentModal}
+                                      routeParams={this.props.match.params}
+                                      setAssessments={this.setAssessments}
+                                      assessments={this.state.submission.assessments}
+                                      showMoveStudentModal={this.showMoveStudentModal}
+                                    />
+                                  }
                                 </ListItemSecondaryAction>
                               </ListItem>
                             )
@@ -591,24 +623,6 @@ class SubmissionDetails extends Component {
                 )})}
 
             </Grid>
-
-            {/*      {this.state.submission.assessments != null &&*/}
-            {/*    (this.state.isAssessmentEditing ?*/}
-            {/*      <SubmissionDetailsAssessmentsEditingContainer*/}
-            {/*        setAssessment={this.setAssessment}*/}
-            {/*        isEditing={this.state.isAssessmentEditing}*/}
-            {/*        toggleEditing={this.toggleEditing}*/}
-            {/*        submission={this.state.submission}*/}
-            {/*        params={this.props.match.params}*/}
-            {/*      />*/}
-            {/*      :*/}
-            {/*      <SubmissionDetailsAssessmentsContainer*/}
-            {/*        isEditing={this.state.isAssessmentEditing}*/}
-            {/*        toggleEditing={this.toggleEditing}*/}
-            {/*        submission={this.state.submission}*/}
-            {/*        params={this.props.match.params}*/}
-            {/*      />*/}
-
           </Grid>
 
           <LabelModal
@@ -627,11 +641,22 @@ class SubmissionDetails extends Component {
             currentAssessments={this.state.submission.assessments}
             updateSubmission={this.updateSubmission}
           />
+
+          <MoveStudentModal
+            show={this.state.showMoveStudentModal}
+            toggleShow={this.toggleShowMoveStudentModal}
+            routeParams={this.props.match.params}
+            currentStudent={this.state.currentStudent}
+            currentAssessment={this.state.currentAssessment}
+            assessments={this.state.submission.assessments}
+            setAssessments={this.setAssessments}
+          />
         </div>
       </>
     );
   }
 }
+
 
 const mapStateToProps = state => {
   return {

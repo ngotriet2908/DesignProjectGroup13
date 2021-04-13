@@ -114,10 +114,38 @@
 .todoCard {
     /*width: 30rem;*/
     width: 100%;
-    flex: 1;
     height: 100%;
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
 }
 
-.todoCardBody {
+/*.todoCardEmpty {*/
+/*    justify-content: center;*/
+/*}*/
 
+.todoCardContent {
+    /*justify-content: center;*/
+    /*height: 100%;*/
+    /*width: 100%;*/
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+
+.todoCardCenteredBody {
+    /*display: flex;*/
+    /*flex-direction: column;*/
+    /*justify-content: center;*/
+    /*align-items: center;*/
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }

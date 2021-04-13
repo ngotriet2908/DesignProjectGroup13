@@ -316,7 +316,7 @@ class Project extends Component {
                           startIcon={<BackupIcon/>}
                           disableElevation
                         >
-                          Upload Grades To Canvas
+                          Upload grades
                         </Button>
                       </CardContent>
                     </Card>

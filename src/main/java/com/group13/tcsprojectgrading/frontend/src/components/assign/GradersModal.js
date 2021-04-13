@@ -23,6 +23,8 @@ class GradersModal extends Component {
 
     this.state = {
       graders: [],
+      tas: [],
+
       isLoaded: false,
       selected: [],
 
@@ -33,12 +35,15 @@ class GradersModal extends Component {
     }
   }
 
+  // todo, quick fix, needs to be changed
   fetchGraders = () => {
     Promise.all([
-      request(`/api/courses/${this.props.routeParams.courseId}/graders?ta=true`)
+      request(`/api/courses/${this.props.routeParams.courseId}/graders?ta=true`),
+      request(`/api/courses/${this.props.routeParams.courseId}/graders`)
     ])
-      .then(async([res1]) => {
-        const graders = await res1.json();
+      .then(async([res1, res2]) => {
+        const tas = await res1.json();
+        const graders = await res2.json();
 
         let selected = graders.filter(grader => {
           return this.props.currentGraders.find(currentGrader => {return currentGrader.id === grader.id})
@@ -47,7 +52,8 @@ class GradersModal extends Component {
         // load submission
         this.setState({
           graders: graders,
-          // labels: labels,
+          tas: tas,
+
           isLoaded: true,
           selected: selected,
           initial: selected,
@@ -119,40 +125,45 @@ class GradersModal extends Component {
         }
 
         <List>
-          {this.state.graders.map(grader => {
-            let isSelected = this.state.selected.find(selectedGrader => {
-              return selectedGrader.id === grader.id;
-            })
+          {
+            this.state.graders.filter(grader => {
+              return this.state.tas.find(ta => {
+                return ta.id === grader.id
+              })
+            }).map(grader => {
+              let isSelected = this.state.selected.find(selectedGrader => {
+                return selectedGrader.id === grader.id;
+              })
 
-            let isUser = this.props.user.id === grader.id;
+              let isUser = this.props.user.id === grader.id;
 
-            return(
-              <ListItem key={grader.id} disabled={isUser}>
-                <ListItemAvatar>
-                  <Avatar
-                    alt={grader.name}
-                    src={grader.avatar.includes("avatar-50") ? "" : grader.avatar}
-                  />
-                </ListItemAvatar>
+              return(
+                <ListItem key={grader.id} disabled={isUser}>
+                  <ListItemAvatar>
+                    <Avatar
+                      alt={grader.name}
+                      src={grader.avatar.includes("avatar-50") ? "" : grader.avatar}
+                    />
+                  </ListItemAvatar>
 
-                <ListItemText
-                  primary={
-                    <span>{grader.name} {isUser && " (you)"}</span>
-                  }
-                />
-
-                <ListItemSecondaryAction>
-                  <IconButton edge="end" aria-label="delete" onClick={() => this.handleGraderClick(grader, isSelected, isUser)}>
-                    {isSelected ?
-                      <CheckCircleIcon style={{color: this.props.theme.palette.success.main}}/>
-                      :
-                      <RadioButtonUncheckedIcon/>
+                  <ListItemText
+                    primary={
+                      <span>{grader.name} {isUser && " (you)"}</span>
                     }
-                  </IconButton>
-                </ListItemSecondaryAction>
-              </ListItem>
-            )
-          })}
+                  />
+
+                  <ListItemSecondaryAction>
+                    <IconButton edge="end" aria-label="delete" onClick={() => this.handleGraderClick(grader, isSelected, isUser)}>
+                      {isSelected ?
+                        <CheckCircleIcon style={{color: this.props.theme.palette.success.main}}/>
+                        :
+                        <RadioButtonUncheckedIcon/>
+                      }
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              )
+            })}
         </List>
       </>
     )

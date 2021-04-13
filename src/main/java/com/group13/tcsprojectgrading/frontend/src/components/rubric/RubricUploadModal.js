@@ -1,12 +1,8 @@
 import React, {Component} from "react";
-import {IoCloseOutline} from "react-icons/io5";
 import classnames from "classnames";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
 import globalStyles from '../helpers/global.module.css';
-import Modal from "react-bootstrap/Modal";
-import Button from "react-bootstrap/Button";
-import {Form} from "react-bootstrap";
 
 
 class RubricUploadModal extends Component {
@@ -49,39 +45,40 @@ class RubricUploadModal extends Component {
 
   render() {
     return(
-      <Modal
-        show={this.props.show}
-        onHide={this.onClose}
-        animation={false}
-      >
-        <div className={globalStyles.modalContainer}>
-          <div className={globalStyles.modalHeaderContainer}>
-            <h2>Import rubric</h2>
-            <div className={classnames(globalStyles.modalHeaderContainerButton)} onClick={this.onClose}>
-              <IoCloseOutline size={30}/>
-            </div>
-          </div>
-
-          <div className={globalStyles.modalBodyContainer}>
-            <Form>
-              <Form.Group>
-                <Form.File ref={this.fileUploaderRef}
-                  name="file"
-                  // label="Upload a rubric"
-                  id="fileUploadForm"
-                />
-              </Form.Group>
-            </Form>
-          </div>
-
-          <div className={classnames(globalStyles.modalFooterContainer)}>
-            <div className={globalStyles.modalFooterContainerButtonGroup}>
-              <Button variant="linkLightGray" onClick={this.onClose}>Cancel</Button>
-              <Button variant="lightGreen" onClick={this.onAccept}>Upload</Button>
-            </div>
-          </div>
-        </div>
-      </Modal>
+    //   <Modal
+    //     show={this.props.show}
+    //     onHide={this.onClose}
+    //     animation={false}
+    //   >
+    //     <div className={globalStyles.modalContainer}>
+    //       <div className={globalStyles.modalHeaderContainer}>
+    //         <h2>Import rubric</h2>
+    //         <div className={classnames(globalStyles.modalHeaderContainerButton)} onClick={this.onClose}>
+    //           <IoCloseOutline size={30}/>
+    //         </div>
+    //       </div>
+    //
+    //       <div className={globalStyles.modalBodyContainer}>
+    //         <Form>
+    //           <Form.Group>
+    //             <Form.File ref={this.fileUploaderRef}
+    //               name="file"
+    //               // label="Upload a rubric"
+    //               id="fileUploadForm"
+    //             />
+    //           </Form.Group>
+    //         </Form>
+    //       </div>
+    //
+    //       <div className={classnames(globalStyles.modalFooterContainer)}>
+    //         <div className={globalStyles.modalFooterContainerButtonGroup}>
+    //           <Button variant="linkLightGray" onClick={this.onClose}>Cancel</Button>
+    //           <Button variant="lightGreen" onClick={this.onAccept}>Upload</Button>
+    //         </div>
+    //       </div>
+    //     </div>
+    //   </Modal>
+      <div></div>
     )
   }
 }

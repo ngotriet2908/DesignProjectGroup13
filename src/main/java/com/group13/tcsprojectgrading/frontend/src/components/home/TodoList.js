@@ -16,6 +16,7 @@ import store from "../../redux/store";
 import {push} from "connected-react-router";
 import Link from "@material-ui/core/Link";
 import Pluralize from "pluralize";
+import DoneIcon from '@material-ui/icons/Done';
 
 
 class TodoList extends Component {
@@ -30,21 +31,30 @@ class TodoList extends Component {
           className={classnames(styles.todoCard)}
           style={{backgroundColor: this.props.theme.palette.additionalColors.lightBlue}}
         >
-          <CardContent>
+          <CardContent className={classnames(styles.todoCardContent)}>
             <div className={styles.todoCardHeader}>
               <h3>
                   To-do list
               </h3>
             </div>
-            <div className={styles.todoCardBody}>
-              <List className={styles.root}>
-                {this.props.tasks.map((task) => {
-                  return(
-                    TodoItem(task)
-                  )
-                })}
-              </List>
-            </div>
+
+            {this.props.tasks.length > 0 ?
+
+              <div className={styles.todoCardBody}>
+                <List className={styles.root}>
+                  {this.props.tasks.map((task) => {
+                    return (
+                      TodoItem(task)
+                    )
+                  })}
+                </List>
+              </div>
+              :
+              <div className={styles.todoCardCenteredBody}>
+                No tasks <DoneIcon/>
+              </div>
+            }
+
           </CardContent>
         </Card>
       </div>
