@@ -85,30 +85,39 @@ class RubricOutlineElement extends Component {
               {isBlock(this.props.data.content.type) && [(
                 <MenuItem
                   key={"addCriterion"}
-                  onClick={() => createNewCriterion(
-                    this.props,
-                    this.props.path,
-                    this.props.data.content.id,
-                    this.props.data.children.length
-                  )}
+                  onClick={() => {
+                    this.handleMenuClose()
+                    createNewCriterion(
+                      this.props,
+                      this.props.path,
+                      this.props.data.content.id,
+                      this.props.data.children.length
+                    )
+                  }}
                 >
                   Add criterion
                 </MenuItem>),
               (
                 <MenuItem
                   key={"addSection"}
-                  onClick={() => createNewBlock(
-                    this.props,
-                    this.props.path,
-                    this.props.data.content.id,
-                    this.props.data.children.length)}
+                  onClick={() => {
+                    this.handleMenuClose()
+                    createNewBlock(
+                      this.props,
+                      this.props.path,
+                      this.props.data.content.id,
+                      this.props.data.children.length)
+                  }}
                 >
                     Add section
                 </MenuItem>)
               ]}
 
               <MenuItem
-                onClick={() => removeElement(this.props)}>
+                onClick={() => {
+                  this.handleMenuClose()
+                  removeElement(this.props)
+                }}>
                 Delete
               </MenuItem>
             </Menu>

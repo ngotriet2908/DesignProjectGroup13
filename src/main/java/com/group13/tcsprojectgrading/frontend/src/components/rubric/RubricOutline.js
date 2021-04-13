@@ -92,23 +92,29 @@ class RubricOutline extends Component {
                   >
                     <MenuItem
                       key={"addCriterion"}
-                      onClick={() => createNewCriterion(
-                        this.props,
-                        this.path,
-                        this.props.rubric.id,
-                        this.props.rubric.children.length
-                      )}
+                      onClick={() => {
+                        this.handleMenuClose()
+                        createNewCriterion(
+                          this.props,
+                          this.path,
+                          this.props.rubric.id,
+                          this.props.rubric.children.length
+                        )
+                      }}
                     >
                       Add criterion
                     </MenuItem>
                     <MenuItem
                       key={"addSection"}
-                      onClick={() => createNewBlock(
-                        this.props,
-                        this.path,
-                        this.props.rubric.id,
-                        this.props.rubric.children.length
-                      )}
+                      onClick={() => {
+                        this.handleMenuClose()
+                        createNewBlock(
+                          this.props,
+                          this.path,
+                          this.props.rubric.id,
+                          this.props.rubric.children.length
+                        )
+                      }}
                     >
                       Add section
                     </MenuItem>
