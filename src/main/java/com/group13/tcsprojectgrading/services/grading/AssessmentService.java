@@ -317,7 +317,7 @@ public class AssessmentService {
             );
         }
 
-       return getAssessment(assessmentId);
+        return getAssessment(assessmentId);
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)
@@ -400,7 +400,7 @@ public class AssessmentService {
                                Long graderId,
                                Long gradeId,
                                List<PrivilegeEnum> privileges
-                               ) throws ResponseStatusException {
+    ) throws ResponseStatusException {
 
         Submission submission = submissionRepository.findById(submissionId).orElse(null);
         if (submission == null) {

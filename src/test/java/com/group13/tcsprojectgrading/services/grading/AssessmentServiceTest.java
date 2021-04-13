@@ -18,6 +18,7 @@ import com.group13.tcsprojectgrading.models.rubric.RubricGrade;
 import com.group13.tcsprojectgrading.models.settings.Settings;
 import com.group13.tcsprojectgrading.models.submissions.Submission;
 import com.group13.tcsprojectgrading.models.user.User;
+import com.group13.tcsprojectgrading.repositories.course.CourseRepository;
 import com.group13.tcsprojectgrading.repositories.grading.*;
 import com.group13.tcsprojectgrading.repositories.submissions.SubmissionRepository;
 import com.group13.tcsprojectgrading.services.graders.GradingParticipationService;
@@ -35,6 +36,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.web.servlet.result.ContentResultMatchers;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
@@ -55,6 +57,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 public class AssessmentServiceTest {
     @Mock
+    private GradingParticipationService gradingParticipationService;
+    @Mock
+    private RubricService rubricService;
+    @Mock
+    private UserService userService;
+    @Mock
+    private SubmissionService submissionService;
+    @Mock
+    private SettingsService settingsService;
+
+    @Mock
     private AssessmentRepository assessmentRepository;
     @Mock
     private GradeRepository gradeRepository;
@@ -66,24 +79,6 @@ public class AssessmentServiceTest {
     private IssueStatusRepository issueStatusRepository;
     @Mock
     private SubmissionRepository submissionRepository;
-
-    @Mock
-    private GradingParticipationService gradingParticipationService;
-    @Mock
-    private RubricService rubricService;
-    @Mock
-    private UserService userService;
-    @Mock
-    private ProjectService projectService;
-    @Mock
-    private SubmissionService submissionService;
-    @Mock
-    private NotificationService notificationService;
-    @Mock
-    private SettingsService settingsService;
-
-    @Mock
-    private ApplicationEventPublisher applicationEventPublisher;
 
     @InjectMocks
     private AssessmentService assessmentService;
@@ -149,17 +144,6 @@ public class AssessmentServiceTest {
                 .isThrownBy(() -> {
                     assessmentService.getAssessment(assessmentId, submissionId, userId, new ArrayList<PrivilegeEnum>());
                 }).withMessageContaining("Submission not found");
-    }
-
-    @Test
-    public void getAssessmentNoPrivileges() throws Exception {
-        testSubmission.setGrader(new User(userId));
-
-        when(submissionService.getSubmission(submissionId)).thenReturn(testSubmission);
-        assertThatExceptionOfType(ResponseStatusException.class)
-                .isThrownBy(() -> {
-                    assessmentService.getAssessment(assessmentId, submissionId, userId, new ArrayList<PrivilegeEnum>());
-                }).withMessageContaining("Unauthorised");
     }
 
     @Test
@@ -302,19 +286,6 @@ public class AssessmentServiceTest {
     }
 
     @Test
-    public void addGradeNoPrivileges() throws Exception {
-        testSubmission.setProject(testProject);
-        User testGrader = new User(userId);
-        List<PrivilegeEnum> privileges = new ArrayList<>();
-
-        when(submissionRepository.findById(submissionId)).thenReturn(Optional.of(testSubmission));
-        when(assessmentRepository.findAssessmentById(assessmentId)).thenReturn(Optional.of(testAssessment));
-        when(userService.findById(userId)).thenReturn(testGrader);
-        assertThatExceptionOfType(ResponseStatusException.class)
-                .isThrownBy(() -> assessmentService.addGrade(submissionId, assessmentId, new Grade(), userId, privileges)).withMessageContaining("Unauthorised");
-    }
-
-    @Test
     public void addGradeNoGrader() throws Exception {
         testSubmission.setProject(testProject);
         User testGrader = new User(userId);
@@ -383,19 +354,6 @@ public class AssessmentServiceTest {
         assertThatExceptionOfType(ResponseStatusException.class)
                 .isThrownBy(() -> assessmentService.activateGrade(submissionId, assessmentId, userId, gradeId, privileges))
                 .withMessageContaining("Submission not found");
-    }
-
-    @Test
-    public void activateGradeNoPrivileges() throws Exception {
-        testSubmission.setProject(testProject);
-        Long gradeId = 62L;
-        User testGrader = new User(userId);
-        List<PrivilegeEnum> privileges = new ArrayList<>();
-
-        when(submissionRepository.findById(submissionId)).thenReturn(Optional.of(testSubmission));
-        assertThatExceptionOfType(ResponseStatusException.class)
-                .isThrownBy(() -> assessmentService.activateGrade(submissionId, assessmentId, userId, gradeId, privileges))
-                .withMessageContaining("Unauthorised");
     }
 
     @Test
@@ -511,23 +469,6 @@ public class AssessmentServiceTest {
     }
 
     @Test
-    public void createIssueNotAssigned() throws Exception {
-        testSubmission.setProject(testProject);
-        testSubmission.setGrader(new User(userId + 1));
-        Issue testIssue = new Issue();
-        User testGrader = new User(userId);
-        List<PrivilegeEnum> privileges = new ArrayList<>();
-        privileges.add(PrivilegeEnum.GRADING_WRITE_SINGLE);
-        GradingParticipation participation = new GradingParticipation(testGrader, testProject, new Role("TA"));
-
-        when(submissionRepository.findById(submissionId)).thenReturn(Optional.of(testSubmission));
-        when(gradingParticipationService.getGradingParticipationByUserAndProject(userId, projectId)).thenReturn(participation);
-        assertThatExceptionOfType(ResponseStatusException.class)
-                .isThrownBy(() -> assessmentService.createIssue(testIssue, submissionId, assessmentId, userId, privileges))
-                .withMessageContaining("Unauthorised");
-    }
-
-    @Test
     public void createIssueAssessmentNotFound() throws Exception {
         testSubmission.setProject(testProject);
         Issue testIssue = new Issue();
@@ -587,20 +528,6 @@ public class AssessmentServiceTest {
         assertThatExceptionOfType(ResponseStatusException.class)
                 .isThrownBy(() -> assessmentService.resolveIssue(submissionId, issueId, userId, solution, privileges))
                 .withMessageContaining("Submission not found");
-    }
-
-    @Test
-    public void resolveIssueNoPrivileges() throws Exception {
-        testSubmission.setProject(testProject);
-        Long issueId = 62L;
-        List<PrivilegeEnum> privileges = new ArrayList<>();
-        String solutionText = "Test Solution";
-        IssueSolution solution = new IssueSolution(solutionText);
-
-        when(submissionRepository.findById(submissionId)).thenReturn(Optional.of(testSubmission));
-        assertThatExceptionOfType(ResponseStatusException.class)
-                .isThrownBy(() -> assessmentService.resolveIssue(submissionId, issueId, userId, solution, privileges))
-                .withMessageContaining("Unauthorised");
     }
 
     @Test
