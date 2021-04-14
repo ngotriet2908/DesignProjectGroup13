@@ -381,7 +381,7 @@ public class AssessmentService {
     }
 
     /*
-    Populates all fields of Grade, saves it, deactivates all existing grades for the criterion and set the new grade
+    Populates all fields of Grade, saves it, deactivates all existing grades for the criterion and sets the new grade
     as active.
      */
     @Transactional(rollbackOn = Exception.class)
@@ -401,7 +401,7 @@ public class AssessmentService {
 
         Submission submission = submissionRepository.findById(submissionId).orElse(null);
         if (submission == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "submission not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Submission not found");
         }
 
         if (privileges.contains(GRADING_WRITE_SINGLE)) {
@@ -413,7 +413,6 @@ public class AssessmentService {
                         HttpStatus.UNAUTHORIZED, "Unauthorised"
                 );
             }
-        }
 
         Rubric rubric = rubricService.getRubricById(submission.getProject().getId());
         List<Element> criteria = rubric.fetchAllCriteria();
@@ -431,6 +430,8 @@ public class AssessmentService {
             );
         }
 
+        // TODO check if needed
+        assessment.setGradedCount(assessment.getGradedCount() + 1);
         assessment = assessmentRepository.save(assessment);
 
         grade.setGradedAt(Date.from(Instant.now()));
@@ -441,7 +442,13 @@ public class AssessmentService {
         this.gradeRepository.deactivateAllGrades(assessmentId, grade.getCriterionId());
         grade.setActive(true);
 
-        return this.gradeRepository.save(grade);
+            return this.gradeRepository.save(grade);
+        } else {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "Unauthorised"
+            );
+        }
+
     }
 
     @Transactional(rollbackOn = Exception.class)
@@ -458,11 +465,11 @@ public class AssessmentService {
                                Long graderId,
                                Long gradeId,
                                List<PrivilegeEnum> privileges
-                               ) throws ResponseStatusException {
+    ) throws ResponseStatusException {
 
         Submission submission = submissionRepository.findById(submissionId).orElse(null);
         if (submission == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "submission not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Submission not found");
         }
 
         if (privileges.contains(GRADING_WRITE_SINGLE)) {
@@ -474,21 +481,24 @@ public class AssessmentService {
                         HttpStatus.UNAUTHORIZED, "Unauthorised"
                 );
             }
+            Grade grade = this.gradeRepository.findGradeById(gradeId).orElse(null);
+
+            if (grade == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Grade not found");
+            }
+            this.gradeRepository.findGradesByAssessment_IdAndCriterionId(assessmentId, grade.getCriterionId());
+
+            // deactivate all other grades and set the selected one as active
+            this.gradeRepository.deactivateAllGrades(grade.getAssessment().getId(), grade.getCriterionId());
+            grade.setActive(true);
+
+            return this.gradeRepository.save(grade);
+        } else {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "Unauthorised"
+            );
         }
 
-
-        Grade grade = this.gradeRepository.findGradeById(gradeId).orElse(null);
-
-        if (grade == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Grade not found");
-        }
-        this.gradeRepository.findGradesByAssessment_IdAndCriterionId(assessmentId, grade.getCriterionId());
-
-        // deactivate all other grades and set the selected one as active
-        this.gradeRepository.deactivateAllGrades(grade.getAssessment().getId(), grade.getCriterionId());
-        grade.setActive(true);
-
-        return this.gradeRepository.save(grade);
     }
 
     /*
@@ -533,7 +543,7 @@ public class AssessmentService {
 
         Submission submission = submissionRepository.findById(submissionId).orElse(null);
         if (submission == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "submission not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Submission not found");
         }
 
         if (privileges.contains(GRADING_WRITE_SINGLE)) {
@@ -545,33 +555,35 @@ public class AssessmentService {
                         HttpStatus.UNAUTHORIZED, "Unauthorised"
                 );
             }
+            Assessment assessment = this.getAssessment(assessmentId);
+
+            if (assessment == null) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Assessment not found");
+            }
+
+            User creator = this.userService.findById(userId);
+            User addressee = null;
+            if (issue.getAddressee() != null) {
+                addressee = this.userService.findById(issue.getAddressee().getId());
+            }
+
+            issue.setAssessment(assessment);
+            issue.setSolution(null);
+            issue.setStatus(this.issueStatusRepository.findByName(IssueStatusEnum.OPEN.toString()));
+            issue.setCreator(creator);
+            issue.setAddressee(addressee);
+            issue = this.issueRepository.save(issue);
+
+            // send an email if user has notifications enabled (if transaction successful)
+            if (this.settingsService.getSettings(assessment.getProject().getId(), userId).isIssuesNotificationsEnabled()) {
+                this.applicationEventPublisher.publishEvent(new IssueCreatedEvent(addressee, assessment.getProject().getName()));
+            }
+
+            return issue;
+        } else {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorised");
         }
 
-        Assessment assessment = this.getAssessment(assessmentId);
-
-        if (assessment == null) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "submission not found");
-        }
-
-        User creator = this.userService.findById(userId);
-        User addressee = null;
-        if (issue.getAddressee() != null) {
-            addressee = this.userService.findById(issue.getAddressee().getId());
-        }
-
-        issue.setAssessment(assessment);
-        issue.setSolution(null);
-        issue.setStatus(this.issueStatusRepository.findByName(IssueStatusEnum.OPEN.toString()));
-        issue.setCreator(creator);
-        issue.setAddressee(addressee);
-        issue = this.issueRepository.save(issue);
-
-        // send an email if user has notifications enabled (if transaction successful)
-        if (this.settingsService.getSettings(assessment.getProject().getId(), userId).isIssuesNotificationsEnabled()) {
-            this.applicationEventPublisher.publishEvent(new IssueCreatedEvent(addressee, assessment.getProject().getName()));
-        }
-
-        return issue;
     }
 
     /*
@@ -583,7 +595,7 @@ public class AssessmentService {
 
         Submission submission = submissionRepository.findById(submissionId).orElse(null);
         if (submission == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "submission not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Submission not found");
         }
 
         if (privileges.contains(GRADING_WRITE_SINGLE)) {
@@ -595,18 +607,19 @@ public class AssessmentService {
                         HttpStatus.UNAUTHORIZED, "Unauthorised"
                 );
             }
+            Issue issue = this.issueRepository.findIssueById(issueId).orElse(null);
+
+            if (issue == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Issue not found");
+            }
+
+            issue.setSolution(solution.getSolution());
+            issue.setStatus(this.issueStatusRepository.findByName(IssueStatusEnum.RESOLVED.toString()));
+            issue = this.issueRepository.save(issue);
+            return issue;
+        } else {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorised");
         }
-
-        Issue issue = this.issueRepository.findIssueById(issueId).orElse(null);
-
-        if (issue == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Issue not found");
-        }
-
-        issue.setSolution(solution.getSolution());
-        issue.setStatus(this.issueStatusRepository.findByName(IssueStatusEnum.RESOLVED.toString()));
-        issue = this.issueRepository.save(issue);
-        return issue;
     }
 
     @Transactional(value = Transactional.TxType.MANDATORY)

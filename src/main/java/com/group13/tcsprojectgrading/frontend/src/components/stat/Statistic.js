@@ -3,6 +3,7 @@ import { Pie } from 'react-chartjs-2';
 import Card from 'react-bootstrap/Card';
 import styles from './stat.module.css';
 import 'chartjs-plugin-colorschemes';
+import {Can} from '../permissions/ProjectAbility';
 
 class Statistic extends Component {
   constructor(props) {
@@ -31,7 +32,6 @@ class Statistic extends Component {
         // </Can>
       );
     case 'piechart':
-      console.log(generatePieData(this.state.data));
       return (
         // <Can I="view" a={this.state.category}>
         <Card className={styles.stat}>

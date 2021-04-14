@@ -112,7 +112,7 @@ public class RichTextParser {
                         for(Text text: textList1) text.setBold();
                         break;
                     case "u":
-                        for(Text text: textList1) text.setUnderline(0.6f, -2f);;
+                        for(Text text: textList1) text.setUnderline(0.6f, -2f);
                         break;
                     case "em":
                         for(Text text: textList1) text.setItalic();

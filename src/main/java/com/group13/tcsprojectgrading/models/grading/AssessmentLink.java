@@ -112,5 +112,13 @@ public class AssessmentLink {
     public void setFeedbackLogs(List<FeedbackLog> feedbackLogs) {
         this.feedbackLogs = feedbackLogs;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AssessmentLink other = (AssessmentLink) o;
+        return Objects.equals(this.id, other.id);
+    }
 }
 

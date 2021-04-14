@@ -1,4 +1,4 @@
-@value primary, secondary, ternary, quaternary, quinary, senary, ultraLightGray, primaryShade, lightGray, darkishGray, moderateGray from '../helpers/colors.css';
+@value primary, secondary, ternary, quaternary, quinary, senary, senaryShade, ultraLightGray, primaryShade, lightGray, darkishGray, moderateGray from '../helpers/colors.css';
 
 
 /* GENERAL */
@@ -262,6 +262,10 @@
 
 .viewerHeaderIconRed {
     color: senary;
+}
+
+.viewerHeaderIconRed:hover {
+    background-color: senaryShade;
 }
 
 .viewerBodyEmpty {
