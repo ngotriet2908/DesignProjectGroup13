@@ -103,11 +103,12 @@ public class CourseService {
             if (courseRepository.existsById(course.getId())) {
                 // TODO
                 throw new ResponseStatusException(
-                        HttpStatus.CONFLICT, "Course exist"
+                        HttpStatus.CONFLICT, "Course already exists"
                 );
             }
             this.courseRepository.save(course);
 
+            //TODO seems pointless, userNode is literally same as CourseCanvas before
             ObjectMapper objectMapper = new ObjectMapper();
             String userCanvas = this.canvasApi.getCanvasCoursesApi().getUserCourse(course.getId());
             JsonNode userNode = objectMapper.readTree(userCanvas);
@@ -167,7 +168,6 @@ public class CourseService {
     public void syncCourse(Long courseId) throws JsonProcessingException, ResponseStatusException{
         // get course (can also be used to update it if required)
         Course course = getCourseWithLock(courseId);
-
         if (course == null) {
              throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Course not found"
@@ -300,7 +300,7 @@ public class CourseService {
             Project project1 = projectRepository.findProjectsById(projectId);
             if (project1 != null) {
                 throw new ResponseStatusException(
-                        HttpStatus.CONFLICT, "project existed"
+                        HttpStatus.CONFLICT, "Project already exists"
                 );
             }
             this.projectRepository.save(project);
@@ -502,7 +502,6 @@ public class CourseService {
         }
 
         CourseParticipation participation = this.courseParticipationRepository.findById_User_IdAndId_Course_Id(userId, courseId);
-
         if (participation == null) {
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED, "User does not participate in the course"

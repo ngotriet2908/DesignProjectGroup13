@@ -174,11 +174,13 @@ public class AssessmentServiceTest {
     @Test
     public void getAssessmentOk() throws Exception{
         testSubmission.setGrader(new User(userId));
+        testSubmission.setProject(testProject);
         List<PrivilegeEnum> privileges = new ArrayList<>();
         privileges.add(PrivilegeEnum.GRADING_READ_SINGLE);
 
         when(submissionService.getSubmission(anyLong())).thenReturn(testSubmission);
         when(assessmentRepository.findById(assessmentId)).thenReturn(Optional.of(testAssessment));
+        when(rubricService.getRubricById(projectId)).thenReturn(new Rubric(projectId));
         assertThat(assessmentService.getAssessment(assessmentId, submissionId, userId, privileges))
                 .isEqualTo(testAssessment);
     }
