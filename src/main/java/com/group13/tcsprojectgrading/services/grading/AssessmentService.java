@@ -430,8 +430,8 @@ public class AssessmentService {
             );
         }
 
-        // TODO check if needed
-        assessment.setGradedCount(assessment.getGradedCount() + 1);
+        // TODO not needed since grades are counted only on fetch
+//        assessment.setGradedCount(assessment.getGradedCount() + 1);
         assessment = assessmentRepository.save(assessment);
 
         grade.setGradedAt(Date.from(Instant.now()));
