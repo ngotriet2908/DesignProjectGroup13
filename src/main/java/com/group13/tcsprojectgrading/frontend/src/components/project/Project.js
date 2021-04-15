@@ -31,6 +31,7 @@ import DescriptionIcon from '@material-ui/icons/Description';
 import FeedbackIcon from '@material-ui/icons/Feedback';
 import ListIcon from '@material-ui/icons/List';
 import BackupIcon from '@material-ui/icons/Backup';
+import StatisticsPanel from "./StatisticsPanel";
 
 
 class Project extends Component {
@@ -323,6 +324,18 @@ class Project extends Component {
                   </div>
                 </div>
               </Grid>
+
+              <Grid item xs={6}>
+
+              </Grid>
+
+              <Grid item xs={6}>
+                {/* pass props here */}
+                <StatisticsPanel
+
+                />
+              </Grid>
+
             </Can>
 
             {/*<IssuesProject routeMatch={this.props.match} user={this.props.user} issues={this.state.issues}/>*/}

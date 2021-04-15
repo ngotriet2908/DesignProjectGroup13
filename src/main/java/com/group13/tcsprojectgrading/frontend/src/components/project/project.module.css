@@ -34,17 +34,6 @@
     border-radius: .25rem;
 }
 
-/*.questionTooltip :global(.bs-tooltip-auto[x-placement^="left"] span.arrow::before),*/
-/*.questionTooltip :global(.bs-tooltip-right .arrow::before) {*/
-/*    border-right-color: #4a7efa;*/
-/*}*/
-
-/*.questionTooltip > :global(div.arrow::before) {*/
-/*    border-bottom-color: white !important;*/
-/*    color: white !important;*/
-/*}*/
-
-
 .screenContainer > div {
     /*flex: 47%;*/
     width: 100%;
