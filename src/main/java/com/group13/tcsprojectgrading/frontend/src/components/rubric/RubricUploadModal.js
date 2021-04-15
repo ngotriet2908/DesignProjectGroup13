@@ -4,7 +4,6 @@ import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
 import globalStyles from '../helpers/global.module.css';
 import CustomModal from "../helpers/CustomModal";
-import {DropzoneArea} from "material-ui-dropzone";
 
 
 class RubricUploadModal extends Component {
