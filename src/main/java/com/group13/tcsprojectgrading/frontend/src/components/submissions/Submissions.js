@@ -22,7 +22,6 @@ import SyncIcon from "@material-ui/icons/Sync";
 import TextField from "@material-ui/core/TextField";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import SearchIcon from "@material-ui/icons/Search";
-import TableFilter from "../helpers/TableFilter";
 import Filter from "../helpers/Filter";
 
 
@@ -31,6 +30,11 @@ class Submissions extends Component {
     super(props);
 
     this.assignedFilterOptions = ["All", "Yours", "Not yours"];
+
+    let filterAssignedChoice = 0;
+    if (this.props.location.state && this.props.location.state.status) {
+      filterAssignedChoice = this.props.location.state.status
+    }
 
     this.state = {
       isLoaded: false,
@@ -41,7 +45,7 @@ class Submissions extends Component {
       searchString: "",
 
       // filterGroupChoice: "All",
-      filterAssignedChoice: this.assignedFilterOptions[0],
+      filterAssignedChoice: this.assignedFilterOptions[filterAssignedChoice],
 
       syncing: false
     }
@@ -243,7 +247,7 @@ const actionCreators = {
 
 const mapStateToProps = state => {
   return {
-    user: state.users.self
+    user: state.users.self,
   };
 };
 

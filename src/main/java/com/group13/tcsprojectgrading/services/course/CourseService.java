@@ -2,7 +2,6 @@ package com.group13.tcsprojectgrading.services.course;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
@@ -89,6 +88,7 @@ public class CourseService {
             long id = courseToImport.get("id").asLong();
 
             // TODO what if no such course exists?
+            // should be checked what Canvas returns in such a case, then catch it and return an error
             JsonNode courseCanvas = Json.getObjectReader().readTree(this.canvasApi.getCanvasCoursesApi().getUserCourse(id));
 
             String name = courseCanvas.get("name").asText();
@@ -108,14 +108,13 @@ public class CourseService {
             }
             this.courseRepository.save(course);
 
-            //TODO seems pointless, userNode is literally same as CourseCanvas before
-            ObjectMapper objectMapper = new ObjectMapper();
-            String userCanvas = this.canvasApi.getCanvasCoursesApi().getUserCourse(course.getId());
-            JsonNode userNode = objectMapper.readTree(userCanvas);
-            System.out.println(userCanvas);
-            if (!RoleEnum.getRoleFromEnrolment(userNode.get("enrollments").get(0).get("role").asText()).equals(RoleEnum.TEACHER)) {
-                throw new ResponseStatusException(
-                        HttpStatus.UNAUTHORIZED, "You are not a teacher in course " + course.getName());
+            // check if user that requested action is teacher
+            for (JsonNode enrolment: courseCanvas.get("enrollments")) {
+                if (enrolment.get("user_id").asLong() == userId &&
+                        !RoleEnum.getRoleFromEnrolment(enrolment.get("role").asText()).equals(RoleEnum.TEACHER)) {
+                    throw new ResponseStatusException(
+                            HttpStatus.UNAUTHORIZED, "You are not a teacher in course " + course.getName());
+                }
             }
 
             // fetch users and for each create a) User b) Participation
@@ -278,13 +277,11 @@ public class CourseService {
             );
         }
 
-        ObjectMapper mapper = new ObjectMapper();
-
         // for each project that was added
         for (JsonNode projectToImport: projects) {
             Long projectId = projectToImport.get("id").asLong();
             String projectCanvas = this.canvasApi.getCanvasCoursesApi().getCourseProject(courseId, projectId);
-            JsonNode projectCanvasNode = mapper.readTree(projectCanvas);
+            JsonNode projectCanvasNode = Json.getObjectReader().readTree(projectCanvas);
 
             // create project
             Project project = new Project(

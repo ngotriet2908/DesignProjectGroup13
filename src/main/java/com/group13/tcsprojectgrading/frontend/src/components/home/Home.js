@@ -23,6 +23,7 @@ import classnames from "classnames";
 import Grid from "@material-ui/core/Grid";
 import ImportExportIcon from '@material-ui/icons/ImportExport';
 import EmptyCourseCard from "./EmptyCourseCard";
+import TaskPanel from "./TaskPanel";
 
 
 class Home extends Component {
@@ -61,7 +62,7 @@ class Home extends Component {
         this.props.saveUserSelf(user);
 
         // TODO remove
-        // courses = Array(10).fill(courses).flat()
+        courses = Array(10).fill(courses).flat()
 
         this.setState({
           recentProjects: recent,
@@ -154,8 +155,9 @@ class Home extends Component {
             </Grid>
 
             <Grid item xs={5}>
-              <TodoList
+              <TaskPanel
                 tasks={this.state.tasks}
+                issues={this.state.issues}
               />
             </Grid>
           </Grid>

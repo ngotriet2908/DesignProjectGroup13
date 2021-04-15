@@ -26,38 +26,36 @@ class TodoList extends Component {
 
   render () {
     return(
-      <div className={classnames(styles.todoContainer)}>
-        <Card
-          className={classnames(styles.todoCard)}
-          style={{backgroundColor: this.props.theme.palette.additionalColors.lightBlue}}
-        >
-          <CardContent className={classnames(styles.todoCardContent)}>
-            <div className={styles.todoCardHeader}>
-              <h3>
+      <Card
+        className={classnames(styles.todoCard)}
+        style={{backgroundColor: this.props.theme.palette.additionalColors.lightBlue}}
+      >
+        <CardContent className={classnames(styles.todoCardContent)}>
+          <div className={styles.todoCardHeader}>
+            <h3>
                   To-do list
-              </h3>
+            </h3>
+          </div>
+
+          {this.props.tasks.length > 0 ?
+
+            <div className={styles.todoCardBody}>
+              <List className={styles.root}>
+                {this.props.tasks.map((task) => {
+                  return (
+                    TodoItem(task)
+                  )
+                })}
+              </List>
             </div>
-
-            {this.props.tasks.length > 0 ?
-
-              <div className={styles.todoCardBody}>
-                <List className={styles.root}>
-                  {this.props.tasks.map((task) => {
-                    return (
-                      TodoItem(task)
-                    )
-                  })}
-                </List>
-              </div>
-              :
-              <div className={styles.todoCardCenteredBody}>
+            :
+            <div className={styles.todoCardCenteredBody}>
                 No tasks <DoneIcon/>
-              </div>
-            }
+            </div>
+          }
 
-          </CardContent>
-        </Card>
-      </div>
+        </CardContent>
+      </Card>
     )
   }
 }
@@ -79,7 +77,7 @@ const TodoItem = (task) => {
               task.course.id +
               "/projects/" +
               task.id +
-              "/submissions"));
+              "/submissions", {status: 1}));
           }}>
             {task.name}
           </Link>

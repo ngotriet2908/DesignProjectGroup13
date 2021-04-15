@@ -566,43 +566,6 @@ public class ProjectService {
         return this.labelRepository.save(label);
     }
 
-    //    @Transactional
-//    public JsonNode deleteLabelPermanently(String projectId, String labelId, Long userId) {
-//        ObjectMapper objectMapper = new ObjectMapper();
-//
-//        Project project = getProject(projectId);
-//        if (project == null) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.NOT_FOUND, "Project not found"
-//            );
-//        }
-//
-//        GradingParticipation grader = graderService.getGraderFromGraderId(userId, projectId);
-//        if (grader == null) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.NOT_FOUND, "Task not found"
-//            );
-//        }
-//        //TODO change response to errors
-//        Label label = this.labelService.findLabelWithId(Long.valueOf(labelId));
-//        ObjectNode result = objectMapper.createObjectNode();
-//        if (label != null) {
-//            List<Submission> submissions = submissionService.findSubmissionsByLabels(label);
-//            if (submissions.size() > 0) {
-//                result.put("error", "Flag is current used by some submission");
-//            } else {
-//                labelService.deleteLabel(label);
-//                // TODO
-////                result.set("data", createFlagsArrayNode(labelService.findLabelsWithProject(project)));
-//            }
-//            return result;
-//
-//        }
-//        result.put("error", "some weird error");
-//        return result;
-//    }
-
-
     @Transactional
     public byte[] getProjectExcel(Long projectId) throws IOException, ResponseStatusException {
         Project project = getProject(projectId);
@@ -1088,23 +1051,6 @@ public class ProjectService {
             );
         }
 
-//        return Stream
-//                .concat(
-////                    submissionService.findSubmissionsForGrader(graderId)
-////                            .stream()
-////                            .map(submission -> assessmentService
-////                                    .getAssessmentsBySubmission(submission)
-////                                    .stream()
-////                                    .map(Assessment::getIssues)
-////                                    .flatMap(Collection::stream)
-////                                    .collect(Collectors.toSet()))
-////                            .flatMap(Collection::stream),
-//                    issueRepository.findIssuesByCreator(user).stream()
-//                    , issueRepository.findIssuesByAddressee(user).stream()
-//                )
-//                .distinct()
-//                .sorted(Comparator.comparingLong(Issue::getId))
-//                .collect(Collectors.toList());
         return issueRepository.findIssuesByCreatorOrAddressee(user, user)
                 .stream()
                 .peek(issue -> {
