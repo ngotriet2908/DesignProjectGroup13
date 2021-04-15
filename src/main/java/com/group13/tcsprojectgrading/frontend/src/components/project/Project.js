@@ -46,7 +46,7 @@ class Project extends Component {
       stats: [],
       isLoaded: false,
       issues: [],
-      syncing: false
+      syncing: false,
     }
   }
 
@@ -60,10 +60,12 @@ class Project extends Component {
     Promise.all([
       request(BASE + "courses/" + courseId + "/projects/" + projectId),
       // request(BASE + "courses/" + courseId + "/projects/" + projectId + "/issues"),
+      request(BASE + "courses/" + courseId + "/projects/" + projectId + "/stats"),
     ])
-      .then(async([res1, res2]) => {
+      .then(async([res1, res3]) => {
         const project = await res1.json();
         // const issues = await res2.json();
+        const stats = await res3.json();
 
         this.props.saveRubric(project.rubric);
 
@@ -78,7 +80,8 @@ class Project extends Component {
           project: project,
           isLoaded: true,
           syncing: false,
-          issues: []
+          issues: [],
+          stats: stats
         });
       })
       .catch(error => {
@@ -331,7 +334,7 @@ class Project extends Component {
 
               <Grid item xs={6}>
                 {/* pass props here */}
-                <StatisticsPanel
+                <StatisticsPanel data = {this.state.stats}
 
                 />
               </Grid>

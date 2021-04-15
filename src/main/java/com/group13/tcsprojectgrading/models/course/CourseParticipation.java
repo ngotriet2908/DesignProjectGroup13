@@ -1,6 +1,7 @@
 package com.group13.tcsprojectgrading.models.course;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.group13.tcsprojectgrading.models.grading.Assessment;
 import com.group13.tcsprojectgrading.models.grading.AssessmentLink;
 import com.group13.tcsprojectgrading.models.submissions.Submission;
 import com.group13.tcsprojectgrading.models.user.User;
@@ -56,6 +57,18 @@ public class CourseParticipation {
     @Transient
 //    @JsonSerialize(contentUsing= Submission.SubmissionShortSerializer.class)
     private List<Submission> submissions;
+
+    @Transient
+//    @JsonSerialize(contentUsing= Submission.SubmissionShortSerializer.class)
+    private Assessment currentAssessment;
+
+    public Assessment getCurrentAssessment() {
+        return currentAssessment;
+    }
+
+    public void setCurrentAssessment(Assessment currentAssessment) {
+        this.currentAssessment = currentAssessment;
+    }
 
     public CourseParticipation() {
     }

@@ -64,8 +64,13 @@ class CourseController {
     Resyncs the course
      */
     @RequestMapping(value = "/{courseId}/sync", method = RequestMethod.POST)
-    protected ResponseEntity<?> syncCourse(@PathVariable Long courseId) throws JsonProcessingException {
+    protected ResponseEntity<?> syncCourse(@PathVariable Long courseId, Principal principal) throws JsonProcessingException {
         // TODO check if teacher is performing this action
+
+        RoleEnum roleEnum = this.courseService.getCourseRole(courseId, Long.valueOf(principal.getName()));
+        if (!(roleEnum != null && roleEnum.equals(RoleEnum.TEACHER))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+        }
 
         // sync courses
         this.courseService.syncCourse(courseId);
@@ -117,6 +122,7 @@ class CourseController {
      */
     @RequestMapping(value = "/{courseId}/projects/all", method = RequestMethod.GET, produces = "application/json")
     protected ResponseEntity<ArrayNode> getCanvasProjects(@PathVariable Long courseId, Principal principal) throws JsonProcessingException {
+
         List<String> projects = this.canvasApi.getCanvasCoursesApi().getCourseProjects(courseId);
 
         if (projects == null) {

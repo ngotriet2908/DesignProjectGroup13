@@ -155,16 +155,25 @@ public class ProjectService {
         return courseService
                 .getCourseStudents(courseId)
                 .stream()
-                .peek(participation -> participation.setSubmissions(
-                        assessmentService.getAssessmentsByProjectAndUser(
-                                projectId,
-                                participation.getId().getUser()
-                        )
-                                .stream()
-                                .map(assessmentLink -> assessmentLink.getId().getSubmission())
-                                .sorted(Comparator.comparingLong(Submission::getId))
-                                .collect(Collectors.toList())
-                ))
+                .peek(participation -> {
+                    participation.setSubmissions(
+                            assessmentService.getAssessmentsByProjectAndUser(
+                                    projectId,
+                                    participation.getId().getUser()
+                            )
+                                    .stream()
+                                    .map(assessmentLink -> assessmentLink.getId().getSubmission())
+                                    .sorted(Comparator.comparingLong(Submission::getId))
+                                    .collect(Collectors.toList())
+                    );
+                    Assessment assessment = assessmentService.findCurrentAssessmentUser(
+                            project,
+                            participation.getId().getUser()
+                    )
+                            .getId().getAssessment();
+
+                    participation.setCurrentAssessment(assessmentService.getAssessmentDetails(assessment.getId(), project));
+                })
                 .sorted(Comparator.comparingLong(a -> a.getId().getUser().getId()))
                 .collect(Collectors.toList());
     }
@@ -188,6 +197,34 @@ public class ProjectService {
 
         courseParticipation.setSubmissions(this.submissionService.getSubmissionFromStudents(projectId, user));
         return courseParticipation;
+    }
+
+    @Transactional
+    public List<Float> getFinalGrades(Long courseId, Long projectId) throws ResponseStatusException {
+        Project project = getProject(projectId);
+
+        if (project == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Project not found"
+            );
+        }
+
+         return courseService
+                .getCourseStudents(courseId)
+                .stream()
+                .map(participation -> {
+                    Assessment assessment = assessmentService.findCurrentAssessmentUser(
+                            project,
+                            participation.getId().getUser()
+                    )
+                            .getId().getAssessment();
+                    assessment = assessmentService.getAssessmentDetails(assessment.getId(), project);
+                    if (assessment.getProgress() < 100) return null;
+                    return (assessment.getManualGrade() != null)? assessment.getManualGrade() : assessment.getFinalGrade();
+                })
+                .filter(Objects::nonNull)
+                .sorted()
+                .collect(Collectors.toList());
     }
 
     @Transactional
