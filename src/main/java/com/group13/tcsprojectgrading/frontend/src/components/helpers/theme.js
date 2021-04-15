@@ -5,27 +5,15 @@ import pink from '@material-ui/core/colors/pink';
 
 export const theme = unstable_createMuiStrictModeTheme({
   palette: {
-    // primary: {
-    //   main: "#002C5F",
-    // },
-    // secondary: {
-    //   main: "#822433",
-    // },
-    // primary: {
-    //   main: "#2196f3",
-    // },
-    // secondary: {
-    //   main: "#f50057",
-    // },
     primary: {
       main: "#2f5d8a",
     },
     secondary: {
       main: "#ffc13b",
     },
-    // error : {
-    //
-    // },
+    error : {
+      main: "#d43808",
+    },
     warning: {
       main: "#d43808",
     },

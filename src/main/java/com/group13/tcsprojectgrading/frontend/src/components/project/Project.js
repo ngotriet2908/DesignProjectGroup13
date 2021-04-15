@@ -326,13 +326,13 @@ class Project extends Component {
                     </Card>
                   </div>
                 </div>
-              </Grid>
+                {/*</Grid>*/}
 
-              <Grid item xs={6}>
+                {/*<Grid item xs={6}>*/}
 
-              </Grid>
+                {/*</Grid>*/}
 
-              <Grid item xs={6}>
+                {/*<Grid item xs={6}>*/}
                 {/* pass props here */}
                 <StatisticsPanel data = {this.state.stats}
 

@@ -30,8 +30,10 @@ class RubricEditorElement extends Component {
   }
 
   render () {
+    console.log()
+
     // rubric's header
-    if (!this.props.data.hasOwnProperty("content")) {
+    if (!this.props.data || !this.props.data.hasOwnProperty("content")) {
       return(
         <div className={styles.viewerBodyEmpty}>
           <FormatAlignLeftIcon/>

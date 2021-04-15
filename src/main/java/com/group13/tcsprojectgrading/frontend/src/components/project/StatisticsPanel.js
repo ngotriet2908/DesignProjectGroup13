@@ -71,7 +71,7 @@ class StatisticsPanel extends Component {
           {
             label: "number of students",
             data: y,
-            backgroundColor: "#878BB6"
+            backgroundColor: this.props.theme.palette.primary.main,
           }
         ]
       },
@@ -87,7 +87,10 @@ class StatisticsPanel extends Component {
   render () {
     return(
       <div className={classnames(globalStyles.sectionContainer)}>
-        <div className={classnames(globalStyles.sectionTitle, globalStyles.sectionTitleWithButton)}>
+        <div
+          className={classnames(globalStyles.sectionTitle, globalStyles.sectionTitleWithButton)}
+          // style={{margin: "0"}}
+        >
           <h3 className={globalStyles.sectionTitleH}>
             Statistics
           </h3>

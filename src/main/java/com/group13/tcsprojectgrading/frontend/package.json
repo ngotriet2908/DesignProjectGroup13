@@ -16,6 +16,7 @@
     "connected-react-router": "^6.9.1",
     "css-loader": "^5.0.2",
     "lodash.clonedeep": "^4.5.0",
+    "material-ui-dropzone": "^3.5.0",
     "pluralize": "^8.0.0",
     "postcss-modules-values": "^4.0.0",
     "prop-types": "^15.7.2",

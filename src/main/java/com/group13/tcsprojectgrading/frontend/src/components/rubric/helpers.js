@@ -92,6 +92,9 @@ export const createNewCriterion = (props, path, id, childrenLength) => {
 }
 
 export const removeElement = (props) => {
+  console.log("P");
+  console.log(props);
+
   props.deleteElement(props.data.content.id, props.path);
   // TODO go to parent
   props.setCurrentPath("");

@@ -67,7 +67,7 @@ class Home extends Component {
         this.props.saveUserSelf(user);
 
         // TODO remove
-        courses = Array(10).fill(courses).flat()
+        // courses = Array(10).fill(courses).flat()
 
         this.setState({
           recentProjects: recent,
