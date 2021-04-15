@@ -1,7 +1,8 @@
 // TODO redefine all API endpoints, they're pure chaos right now
 
-export const HOST = "http://localhost:8080"
+// export const HOST = "http://localhost:8080"
 // export const HOST = "http://prograding.ddns.net:8080"
+export const HOST = "https://prograding.duckdns.org"
 export const BASE = "/api/";
 export const USER_COURSES = "courses";
 export const USER_INFO = "users/self";
@@ -18,4 +19,5 @@ export const COURSES = "courses";
 // export const USER_RECENT = "users/recent"
 // export const COURSE_INFO = "courses"
 export const PROJECT = "projects"
+
 

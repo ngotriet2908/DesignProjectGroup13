@@ -53,7 +53,7 @@ public class RubricService {
             // TODO, get rid of object mapper
             ObjectMapper objectMapper = new ObjectMapper();
             if (linker != null) {
-                System.out.println("Rubric version: " + linker.getVersion());
+//                System.out.println("Rubric version: " + linker.getVersion());
                 Rubric rubric = objectMapper.readValue(linker.getRubric(), Rubric.class);
                 rubric.setVersion(linker.getVersion());
                 return rubric;
@@ -87,7 +87,7 @@ public class RubricService {
 
         // TODO, get rid of object mapper
 //        linker.setRubric(Json.getObjectWriter().writeValueAsString(rubric));
-        System.out.println("Rubric version: " + linker.getVersion());
+//        System.out.println("Rubric version: " + linker.getVersion());
         ObjectMapper mapper = new ObjectMapper();
         linker.setRubric(mapper.writeValueAsString(rubric));
 

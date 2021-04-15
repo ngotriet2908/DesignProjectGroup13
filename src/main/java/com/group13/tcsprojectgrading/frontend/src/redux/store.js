@@ -23,7 +23,7 @@ export const store = createStore(
       routerMiddleware(history), // allows dispatching of history actions
       // thunk
     ),
-    window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+    // window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
   ),
 );
 
