@@ -5,6 +5,8 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.group13.tcsprojectgrading.models.course.Course;
+import com.group13.tcsprojectgrading.models.project.Project;
 import com.group13.tcsprojectgrading.models.submissions.Submission;
 import com.group13.tcsprojectgrading.models.user.User;
 
@@ -49,17 +51,25 @@ public class Issue {
 
     private String solution;
 
-    @Transient
+    @ManyToOne
     @JsonSerialize(using = Submission.SubmissionShortSerializer.class)
     private Submission submission;
 
-    public Issue() {
-    }
+    @ManyToOne
+    @JsonSerialize(using = Course.CourseShortSerialiser.class)
+    private Course course;
 
-    public Issue(Long id, Assessment assessment, Issue referentIssue, String subject, String description, User creator,
-                 User addressee, IssueStatus status, String solution, String target) {
-        this.id = id;
+    @ManyToOne
+    @JsonSerialize(using = Project.ProjectShortSerialiser.class)
+    private Project project;
+
+    public Issue() { }
+
+    public Issue(Assessment assessment, String target, Issue referentIssue, String subject, String description,
+                 User creator, User addressee, IssueStatus status, String solution, Submission submission,
+                 Course course, Project project) {
         this.assessment = assessment;
+        this.target = target;
         this.referentIssue = referentIssue;
         this.subject = subject;
         this.description = description;
@@ -67,7 +77,9 @@ public class Issue {
         this.addressee = addressee;
         this.status = status;
         this.solution = solution;
-        this.target = target;
+        this.submission = submission;
+        this.course = course;
+        this.project = project;
     }
 
     public Long getId() {
@@ -158,9 +170,25 @@ public class Issue {
         this.submission = submission;
     }
 
+    public Course getCourse() {
+        return course;
+    }
+
+    public void setCourse(Course course) {
+        this.course = course;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
     /*
-        Serialiser for the brief information about the issue.
-         */
+                Serialiser for the brief information about the issue.
+                 */
     public static class IssueShortSerialiser extends JsonSerializer<Issue> {
         @Override
         public void serialize(Issue issue, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
@@ -170,27 +198,4 @@ public class Issue {
             jsonGenerator.writeEndObject();
         }
     }
-
-    //    public JsonNode convertToJson() {
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        ObjectNode node = objectMapper.createObjectNode();
-//        node.put("id", id.toString());
-//        node.put("assessmentId", assessmentId.toString());
-//        node.put("target", target.toString());
-//        node.put("targetName", targetName);
-//        node.put("targetType", targetType);
-//        node.put("subject", subject);
-//        node.put("description", description);
-//        node.put("status", status);
-//        if (solution != null)
-//            node.put("solution", solution);
-//        node.set("creator", creator.getGraderJson());
-//        if (referentIssue != null) {
-//            node.set("reference", referentIssue.convertToJson());
-//        }
-//        if (addressee != null) {
-//            node.set("addressee", addressee.getGraderJson());
-//        }
-//        return node;
-//    }
 }

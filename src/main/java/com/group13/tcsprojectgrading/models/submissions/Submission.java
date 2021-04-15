@@ -240,18 +240,11 @@ public class Submission {
             jsonGenerator.writeStartObject();
             jsonGenerator.writeNumberField("id", submission.getId());
             jsonGenerator.writeStringField("name", submission.getName());
-            jsonGenerator.writeStringField("submittedAt", submission.getSubmittedAt().toString());
-//            jsonGenerator.writeObjectField("members", submission.getMembers());
-            if (submission.getGrader() != null) {
-//                jsonGenerator.writeObjectFieldStart("grader");
-//                jsonGenerator.writeStartObject();
-//                jsonGenerator.writeNumberField("id", submission.getGrader().getId());
-//                jsonGenerator.writeStringField("name", submission.getGrader().getName());
-//                jsonGenerator.writeStringField("sNumber", submission.getGrader().getsNumber());
-//                jsonGenerator.writeEndObject();
-                jsonGenerator.writeObjectField("grader", submission.getGrader());
+//            jsonGenerator.writeStringField("submittedAt", submission.getSubmittedAt().toString());
 
-            }
+//            if (submission.getGrader() != null) {
+//                jsonGenerator.writeObjectField("grader", submission.getGrader());
+//            }
 
             jsonGenerator.writeEndObject();
         }

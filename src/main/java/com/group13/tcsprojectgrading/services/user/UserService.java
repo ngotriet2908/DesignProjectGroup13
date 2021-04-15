@@ -1,9 +1,12 @@
 package com.group13.tcsprojectgrading.services.user;
 
+import com.group13.tcsprojectgrading.models.grading.Issue;
 import com.group13.tcsprojectgrading.models.project.Project;
 import com.group13.tcsprojectgrading.models.user.User;
 import com.group13.tcsprojectgrading.repositories.graders.GradingParticipationRepository;
+import com.group13.tcsprojectgrading.repositories.grading.IssueRepository;
 import com.group13.tcsprojectgrading.repositories.user.UserRepository;
+import com.group13.tcsprojectgrading.services.grading.AssessmentService;
 import com.group13.tcsprojectgrading.services.submissions.SubmissionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -17,11 +20,16 @@ public class UserService {
     private final SubmissionService submissionService;
     private final UserRepository userRepository;
     private final GradingParticipationRepository gradingParticipationRepository;
+    private final IssueRepository issueRepository;
 
-    public UserService(SubmissionService submissionService, UserRepository userRepository, GradingParticipationRepository gradingParticipationRepository) {
+    public UserService(SubmissionService submissionService, UserRepository userRepository,
+                       GradingParticipationRepository gradingParticipationRepository,
+                       IssueRepository issueRepository) {
         this.submissionService = submissionService;
         this.userRepository = userRepository;
         this.gradingParticipationRepository = gradingParticipationRepository;
+
+        this.issueRepository = issueRepository;
     }
 
     @Transactional(rollbackOn = Exception.class)
@@ -42,12 +50,15 @@ public class UserService {
         return userRepository.getOne(userId);
     }
 
+    /*
+    Returns a list of projects in which the user has submissions to grade.
+     */
     @Transactional
     public Collection<Project> getTodoForUser(Long userId) throws ResponseStatusException{
         User user = userRepository.getOne(userId);
         if (user == null) {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "user not found"
+                    HttpStatus.NOT_FOUND, "User not found"
             );
         }
 
@@ -61,7 +72,6 @@ public class UserService {
                             if (
                                     !submission.getAssessments().stream()
                                     .map(assessment -> {
-                                        System.out.println(assessment.getProgress() + "%");
                                         return assessment.getProgress() == 100;
                                     })
                                     .reduce(true, (value, value1) -> value = value & value1)
@@ -102,5 +112,23 @@ public class UserService {
                     }
                 });
         return projectMap.values();
+    }
+
+    /*
+    Returns a list of issues that have the user as the author or addressee.
+     */
+    @Transactional
+    public Collection<Issue> getIssuesForUser(Long userId) throws ResponseStatusException{
+        User user = userRepository.getOne(userId);
+
+        if (user == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "User not found"
+            );
+        }
+
+        List<Issue> issues = this.issueRepository.findIssuesByCreatorOrAddressee(user, user);
+
+        return issues;
     }
 }

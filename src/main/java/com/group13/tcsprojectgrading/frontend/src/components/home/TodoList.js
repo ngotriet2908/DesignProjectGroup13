@@ -32,9 +32,9 @@ class TodoList extends Component {
       >
         <CardContent className={classnames(styles.todoCardContent)}>
           <div className={styles.todoCardHeader}>
-            <h3>
+            <h4>
                   To-do list
-            </h3>
+            </h4>
           </div>
 
           {this.props.tasks.length > 0 ?

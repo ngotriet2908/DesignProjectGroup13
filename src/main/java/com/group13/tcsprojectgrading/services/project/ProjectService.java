@@ -1078,30 +1078,30 @@ public class ProjectService {
         return true;
     }
 
-    @Transactional
-    public List<Issue> getIssuesInProject(Long projectId, Long graderId) throws ResponseStatusException {
-
-        User user = userService.findById(graderId);
-        if (user == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "user not found"
-            );
-        }
-
-        return issueRepository.findIssuesByCreatorOrAddressee(user, user)
-                .stream()
-                .peek(issue -> {
-                        Submission submission = submissionService
-                                .findSubmissionsFromAssessment(
-                                        issue.getAssessment().getId());
-                        if (submission.getProject().getId().equals(projectId)) {
-                            issue.setSubmission(
-                                    submission
-                            );
-                        }
-                })
-                .filter(issue -> issue.getSubmission() != null)
-                .sorted(Comparator.comparingLong(Issue::getId))
-                .collect(Collectors.toList());
-    }
+//    @Transactional
+//    public List<Issue> getIssuesInProject(Long projectId, Long graderId) throws ResponseStatusException {
+//
+//        User user = userService.findById(graderId);
+//        if (user == null) {
+//            throw new ResponseStatusException(
+//                    HttpStatus.NOT_FOUND, "user not found"
+//            );
+//        }
+//
+//        return issueRepository.findIssuesByCreatorOrAddressee(user, user)
+//                .stream()
+//                .peek(issue -> {
+//                        Submission submission = submissionService
+//                                .findSubmissionsFromAssessment(
+//                                        issue.getAssessment().getId());
+//                        if (submission.getProject().getId().equals(projectId)) {
+//                            issue.setSubmission(
+//                                    submission
+//                            );
+//                        }
+//                })
+//                .filter(issue -> issue.getSubmission() != null)
+//                .sorted(Comparator.comparingLong(Issue::getId))
+//                .collect(Collectors.toList());
+//    }
 }
