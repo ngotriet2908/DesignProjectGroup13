@@ -127,6 +127,21 @@ public class ProjectController {
         }
     }
 
+    @RequestMapping(value = "/{projectId}/stats", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    protected List<Float> getProjectCurrentGradesDistribution(@PathVariable Long courseId,
+                                                        @PathVariable Long projectId,
+                                                        Principal principal) throws JsonProcessingException, ParseException {
+
+        List<PrivilegeEnum> privileges = this.gradingParticipationService
+                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
+        if (!(privileges != null && privileges.contains(PROJECT_READ))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
+
+        return this.projectService.getFinalGrades(courseId, projectId);
+    }
+
     @RequestMapping(value = "/{projectId}/students/{studentId}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     protected CourseParticipation getProjectParticipant(@PathVariable Long courseId,

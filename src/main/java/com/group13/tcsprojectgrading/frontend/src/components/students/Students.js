@@ -177,6 +177,7 @@ class Students extends Component {
                   <TableCell>Name</TableCell>
                   <TableCell>sNumber</TableCell>
                   <TableCell>Email</TableCell>
+                  <TableCell>Final grade</TableCell>
                   <TableCell align="right">
                     <TableFilter
                       options={this.submissionsFilterOptions}
@@ -217,6 +218,12 @@ class Students extends Component {
                         </TableCell>
                         <TableCell component="td" scope="row">
                           {student.id.user.email}
+                        </TableCell>
+                        <TableCell component="td" scope="row">
+                          { (student.currentAssessment != null &&
+                              student.currentAssessment.progress === 100)?
+                                student.currentAssessment.finalGrade : null
+                          }
                         </TableCell>
                         <TableCell align="right">{student.submissions.length}</TableCell>
                       </TableRow>
