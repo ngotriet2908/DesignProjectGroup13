@@ -563,6 +563,9 @@ public class AssessmentService {
             addressee = this.userService.findById(issue.getAddressee().getId());
         }
 
+        issue.setSubmission(submission);
+        issue.setProject(submission.getProject());
+        issue.setCourse(submission.getProject().getCourse());
         issue.setAssessment(assessment);
         issue.setSolution(null);
         issue.setStatus(this.issueStatusRepository.findByName(IssueStatusEnum.OPEN.toString()));

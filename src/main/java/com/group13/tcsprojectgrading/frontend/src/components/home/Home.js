@@ -3,7 +3,7 @@ import React, { Component } from 'react'
 import styles from './home.module.css'
 
 import {request} from "../../services/request";
-import {BASE, USER_COURSES, USER_INFO, USER_TASKS} from "../../services/endpoints";
+import {BASE, USER_COURSES, USER_INFO, USER_ISSUES, USER_TASKS} from "../../services/endpoints";
 import {USER_RECENT} from "../../services/endpoints";
 import {connect} from "react-redux";
 import {saveUserSelf} from "../../redux/user/actions";
@@ -33,7 +33,10 @@ class Home extends Component {
       courses: [],
       recentProjects: [],
       isLoaded: false,
+
       tasks: [],
+      issues: [],
+
       showImportModal: false
     }
   }
@@ -51,13 +54,15 @@ class Home extends Component {
       request(BASE + USER_INFO),
       request(BASE + USER_COURSES),
       request(BASE + USER_RECENT),
-      request(BASE + USER_TASKS)
+      request(BASE + USER_TASKS),
+      request(BASE + USER_ISSUES)
     ])
-      .then(async([res1, res2, res3, res4]) => {
+      .then(async([res1, res2, res3, res4, res5]) => {
         const user = await res1.json();
         let courses = await res2.json();
         const recent = await res3.json();
         const tasks = await res4.json();
+        const issues = await res5.json();
 
         this.props.saveUserSelf(user);
 
@@ -68,7 +73,8 @@ class Home extends Component {
           recentProjects: recent,
           courses: courses,
           isLoaded: true,
-          tasks: tasks
+          tasks: tasks,
+          issues: issues
         })
       })
       .catch(error => {

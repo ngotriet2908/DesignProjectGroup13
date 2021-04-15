@@ -489,17 +489,17 @@ public class ProjectController {
         return projectService.uploadGradesToCanvas(projectId, canvasApi);
     }
 
-    @GetMapping("/{projectId}/issues")
-    public List<Issue> getIssuesForProject(
-            @PathVariable Long projectId,
-            Principal principal, @PathVariable String courseId) throws JsonProcessingException {
-
-        List<PrivilegeEnum> privileges = this.gradingParticipationService
-                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
-        if (!(privileges != null && privileges.contains(PROJECT_READ))) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
-        }
-
-        return projectService.getIssuesInProject(projectId, Long.valueOf(principal.getName()));
-    }
+//    @GetMapping("/{projectId}/issues")
+//    public List<Issue> getIssuesForProject(
+//            @PathVariable Long projectId,
+//            Principal principal, @PathVariable String courseId) throws JsonProcessingException {
+//
+//        List<PrivilegeEnum> privileges = this.gradingParticipationService
+//                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
+//        if (!(privileges != null && privileges.contains(PROJECT_READ))) {
+//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+//        }
+//
+//        return projectService.getIssuesInProject(projectId, Long.valueOf(principal.getName()));
+//    }
 }
