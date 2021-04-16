@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.List;
 
+/**
+ * Service handlers operations relating to activity
+ */
 @Service
 public class ActivityService {
     
@@ -19,18 +22,13 @@ public class ActivityService {
         this.repository = repository;
     }
 
+    /**
+     * get user's activities
+     * @param userId canvas user id
+     * @return list of activities
+     */
     @Transactional
     public List<Activity> getActivities(Long userId) {
         return repository.findById_User_IdOrderByLastAccessed(userId);
-    }
-
-    @Transactional
-    public List<Activity> getActivitiesByProject(Project project) {
-        return repository.findActivitiesById_Project(project);
-    }
-
-    @Transactional
-    public void addOrUpdateActivity(Activity activity) {
-        repository.save(activity);
     }
 }

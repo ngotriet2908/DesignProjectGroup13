@@ -8,10 +8,11 @@ import java.sql.Types;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * helping mapper that switches the type blob to type binary in order to make postgres work with oauth2
+ */
 public class PostgreSqlOAuth2AuthorizedClientParametersMapper extends OAuth2AuthorizedClientParametersMapper {
-    /*
-    Switch the type blob to type binary in order to make postgres work with oauth2
-     */
+
     @Override
     public List<SqlParameterValue> apply(OAuth2AuthorizedClientHolder authorizedClientHolder) {
         return super.apply(authorizedClientHolder).stream()

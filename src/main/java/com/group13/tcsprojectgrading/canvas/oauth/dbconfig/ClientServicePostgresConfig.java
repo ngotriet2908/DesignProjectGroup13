@@ -11,6 +11,9 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import java.util.List;
 import java.util.function.Function;
 
+/**
+ * Configuration for oauth2 client table in database
+ */
 @Configuration
 public class ClientServicePostgresConfig {
     @Bean

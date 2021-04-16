@@ -6,6 +6,9 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
+/**
+ * Model that record user's interaction with certain projects
+ */
 @Entity
 public class Activity {
     @Embeddable

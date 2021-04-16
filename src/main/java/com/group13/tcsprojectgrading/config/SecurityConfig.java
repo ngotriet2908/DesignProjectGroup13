@@ -16,11 +16,12 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * Security configuration for the application
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-//    @Autowired
-//    private CanvasOAuth2LoginSuccessHandler canvasOAuth2LoginSuccessHandler;
 
     @Autowired
     private GoogleAuthorizationCodeFlow flow;
@@ -28,6 +29,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private UserService userService;
 
+    /**
+     * request filter for back-end
+     * @param http http request
+     * @throws Exception exception
+     */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http

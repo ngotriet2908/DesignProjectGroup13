@@ -20,11 +20,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
+/**
+ * Service handlers operations relating to rubric
+ */
 @Service
 public class RubricService {
     private final RubricLinkerRepository rubricLinkerRepository;
@@ -38,16 +38,31 @@ public class RubricService {
         this.gradeRepository = gradeRepository;
     }
 
+    /**
+     * get a rubric with project id
+     * @param id rubric id
+     * @return a rubric entity
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Rubric getRubricById(Long id) {
         return getRubricFromLinker(rubricLinkerRepository.findById(new RubricLinker.Pk(new Project(id))).orElse(null));
     }
 
+    /**
+     * obtain a lock on a rubric with project id
+     * @param id rubric id
+     * @return a rubric entity
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Rubric getRubricAndLock(Long id) {
         return getRubricFromLinker(rubricLinkerRepository.findRubricLinkerById(new RubricLinker.Pk(new Project(id))).orElse(null));
     }
 
+    /**
+     * extract rubric from rubric linker
+     * @param linker rubric linker entity
+     * @return a rubric entity
+     */
     private Rubric getRubricFromLinker(RubricLinker linker) {
         try {
             // TODO, get rid of object mapper
@@ -64,6 +79,11 @@ public class RubricService {
         return null;
     }
 
+    /**
+     * extract rubric history from rubric history linker
+     * @param linker rubric history linker entity
+     * @return a rubric history entity
+     */
     private RubricHistory getRubricHistoryFromLinker(RubricHistoryLinker linker) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -76,6 +96,12 @@ public class RubricService {
         return null;
     }
 
+    /**
+     * update rubric
+     * @param rubric rubric entity
+     * @return updated rubric entity
+     * @throws JsonProcessingException json parsing exception
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Rubric saveRubric(Rubric rubric) throws JsonProcessingException {
         updateCriterionCount(rubric);
@@ -94,6 +120,12 @@ public class RubricService {
         return getRubricFromLinker(this.rubricLinkerRepository.save(linker));
     }
 
+    /**
+     * add new rubric if not exist
+     * @param rubric rubric entity
+     * @return created rubric entity
+     * @throws JsonProcessingException json parsing exception
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Rubric addNewRubric(Rubric rubric) throws JsonProcessingException {
         updateCriterionCount(rubric);
@@ -108,29 +140,46 @@ public class RubricService {
         return getRubricFromLinker(this.rubricLinkerRepository.save(linker));
     }
 
+    /**
+     * add new empty rubric
+     * @param projectId canvas project id
+     * @return updated rubric entity
+     * @throws JsonProcessingException json parsing exception
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Rubric addNewRubric(Long projectId) throws JsonProcessingException {
         return this.addNewRubric(new Rubric(projectId));
     }
 
+    /**
+     * import rubric to database
+     * @param rubric rubric entity
+     * @return updated rubric
+     * @throws JsonProcessingException json parsing exception
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public String importRubric(Rubric rubric) throws JsonProcessingException {
         RubricLinker linker = rubricLinkerRepository.findRubricLinkerById(new RubricLinker.Pk(new Project(rubric.getId()))).orElse(null);
         if (linker == null) return null;
 
-        // TODO, get rid of object mapper
-//        linker.setRubric(Json.getObjectWriter().writeValueAsString(rubric));
-//        if (linker.getVersion() > 0) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.CONFLICT, "cannot import after v0"
-//            );
-//        }
-
-        ObjectMapper mapper = new ObjectMapper();
-        linker.setRubric(mapper.writeValueAsString(rubric));
+        //randomise ID of elements
+        Stack<Element> stack = new Stack<>();
+        stack.addAll(rubric.getChildren());
+        while(stack.size() > 0) {
+            Element element = stack.pop();
+            if (element.content.type.equals(RubricContent.BLOCK_TYPE)) {
+                stack.addAll(element.children);
+            }
+            element.getContent().setId(UUID.randomUUID().toString());
+        }
+        linker.setRubric(Json.getObjectWriter().writeValueAsString(rubric));
         return rubricLinkerRepository.save(linker).getRubric();
     }
 
+    /**
+     * update criterion count in a rubric
+     * @param rubric rubric entity
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public void updateCriterionCount(Rubric rubric) {
         int total = 0;
@@ -143,11 +192,19 @@ public class RubricService {
         rubric.setCriterionCount(total);
     }
 
+    /**
+     * update last modified in a rubric
+     * @param rubric rubric entity
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public void updateLastModified(Rubric rubric) {
         rubric.setLastModified(new Date());
     }
 
+    /**
+     * get all rubrics
+     * @return list of rubrics
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public List<Rubric> getAllRubrics() {
         List<Rubric> rubrics = new ArrayList<>();
@@ -161,11 +218,20 @@ public class RubricService {
         return rubrics;
     }
 
+    /**
+     * remove rubric
+     * @param projectId canvas project id
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public void deleteRubric(Long projectId) {
         rubricLinkerRepository.deleteById(new RubricLinker.Pk(new Project(projectId)));
     }
 
+    /**
+     * store rubric history
+     * @param history rubric history entity
+     * @throws JsonProcessingException json parsing exception
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public void storeHistory(RubricHistory history) throws JsonProcessingException {
 
@@ -178,6 +244,11 @@ public class RubricService {
         rubricHistoryLinkerRepository.save(linker);
     }
 
+    /**
+     * get rubric history in project
+     * @param projectId canvas project id
+     * @return rubric history entity
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public RubricHistory getHistory(Long projectId) {
         RubricHistoryLinker linker = rubricHistoryLinkerRepository.findById(projectId).orElse(null);
@@ -185,6 +256,15 @@ public class RubricService {
     }
 
     // TODO: mark all? mark specific? put in issues? notify? if mark all - stop when first issue below is found
+
+    /**
+     * Apply patch to rubric and update
+     * @param patches update patches
+     * @param rubric rubric entity
+     * @return updated rubric
+     * @throws JsonProcessingException json parsing exception
+     * @throws ResponseStatusException response exception
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Rubric applyUpdate(JsonNode patches, Rubric rubric) throws JsonProcessingException, ResponseStatusException {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -280,6 +360,12 @@ public class RubricService {
     }
 
 
+    /**
+     * find element in rubric using path
+     * @param rubric rubric entity
+     * @param path path string
+     * @return rubric element
+     */
     public JsonNode findInRubric(JsonNode rubric, String[] path) {
         JsonNode currentArray = null;
         JsonNode currentElement = rubric;
@@ -297,26 +383,11 @@ public class RubricService {
         return currentElement;
     }
 
-    public List<Element> findAllCriteria(Element element) {
-        List<Element> criteria = new ArrayList<>();
-        Stack<Element> fringe = new Stack<>();
-        fringe.push(element);
-
-        while (!fringe.isEmpty()) {
-            Element currentElement = fringe.pop();
-
-            if (currentElement.getContent().getType().equals(Type.SECTION.toString())) {
-                for (Element e: currentElement.getChildren()) {
-                    fringe.push(e);
-                }
-            } else {
-                criteria.add(currentElement);
-            }
-        }
-
-        return criteria;
-    }
-
+    /**
+     * find all criteria in an element
+     * @param element rubric element
+     * @return list of rubric element
+     */
     public List<JsonNode> findAllCriteria(JsonNode element) {
         List<JsonNode> criteria = new ArrayList<>();
         Stack<JsonNode> fringe = new Stack<>();

@@ -22,7 +22,9 @@ import java.util.Set;
 
 import static com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum.*;
 
-
+/**
+ * Controller handles Submissions Endpoints
+ */
 @RestController
 @RequestMapping("/api/courses/{courseId}/projects/{projectId}/submissions")
 public class SubmissionController {
@@ -37,6 +39,15 @@ public class SubmissionController {
         this.gradingParticipationService = gradingParticipationService;
     }
 
+    /**
+     * Get submissions from database either to return submissions based on graders/unassigned
+     * this method require privilege SUBMISSIONS_READ
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param grader unassigned/id
+     * @param principal injected oauth2 client's information
+     * @return list of Submissions from database
+     */
     @GetMapping(value = "")
     protected ResponseEntity<?> getSubmissions(
             @PathVariable Long courseId,
@@ -60,6 +71,16 @@ public class SubmissionController {
         return new ResponseEntity<>(submissions, HttpStatus.OK);
     }
 
+    /**
+     * Get info from a submission
+     * this method require privilege SUBMISSION_READ_SINGLE or SUBMISSION_READ_ALL
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param submissionId submission id
+     * @param principal injected oauth2 client's information
+     * @return a Submission
+     * @throws JsonProcessingException json parsing exception
+     */
     @GetMapping(value = "/{submissionId}")
     protected ResponseEntity<?> getSubmissionInfo(@PathVariable Long courseId,
                                                   @PathVariable Long projectId,
@@ -79,8 +100,15 @@ public class SubmissionController {
         return new ResponseEntity<>(submission, HttpStatus.OK);
     }
 
-    /*
-    Assign the submission to the grader.
+    /**
+     * Assign the submission to the grader.
+     * this method require privilege MANAGE_GRADERS_EDIT
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param submissionId submission id
+     * @param grader user entity that will be assigned submission to
+     * @param principal injected oauth2 client's information
+     * @throws JsonProcessingException json parsing exception
      */
     @PostMapping(value = "/{submissionId}/assign")
     protected void assignSubmission(@PathVariable Long courseId,
@@ -100,8 +128,14 @@ public class SubmissionController {
         this.submissionService.assignSubmission(submissionId, grader);
     }
 
-    /*
-    Move the submission from its grader back to the 'unassigned' l.
+    /**
+     * Move the submission from its grader back to the 'unassigned' l.
+     * this method require privilege MANAGE_GRADERS_EDIT or MANAGE_GRADERS_SELF_EDIT
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param submissionId submission id
+     * @param principal injected oauth2 client's information
+     * @throws JsonProcessingException json parsing exception
      */
     @PostMapping(value = "/{submissionId}/dissociate")
     protected void dissociateSubmission(@PathVariable Long courseId,
@@ -121,6 +155,16 @@ public class SubmissionController {
         this.submissionService.dissociateSubmission(submissionId, privileges, Long.valueOf(principal.getName()));
     }
 
+    /**
+     * manage labels for a submission
+     * this method require privilege SUBMISSION_EDIT_ALL or SUBMISSION_EDIT_SINGLE
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param submissionId submission id
+     * @param labels list of label soon to be active
+     * @param principal injected oauth2 client's information
+     * @throws JsonProcessingException json parsing exception
+     */
     @PutMapping(value = "/{submissionId}/labels")
     protected void saveLabels(@PathVariable Long courseId,
                               @PathVariable Long projectId,
@@ -141,9 +185,19 @@ public class SubmissionController {
         this.submissionService.saveLabels(projectId, Long.valueOf(principal.getName()), labels, submissionId, privileges);
     }
 
-
+    /**
+     * Manage Grading sheets (new, clone, move, delete)
+     * this method require privilege SUBMISSION_EDIT_ALL or SUBMISSION_EDIT_SINGLE
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param submissionId submission id
+     * @param object action object
+     * @param principal injected oauth2 client's information
+     * @return updated list of Grading sheets
+     * @throws JsonProcessingException json parsing exception
+     */
     @PostMapping(value = "/{submissionId}/assessmentManagement")
-    protected List<Assessment> createNewAssessment(@PathVariable Long courseId,
+    protected List<Assessment> manageAssessment(@PathVariable Long courseId,
                                                    @PathVariable Long projectId,
                                                    @PathVariable Long submissionId,
                                                    @RequestBody JsonNode object,
@@ -160,6 +214,18 @@ public class SubmissionController {
         return submissionService.getAssessmentsBySubmission(submissionId);
     }
 
+    /**
+     * Add student to a grading sheet in a submission
+     * this method require privilege SUBMISSION_EDIT_ALL or SUBMISSION_EDIT_SINGLE
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param submissionId submission id
+     * @param participantId student user id
+     * @param assessmentId grading sheet id
+     * @param principal injected oauth2 client's information
+     * @return updated Submission from database
+     * @throws JsonProcessingException json parsing exception
+     */
     @PostMapping(value = "/{submissionId}/addParticipant/{participantId}/{assessmentId}")
     protected Submission addParticipantToSubmission(@PathVariable Long courseId,
                                             @PathVariable Long projectId,
@@ -177,7 +243,18 @@ public class SubmissionController {
         return submissionService.addParticipantToSubmission(courseId, projectId, submissionId, participantId, assessmentId, privileges, Long.valueOf(principal.getName()));
     }
 
-
+    /**
+     * remove student to a grading sheet in a submission
+     * this method require privilege SUBMISSION_EDIT_ALL or SUBMISSION_EDIT_SINGLE
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param submissionId submission id
+     * @param participantId student user id
+     * @param returnAll choose whether return all submissions
+     * @param principal injected oauth2 client's information
+     * @return either a updated Submission or a list of updated Submission
+     * @throws JsonProcessingException json parsing exception
+     */
     @DeleteMapping(value = "/{submissionId}/removeParticipant/{participantId}")
     protected Object removeParticipantFromSubmission(@PathVariable Long courseId,
                                                          @PathVariable Long projectId,

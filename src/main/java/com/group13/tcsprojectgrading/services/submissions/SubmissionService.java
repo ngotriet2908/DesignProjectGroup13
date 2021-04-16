@@ -34,6 +34,9 @@ import java.util.stream.Collectors;
 
 import static com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum.*;
 
+/**
+ * Service handlers operations relating to submissions
+ */
 @Service
 public class SubmissionService {
     private final SubmissionRepository submissionRepository;
@@ -64,9 +67,16 @@ public class SubmissionService {
         this.gradeRepository = gradeRepository;
     }
 
-    /*
-    Creates a new submission entry in the database if the submission did not exist before or updates one if it was
-    already stored.
+    /**
+     * Creates a new submission entry in the database if the submission did not exist before or updates one if it was
+     *     already stored.
+     * @param project project entity
+     * @param userId canvas user id
+     * @param groupId canvas group id
+     * @param date submission date
+     * @param name submission name
+     * @return created submission
+     * @throws ResponseStatusException response exception
      */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Submission   addNewSubmission(Project project, User userId, Long groupId,
@@ -85,9 +95,12 @@ public class SubmissionService {
         }
     }
 
-    /*
-    Creates a new submission entry in the database if the submission did not exist before or updates one if it was
-    already stored.
+    /**
+     * Creates a new submission entry in the database if the submission did not exist before or updates one if it was
+     *     already stored.
+     * @param submission submission entity
+     * @return created submission
+     * @throws ResponseStatusException response exception
      */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Submission addNewSubmission(Submission submission) throws ResponseStatusException {
@@ -157,11 +170,21 @@ public class SubmissionService {
 //    }
 //
 
+    /**
+     * find assigned submission for grader
+     * @param graderId canvas user id
+     * @return list of submissions
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public List<Submission> findSubmissionsForGrader(Long graderId) {
         return submissionRepository.findSubmissionsByGrader_Id(graderId);
     }
 
+    /**
+     * find submisions from an assessment
+     * @param assessmentId assessment id
+     * @return submission entity
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Submission findSubmissionsFromAssessment(Long assessmentId) {
         Set<AssessmentLink> assessmentLinks = assessmentService.findAssessmentLinksByAssessmentId(assessmentId);
@@ -172,8 +195,13 @@ public class SubmissionService {
                 .getId().getSubmission();
     }
 
-    /*
-    Returns all submissions in the project (if the user is a grader inside that project).
+    /**
+     * Returns all submissions in the project (if the user is a grader inside that project).
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param userId canvas user id
+     * @return list of submissions
+     * @throws ResponseStatusException response exception
      */
     @Transactional
     public List<Submission> getSubmissions(Long courseId, Long projectId, Long userId) throws ResponseStatusException {
@@ -201,8 +229,12 @@ public class SubmissionService {
         return submissions;
     }
 
-    /*
-    Returns unassigned submissions in the project.
+    /**
+     * Returns unassigned submissions in the project.
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param userId canvas user id
+     * @return list of submissions
      */
     @Transactional
     public List<Submission> getUnassignedSubmissions(Long courseId, Long projectId, Long userId) {
@@ -231,8 +263,15 @@ public class SubmissionService {
         return submissions;
     }
 
-    /*
-    Returns a single submission.
+    /**
+     * Returns a single submission.
+     * @param projectId canvas project id
+     * @param submissionId submission id
+     * @param privileges user's privileges
+     * @param graderId grader user id
+     * @return a submission entity
+     * @throws JsonProcessingException json parsing exception
+     * @throws ResponseStatusException response exception
      */
     @Transactional
     public Submission getSubmissionController(Long projectId, Long submissionId,
@@ -267,6 +306,13 @@ public class SubmissionService {
         return submission;
     }
 
+    /**
+     * get submission from id
+     * @param submissionId submission id
+     * @return a submission entity
+     * @throws JsonProcessingException json parsing exception
+     * @throws ResponseStatusException response exception
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Submission getSubmission(Long submissionId) throws JsonProcessingException, ResponseStatusException {
 //        Project project = this.projectRepository.findById(projectId).orElse(null);
@@ -297,6 +343,13 @@ public class SubmissionService {
         return submission;
     }
 
+    /**
+     * Obtain a lock on a submission
+     * @param submissionId submission id
+     * @return a submission entity
+     * @throws JsonProcessingException json parsing exception
+     * @throws ResponseStatusException response exception
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Submission getSubmissionWithLock(Long submissionId) throws JsonProcessingException, ResponseStatusException {
 //        Project project = this.projectRepository.findById(projectId).orElse(null);
@@ -327,8 +380,11 @@ public class SubmissionService {
         return submission;
     }
 
-    /*
-    Populates the "members" field with the list of students who are linked to the submission.
+
+    /**
+     * Populates the "members" field with the list of students who are linked to the submission.
+     * @param submission submission entity
+     * @return a submission entity
      */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Submission addSubmissionMembers(Submission submission) {
@@ -337,8 +393,10 @@ public class SubmissionService {
         return submission;
     }
 
-    /*
-    Populates the "assessments" field with the list of assessments linked to the submission.
+    /**
+     * Populates the "assessments" field with the list of assessments linked to the submission.
+     * @param submission submission entity
+     * @return a submission entity
      */
     @Transactional
     public Submission addSubmissionAssessments(Submission submission) {
@@ -378,6 +436,11 @@ public class SubmissionService {
         return submission;
     }
 
+    /**
+     * add to-do to submission assessments in a submission
+     * @param submission submission entity
+     * @return a submission entity
+     */
     @Transactional
     public Submission addTodoSubmissionAssessments(Submission submission) {
         Rubric rubric = rubricService.getRubricById(submission.getProject().getId());
@@ -417,9 +480,15 @@ public class SubmissionService {
         return submission;
     }
 
-
-    /*
-    Saves the list of labels for the submission.
+    /**
+     * Saves the list of labels for the submission.
+     * @param projectId canvas project id
+     * @param graderId grader user id
+     * @param labels labels from front-end
+     * @param submissionId submission id
+     * @param privileges user's privileges
+     * @throws JsonProcessingException json parsing exception
+     * @throws ResponseStatusException response exception
      */
     @Transactional
     public void saveLabels(Long projectId, Long graderId, Set<Label> labels, Long submissionId,
@@ -446,8 +515,9 @@ public class SubmissionService {
         this.submissionRepository.save(submission);
     }
 
-    /*
-    Moves the submissions of graders NOT in the given list of users to 'unassigned'.
+    /**
+     * Moves the submissions of graders NOT in the given list of users to 'unassigned'.
+     * @param users list of users
      */
     @Transactional
     public void dissociateSubmissionsFromUsers(List<User> users) {
@@ -461,9 +531,12 @@ public class SubmissionService {
 //        this.submissionRepository.dissociateSubmissionsFromUsersNotInList(users);
     }
 
-    /*
-    Sets the user as a grader of the submission.
-    */
+    /**
+     * Sets the user as a grader of the submission.
+     * @param submissionId submission id
+     * @param grader grader entity
+     * @throws JsonProcessingException parsing json exception
+     */
     @Transactional
     public void assignSubmission(Long submissionId, User grader) throws JsonProcessingException {
         Submission submission = this.getSubmissionWithLock(submissionId);
@@ -486,8 +559,12 @@ public class SubmissionService {
         this.submissionRepository.save(submission);
     }
 
-    /*
-    Sets the user as a grader of the submission.
+    /**
+     * Sets the user as a grader of the submission.
+     * @param submissionId submission id
+     * @param privileges user's privileges
+     * @param graderId grader user id
+     * @throws JsonProcessingException json parsing exception
      */
     @Transactional
     public void dissociateSubmission(Long submissionId,
@@ -515,7 +592,17 @@ public class SubmissionService {
         this.submissionRepository.save(submission);
     }
 
-
+    /**
+     * Manage assessments in a submission
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param submissionId submission id
+     * @param object action object
+     * @param privileges user's privileges
+     * @param userId user id
+     * @throws JsonProcessingException json parsing exception
+     * @throws ResponseStatusException response exception
+     */
     @Transactional(rollbackOn = Exception.class)
     public void assessmentManagement(Long courseId, Long projectId, Long submissionId,
                                                  JsonNode object, List<PrivilegeEnum> privileges, Long userId) throws JsonProcessingException, ResponseStatusException {
@@ -675,13 +762,31 @@ public class SubmissionService {
         }
     }
 
+    /**
+     * get assessments in a submission
+     * @param submissionId submission id
+     * @return list of assessments
+     * @throws JsonProcessingException json parsing exception
+     */
     @Transactional(value = Transactional.TxType.REQUIRES_NEW)
     public List<Assessment> getAssessmentsBySubmission(Long submissionId) throws JsonProcessingException {
         Submission submission = getSubmission(submissionId);
         return assessmentService.getAssessmentsBySubmission(submission);
     }
 
-
+    /**
+     * add student to submission
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param submissionId submission id
+     * @param participantId participant id
+     * @param assessmentId assessment id
+     * @param privileges user's privileges
+     * @param userId user id
+     * @return updated submission
+     * @throws JsonProcessingException json parsing exception
+     * @throws ResponseStatusException response exception
+     */
     @Transactional(rollbackOn = Exception.class)
     public Submission addParticipantToSubmission(Long courseId, Long projectId, Long submissionId,
                                                  Long participantId, Long assessmentId,
@@ -737,6 +842,19 @@ public class SubmissionService {
         return getSubmission(submissionId);
     }
 
+    /**
+     * remove student to submission
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param submissionId submission id
+     * @param participantId participant id
+     * @param privileges user's privileges
+     * @param userId user id
+     * @param returnAll whether to return all
+     * @return updated submission
+     * @throws JsonProcessingException json parsing exception
+     * @throws ResponseStatusException response exception
+     */
     @Transactional(rollbackOn = Exception.class)
     public Object removeParticipantFromSubmission(Long courseId, Long projectId, Long submissionId, Long participantId,
                                                  List<PrivilegeEnum> privileges, Long userId, boolean returnAll) throws JsonProcessingException, ResponseStatusException {
@@ -805,6 +923,13 @@ public class SubmissionService {
 //        return resultNode
     }
 
+    /**
+     * get submissions from a student
+     * @param projectId canvas project id
+     * @param user user entity
+     * @return  list of submissions
+     * @throws ResponseStatusException response exception
+     */
     @Transactional
     public List<Submission> getSubmissionFromStudents(Long projectId, User user) throws ResponseStatusException {
         Set<AssessmentLink> links = assessmentService.getAssessmentsByProjectAndUser(projectId, user);

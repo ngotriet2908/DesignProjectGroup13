@@ -7,6 +7,9 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 import java.util.Properties;
 
+/**
+ * Email sender (using prograding email) configuration
+ */
 @Configuration
 public class EmailSender {
     @Bean

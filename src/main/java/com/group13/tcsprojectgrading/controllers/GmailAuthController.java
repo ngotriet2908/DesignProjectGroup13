@@ -17,6 +17,9 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 
+/**
+ * Controller handles gmail oauth2 flow
+ */
 @Controller
 @RestController
 @RequestMapping("/api/gmail")
@@ -34,6 +37,13 @@ public class GmailAuthController {
         this.currentUrlMap = new HashMap<>();
     }
 
+    /**
+     * start Gmail oauth2 flow
+     * @param principal injected oauth2 client's information
+     * @param request oauth2 request
+     * @return redirect user to Gmail login
+     * @throws Exception exception
+     */
     @RequestMapping(value = "/auth", method = RequestMethod.GET)
     public RedirectView googleConnectionStatus1(Principal principal, HttpServletRequest request) throws Exception {
         AuthorizationCodeRequestUrl authorizationUrl = flow.newAuthorizationUrl().setRedirectUri(redirectUri);
@@ -45,6 +55,13 @@ public class GmailAuthController {
         return new RedirectView(authorizationUrl.build());
     }
 
+    /**
+     * finishing Gmail oauth2 flow
+     * @param code intermediate code for Gmail oauth2 flow
+     * @param principal injected oauth2 client's information
+     * @return redirect user to
+     * @throws IOException not found exception
+     */
     @RequestMapping(value = "/code", method = RequestMethod.GET, params = "code")
     public RedirectView oauth2Callback(@RequestParam(value = "code") String code, Principal principal) throws IOException {
 

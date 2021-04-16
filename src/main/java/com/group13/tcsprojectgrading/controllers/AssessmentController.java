@@ -19,6 +19,9 @@ import org.springframework.web.server.ResponseStatusException;
 import java.security.Principal;
 import java.util.List;
 
+/**
+ * Controller handles Assessment Endpoints
+ */
 @RestController
 @RequestMapping("/api/courses/{courseId}/projects/{projectId}/submissions/{submissionId}/assessments/{assessmentId}")
 public class AssessmentController {
@@ -35,6 +38,16 @@ public class AssessmentController {
         this.gradingParticipationService = gradingParticipationService;
     }
 
+    /**
+     * get Assessment from database with details (progress, issues, grades, final grade)
+     * this method require privilege GRADING_READ_ALL or GRADING_READ_SINGLE
+     * @param projectId canvas project id
+     * @param submissionId submission id
+     * @param assessmentId grading sheet id
+     * @param principal injected oauth2 client's information
+     * @return Assessment entity
+     * @throws JsonProcessingException json parsing exception
+     */
     @RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
     protected ResponseEntity<?> getAssessment(@PathVariable Long projectId,
                                    @PathVariable Long submissionId,
@@ -53,18 +66,24 @@ public class AssessmentController {
         return new ResponseEntity<>(assessment, HttpStatus.OK);
     }
 
-
+    /**
+     * Post new grade to a criterion in a grading sheet
+     * this method require privilege GRADING_WRITE_ALL or GRADING_WRITE_SINGLE
+     * @param projectId canvas project id
+     * @param submissionId submission id
+     * @param assessmentId grading sheet id
+     * @param grade Grade entity from front-end
+     * @param principal injected oauth2 client's information
+     * @return created Grade from database
+     */
     @RequestMapping(value = "/grades", method = RequestMethod.POST)
     protected ResponseEntity<?> alterCriterionAssessment(
-            @PathVariable Long courseId,
             @PathVariable Long projectId,
             @PathVariable Long submissionId,
             @PathVariable Long assessmentId,
             @RequestBody Grade grade,
             Principal principal
     ) {
-
-
 
         List<PrivilegeEnum> privileges = this.gradingParticipationService
                 .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
@@ -79,6 +98,16 @@ public class AssessmentController {
         return new ResponseEntity<>(createdGrade, HttpStatus.OK);
     }
 
+    /**
+     * Set a grade as current grade in a criterion in a grading sheet
+     * this method require privilege GRADING_WRITE_ALL or GRADING_WRITE_SINGLE
+     * @param gradeId id of the grade that need to be activate
+     * @param projectId canvas project id
+     * @param submissionId submission id
+     * @param assessmentId grading sheet id
+     * @param principal injected oauth2 client's information
+     * @return activated Grade from database
+     */
     @RequestMapping(value = "/grades/{gradeId}/activate", method = RequestMethod.POST)
     protected ResponseEntity<?> activateGrade(
             @PathVariable Long gradeId,
@@ -101,9 +130,17 @@ public class AssessmentController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    /**
+     * get a list of issues in a grading sheet
+     * this method require privilege SUBMISSION_READ_ALL or SUBMISSION_READ_SINGLE
+     * @param projectId canvas project id
+     * @param submissionId submission id
+     * @param assessmentId grading sheet id
+     * @param principal injected oauth2 client's information
+     * @return a list of Issue from database
+     */
     @RequestMapping(value = "/issues", method = RequestMethod.GET)
     protected List<Issue> getIssues(
-            @PathVariable Long courseId,
             @PathVariable Long projectId,
             @PathVariable Long submissionId,
             @PathVariable Long assessmentId,
@@ -121,9 +158,18 @@ public class AssessmentController {
         return this.assessmentService.getIssues(submissionId, assessmentId, Long.valueOf(principal.getName()), privileges);
     }
 
+    /**
+     * create a new issue in a grading sheet
+     * this method require privilege GRADING_WRITE_SINGLE or GRADING_WRITE_ALL
+     * @param projectId canvas project id
+     * @param submissionId submission id
+     * @param assessmentId grading sheet id
+     * @param issue Issue entity from front-end
+     * @param principal injected oauth2 client's information
+     * @return created Issue from database
+     */
     @RequestMapping(value = "/issues", method = RequestMethod.POST)
     protected Issue createIssue(
-            @PathVariable Long courseId,
             @PathVariable Long projectId,
             @PathVariable Long submissionId,
             @PathVariable Long assessmentId,
@@ -142,10 +188,19 @@ public class AssessmentController {
         return this.assessmentService.createIssue(issue, submissionId, assessmentId, Long.valueOf(principal.getName()), privileges);
     }
 
-
+    /**
+     * resolve an issue in a grading sheet
+     * this method require privilege GRADING_WRITE_SINGLE or GRADING_WRITE_ALL
+     * @param projectId canvas project id
+     * @param submissionId submission id
+     * @param assessmentId grading sheet id
+     * @param issueId issue id that need to be resolve
+     * @param solution issue solution
+     * @param principal injected oauth2 client's information
+     * @return a list of Issue from database
+     */
     @RequestMapping(value = "/issues/{issueId}/resolve", method = RequestMethod.POST)
     protected Issue resolveIssue(
-            @PathVariable Long courseId,
             @PathVariable Long projectId,
             @PathVariable Long submissionId,
             @PathVariable Long assessmentId,

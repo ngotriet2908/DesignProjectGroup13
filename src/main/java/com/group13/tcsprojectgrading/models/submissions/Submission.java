@@ -18,6 +18,9 @@ import javax.persistence.*;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Model represent a submission that is import from canvas
+ */
 @Entity
 public class Submission {
     @Id

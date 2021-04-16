@@ -17,6 +17,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
 
+/**
+ * Service handlers operations relating to Settings
+ */
 @Service
 public class SettingsService {
     private final SettingsRepository settingsRepository;
@@ -47,6 +50,12 @@ public class SettingsService {
         this.projectService = projectService;
     }
 
+    /**
+     * get settings of user in a project
+     * @param projectId canvas project id
+     * @param userId canvas user id
+     * @return a Settings entity
+     */
     @Transactional
     public Settings getSettings(Long projectId, Long userId) {
         if (this.projectService.getProject(projectId) == null) {
@@ -60,6 +69,11 @@ public class SettingsService {
         );
     }
 
+    /**
+     * create setting in project for a user
+     * @param projectId canvas project id
+     * @param userId canvas user id
+     */
     @Transactional
     public void createSettings(Long projectId, Long userId) {
         Settings settings = new Settings(userId, projectId);
@@ -71,6 +85,11 @@ public class SettingsService {
         this.settingsRepository.save(settings);
     }
 
+    /**
+     * update settings
+     * @param settings to be updated settings
+     * @return updates Settings
+     */
     @Transactional
     public Settings saveSettings(Settings settings) {
         return this.settingsRepository.save(settings);

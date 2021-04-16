@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.List;
 
+/**
+ * Service handlers operations relating to role
+ */
 @Service
 public class RoleService {
 
@@ -19,11 +22,22 @@ public class RoleService {
         this.repository = repository;
     }
 
+    /**
+     * get role by name
+     * @param name name of the role
+     * @return role entity
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Role findRoleByName(String name) {
         return repository.findByName(name);
     }
 
+    /**
+     * create role if not exist
+     * @param name name of new role
+     * @param privileges role's privileges
+     * @return created role
+     */
     @Transactional(rollbackOn = Exception.class)
     public Role addRoleIfNotExist(String name, List<Privilege> privileges) {
         Role role = repository.findByName(name);
@@ -36,6 +50,10 @@ public class RoleService {
         return role;
     }
 
+    /**
+     * Get all roles in application
+     * @return list of roles
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public List<Role> findAllRoles() {
         return repository.findAll();

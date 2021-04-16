@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.List;
 
+/**
+ * Service handlers operations relating to project role
+ */
 @Service
 public class ProjectRoleService {
     private final ProjectRoleRepository projectRoleRepository;
@@ -22,6 +25,10 @@ public class ProjectRoleService {
         this.roleService = roleService;
     }
 
+    /**
+     * add all default roles to project
+     * @param project project entity
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public void addDefaultRolesToProject(Project project) {
         Role teacher = this.roleService.findRoleByName(RoleEnum.TEACHER.toString());
@@ -31,6 +38,12 @@ public class ProjectRoleService {
         this.projectRoleRepository.save(new ProjectRole(taGrading, project));
     }
 
+    /**
+     * add a role to project
+     * @param project project entity
+     * @param role role entity
+     * @return created project role
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public ProjectRole addRoleToProject(Project project, Role role) {
         if (this.projectRoleRepository.existsById_ProjectAndId_Role(project, role)) {
@@ -46,11 +59,22 @@ public class ProjectRoleService {
         return this.projectRoleRepository.save(new ProjectRole(role, project));
     }
 
+    /**
+     * get project role entity in a project and role
+     * @param project project entity
+     * @param role role entity
+     * @return project role entity
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public ProjectRole findByProjectAndRole(Project project, Role role) {
         return this.projectRoleRepository.findById_ProjectAndId_Role(project, role);
     }
 
+    /**
+     * get project roles in a project
+     * @param project project entity
+     * @return list of project role
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public List<ProjectRole> findByProject(Project project) {
         return this.projectRoleRepository.findById_Project(project);

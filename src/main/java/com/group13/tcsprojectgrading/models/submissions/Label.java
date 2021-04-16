@@ -7,6 +7,9 @@ import javax.persistence.*;
 import java.util.Collection;
 import java.util.Objects;
 
+/**
+ * Model that represent label in a project, label can be used by all graders when created
+ */
 @Entity
 public class Label {
     @Id

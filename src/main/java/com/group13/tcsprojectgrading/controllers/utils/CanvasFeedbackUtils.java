@@ -1,4 +1,4 @@
-package com.group13.tcsprojectgrading.controllers;
+package com.group13.tcsprojectgrading.controllers.utils;
 
 import com.group13.tcsprojectgrading.models.course.CourseParticipation;
 import com.group13.tcsprojectgrading.models.grading.Assessment;
@@ -9,9 +9,7 @@ import com.group13.tcsprojectgrading.models.rubric.RubricContent;
 import com.itextpdf.io.font.FontConstants;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
-import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
-import com.itextpdf.layout.property.HorizontalAlignment;
 
 import java.io.IOException;
 import java.util.HashMap;

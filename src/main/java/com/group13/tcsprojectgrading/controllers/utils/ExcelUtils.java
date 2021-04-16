@@ -1,4 +1,4 @@
-package com.group13.tcsprojectgrading.controllers;
+package com.group13.tcsprojectgrading.controllers.utils;
 
 import com.group13.tcsprojectgrading.models.grading.Assessment;
 import com.group13.tcsprojectgrading.models.grading.AssessmentLink;
