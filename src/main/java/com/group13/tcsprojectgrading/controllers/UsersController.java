@@ -2,6 +2,7 @@ package com.group13.tcsprojectgrading.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
+import com.group13.tcsprojectgrading.models.grading.Issue;
 import com.group13.tcsprojectgrading.models.user.Activity;
 import com.group13.tcsprojectgrading.models.project.Project;
 import com.group13.tcsprojectgrading.models.user.User;
@@ -82,7 +83,7 @@ class UsersController {
     }
 
     /*
-    Return the list of most recently accessed projects.
+    Returns the list of most recently accessed projects.
      */
     @GetMapping(value = "/recent")
     protected List<Activity> recentProject(Principal principal) {
@@ -90,9 +91,19 @@ class UsersController {
         return activities.subList(0, Math.min(3, activities.size()));
     }
 
+    /*
+    Returns the list of projects with submissions that the user is assigned to grade.
+     */
     @GetMapping(value = "/to-do")
     protected Collection<Project> getTasks(Principal principal) throws JsonProcessingException {
-
         return userService.getTodoForUser(Long.valueOf(principal.getName()));
+    }
+
+    /*
+    Returns the list of issues which were either created by the user or addressed to the user.
+     */
+    @GetMapping(value = "/issues")
+    protected Collection<Issue> getIssues(Principal principal) throws JsonProcessingException {
+        return userService.getIssuesForUser(Long.valueOf(principal.getName()));
     }
 }

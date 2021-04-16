@@ -10,6 +10,7 @@
     "@material-ui/icons": "^4.11.2",
     "all": "^0.0.0",
     "awesome-debounce-promise": "^2.1.0",
+    "chart.js": "^2.9.4",
     "chartjs-plugin-colorschemes": "^0.4.0",
     "classnames": "^2.2.6",
     "connected-react-router": "^6.9.1",

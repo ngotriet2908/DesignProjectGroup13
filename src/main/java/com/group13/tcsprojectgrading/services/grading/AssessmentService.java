@@ -306,11 +306,6 @@ public class AssessmentService {
             );
         }
 
-        if (assessment.getManualGrade() != null) {
-            assessment.setFinalGrade(assessment.getManualGrade());
-            return assessment;
-        }
-
         Rubric rubric = rubricService.getRubricById(project.getId());
         List<Element> criteria = rubric.fetchAllCriteria();
         Map<String, Element> criteriaMap = new HashMap<>();
@@ -318,6 +313,12 @@ public class AssessmentService {
         List<Grade> grades = gradeRepository.findGradesByAssessmentAndIsActiveIsTrue(assessment);
         assessment.setIssues(issueRepository.findIssuesByAssessmentId(assessment.getId()));
         assessment.setProgress((int)(grades.size() *1.0/rubric.getCriterionCount()*100));
+
+        if (assessment.getManualGrade() != null) {
+            assessment.setFinalGrade(assessment.getManualGrade());
+            return assessment;
+        }
+
         assessment.setFinalGrade(
                 (float) grades.stream()
                         .mapToDouble(grade ->
@@ -563,6 +564,9 @@ public class AssessmentService {
             addressee = this.userService.findById(issue.getAddressee().getId());
         }
 
+        issue.setSubmission(submission);
+        issue.setProject(submission.getProject());
+        issue.setCourse(submission.getProject().getCourse());
         issue.setAssessment(assessment);
         issue.setSolution(null);
         issue.setStatus(this.issueStatusRepository.findByName(IssueStatusEnum.OPEN.toString()));

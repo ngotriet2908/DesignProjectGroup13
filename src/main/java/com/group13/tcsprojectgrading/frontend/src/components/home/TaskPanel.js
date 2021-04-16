@@ -7,6 +7,7 @@ import TodoList from "./TodoList";
 import Paper from "@material-ui/core/Paper";
 import Tab from "@material-ui/core/Tab";
 import Tabs from "@material-ui/core/Tabs";
+import IssueList from "./IssueList";
 
 
 class TaskPanel extends Component {
@@ -19,10 +20,15 @@ class TaskPanel extends Component {
 
     this.components = [
       <TodoList
+        key={0}
         tasks={this.props.tasks}
       />,
-      <div>
-        hey
+      <div
+        key={1}
+      >
+        <IssueList
+          issues={this.props.issues}
+        />
       </div>
     ]
   }

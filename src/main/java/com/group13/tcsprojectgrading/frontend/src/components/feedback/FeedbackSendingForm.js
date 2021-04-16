@@ -150,7 +150,7 @@ class FeedbackSendingForm extends Component {
                   <Button
                     variant="contained"
                     color="primary"
-                    onClick={() => this.handleSendFeedback(true)}
+                    onClick={() => this.handleSendFeedback(true, "canvasString")}
                     startIcon={<GroupIcon/>}
                     disableElevation
                     fullWidth
@@ -170,7 +170,7 @@ class FeedbackSendingForm extends Component {
                     variant="contained"
                     color="secondary"
                     style={{color: "white"}}
-                    onClick={() => this.handleSendFeedback(false)}
+                    onClick={() => this.handleSendFeedback(false, "canvasString")}
                     startIcon={<PersonIcon/>}
                     disableElevation
                     fullWidth

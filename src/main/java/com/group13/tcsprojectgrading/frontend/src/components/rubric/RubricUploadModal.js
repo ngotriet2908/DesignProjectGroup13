@@ -3,6 +3,7 @@ import classnames from "classnames";
 import {request} from "../../services/request";
 import {BASE} from "../../services/endpoints";
 import globalStyles from '../helpers/global.module.css';
+import CustomModal from "../helpers/CustomModal";
 
 
 class RubricUploadModal extends Component {
@@ -11,9 +12,17 @@ class RubricUploadModal extends Component {
 
     this.state = {
       isLoaded: false,
+
+      files: []
     }
 
-    this.fileUploaderRef = React.createRef()
+    // this.fileUploaderRef = React.createRef()
+  }
+
+  componentDidMount() {
+    this.setState({
+      isLoaded: true,
+    })
   }
 
   onClose = () => {
@@ -27,11 +36,20 @@ class RubricUploadModal extends Component {
   }
 
   onAccept = () => {
+    if (this.state.files.length !== 1) {
+      return;
+    }
+
+    console.log(this.state.files[0])
+
     let formData = new FormData();
-    formData.append("rubric", this.fileUploaderRef.current.files[0]);
+    formData.append("rubric",this.state.files[0]);
 
     request(BASE + "courses/" + this.props.courseId + "/projects/" + this.props.projectId + "/rubric/uploadFile", "POST",
-      undefined, undefined, undefined, undefined, formData)
+
+      undefined, undefined, undefined, undefined,
+      formData
+    )
       .then(async response => {
         let data = await response.json();
 
@@ -43,44 +61,36 @@ class RubricUploadModal extends Component {
       });
   }
 
+  handleChange(event){
+    console.log(event.target.files);
+
+    this.setState({
+      files: event.target.files
+    });
+  }
+
+  body = () => {
+    return (
+      <>
+        <input type="file" id="input" multiple onChange={(event) => this.handleChange(event)}/>
+      </>
+    )
+  }
+
   render() {
     return(
-    //   <Modal
-    //     show={this.props.show}
-    //     onHide={this.onClose}
-    //     animation={false}
-    //   >
-    //     <div className={globalStyles.modalContainer}>
-    //       <div className={globalStyles.modalHeaderContainer}>
-    //         <h2>Import rubric</h2>
-    //         <div className={classnames(globalStyles.modalHeaderContainerButton)} onClick={this.onClose}>
-    //           <IoCloseOutline size={30}/>
-    //         </div>
-    //       </div>
-    //
-    //       <div className={globalStyles.modalBodyContainer}>
-    //         <Form>
-    //           <Form.Group>
-    //             <Form.File ref={this.fileUploaderRef}
-    //               name="file"
-    //               // label="Upload a rubric"
-    //               id="fileUploadForm"
-    //             />
-    //           </Form.Group>
-    //         </Form>
-    //       </div>
-    //
-    //       <div className={classnames(globalStyles.modalFooterContainer)}>
-    //         <div className={globalStyles.modalFooterContainerButtonGroup}>
-    //           <Button variant="linkLightGray" onClick={this.onClose}>Cancel</Button>
-    //           <Button variant="lightGreen" onClick={this.onAccept}>Upload</Button>
-    //         </div>
-    //       </div>
-    //     </div>
-    //   </Modal>
-      <div></div>
+      <CustomModal
+        show={this.props.show}
+        onClose={this.props.toggleShow}
+        onShow={() => {}}
+        onAccept={this.onAccept}
+        title={"Upload rubric"}
+        description={"Select a rubric and upload it."}
+        body={this.body()}
+        isLoaded={this.state.isLoaded}
+      />
     )
   }
 }
 
-export default (RubricUploadModal);
+export default RubricUploadModal;
