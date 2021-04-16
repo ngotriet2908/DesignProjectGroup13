@@ -19,6 +19,7 @@ import com.group13.tcsprojectgrading.models.settings.Settings;
 import com.group13.tcsprojectgrading.models.submissions.Submission;
 import com.group13.tcsprojectgrading.models.user.User;
 import com.group13.tcsprojectgrading.repositories.course.CourseRepository;
+import com.group13.tcsprojectgrading.repositories.feedback.FeedbackLogRepository;
 import com.group13.tcsprojectgrading.repositories.grading.*;
 import com.group13.tcsprojectgrading.repositories.submissions.SubmissionRepository;
 import com.group13.tcsprojectgrading.services.graders.GradingParticipationService;
@@ -29,6 +30,7 @@ import com.group13.tcsprojectgrading.services.settings.SettingsService;
 import com.group13.tcsprojectgrading.services.submissions.SubmissionService;
 import com.group13.tcsprojectgrading.services.user.UserService;
 import org.checkerframework.checker.units.qual.C;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -79,20 +81,33 @@ public class AssessmentServiceTest {
     private IssueStatusRepository issueStatusRepository;
     @Mock
     private SubmissionRepository submissionRepository;
+    @Mock
+    private FeedbackLogRepository  feedbackLogRepository;
 
     @InjectMocks
     private AssessmentService assessmentService;
 
-    private final Long courseId = 1L;
-    private final Long projectId = 2L;
-    private final Long submissionId = 3L;
-    private final Long assessmentId = 4L;
-    private final Assessment testAssessment = new Assessment(assessmentId);
-    private final Submission testSubmission = new Submission();
-    private final Long userId = 44L;
-    Course testCourse = new Course(courseId, "test", new Date());
-    Project testProject = new Project(projectId, testCourse, "test", "0");
+    private Long projectId;
+    private Long submissionId;
+    private Long assessmentId;
+    private Assessment testAssessment;
+    private Submission testSubmission;
+    private Long userId;
+    Course testCourse;
+    Project testProject;
 
+    @BeforeEach
+    public void init() {
+        Long courseId = 1L;
+        projectId = 2L;
+        submissionId = 3L;
+        assessmentId = 4L;
+        testAssessment = new Assessment(assessmentId);
+        testSubmission = new Submission();
+        userId = 44L;
+        testCourse = new Course(courseId, "test", new Date());
+        testProject = new Project(projectId, testCourse, "test", "0");
+    }
     @Test
     public void createNewAssessmentWithLink() throws Exception {
         User testStudent = new User(userId - 1);
@@ -325,11 +340,15 @@ public class AssessmentServiceTest {
     public void addGradeOk() throws Exception {
         testSubmission.setProject(testProject);
         User testGrader = new User(userId);
+        String criterionId = "532";
         testSubmission.setGrader(testGrader);
         List<PrivilegeEnum> privileges = new ArrayList<>();
         privileges.add(PrivilegeEnum.GRADING_WRITE_SINGLE);
         GradingParticipation participation = new GradingParticipation(testGrader, testProject, new Role("TA"));
         Grade testGrade = new Grade();
+        testGrade.setCriterionId(criterionId);
+        Rubric testRubric = new Rubric(projectId);
+        testRubric.setChildren(List.of(new Element(new RubricContent(criterionId, RubricContent.CRITERION_TYPE, "test"))));
 
         when(submissionRepository.findById(submissionId)).thenReturn(Optional.of(testSubmission));
         when(assessmentRepository.findAssessmentById(assessmentId)).thenReturn(Optional.of(testAssessment));
@@ -337,6 +356,7 @@ public class AssessmentServiceTest {
         when(userService.findById(userId)).thenReturn(testGrader);
         when(gradingParticipationService.getGradingParticipationByUserAndProject(userId, projectId)).thenReturn(participation);
         when(gradeRepository.save(any(Grade.class))).then(returnsFirstArg());
+        when(rubricService.getRubricById(projectId)).thenReturn(testRubric);
 
         assertThat(assessmentService.addGrade(submissionId, assessmentId, testGrade, userId, privileges))
                 .isEqualTo(testGrade);
