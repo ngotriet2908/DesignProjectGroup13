@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * Configuration for oauth2 client table in database
+ * Configuration for OAuth2 client table in database
  */
 @Configuration
 public class ClientServicePostgresConfig {

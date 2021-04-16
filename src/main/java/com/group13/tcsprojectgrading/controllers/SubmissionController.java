@@ -23,7 +23,7 @@ import java.util.Set;
 import static com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum.*;
 
 /**
- * Controller handles Submissions Endpoints
+ * Handles submission-related endpoints
  */
 @RestController
 @RequestMapping("/api/courses/{courseId}/projects/{projectId}/submissions")
@@ -40,10 +40,10 @@ public class SubmissionController {
     }
 
     /**
-     * Get submissions from database either to return submissions based on graders/unassigned
-     * this method require privilege SUBMISSIONS_READ
-     * @param courseId canvas course id
-     * @param projectId canvas project id
+     * Gets submissions from database either to return submissions based on graders/unassigned
+     * This method requires privilege SUBMISSIONS_READ
+     * @param courseId Canvas course id
+     * @param projectId Canvas project id
      * @param grader unassigned/id
      * @param principal injected oauth2 client's information
      * @return list of Submissions from database
@@ -72,10 +72,10 @@ public class SubmissionController {
     }
 
     /**
-     * Get info from a submission
-     * this method require privilege SUBMISSION_READ_SINGLE or SUBMISSION_READ_ALL
-     * @param courseId canvas course id
-     * @param projectId canvas project id
+     * Gets info from a submission
+     * This method requires privileges SUBMISSION_READ_SINGLE or SUBMISSION_READ_ALL
+     * @param courseId Canvas course id
+     * @param projectId Canvas project id
      * @param submissionId submission id
      * @param principal injected oauth2 client's information
      * @return a Submission
@@ -101,10 +101,10 @@ public class SubmissionController {
     }
 
     /**
-     * Assign the submission to the grader.
-     * this method require privilege MANAGE_GRADERS_EDIT
-     * @param courseId canvas course id
-     * @param projectId canvas project id
+     * Assigns the submission to the grader.
+     * This method requires privilege MANAGE_GRADERS_EDIT
+     * @param courseId Canvas course id
+     * @param projectId Canvas project id
      * @param submissionId submission id
      * @param grader user entity that will be assigned submission to
      * @param principal injected oauth2 client's information
@@ -129,10 +129,10 @@ public class SubmissionController {
     }
 
     /**
-     * Move the submission from its grader back to the 'unassigned' l.
-     * this method require privilege MANAGE_GRADERS_EDIT or MANAGE_GRADERS_SELF_EDIT
-     * @param courseId canvas course id
-     * @param projectId canvas project id
+     * Moves the submission from its grader back to the 'unassigned'.
+     * This method requires privileges MANAGE_GRADERS_EDIT or MANAGE_GRADERS_SELF_EDIT
+     * @param courseId Canvas course id
+     * @param projectId Canvas project id
      * @param submissionId submission id
      * @param principal injected oauth2 client's information
      * @throws JsonProcessingException json parsing exception
@@ -156,10 +156,10 @@ public class SubmissionController {
     }
 
     /**
-     * manage labels for a submission
-     * this method require privilege SUBMISSION_EDIT_ALL or SUBMISSION_EDIT_SINGLE
-     * @param courseId canvas course id
-     * @param projectId canvas project id
+     * Manages labels for a submission
+     * This method requires privileges SUBMISSION_EDIT_ALL or SUBMISSION_EDIT_SINGLE
+     * @param courseId Canvas course id
+     * @param projectId Canvas project id
      * @param submissionId submission id
      * @param labels list of label soon to be active
      * @param principal injected oauth2 client's information
@@ -186,10 +186,10 @@ public class SubmissionController {
     }
 
     /**
-     * Manage Grading sheets (new, clone, move, delete)
-     * this method require privilege SUBMISSION_EDIT_ALL or SUBMISSION_EDIT_SINGLE
-     * @param courseId canvas course id
-     * @param projectId canvas project id
+     * Manages grading sheets (new, clone, move, delete)
+     * This method requires privileges SUBMISSION_EDIT_ALL or SUBMISSION_EDIT_SINGLE
+     * @param courseId Canvas course id
+     * @param projectId Canvas project id
      * @param submissionId submission id
      * @param object action object
      * @param principal injected oauth2 client's information
@@ -215,10 +215,10 @@ public class SubmissionController {
     }
 
     /**
-     * Add student to a grading sheet in a submission
-     * this method require privilege SUBMISSION_EDIT_ALL or SUBMISSION_EDIT_SINGLE
-     * @param courseId canvas course id
-     * @param projectId canvas project id
+     * Adds student to a grading sheet in a submission
+     * This method requires privileges SUBMISSION_EDIT_ALL or SUBMISSION_EDIT_SINGLE
+     * @param courseId Canvas course id
+     * @param projectId Canvas project id
      * @param submissionId submission id
      * @param participantId student user id
      * @param assessmentId grading sheet id
@@ -244,10 +244,10 @@ public class SubmissionController {
     }
 
     /**
-     * remove student to a grading sheet in a submission
-     * this method require privilege SUBMISSION_EDIT_ALL or SUBMISSION_EDIT_SINGLE
-     * @param courseId canvas course id
-     * @param projectId canvas project id
+     * Removes student to a grading sheet in a submission
+     * This method requires privileges SUBMISSION_EDIT_ALL or SUBMISSION_EDIT_SINGLE
+     * @param courseId Canvas course id
+     * @param projectId Canvas project id
      * @param submissionId submission id
      * @param participantId student user id
      * @param returnAll choose whether return all submissions

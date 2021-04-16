@@ -114,7 +114,6 @@ public class AssessmentService {
      */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public AssessmentLink createNewAssessmentWithLink(Submission submission, User user, Project project, Assessment assessment) {
-        // TODO this check can actually be simplified
         boolean currentExists = this.assessmentLinkRepository.existsById_UserAndId_Submission_ProjectAndCurrentIsTrue(user, project);
 
         // set as current if current assessment is not set
@@ -151,7 +150,7 @@ public class AssessmentService {
     }
 
     /**
-     * update an existing assessment in database
+     * Updates an existing assessment in database
      * @param assessment assessment entity
      * @return a updated assessment
      */
@@ -165,7 +164,7 @@ public class AssessmentService {
     }
 
     /**
-     * Create a cloned assessment and move given user to that asessment
+     * Creates a cloned assessment and moves given user to that assessment
      * @param submission submission entity
      * @param assessment assessment entity that are being cloned
      * @param participation student that will be moved
@@ -189,7 +188,7 @@ public class AssessmentService {
     }
 
     /**
-     * Move user from an assessment to another and create a new assessment
+     * Moves user from an assessment to another and creates a new assessment
      * @param link current assessment link of user
      * @param assessment new assessment
      * @param assessmentLinks list of previous assessment links
@@ -217,7 +216,7 @@ public class AssessmentService {
     }
 
     /**
-     * Create a new assessment in the submission and move user into it
+     * Creates a new assessment in the submission and moves user into it
      * @param submission submission entity
      * @param user user entity
      * @return a created link between submission, user and assessment
@@ -265,7 +264,7 @@ public class AssessmentService {
     }
 
     /**
-     * get assessments as links of a user in a project
+     * Gets assessments as links of a user in a project
      * @param projectId canvas project id
      * @param user user entity
      * @return a list of links between submission, user and assessment
@@ -276,7 +275,7 @@ public class AssessmentService {
     }
 
     /**
-     * obtain locks on assessments as links of a user in a project
+     * Obtains locks on assessments as links of a user in a project
      * @param projectId canvas project id
      * @param user user entity
      * @return a list of links between submission, user and assessment
@@ -287,7 +286,7 @@ public class AssessmentService {
     }
 
     /**
-     * get assessments as link in a submission
+     * Gets assessments as link in a submission
      * @param submission submission entity
      * @return a list of links between submission, user and assessment
      */
@@ -297,7 +296,7 @@ public class AssessmentService {
     }
 
     /**
-     * obtain locks on assessments as links in a submission
+     * Obtains locks on assessments as links in a submission
      * @param submission submission entity
      * @return a list of links between submission, user and assessment
      */
@@ -413,7 +412,7 @@ public class AssessmentService {
     }
 
     /**
-     * Obtain lock on an assessment
+     * Obtains lock on an assessment
      * @param id assessment id
      * @return an assessment
      */
@@ -431,7 +430,7 @@ public class AssessmentService {
     }
 
     /**
-     * Checks if the user has permissions to retrieve the assessment and returns it if so.
+     * Checkss if the user has permissions to retrieve the assessment and returns it if so.
      * @param assessmentId assessment id
      * @param submissionId submission is
      * @param userId canvas user id
@@ -459,7 +458,7 @@ public class AssessmentService {
     }
 
     /**
-     * get assessment as link for user in a submission
+     * Gets assessment as link for user in a submission
      * @param submissionId submission id
      * @param userId canvas user id
      * @return a assessment link
@@ -472,7 +471,7 @@ public class AssessmentService {
     }
 
     /**
-     * obtain a lock on assessment as link for user in a submission
+     * Obtains a lock on assessment as link for user in a submission
      * @param submissionId submission id
      * @param userId canvas user id
      * @return a assessment link
@@ -556,7 +555,7 @@ public class AssessmentService {
     }
 
     /**
-     * add new grade to database
+     * Adds new grade to database
      * @param grade grade entity
      * @return a created grade
      */
@@ -725,7 +724,6 @@ public class AssessmentService {
      * @param privileges user's privileges
      * @return a resolved issue
      */
-//    TODO send email
     @Transactional(rollbackOn = Exception.class)
     public Issue resolveIssue(Long submissionId, Long issueId, Long graderId, IssueSolution solution, List<PrivilegeEnum> privileges) {
 
@@ -762,7 +760,7 @@ public class AssessmentService {
     }
 
     /**
-     * find current assessment as link for user in a project
+     * Finds current assessment as link for user in a project
      * @param project project entity
      * @param user user entity
      * @return an assessment link
@@ -776,7 +774,7 @@ public class AssessmentService {
     }
 
     /**
-     * find assessment links that are linked to an assessment
+     * Finds assessment links that are linked to an assessment
      * @param id assessment id
      * @return list of assessment link
      */
@@ -790,7 +788,7 @@ public class AssessmentService {
     }
 
     /**
-     * get active grades for an assessment
+     * Gets active grades for an assessment
      * @param assessment assessment entity
      * @return list of grades
      */
@@ -799,15 +797,8 @@ public class AssessmentService {
         return gradeRepository.findGradesByAssessmentAndIsActiveIsTrue(assessment);
     }
 
-
-//
-//    @Transactional(value = Transactional.TxType.MANDATORY)
-//    public void saveAssessment(Assessment assessment) {
-//        this.assessmentRepository.save(assessment);
-//    }
-
     /**
-     * remove assessment from database
+     * Removes assessment from database
      * @param assessment assessment entity
      */
     @Transactional(value = Transactional.TxType.MANDATORY)
@@ -817,7 +808,7 @@ public class AssessmentService {
     }
 
     /**
-     * delete assessment linker from database and remove all logs
+     * Deletes assessment linker from database and removes all logs
      * @param assessmentLink assessment link entity
      */
     @Transactional(value = Transactional.TxType.MANDATORY)
@@ -827,7 +818,7 @@ public class AssessmentService {
     }
 
     /**
-     * save assessment link to database
+     * Saves assessment link to database
      * @param assessmentLink assessment link entity
      */
     @Transactional(value = Transactional.TxType.MANDATORY)
@@ -836,7 +827,7 @@ public class AssessmentService {
     }
 
     /**
-     * save assessment links to database
+     * Saves assessment links to database
      * @param links assessment link entities
      */
     @Transactional(value = Transactional.TxType.MANDATORY)
@@ -845,7 +836,7 @@ public class AssessmentService {
     }
 
     /**
-     * create new assessment link if not exist
+     * Creates new assessment link if not exist
      * @param assessmentLink assessment link entity
      * @return a created assessment link
      */
@@ -856,43 +847,16 @@ public class AssessmentService {
     }
 
     /**
-     * get issues in an assessment
+     * Gets issues in an assessment
      * @param assessmentLink assessment link entity
      */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public void findIssuesByAssessment(AssessmentLink assessmentLink) {
         this.assessmentLinkRepository.save(assessmentLink);
     }
-//    @Transactional(value = Transactional.TxType.MANDATORY)
-//    public CurrentAssessment getCurrentAssessment(User user, Project project) {
-//        return this.currentAssessmentRepository.findById_UserAndId_Project(user, project);
-//    }
-//
-//    @Transactional(value = Transactional.TxType.MANDATORY)
-//    public void setCurrentAssessment(User user, Project project, Assessment assessment) {
-//        this.currentAssessmentRepository.save(new CurrentAssessment(user, project, assessment));
-//    }
-
-
-//    public int calculateFinalGrade(Rubric rubric, Assessment assessment) {
-//        List<Element> criteria = rubric.fetchAllCriteria();
-//        int total = 0;
-//
-//        for (Element criterion: criteria) {
-//            CriterionGrade grades = assessment.getGrades().get(criterion.getContent().getId());
-//            Grade grade = grades.getHistory().get(grades.getActive());
-//            total += grade.getGrade() * criterion.getContent().getGrade().getWeight();
-//        }
-//
-//        return total;
-//    }
-
-    /*
-    TODO can be changed to catch any email-related events
-     */
 
     /**
-     * A custom even that should fire when an issue is created.
+     * Fires when an issue is created.
      */
     public static class IssueCreatedEvent extends ApplicationEvent {
         private final String projectName;

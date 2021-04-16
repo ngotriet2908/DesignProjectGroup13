@@ -57,22 +57,12 @@ class Grader extends Component {
           <div className={styles.graderHeader}>
             <div className={styles.graderHeaderTitle}>
               <h4>{this.props.name}
-                {/* TODO */}
-                {/*{this.props.grader != null && (isTeacher(this.props.grader.role[0].name) ? "(Teacher)" : "(TA)")}*/}
+
               </h4>
 
               <span className={styles.graderHeaderSecondary}>{Pluralize( 'submission', this.props.submissions.length, true)}</span>
             </div>
             <div className={styles.graderHeaderButtonContainer}>
-              {/*{this.props.grader == null &&*/}
-              {/*  <Can I="edit" a="ManageGraders">*/}
-              {/*    <Button variant={"yellow"}*/}
-              {/*        onClick={this.props.toggleShowBulk}>*/}
-              {/*        Bulk assign*/}
-              {/*    </Button>*/}
-              {/*  </Can>*/}
-              {/*}*/}
-
               <IconButton className={classnames(styles.collapseButton)} onClick={this.toggleCollapsed}>
                 <KeyboardArrowDownIcon/>
               </IconButton>

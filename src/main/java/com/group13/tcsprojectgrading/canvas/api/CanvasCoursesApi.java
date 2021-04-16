@@ -15,7 +15,7 @@ import java.net.URI;
 import java.util.List;
 
 /**
- * This class consists of methods that are used to retrieve data from canvas course apis
+ * Consists of methods that are used to retrieve data from Canvas course API
  */
 @Component
 public class CanvasCoursesApi {
@@ -27,8 +27,8 @@ public class CanvasCoursesApi {
     }
 
     /**
-     * Get Canvas courses that user participates in
-     * @return list of courses in Json strings
+     * Returns Canvas courses that user participates in
+     * @return list of courses
      */
     public List<String> getUserCourseList() {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
@@ -47,9 +47,9 @@ public class CanvasCoursesApi {
     }
 
     /**
-     * Get a Canvas course if user have access to it
-     * @param courseId canvas course id
-     * @return canvas course Json string
+     * Returns a Canvas course if user has access to it
+     * @param courseId Canvas course id
+     * @return Canvas course Json string
      */
     public String getUserCourse(Long courseId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
@@ -69,9 +69,9 @@ public class CanvasCoursesApi {
     }
 
     /**
-     * Get Canvas assignments/projects in a course
-     * @param courseId canvas course id
-     * @return a list of canvas assignments/projects Json string
+     * Returns Canvas assignments/projects in a course
+     * @param courseId Canvas course id
+     * @return a list of Canvas assignments/projects Json string
      */
     public List<String> getCourseProjects(Long courseId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
@@ -90,8 +90,8 @@ public class CanvasCoursesApi {
     }
 
     /**
-     * Get Canvas participants in a course (with enrollments aka roles)
-     * @param courseId canvas course id
+     * Returns Canvas participants in a course (with enrollments aka roles)
+     * @param courseId Canvas course id
      * @return a list of Canvas participants Json string
      */
     public List<String> getCourseParticipants(Long courseId) {
@@ -112,8 +112,8 @@ public class CanvasCoursesApi {
     }
 
     /**
-     * Get Canvas participants in a course (with enrollments aka roles, avatar url and email)
-     * @param courseId canvas course id
+     * Returns Canvas participants in a course (with enrollments aka roles, avatar url and email)
+     * @param courseId Canvas course id
      * @return a list of Canvas participants Json string
      */
     public List<String> getCourseParticipantsWithAvatars(Long courseId) {
@@ -134,9 +134,9 @@ public class CanvasCoursesApi {
     }
 
     /**
-     * Get a participant in a Canvas course
-     * @param courseId canvas course id
-     * @param userId canvas user id
+     * Returns a participant in a Canvas course
+     * @param courseId Canvas course id
+     * @param userId Canvas user id
      * @return participant json string
      */
     public String getCourseUser(Long courseId, Long userId) {
@@ -156,8 +156,8 @@ public class CanvasCoursesApi {
     }
 
     /**
-     * Get Canvas graders in a course (with enrollments aka roles)
-     * @param courseId canvas course id
+     * Returns Canvas graders in a course (with enrollments aka roles)
+     * @param courseId Canvas course id
      * @return a list of Canvas graders Json string
      */
     public List<String> getCourseGraders(Long courseId) {
@@ -179,8 +179,8 @@ public class CanvasCoursesApi {
     }
 
     /**
-     * Get Canvas students in a course (with enrollments aka roles)
-     * @param courseId canvas course id
+     * Returns Canvas students in a course (with enrollments aka roles)
+     * @param courseId Canvas course id
      * @return a list of Canvas students Json string
      */
     public List<String> getCourseStudents(Long courseId) {
@@ -202,8 +202,8 @@ public class CanvasCoursesApi {
     }
 
     /**
-     * Get Canvas group categories in a course
-     * @param courseId canvas course id
+     * Returns Canvas group categories in a course
+     * @param courseId Canvas course id
      * @return a list of group categories Json string
      */
     public List<String> getCourseGroupCategories(Long courseId) {
@@ -223,8 +223,8 @@ public class CanvasCoursesApi {
     }
 
     /**
-     * Get Canvas groups in a group category in a course
-     * @param groupCatId canvas group category id
+     * Returns Canvas groups in a group category in a course
+     * @param groupCatId Canvas group category id
      * @return a list of groups Json string
      */
     public List<String> getCourseGroupCategoryGroup(Long groupCatId) {
@@ -245,8 +245,8 @@ public class CanvasCoursesApi {
     }
 
     /**
-     * Get Canvas groups in a course
-     * @param courseId canvas group category id
+     * Returns Canvas groups in a course
+     * @param courseId Canvas group category id
      * @return a list of groups Json string
      */
     public List<String> getCourseGroups(Long courseId) {
@@ -267,8 +267,8 @@ public class CanvasCoursesApi {
     }
 
     /**
-     * Get Canvas group memberships in a group
-     * @param groupId canvas group id
+     * Returns Canvas group memberships in a group
+     * @param groupId Canvas group id
      * @return a list of members Json string
      */
     public List<String> getGroupMemberships(Long groupId) {
@@ -288,8 +288,8 @@ public class CanvasCoursesApi {
     }
 
     /**
-     * Get Canvas group users in a group
-     * @param groupId canvas group id
+     * Returns Canvas group users in a group
+     * @param groupId Canvas group id
      * @return a list of members Json string
      */
     public List<String> getGroupUsers(Long groupId) {
@@ -309,8 +309,8 @@ public class CanvasCoursesApi {
     }
 
     /**
-     * Get Canvas groups that user are in
-     * @param accountId canvas account id
+     * Returns Canvas groups that user are in
+     * @param accountId Canvas account id
      * @return a list of groups Json string
      */
     public List<String> getGroupsFromAccount(Long accountId) {
@@ -330,9 +330,9 @@ public class CanvasCoursesApi {
     }
 
     /**
-     * Get Canvas submissions in a project in a course
-     * @param courseId canvas course id
-     * @param assignmentId canvas assignment id
+     * Returns Canvas submissions in a project in a course
+     * @param courseId Canvas course id
+     * @param assignmentId Canvas assignment id
      * @return a list of submissions Json string
      */
     public List<String> getSubmissions(Long courseId, Long assignmentId) {
@@ -354,9 +354,9 @@ public class CanvasCoursesApi {
     }
 
     /**
-     * Get Canvas submissions in a project in a course with additional info (group, submission_history, user, submission comments)
-     * @param courseId canvas course id
-     * @param assignmentId canvas assignment id
+     * Returns Canvas submissions in a project in a course with additional info (group, submission_history, user, submission comments)
+     * @param courseId Canvas course id
+     * @param assignmentId Canvas assignment id
      * @return a list of submissions Json string
      */
     public List<String> getSubmissionsInfo(Long courseId, Long assignmentId) {
@@ -370,7 +370,6 @@ public class CanvasCoursesApi {
                     .host(CanvasEndpoints.HOST)
                     .path(CanvasEndpoints.SUBMISSIONS_PATH)
                     .queryParam("include[]", "group", "submission_history","user","submission_comments")
-//                    .queryParam("grouped", true)
                     .build(courseId, assignmentId);
 
             return this.canvasApi.sendRequestWithPagination(uri, HttpMethod.GET, authorizedClient);
@@ -378,10 +377,10 @@ public class CanvasCoursesApi {
     }
 
     /**
-     * Get Canvas submission in a project in a course with submission comments
-     * @param courseId canvas course id
-     * @param projectId canvas assignment id
-     * @param submitterId canvas user submitter id
+     * Returns Canvas submission in a project in a course with submission comments
+     * @param courseId Canvas course id
+     * @param projectId Canvas assignment id
+     * @param submitterId Canvas user submitter id
      * @return submission Json string
      */
     public String getSubmission(Long courseId, Long projectId , Long submitterId) {
@@ -402,9 +401,9 @@ public class CanvasCoursesApi {
     }
 
     /**
-     * Get Canvas assignment in a course
-     * @param courseId canvas course id
-     * @param projectId canvas assignment id
+     * Returns Canvas assignment in a course
+     * @param courseId Canvas course id
+     * @param projectId Canvas assignment id
      * @return Canvas project Json string
      */
     public String getCourseProject(Long courseId, Long projectId) {
@@ -424,9 +423,9 @@ public class CanvasCoursesApi {
     }
 
     /**
-     * Upload grades to canvas to a project
-     * @param courseId canvas course id
-     * @param assignmentId canvas assignment id
+     * Uploads grades to Canvas for a project
+     * @param courseId Canvas course id
+     * @param assignmentId Canvas assignment id
      * @param queryParams list of grades in Canvas api format
      * @return Canvas project Json string
      */

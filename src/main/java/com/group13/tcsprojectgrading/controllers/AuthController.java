@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class AuthController {
     /*
-    Protected method that forces the server to check the session cookie.
+    Forces the server to check the session cookie.
      */
     @RequestMapping(value = "api/auth/session", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     protected String verifySession() {

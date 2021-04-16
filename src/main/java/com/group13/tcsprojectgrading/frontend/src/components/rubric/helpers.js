@@ -96,7 +96,6 @@ export const removeElement = (props) => {
   console.log(props);
 
   props.deleteElement(props.data.content.id, props.path);
-  // TODO go to parent
   props.setCurrentPath("");
   props.setSelectedElement(props.rubric.id);
 }

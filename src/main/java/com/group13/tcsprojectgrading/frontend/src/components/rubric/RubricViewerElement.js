@@ -19,7 +19,6 @@ class RubricViewerElement extends Component {
       return(
         <div className={styles.viewerBodyEmpty}>
           <FormatAlignLeftIcon/>
-          {/* todo 'create a criterion' */}
           <p>Choose a criterion</p>
         </div>
       )

@@ -66,7 +66,6 @@ class Settings extends Component {
             }
           }))
         } else {
-          // TODO: show error
           console.error("Could not update user settings.")
         }
       })
@@ -89,7 +88,6 @@ class Settings extends Component {
             }
           }))
         } else {
-          // TODO: show error
           console.error("Could not update user settings.")
         }
       })

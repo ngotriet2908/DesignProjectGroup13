@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 
 import static com.group13.tcsprojectgrading.controllers.utils.Utils.groupPages;
 /**
- * Service handlers operations relating to courses
+ * Service handlers related to courses
  */
 @Service
 public class CourseService {
@@ -92,7 +92,6 @@ public class CourseService {
         for (JsonNode courseToImport: courses) {
             long id = courseToImport.get("id").asLong();
 
-            // TODO what if no such course exists?
             // should be checked what Canvas returns in such a case, then catch it and return an error
             JsonNode courseCanvas = Json.getObjectReader().readTree(this.canvasApi.getCanvasCoursesApi().getUserCourse(id));
 
@@ -106,7 +105,6 @@ public class CourseService {
             // create course
             Course course = new Course(id, name, startAt);
             if (courseRepository.existsById(course.getId())) {
-                // TODO
                 throw new ResponseStatusException(
                         HttpStatus.CONFLICT, "Course already exists"
                 );
@@ -324,8 +322,6 @@ public class CourseService {
                     projectCanvasNode.get("name").asText(),
                     projectCanvasNode.get("created_at").asText()
             );
-
-            // TODO fetch submissions here (i.e. do the initial sync)
 
             // save project
             Project project1 = projectRepository.findProjectsById(projectId);

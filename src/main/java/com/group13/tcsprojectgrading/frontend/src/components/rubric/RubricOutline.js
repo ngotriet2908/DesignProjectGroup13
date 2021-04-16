@@ -119,7 +119,6 @@ class RubricOutline extends Component {
                       Add section
                     </MenuItem>
 
-                    {/* TODO doesn't work yet */}
                     {/*<MenuItem*/}
                     {/*  onClick={() => removeAll(this.props)}>*/}
                     {/*  Clear*/}

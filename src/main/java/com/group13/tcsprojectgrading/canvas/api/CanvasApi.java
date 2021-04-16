@@ -31,7 +31,7 @@ public class CanvasApi {
     private final CanvasCoursesApi canvasCoursesApi;
 
     /**
-     * default constructor
+     * Creates a new Canvas API accessor.
      * @param webClient spring boot webclient
      */
     public CanvasApi(WebClient webClient) {
@@ -41,23 +41,23 @@ public class CanvasApi {
     }
 
     /**
-     * get canvas users api, which grants the ability to call canvas users' endpoints
-     * @return canvas users api
+     * Returns Canvas users API object, which grants the ability to call Canvas users' endpoints
+     * @return Canvas users api
      */
     public CanvasUsersApi getCanvasUsersApi() {
         return canvasUsersApi;
     }
 
     /**
-     * get canvas courses api, which grants the ability to call canvas courses' endpoints
-     * @return canvas courses api
+     * Returns Canvas courses api, which grants the ability to call Canvas courses' endpoints
+     * @return Canvas courses api
      */
     public CanvasCoursesApi getCanvasCoursesApi() {
         return canvasCoursesApi;
     }
 
     /**
-     * get user oauth2 authentication/authorised client from user request's parameters and database
+     * Returns user OAuth2 authenticated client from user request's parameters and database
      * @return oauth2 authorised client
      */
     public OAuth2AuthorizedClient getAuthorisedClient() {
@@ -78,40 +78,30 @@ public class CanvasApi {
     }
 
     /**
-     * a custom method to send CRUD methods request to canvas' endpoints
-     * @param uri canvas' endpoint
+     * Sends CRUD request to Canvas' endpoints.
+     * @param uri Canvas' endpoint
      * @param httpMethod CRUD method
-     * @param authorizedClient oauth2 client contains canvas token
-     * @return response body from canvas
+     * @param authorizedClient oauth2 client contains Canvas token
+     * @return response body from Canvas
      */
     public String sendRequest(URI uri, HttpMethod httpMethod, OAuth2AuthorizedClient authorizedClient) {
         WebClient.UriSpec<WebClient.RequestBodySpec> uriSpec = webClient.method(httpMethod);
         WebClient.RequestBodySpec bodySpec = uriSpec.uri(uri);
         bodySpec
                 .attributes(ServletOAuth2AuthorizedClientExchangeFilterFunction.oauth2AuthorizedClient(authorizedClient));
-//        return bodySpec
-//                .retrieve()
-//                .bodyToMono(String.class)
-//                .block();
-        // TODO: catch errors here and in other request functions (!important)
-        String result = bodySpec
+        return bodySpec
                 .retrieve()
-//                    .onStatus(status -> status == HttpStatus.UNAUTHORIZED,
-//                            clientResponse -> Mono.error(new CanvasAuthorisationException("Unauthorised 401."))
-//                    )
                 .bodyToMono(String.class)
                 .block();
-//        System.out.println(result);
-            return result;
     }
 
     /**
-     * a custom method to send POST request to canvas' endpoints
-     * @param uri canvas' endpoint
+     * Sends POST request to Canvas' endpoints
+     * @param uri Canvas' endpoint
      * @param httpMethod CRUD method
-     * @param authorizedClient oauth2 client contains canvas token
+     * @param authorizedClient oauth2 client contains Canvas token
      * @param data payload for post request
-     * @return response body from canvas
+     * @return response body from Canvas
      */
     public String postRequest(URI uri, HttpMethod httpMethod, OAuth2AuthorizedClient authorizedClient, MultiValueMap<String, String> data) {
         WebClient.UriSpec<WebClient.RequestBodySpec> uriSpec = webClient.method(httpMethod);
@@ -121,28 +111,18 @@ public class CanvasApi {
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(BodyInserters.fromFormData(data))
                 .attributes(ServletOAuth2AuthorizedClientExchangeFilterFunction.oauth2AuthorizedClient(authorizedClient));
-//        return bodySpec
-//                .retrieve()
-//                .bodyToMono(String.class)
-//                .block();
-        // TODO: catch errors here and in other request functions (!important)
         System.out.println(uriSpec);
-        String result = bodySpec
+        return bodySpec
                 .retrieve()
-//                    .onStatus(status -> status == HttpStatus.UNAUTHORIZED,
-//                            clientResponse -> Mono.error(new CanvasAuthorisationException("Unauthorised 401."))
-//                    )
                 .bodyToMono(String.class)
                 .block();
-//        System.out.println(result);
-        return result;
     }
 
     /**
-     * a custom async method to send CRUD methods request to canvas' endpoints
-     * @param uri canvas' endpoint
+     * Sends async CRUD request to Canvas' endpoints
+     * @param uri Canvas' endpoint
      * @param httpMethod CRUD method
-     * @param authorizedClient oauth2 client contains canvas token
+     * @param authorizedClient oauth2 client contains Canvas token
      * @return a Mono entity for async methods
      */
     public Mono<ResponseEntity<String>> sendRequestAsync(URI uri, HttpMethod httpMethod, OAuth2AuthorizedClient authorizedClient) {
@@ -153,11 +133,11 @@ public class CanvasApi {
     }
 
     /**
-     * a custom method to send CRUD methods request to canvas' endpoints and retrieve all pages from canvas pagination
-     * @param url canvas' endpoint
+     * Sends CRUD request to Canvas' endpoints and unwraps Canvas' pagination
+     * @param url Canvas' endpoint
      * @param httpMethod CRUD method
-     * @param authorizedClient oauth2 client contains canvas token
-     * @return list of response bodies from canvas
+     * @param authorizedClient oauth2 client contains Canvas token
+     * @return list of response bodies from Canvas
      */
     public List<String> sendRequestWithPagination(URI url, HttpMethod httpMethod, OAuth2AuthorizedClient authorizedClient) {
         Mono<List<String>> entityMono =
@@ -174,10 +154,9 @@ public class CanvasApi {
                         }
                     }
                     if (next == null) {
-//                        System.out.println("next == null");
                         return Mono.empty();
                     }
-//                    System.out.println(next);
+
                     URI uri = null;
                     try {
                         uri = new URI(next);
@@ -188,7 +167,6 @@ public class CanvasApi {
                 }).flatMap(clientResponse -> Mono.just(clientResponse.getBody())).collectList();
 
         List<String> res = entityMono.block();
-//        System.out.println(Arrays.toString(res.toArray()));
         return res;
     }
 }

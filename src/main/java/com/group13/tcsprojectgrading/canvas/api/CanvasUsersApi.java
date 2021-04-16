@@ -10,7 +10,7 @@ import java.net.URI;
 import java.util.List;
 
 /**
- * This class consists of methods that are used to retrieve data from canvas user apis
+ * Consists of methods that are used to retrieve data from Canvas user API
  */
 @Component
 public class CanvasUsersApi {
@@ -22,8 +22,8 @@ public class CanvasUsersApi {
     }
 
     /**
-     * get authorised client account from canvas
-     * @return canvas account json string
+     * Returns authorised client account from Canvas
+     * @return Canvas account json string
      */
     public String getAccount() {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
@@ -42,9 +42,9 @@ public class CanvasUsersApi {
     }
 
     /**
-     * get authorised client account from canvas
-     * @param userId canvas user id
-     * @return canvas account json string
+     * Returns authorised client account from Canvas
+     * @param userId Canvas user id
+     * @return Canvas account json string
      */
     public String getAccountWithId(Long userId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
@@ -63,8 +63,8 @@ public class CanvasUsersApi {
     }
 
     /**
-     * get user enrollment in Canvas
-     * @param userId canvas user id
+     * Returns user's enrollments in Canvas
+     * @param userId Canvas user id
      * @return list of enrollments
      */
     public List<String> getEnrolments(Long userId) {
@@ -84,9 +84,9 @@ public class CanvasUsersApi {
     }
 
     /**
-     * send canvas message to user/group
-     * @param userId canvas user id
-     * @param groupId canvas group id
+     * Sends Canvas message to user/group
+     * @param userId Canvas user id
+     * @param groupId Canvas group id
      * @param subject subject of the message
      * @param body body of the message
      */

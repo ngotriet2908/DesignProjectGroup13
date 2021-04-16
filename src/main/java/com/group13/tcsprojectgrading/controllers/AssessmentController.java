@@ -20,7 +20,7 @@ import java.security.Principal;
 import java.util.List;
 
 /**
- * Controller handles Assessment Endpoints
+ * Handles assessment endpoints
  */
 @RestController
 @RequestMapping("/api/courses/{courseId}/projects/{projectId}/submissions/{submissionId}/assessments/{assessmentId}")
@@ -39,9 +39,9 @@ public class AssessmentController {
     }
 
     /**
-     * get Assessment from database with details (progress, issues, grades, final grade)
-     * this method require privilege GRADING_READ_ALL or GRADING_READ_SINGLE
-     * @param projectId canvas project id
+     * Gets Assessment from database with details (progress, issues, grades, final grade)
+     * This method requires privileges GRADING_READ_ALL or GRADING_READ_SINGLE
+     * @param projectId Canvas project id
      * @param submissionId submission id
      * @param assessmentId grading sheet id
      * @param principal injected oauth2 client's information
@@ -67,9 +67,9 @@ public class AssessmentController {
     }
 
     /**
-     * Post new grade to a criterion in a grading sheet
-     * this method require privilege GRADING_WRITE_ALL or GRADING_WRITE_SINGLE
-     * @param projectId canvas project id
+     * Posts a new grade for a criterion in a grading sheet
+     * This method requires privileges GRADING_WRITE_ALL or GRADING_WRITE_SINGLE
+     * @param projectId Canvas project id
      * @param submissionId submission id
      * @param assessmentId grading sheet id
      * @param grade Grade entity from front-end
@@ -99,10 +99,10 @@ public class AssessmentController {
     }
 
     /**
-     * Set a grade as current grade in a criterion in a grading sheet
-     * this method require privilege GRADING_WRITE_ALL or GRADING_WRITE_SINGLE
+     * Sets a grade as current grade in a criterion in a grading sheet
+     * This method requires privileges GRADING_WRITE_ALL or GRADING_WRITE_SINGLE
      * @param gradeId id of the grade that need to be activate
-     * @param projectId canvas project id
+     * @param projectId Canvas project id
      * @param submissionId submission id
      * @param assessmentId grading sheet id
      * @param principal injected oauth2 client's information
@@ -131,9 +131,9 @@ public class AssessmentController {
     }
 
     /**
-     * get a list of issues in a grading sheet
-     * this method require privilege SUBMISSION_READ_ALL or SUBMISSION_READ_SINGLE
-     * @param projectId canvas project id
+     * Gets a list of issues in a grading sheet
+     * This method requires privileges SUBMISSION_READ_ALL or SUBMISSION_READ_SINGLE
+     * @param projectId Canvas project id
      * @param submissionId submission id
      * @param assessmentId grading sheet id
      * @param principal injected oauth2 client's information
@@ -159,9 +159,9 @@ public class AssessmentController {
     }
 
     /**
-     * create a new issue in a grading sheet
-     * this method require privilege GRADING_WRITE_SINGLE or GRADING_WRITE_ALL
-     * @param projectId canvas project id
+     * Creates a new issue in a grading sheet
+     * This method requires privileges GRADING_WRITE_SINGLE or GRADING_WRITE_ALL
+     * @param projectId Canvas project id
      * @param submissionId submission id
      * @param assessmentId grading sheet id
      * @param issue Issue entity from front-end
@@ -189,9 +189,9 @@ public class AssessmentController {
     }
 
     /**
-     * resolve an issue in a grading sheet
-     * this method require privilege GRADING_WRITE_SINGLE or GRADING_WRITE_ALL
-     * @param projectId canvas project id
+     * Resolves an issue in a grading sheet
+     * This method requires privileges GRADING_WRITE_SINGLE or GRADING_WRITE_ALL
+     * @param projectId Canvas project id
      * @param submissionId submission id
      * @param assessmentId grading sheet id
      * @param issueId issue id that need to be resolve

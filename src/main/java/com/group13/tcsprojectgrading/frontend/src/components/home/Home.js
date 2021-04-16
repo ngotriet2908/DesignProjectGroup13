@@ -13,7 +13,6 @@ import CourseCard from "./CourseCard";
 import globalStyles from '../helpers/global.module.css';
 
 import ImportCoursesModal from "./ImportCoursesModal";
-import TodoList from "./TodoList";
 import StickyHeader from "../helpers/StickyHeader";
 
 import CircularProgress from "@material-ui/core/CircularProgress";
@@ -65,9 +64,6 @@ class Home extends Component {
         const issues = await res5.json();
 
         this.props.saveUserSelf(user);
-
-        // TODO remove
-        // courses = Array(10).fill(courses).flat()
 
         this.setState({
           recentProjects: recent,

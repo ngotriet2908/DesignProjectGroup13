@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Home view Controller
+ * Main app's controller
  */
 @Controller
 public class HomeController {

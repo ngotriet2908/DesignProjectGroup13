@@ -11,7 +11,7 @@ import javax.transaction.Transactional;
 import java.security.Principal;
 
 /**
- * Controller handles Email Settings Endpoints
+ * Handles email settings endpoints
  */
 @RestController
 @RequestMapping("/api/courses/{courseId}/projects/{projectId}/settings")
@@ -24,8 +24,8 @@ public class SettingsController {
     }
 
     /**
-     * get user's settings.
-     * @param projectId canvas project id
+     * Gets user's settings.
+     * @param projectId Canvas project id
      * @param principal injected oauth2 client's information
      * @return a Settings from database
      */

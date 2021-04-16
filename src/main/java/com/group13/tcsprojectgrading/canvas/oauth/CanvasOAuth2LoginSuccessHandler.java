@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * Handler for successful login using oauth2 flow from canvas
+ * Handler for successful OAuth2 sign in with Canvas
  */
 @Component
 public class CanvasOAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
@@ -26,9 +26,9 @@ public class CanvasOAuth2LoginSuccessHandler implements AuthenticationSuccessHan
     }
 
     /**
-     * log the user to console, register a new user in database
+     * Logs the user to console, registers a new user in database
      * @param request request from user
-     * @param response response from canvas
+     * @param response response from Canvas
      * @param authentication injected authentication contain user details
      * @throws IOException exception if no user exists
      */

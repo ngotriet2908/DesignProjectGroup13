@@ -19,7 +19,7 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 
 /**
- * Configuration for oauth2 flow to get token from Gmail for sending email purposes
+ * Configuration for OAuth2 flow to get a token from Gmail for sending emails
  */
 @Configuration
 public class GmailConfig {
@@ -37,7 +37,7 @@ public class GmailConfig {
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 
     /**
-     * init a gmail flow if not exists or return a gmail flow that contains users' tokens
+     * Initialises Gmail flow if not exists or returns the Gmail flow that contains users' tokens
      * @return gmail flow
      * @throws GeneralSecurityException security exception
      * @throws IOException no credentials file found
@@ -45,7 +45,6 @@ public class GmailConfig {
     @Bean
     public GoogleAuthorizationCodeFlow getGmailFlow() throws GeneralSecurityException, IOException {
         if (flow == null) {
-//            System.out.println("null flow");
             GoogleClientSecrets.Details web = new GoogleClientSecrets.Details();
             web.setClientId(clientId);
             web.setClientSecret(clientSecret);
@@ -62,7 +61,7 @@ public class GmailConfig {
                     .setDataStoreFactory(dataStore)
                     .build();
         } else {
-            System.out.println("flow exists");
+            System.out.println("Gmail flow exists.");
         }
         return flow;
     }

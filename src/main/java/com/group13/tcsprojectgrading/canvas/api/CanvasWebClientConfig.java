@@ -15,7 +15,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
 /**
- * Configuration for webclient that is user for canvas APIs
+ * Configuration for webclient that is user for sending requests to Canvas API
  */
 @Configuration
 public class CanvasWebClientConfig {

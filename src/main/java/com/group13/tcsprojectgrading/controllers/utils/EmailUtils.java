@@ -61,8 +61,6 @@ public class EmailUtils {
         Message message = createMessageWithEmail(emailContent);
         message = service.users().messages().send(userId, message).execute();
 
-        System.out.println("Message id: " + message.getId());
-        System.out.println(message.toPrettyString());
         return message;
     }
 

@@ -59,9 +59,6 @@ class Students extends Component {
         const project = await res2.json();
         const course = await res3.json();
 
-        // TODO remove
-        // students = Array(10).fill(students).flat()
-
         if (project.privileges !== null) {
           updateAbility(ability, project.privileges, this.props.user)
         } else {
@@ -222,7 +219,7 @@ class Students extends Component {
                         <TableCell component="td" scope="row">
                           { (student.currentAssessment != null &&
                               student.currentAssessment.progress === 100)?
-                                student.currentAssessment.finalGrade : null
+                            student.currentAssessment.finalGrade : null
                           }
                         </TableCell>
                         <TableCell align="right">{student.submissions.length}</TableCell>

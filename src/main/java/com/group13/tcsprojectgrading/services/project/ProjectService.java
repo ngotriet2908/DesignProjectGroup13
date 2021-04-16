@@ -286,7 +286,6 @@ public class ProjectService {
         if (project == null) {
             return null;
         } else {
-            // TODO just check if grader?
             List<PrivilegeEnum> privileges = this.gradingParticipationService.getPrivilegesFromUserIdAndProject(userId, projectId);
 
             if (privileges == null) {
@@ -508,10 +507,6 @@ public class ProjectService {
                     HttpStatus.BAD_REQUEST, "Self must be explicitly included as a grader"
             );
         }
-
-////        Obtain a locks on all graders in the project
-////        TODO should more efficient by only lock the "would be" affected only
-//        this.gradingParticipationService.getLocksOnAllProjectGraders(project);
 
         // move all submissions of the removed graders to 'unassigned' (i.e. all graders that are not in the selected list)
         // for all submissions, if submission's grader is NOT in USERS, set grader to null

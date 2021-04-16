@@ -35,7 +35,6 @@ class GradersModal extends Component {
     }
   }
 
-  // todo, quick fix, needs to be changed
   fetchGraders = () => {
     Promise.all([
       request(`/api/courses/${this.props.routeParams.courseId}/graders?ta=true`),

@@ -47,16 +47,6 @@ public class TcsProjectGradingApplication {
             );
 
             List<PrivilegeEnum> taPrivilegesEnum = List.of(
-//                    MANAGE_GRADERS_OPEN, MANAGE_GRADERS_SELF_EDIT,
-//                    RUBRIC_READ, RUBRIC_DOWNLOAD,
-//                    STATISTIC_READ,
-//                    ADMIN_TOOLBAR_VIEW,
-//                    TODO_LIST_VIEW,
-//                    GRADING_WRITE_SINGLE, GRADING_READ_ALL,
-//                    PROJECT_READ,
-//                    SUBMISSIONS_READ,
-//                    SUBMISSION_READ_ALL, SUBMISSION_EDIT_SINGLE,
-//                    FLAG_CREATE, FLAG_ASSIGN
             );
 
             List<PrivilegeEnum> taGradingPrivilegesEnum = List.of(

@@ -30,7 +30,7 @@ public class FeedbackService {
     }
 
     /**
-     * Get feedback template from a project
+     * Gets feedback template from a project
      * @param project a project from database
      * @return list of feedback templates
      */
@@ -40,7 +40,7 @@ public class FeedbackService {
     }
 
     /**
-     * Get feedback template
+     * Gets feedback template
      * @param id template id
      * @return feedback template
      */
@@ -50,7 +50,7 @@ public class FeedbackService {
     }
 
     /**
-     * Save feedback template to database
+     * Saves feedback template to database
      * @param template feedback template
      */
     @Transactional(value = Transactional.TxType.MANDATORY)
@@ -59,7 +59,7 @@ public class FeedbackService {
     }
 
     /**
-     * Save feedback log to database
+     * Saves feedback log to database
      * @param log feedback log
      */
     @Transactional(value = Transactional.TxType.MANDATORY)
@@ -68,7 +68,7 @@ public class FeedbackService {
     }
 
     /**
-     * Get feedback logs from a project
+     * Gets feedback logs from a project
      * @param project a project from database
      * @return list of feedback logs
      */
@@ -78,7 +78,7 @@ public class FeedbackService {
     }
 
     /**
-     * Delete feedback template from database
+     * Deletes feedback template from database
      * @param templateId feedback template id
      */
     @Transactional(value = Transactional.TxType.MANDATORY)
@@ -94,7 +94,7 @@ public class FeedbackService {
     }
 
     /**
-     * Get feedback logs from assessment link
+     * Gets feedback logs from assessment link
      * @param link assessment link
      * @return list of feedback logs
      */

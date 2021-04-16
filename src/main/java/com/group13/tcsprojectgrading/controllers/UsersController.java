@@ -46,7 +46,7 @@ class UsersController {
     }
 
     /**
-     * get user's profile data.
+     * Gets user's profile data.
      * @param userId canvas user id
      * @return User from database
      */
@@ -62,24 +62,15 @@ class UsersController {
     }
 
     /**
-     * Get profile data of the signed in users from Canvas.
+     * Gets profile data of the signed in users from Canvas.
      * @param principal injected oauth2 client's information
      * @return User from database
      */
     @RequestMapping(value = "/self", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     protected ResponseEntity<?> selfInfo(Principal principal) {
-//        String response = this.canvasApi.getCanvasUsersApi().getAccount();
-//
-//        if (response == null) {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-//        } else {
-//            return new ResponseEntity<>(response, HttpStatus.OK);
-//        }
-
         User user = this.userService.findById(Long.valueOf(principal.getName()));
 
         if (user == null) {
-            // TODO
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found");
         } else {
             return new ResponseEntity<>(user, HttpStatus.OK);
@@ -87,7 +78,7 @@ class UsersController {
     }
 
     /**
-     * Get the list of most recently accessed projects.
+     * Gets the list of most recently accessed projects.
      * @return list of Activity
      */
     @GetMapping(value = "/recent")
@@ -97,7 +88,7 @@ class UsersController {
     }
 
     /**
-     * Get the list of projects with submissions that the user is assigned to grade.
+     * Gets the list of projects with submissions that the user is assigned to grade.
      * @param principal injected oauth2 client's information
      * @return get to-do for user
      * @throws JsonProcessingException json parsing exception
@@ -108,7 +99,7 @@ class UsersController {
     }
 
     /**
-     * Get the list of issues which were either created by the user or addressed to the user.
+     * Gets the list of issues which were either created by the user or addressed to the user.
      * @param principal injected oauth2 client's information
      * @return get List of Issue from database
      * @throws JsonProcessingException json parsing exception

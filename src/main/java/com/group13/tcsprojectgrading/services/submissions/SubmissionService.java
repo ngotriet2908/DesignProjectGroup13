@@ -315,16 +315,6 @@ public class SubmissionService {
      */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Submission getSubmission(Long submissionId) throws JsonProcessingException, ResponseStatusException {
-//        Project project = this.projectRepository.findById(projectId).orElse(null);
-//
-//        if (project == null) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.NOT_FOUND, "Project not found"
-//            );
-//        }
-
-        // TODO I'm not sure whether to hide the submission or not (only grading?)
-
         // find submission
         Submission submission = this.submissionRepository.findById(submissionId).orElse(null);
 
@@ -352,16 +342,6 @@ public class SubmissionService {
      */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Submission getSubmissionWithLock(Long submissionId) throws JsonProcessingException, ResponseStatusException {
-//        Project project = this.projectRepository.findById(projectId).orElse(null);
-//
-//        if (project == null) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.NOT_FOUND, "Project not found"
-//            );
-//        }
-
-        // TODO I'm not sure whether to hide the submission or not (only grading?)
-
         // find submission
         Submission submission = this.submissionRepository.findSubmissionById(submissionId).orElse(null);
 
@@ -526,9 +506,6 @@ public class SubmissionService {
         List<Submission> submissions = submissionRepository.findAllByGraderIsNotIn(users)
                 .stream().peek(submission -> submission.setGrader(null)).collect(Collectors.toList());
         submissionRepository.saveAll(submissions);
-
-//        TODO check this whether you want to use saveAll or your custom update
-//        this.submissionRepository.dissociateSubmissionsFromUsersNotInList(users);
     }
 
     /**
@@ -569,8 +546,6 @@ public class SubmissionService {
     @Transactional
     public void dissociateSubmission(Long submissionId,
                                      List<PrivilegeEnum> privileges, Long graderId) throws JsonProcessingException {
-
-//        TODO put locks and check only self remove
         Submission submission = this.getSubmissionWithLock(submissionId);
 
         if (submission == null) {

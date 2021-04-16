@@ -95,7 +95,6 @@ public class Rubric {
     }
 
     public static void main(String[] args) throws JsonProcessingException {
-        // TODO: remove object mapper
         ObjectMapper objectMapper = new ObjectMapper();
         String json = "{\n" +
                 "    \"id\": \"168\",\n" +

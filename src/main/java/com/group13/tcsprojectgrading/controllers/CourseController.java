@@ -23,7 +23,7 @@ import java.text.ParseException;
 import java.util.*;
 
 /**
- * Controller handles Course Endpoints
+ * Handles course-related endpoints
  */
 @RestController
 @RequestMapping("/api/courses")
@@ -61,15 +61,13 @@ class CourseController {
     @RequestMapping(value = "", method = RequestMethod.POST)
     protected ResponseEntity<?> importCourses(@RequestBody ArrayNode courses,
                                               Principal principal) throws IOException, ParseException {
-        // TODO check if teacher is performing this action
-
         // import courses
         this.courseService.importCourses(courses, Long.valueOf(principal.getName()));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
-     * resync course from canvas
+     * Resyncs course from canvas
      * @param courseId canvas course id
      * @param principal injected oauth2 client's information
      * @return updated Courses
@@ -77,8 +75,6 @@ class CourseController {
      */
     @RequestMapping(value = "/{courseId}/sync", method = RequestMethod.POST)
     protected ResponseEntity<?> syncCourse(@PathVariable Long courseId, Principal principal) throws JsonProcessingException {
-        // TODO check if teacher is performing this action
-
         RoleEnum roleEnum = this.courseService.getCourseRole(courseId, Long.valueOf(principal.getName()));
         if (!(roleEnum != null && roleEnum.equals(RoleEnum.TEACHER))) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
@@ -91,7 +87,7 @@ class CourseController {
 
 
     /**
-     * Get all courses that the user can import (i.e. the list of courses from Canvas)
+     * Gets all courses that the user can import (i.e. the list of courses from Canvas)
      * @return list of Courses from canvas
      * @throws JsonProcessingException json parsing exception
      */
@@ -123,7 +119,7 @@ class CourseController {
      */
 
     /**
-     * Get single course's details with user's role in the course and course's project list
+     * Gets single course's details with user's role in the course and course's project list
      * Student cannot use this method
      * @param courseId canvas course id
      * @param principal injected oauth2 client's information
@@ -142,7 +138,7 @@ class CourseController {
     }
 
     /**
-     * Get all projects that the user can import (i.e. the list of course's projects from Canvas)
+     * Gets all projects that the user can import (i.e. the list of course's projects from Canvas)
      * Student cannot use this method
      * @param courseId canvas course id
      * @param principal injected oauth2 client's information

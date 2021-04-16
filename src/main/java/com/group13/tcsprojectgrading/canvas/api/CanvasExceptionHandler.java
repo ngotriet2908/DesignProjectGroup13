@@ -9,7 +9,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 /**
- * Catch exceptions from canvas request from the application
+ * Catches exceptions from Canvas request from the application
  */
 @ControllerAdvice
 public class CanvasExceptionHandler extends ResponseEntityExceptionHandler {

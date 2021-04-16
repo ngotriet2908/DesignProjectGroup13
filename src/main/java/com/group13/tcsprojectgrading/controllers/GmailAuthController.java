@@ -18,7 +18,7 @@ import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 
 /**
- * Controller handles gmail oauth2 flow
+ * Handles Gmail OAuth2 flow
  */
 @Controller
 @RestController
@@ -38,7 +38,7 @@ public class GmailAuthController {
     }
 
     /**
-     * start Gmail oauth2 flow
+     * Starts Gmail oauth2 flow
      * @param principal injected oauth2 client's information
      * @param request oauth2 request
      * @return redirect user to Gmail login
@@ -56,7 +56,7 @@ public class GmailAuthController {
     }
 
     /**
-     * finishing Gmail oauth2 flow
+     * Finishes Gmail OAuth2 flow
      * @param code intermediate code for Gmail oauth2 flow
      * @param principal injected oauth2 client's information
      * @return redirect user to

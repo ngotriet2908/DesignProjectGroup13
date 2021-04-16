@@ -90,7 +90,6 @@ public class PdfUtils {
                     .setPaddingLeft(fixPadding)
                     .setFontSize(13);
             document.add(header);
-            //TODO check for null comment
             Paragraph body = new Paragraph("comment: " + nodeInfo.getGrade().getDescription())
                     .setFont(font)
                     .setPaddingLeft(fixPadding + 10)

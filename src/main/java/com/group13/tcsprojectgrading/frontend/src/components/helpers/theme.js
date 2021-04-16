@@ -1,7 +1,4 @@
 import { unstable_createMuiStrictModeTheme } from '@material-ui/core/styles';
-import colors from "./colors.css";
-import blue from '@material-ui/core/colors/blue';
-import pink from '@material-ui/core/colors/pink';
 
 export const theme = unstable_createMuiStrictModeTheme({
   palette: {

@@ -67,7 +67,6 @@ public class PdfRubricUtils {
                     .setPaddingLeft(fixPadding)
                     .setFontSize(13);
             document.add(header);
-            //TODO check for null comment
             RichTextParser richTextParser = new RichTextParser();
             Paragraph body = richTextParser.parse(content.getText())
                     .setFont(font)

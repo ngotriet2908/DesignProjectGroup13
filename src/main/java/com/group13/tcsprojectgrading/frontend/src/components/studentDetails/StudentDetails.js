@@ -198,7 +198,6 @@ class StudentDetails extends Component {
                             <IconButton
                               size="medium"
                               onClick={() => this.deleteHandler(submission)}
-                              // TODO!! disable if only one stuent in submission : disabled={submission.}
                             >
                               <DeleteOutlineIcon style={{color: "red"}}/>
                             </IconButton>

@@ -65,10 +65,8 @@ public class RubricService {
      */
     private Rubric getRubricFromLinker(RubricLinker linker) {
         try {
-            // TODO, get rid of object mapper
             ObjectMapper objectMapper = new ObjectMapper();
             if (linker != null) {
-//                System.out.println("Rubric version: " + linker.getVersion());
                 Rubric rubric = objectMapper.readValue(linker.getRubric(), Rubric.class);
                 rubric.setVersion(linker.getVersion());
                 return rubric;
@@ -111,9 +109,6 @@ public class RubricService {
             return null;
         }
 
-        // TODO, get rid of object mapper
-//        linker.setRubric(Json.getObjectWriter().writeValueAsString(rubric));
-//        System.out.println("Rubric version: " + linker.getVersion());
         ObjectMapper mapper = new ObjectMapper();
         linker.setRubric(mapper.writeValueAsString(rubric));
 
@@ -254,8 +249,6 @@ public class RubricService {
         RubricHistoryLinker linker = rubricHistoryLinkerRepository.findById(projectId).orElse(null);
         return getRubricHistoryFromLinker(linker);
     }
-
-    // TODO: mark all? mark specific? put in issues? notify? if mark all - stop when first issue below is found
 
     /**
      * Apply patch to rubric and update

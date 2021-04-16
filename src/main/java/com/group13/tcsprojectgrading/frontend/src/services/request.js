@@ -53,18 +53,15 @@ export function request(
   }
 
   if (method === 'POST' || method === 'PUT' || method === 'PATCH' || method === 'DELETE') {
-    // TODO don't send the token to external urls
     init.headers["X-XSRF-TOKEN"] = getCookie('XSRF-TOKEN');
   }
 
   return fetch(url, init)
     .then(response => {
-      // TODO other responses
       if (response.status === 401 && catch401) {
         store.dispatch(push(URL_PREFIX + "/login/"))
         throw new Error("Not authenticated: 401")
       }
-      // TODO: we should catch 404
       else if (catch404 && response.status === 404) {
         store.dispatch(push(URL_PREFIX + "/404/"))
         throw new Error("Not found: 404")
