@@ -6,8 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.course.Course;
-import com.group13.tcsprojectgrading.models.course.CourseParticipation;
-import com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum;
 import com.group13.tcsprojectgrading.models.permissions.RoleEnum;
 import com.group13.tcsprojectgrading.models.user.User;
 import com.group13.tcsprojectgrading.services.project.ProjectService;
@@ -17,14 +15,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import static com.group13.tcsprojectgrading.controllers.Utils.groupPages;
+import static com.group13.tcsprojectgrading.controllers.utils.Utils.groupPages;
 
 import java.io.IOException;
 import java.security.Principal;
 import java.text.ParseException;
 import java.util.*;
-import java.util.stream.Collectors;
 
+/**
+ * Controller handles Course Endpoints
+ */
 @RestController
 @RequestMapping("/api/courses")
 class CourseController {
@@ -38,8 +38,11 @@ class CourseController {
         this.projectService = projectService;
     }
 
-    /*
-    Returns the list of courses that were imported and are available in the app's database
+    /**
+     * Returns the list of courses that were imported and are available in the app's database
+     * @param principal injected oauth2 client's information
+     * @return list of Courses
+     * @throws JsonProcessingException json parsing exception
      */
     @RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
     protected ResponseEntity<List<Course>> getCourses(Principal principal) throws JsonProcessingException {
@@ -47,8 +50,13 @@ class CourseController {
         return new ResponseEntity<>(courses, HttpStatus.OK);
     }
 
-    /*
-    Imports selected courses
+    /**
+     * Imports selected courses
+     * @param courses list of courses from front-end
+     * @param principal injected oauth2 client's information
+     * @return a list of Courses
+     * @throws JsonProcessingException json parsing exception
+     * @throws ParseException parsing exception
      */
     @RequestMapping(value = "", method = RequestMethod.POST)
     protected ResponseEntity<?> importCourses(@RequestBody ArrayNode courses,
@@ -60,8 +68,12 @@ class CourseController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    /*
-    Resyncs the course
+    /**
+     * resync course from canvas
+     * @param courseId canvas course id
+     * @param principal injected oauth2 client's information
+     * @return updated Courses
+     * @throws JsonProcessingException json parsing exception
      */
     @RequestMapping(value = "/{courseId}/sync", method = RequestMethod.POST)
     protected ResponseEntity<?> syncCourse(@PathVariable Long courseId, Principal principal) throws JsonProcessingException {
@@ -77,8 +89,11 @@ class CourseController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    /*
-    Returns all courses that the user can import (i.e. the list of courses from Canvas)
+
+    /**
+     * Get all courses that the user can import (i.e. the list of courses from Canvas)
+     * @return list of Courses from canvas
+     * @throws JsonProcessingException json parsing exception
      */
     @RequestMapping(value = "/all", method = RequestMethod.GET, produces = "application/json")
     protected ResponseEntity<ArrayNode> canvasCourses() throws JsonProcessingException {
@@ -104,7 +119,16 @@ class CourseController {
     }
 
     /*
-    Returns single course's details with user's role in the course and course's project list
+
+     */
+
+    /**
+     * Get single course's details with user's role in the course and course's project list
+     * Student cannot use this method
+     * @param courseId canvas course id
+     * @param principal injected oauth2 client's information
+     * @return a Course from database
+     * @throws IOException not found exception
      */
     @RequestMapping(value = "/{courseId}", method = RequestMethod.GET, produces = "application/json")
     protected String getCourse(@PathVariable Long courseId, Principal principal) throws IOException {
@@ -117,8 +141,13 @@ class CourseController {
         return this.courseService.getCourse(courseId, Long.valueOf(principal.getName()));
     }
 
-    /*
-    Returns all projects that the user can import (i.e. the list of course's projects from Canvas)
+    /**
+     * Get all projects that the user can import (i.e. the list of course's projects from Canvas)
+     * Student cannot use this method
+     * @param courseId canvas course id
+     * @param principal injected oauth2 client's information
+     * @return a list of canvas project
+     * @throws JsonProcessingException json parsing exception
      */
     @RequestMapping(value = "/{courseId}/projects/all", method = RequestMethod.GET, produces = "application/json")
     protected ResponseEntity<ArrayNode> getCanvasProjects(@PathVariable Long courseId, Principal principal) throws JsonProcessingException {
@@ -134,7 +163,15 @@ class CourseController {
     }
 
     /*
-    Imports selected projects.
+     */
+
+    /**
+     * Imports selected projects. Only a teacher can use this method
+     * @param courseId canvas course id
+     * @param projects canvas projects from front-end
+     * @param principal injected oauth2 client's information
+     * @return created Project from database
+     * @throws JsonProcessingException json parsing exception
      */
     @RequestMapping(value = "/{courseId}/projects", method = RequestMethod.POST)
     protected ResponseEntity<?> importProjects(
@@ -152,8 +189,14 @@ class CourseController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    /*
-    Returns all teachers and TAs participating in the course.
+    /**
+     * Returns all teachers and TAs participating in the course.
+     * Only a Teacher or a TA grading can use this method
+     * @param courseId canvas course id
+     * @param id user id
+     * @param principal injected oauth2 client's information
+     * @param tas list of tas from front-end
+     * @return list of Users from database
      */
     @RequestMapping(value = "/{courseId}/graders", method = RequestMethod.GET, produces = "application/json")
     protected ResponseEntity<?> getCourseUsers(

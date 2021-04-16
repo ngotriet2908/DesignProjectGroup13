@@ -10,16 +10,15 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.services.gmail.Gmail;
 import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
-import com.group13.tcsprojectgrading.controllers.CanvasFeedbackUtils;
-import com.group13.tcsprojectgrading.controllers.ExcelUtils;
-import com.group13.tcsprojectgrading.controllers.PdfRubricUtils;
-import com.group13.tcsprojectgrading.controllers.PdfUtils;
+import com.group13.tcsprojectgrading.controllers.utils.CanvasFeedbackUtils;
+import com.group13.tcsprojectgrading.controllers.utils.ExcelUtils;
+import com.group13.tcsprojectgrading.controllers.utils.PdfRubricUtils;
+import com.group13.tcsprojectgrading.controllers.utils.PdfUtils;
 import com.group13.tcsprojectgrading.models.course.CourseParticipation;
 import com.group13.tcsprojectgrading.models.feedback.FeedbackLog;
 import com.group13.tcsprojectgrading.models.feedback.FeedbackTemplate;
 import com.group13.tcsprojectgrading.models.grading.Assessment;
 import com.group13.tcsprojectgrading.models.grading.AssessmentLink;
-import com.group13.tcsprojectgrading.models.grading.Issue;
 import com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum;
 import com.group13.tcsprojectgrading.models.permissions.RoleEnum;
 import com.group13.tcsprojectgrading.models.project.Project;
@@ -71,10 +70,12 @@ import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.group13.tcsprojectgrading.controllers.EmailUtils.createEmailWithAttachment;
-import static com.group13.tcsprojectgrading.controllers.EmailUtils.sendMessage;
+import static com.group13.tcsprojectgrading.controllers.utils.EmailUtils.createEmailWithAttachment;
+import static com.group13.tcsprojectgrading.controllers.utils.EmailUtils.sendMessage;
 
-
+/**
+ * Service handlers operations relating to courses
+ */
 @Service
 public class ProjectService {
     private final ProjectRepository projectRepository;
@@ -125,23 +126,25 @@ public class ProjectService {
         this.issueRepository = issueRepository;
     }
 
-    /*
-    Returns a list of projects belonging to the course.
+    /**
+     * Returns a list of projects belonging to the course.
+     * @param courseId canvas course id
+     * @return list of project
+     * @throws ResponseStatusException response exception
      */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public List<Project> getProjectsByCourseId(Long courseId) throws ResponseStatusException{
         return projectRepository.findProjectsByCourse_Id(courseId);
     }
 
-    /*
-    Returns user's to-do list (list of projects in which the user has assigned grading tasks).
-     */
-    // TODO, disabled
-    @Transactional
-    public List<Project> getToDoList(Long userId) throws ResponseStatusException {
-        return this.projectRepository.getToDoList(userId);
-    }
 
+    /**
+     * get students as course participant that have submissions
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @return list of course participation
+     * @throws ResponseStatusException response exception
+     */
     @Transactional
     public List<CourseParticipation> getProjectParticipantsWithSubmissions(Long courseId, Long projectId) throws ResponseStatusException {
         Project project = getProject(projectId);
@@ -182,6 +185,15 @@ public class ProjectService {
                 .collect(Collectors.toList());
     }
 
+
+    /**
+     * get info on a student as course participation in a project
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param participantId canvas user id
+     * @return a course participation
+     * @throws ResponseStatusException response exception
+     */
     @Transactional
     public CourseParticipation getProjectStudent(Long courseId, Long projectId, Long participantId) throws ResponseStatusException{
         CourseParticipation courseParticipation = courseParticipationRepository.findById_User_IdAndId_Course_Id(participantId, courseId);
@@ -203,6 +215,13 @@ public class ProjectService {
         return courseParticipation;
     }
 
+    /**
+     * calculate final grades on graded submissions
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @return list of final grades
+     * @throws ResponseStatusException response exception
+     */
     @Transactional
     public List<Float> getFinalGrades(Long courseId, Long projectId) throws ResponseStatusException {
         Project project = getProject(projectId);
@@ -232,16 +251,34 @@ public class ProjectService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * get project from id
+     * @param projectId canvas project id
+     * @return a project entity
+     */
     @Transactional
     public Project getProject(Long projectId) {
         return this.projectRepository.findById(projectId).orElse(null);
     }
 
+    /**
+     * obtain lock on a project
+     * @param projectId canvas project id
+     * @return a project entity
+     */
     @Transactional(Transactional.TxType.MANDATORY)
     public Project getProjectWithLock(Long projectId) {
         return this.projectRepository.findProjectById(projectId).orElse(null);
     }
 
+    /**
+     * get project and user privileges
+     * @param projectId canvas project id
+     * @param userId canvas user id
+     * @return project with privileges json
+     * @throws IOException not found exception
+     * @throws ResponseStatusException response exception
+     */
     @Transactional
     public String getProject(Long projectId, Long userId) throws IOException, ResponseStatusException {
         Project project = this.projectRepository.findById(projectId).orElse(null);
@@ -262,6 +299,12 @@ public class ProjectService {
         }
     }
 
+    /**
+     * Synchronise project with canvas
+     * @param projectId canvas project id
+     * @param submissionsArray submission arrays
+     * @throws ResponseStatusException response exception
+     */
     @Transactional(rollbackOn = Exception.class)
     public void syncProject(Long projectId, ArrayNode submissionsArray) throws ResponseStatusException {
         // retrieve project
@@ -413,8 +456,12 @@ public class ProjectService {
         }
     }
 
-    /*
-    Returns the list of people who participate in the project as graders.
+    /**
+     * Returns the list of people who participate in the project as graders.
+     * @param projectId canvas project id
+     * @return list of users
+     * @throws IOException not found exception
+     * @throws ResponseStatusException response exception
      */
     @Transactional
     public List<User> getProjectGraders(Long projectId) throws IOException, ResponseStatusException {
@@ -435,9 +482,14 @@ public class ProjectService {
         return this.gradingParticipationService.getProjectGradersWithSubmissions(projectId);
     }
 
-    /*
-    Saves the passed list of users as graders for the project.
-    (can be replaced by a more efficient version)
+    /**
+     * Saves the passed list of users as graders for the project.
+     * (can be replaced by a more efficient version)
+     * @param projectId canvas project id
+     * @param graders list of graders
+     * @param userId user id
+     * @return list of updated graders
+     * @throws IOException not found exception
      */
     @Transactional
     public List<User> saveProjectGraders(Long projectId, List<User> graders, Long userId) throws IOException {
@@ -484,8 +536,13 @@ public class ProjectService {
         return this.getProjectGraders(projectId);
     }
 
-    /*
-    Update the rubric with patches (patches are applied sequentially).
+    /**
+     * Update the rubric with patches (patches are applied sequentially).
+     * @param projectId canvas project id
+     * @param patch update patch
+     * @param version rubric current version
+     * @throws JsonProcessingException json parsing exception
+     * @throws ResponseStatusException response exception
      */
     @Transactional(rollbackOn = Exception.class)
     public void updateRubric(Long projectId, JsonNode patch, Long version) throws JsonProcessingException, ResponseStatusException {
@@ -521,8 +578,12 @@ public class ProjectService {
         System.out.println("Updating the rubric of project " + projectId + " finished successfully.");
     }
 
-    /*
-    Returns the rubric of the project.
+    /**
+     * Returns the rubric of the project.
+     * @param projectId canvas project id
+     * @return rubric as string
+     * @throws JsonProcessingException json parsing exception
+     * @throws ResponseStatusException response exception
      */
     @Transactional
     public String getRubric(Long projectId) throws JsonProcessingException, ResponseStatusException {
@@ -544,9 +605,13 @@ public class ProjectService {
         }
     }
 
-    /*
-    Returns a list of labels that were created within the project.
-     */
+    /**
+     * Returns a list of labels that were created within the project.
+     * @param projectId canvas project id
+     * @param rubricJson to be imported rubric
+     * @return updated rubric
+     * @throws ResponseStatusException response exception
+     * */
     @Transactional(rollbackOn = Exception.class)
     public String importRubric(Long projectId, String rubricJson) throws ResponseStatusException {
         try {
@@ -561,6 +626,13 @@ public class ProjectService {
         }
     }
 
+    /**
+     * get rubric as custom file
+     * @param projectId canvas project id
+     * @return bytes of rubric
+     * @throws JsonProcessingException json parsing exception
+     * @throws ResponseStatusException response exception
+     */
     @Transactional
     public byte[] getRubricFile(Long projectId) throws JsonProcessingException, ResponseStatusException {
         Project project = getProject(projectId);
@@ -581,6 +653,12 @@ public class ProjectService {
         }
     }
 
+    /**
+     * get project labels
+     * @param projectId canvas project id
+     * @return list of labels
+     * @throws ResponseStatusException response exception
+     */
     @Transactional
     public List<Label> getProjectLabels(Long projectId) throws ResponseStatusException {
         Project project = getProject(projectId);
@@ -594,6 +672,13 @@ public class ProjectService {
         return this.labelRepository.findByProjectId(projectId);
     }
 
+    /**
+     * save info of label
+     * @param label to be updated label
+     * @param projectId canvas project id
+     * @return updated label
+     * @throws ResponseStatusException response exception
+     */
     @Transactional(rollbackOn = Exception.class)
     public Label saveProjectLabel(Label label, Long projectId) throws ResponseStatusException {
         Project project = getProjectWithLock(projectId);
@@ -608,6 +693,13 @@ public class ProjectService {
         return this.labelRepository.save(label);
     }
 
+    /**
+     * export project grades to excel file
+     * @param projectId canvas project id
+     * @return bytes of excel file
+     * @throws IOException not found exception
+     * @throws ResponseStatusException response exception
+     */
     @Transactional
     public byte[] getProjectExcel(Long projectId) throws IOException, ResponseStatusException {
         Project project = getProject(projectId);
@@ -653,6 +745,12 @@ public class ProjectService {
         return byteArrayOutputStream.toByteArray();
     }
 
+    /**
+     * get feedback template from a project
+     * @param projectId canvas project id
+     * @return list of feedback templates
+     * @throws ResponseStatusException response exception
+     */
     @Transactional
     public List<FeedbackTemplate> getFeedbackTemplates(Long projectId) throws ResponseStatusException {
         Project project = getProject(projectId);
@@ -665,6 +763,13 @@ public class ProjectService {
         return feedbackService.getTemplatesFromProject(project);
     }
 
+    /**
+     * create new feedback template
+     * @param projectId canvas project id
+     * @param objectNode feedback template in json
+     * @return created feedback template
+     * @throws ResponseStatusException response exception
+     */
     @Transactional(rollbackOn = Exception.class)
     public List<FeedbackTemplate> createFeedbackTemplate(Long projectId, ObjectNode objectNode) throws ResponseStatusException {
         Project project = getProjectWithLock(projectId);
@@ -686,6 +791,14 @@ public class ProjectService {
         return feedbackService.getTemplatesFromProject(project);
     }
 
+    /**
+     * update feedback template
+     * @param projectId canvas project id
+     * @param templateId template id
+     * @param objectNode feedback template in json
+     * @return updated feedback template
+     * @throws ResponseStatusException response exception
+     */
     @Transactional(rollbackOn = Exception.class)
     public List<FeedbackTemplate> updateFeedbackTemplate(Long projectId, Long templateId, ObjectNode objectNode) throws ResponseStatusException {
         Project project = getProjectWithLock(projectId);
@@ -707,6 +820,13 @@ public class ProjectService {
         return feedbackService.getTemplatesFromProject(project);
     }
 
+    /**
+     * delete feedback templates
+     * @param projectId canvas project id
+     * @param templateId template id
+     * @return list of current templates
+     * @throws ResponseStatusException response exception
+     */
     @Transactional(rollbackOn = Exception.class)
     public List<FeedbackTemplate> deleteUpdateTemplate(Long projectId, Long templateId) throws ResponseStatusException {
         Project project = getProject(projectId);
@@ -721,6 +841,12 @@ public class ProjectService {
         return feedbackService.getTemplatesFromProject(project);
     }
 
+    /**
+     * get students whose current assessment are fully graded
+     * @param projectId canvas project id
+     * @return list of students as course participation
+     * @throws ResponseStatusException response exception
+     */
     @Transactional
     public List<CourseParticipation> allFinishedGradedUser(Long projectId) throws ResponseStatusException {
         Project project = getProject(projectId);
@@ -753,6 +879,12 @@ public class ProjectService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * get students whose current assessment are fully graded that haven't received feedback
+     * @param projectId canvas project id
+     * @return list of students as course participation
+     * @throws ResponseStatusException response exception
+     */
     @Transactional
     public List<CourseParticipation> allFinishedGradedUserNotSent(Long projectId) throws ResponseStatusException {
         Project project = getProject(projectId);
@@ -786,6 +918,13 @@ public class ProjectService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * post grades to canvas
+     * @param projectId canvas project id
+     * @param canvasApi canvas api bean
+     * @return response from canvas
+     * @throws ResponseStatusException response exception
+     */
     @Transactional
     public String uploadGradesToCanvas(Long projectId, CanvasApi canvasApi) throws ResponseStatusException {
         Project project = getProject(projectId);
@@ -869,6 +1008,13 @@ public class ProjectService {
 //        return new ResponseEntity<byte[]>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.OK);
 //    }
 
+    /**
+     * export rubric as pdf
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @return bytes of rubric pdf
+     * @throws IOException not found exception
+     */
     @Transactional
     public byte[] downloadRubric(Long courseId, Long projectId) throws IOException {
         Project project = getProject(projectId);
@@ -892,6 +1038,16 @@ public class ProjectService {
         return byteArrayOutputStream.toByteArray();
     }
 
+    /**
+     * send feedback via teacher email with feedback pdf attachment
+     * @param projectId canvas project id
+     * @param templateId template id
+     * @param isAll send to all ?
+     * @param flow Gmail flow
+     * @param principal injected oauth2 client's information
+     * @return list of feedback log
+     * @throws ResponseStatusException response exception
+     */
     @Transactional
     public List<FeedbackLog> sendFeedbackEmailPdf(Long projectId, Long templateId, boolean isAll,
                                           GoogleAuthorizationCodeFlow flow, Principal principal) throws ResponseStatusException{
@@ -949,6 +1105,16 @@ public class ProjectService {
         return feedbackService.getLogs(project);
     }
 
+    /**
+     * send feedback via teacher canvas message
+     * @param projectId canvas project id
+     * @param templateId template id
+     * @param isAll send to all ?
+     * @param canvasApi canvas api bean
+     * @param principal injected oauth2 client's information
+     * @return list of feedback log
+     * @throws ResponseStatusException response exception
+     */
     @Transactional
     public List<FeedbackLog> sendFeedbackCanvasString(Long projectId, Long templateId, boolean isAll,
                                                   CanvasApi canvasApi, Principal principal) throws ResponseStatusException{
@@ -997,6 +1163,20 @@ public class ProjectService {
         return feedbackService.getLogs(project);
     }
 
+    /**
+     * send feedback via teacher email with feedback pdf attachment
+     * @param project project entity
+     * @param link assessment link entity
+     * @param participation student as participation entity
+     * @param template feedback template entity
+     * @param flow Gmail flow
+     * @param rubric rubric entity
+     * @param teacherId canvas teacher user id
+     * @return success or not
+     * @throws IOException not found exception
+     * @throws MessagingException message exception
+     * @throws ResponseStatusException response exception
+     */
     @Transactional
     public boolean sendFeedbackEmail(Project project, AssessmentLink link, CourseParticipation participation,
                                 FeedbackTemplate template,
@@ -1054,6 +1234,17 @@ public class ProjectService {
         return false;
     }
 
+    /**
+     * send feedback via canvas message
+     * @param project project entity
+     * @param link assessment link entity
+     * @param participation student as participation entity
+     * @param template feedback template entity
+     * @param canvasApi canvas api bean
+     * @param rubric rubric entity
+     * @param teacherId canvas teacher user id
+     * @return success or not
+     */
     @Transactional
     public boolean sendFeedbackCanvas(Project project, AssessmentLink link, CourseParticipation participation,
                                      FeedbackTemplate template,

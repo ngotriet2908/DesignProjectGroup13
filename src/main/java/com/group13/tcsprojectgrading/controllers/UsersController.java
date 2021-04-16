@@ -45,8 +45,10 @@ class UsersController {
         this.projectService = projectService;
     }
 
-    /*
-    Returns user's profile data.
+    /**
+     * get user's profile data.
+     * @param userId canvas user id
+     * @return User from database
      */
     @RequestMapping(value = "/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     protected ResponseEntity<?> getUserInfo(@PathVariable Long userId) {
@@ -59,8 +61,10 @@ class UsersController {
         }
     }
 
-    /*
-    Returns profile data of the signed in users from Canvas.
+    /**
+     * Get profile data of the signed in users from Canvas.
+     * @param principal injected oauth2 client's information
+     * @return User from database
      */
     @RequestMapping(value = "/self", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     protected ResponseEntity<?> selfInfo(Principal principal) {
@@ -82,8 +86,9 @@ class UsersController {
         }
     }
 
-    /*
-    Returns the list of most recently accessed projects.
+    /**
+     * Get the list of most recently accessed projects.
+     * @return list of Activity
      */
     @GetMapping(value = "/recent")
     protected List<Activity> recentProject(Principal principal) {
@@ -91,16 +96,22 @@ class UsersController {
         return activities.subList(0, Math.min(3, activities.size()));
     }
 
-    /*
-    Returns the list of projects with submissions that the user is assigned to grade.
+    /**
+     * Get the list of projects with submissions that the user is assigned to grade.
+     * @param principal injected oauth2 client's information
+     * @return get to-do for user
+     * @throws JsonProcessingException json parsing exception
      */
     @GetMapping(value = "/to-do")
     protected Collection<Project> getTasks(Principal principal) throws JsonProcessingException {
         return userService.getTodoForUser(Long.valueOf(principal.getName()));
     }
 
-    /*
-    Returns the list of issues which were either created by the user or addressed to the user.
+    /**
+     * Get the list of issues which were either created by the user or addressed to the user.
+     * @param principal injected oauth2 client's information
+     * @return get List of Issue from database
+     * @throws JsonProcessingException json parsing exception
      */
     @GetMapping(value = "/issues")
     protected Collection<Issue> getIssues(Principal principal) throws JsonProcessingException {

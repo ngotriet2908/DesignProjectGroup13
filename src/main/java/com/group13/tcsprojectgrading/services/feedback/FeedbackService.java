@@ -14,6 +14,9 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.transaction.Transactional;
 import java.util.List;
 
+/**
+ * Service handlers operations relating to feedback
+ */
 @Service
 public class FeedbackService {
 
@@ -26,31 +29,58 @@ public class FeedbackService {
         this.feedbackTemplateRepository = feedbackTemplateRepository;
     }
 
+    /**
+     * Get feedback template from a project
+     * @param project a project from database
+     * @return list of feedback templates
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public List<FeedbackTemplate> getTemplatesFromProject(Project project) {
         return feedbackTemplateRepository.getFeedbackTemplatesByProjectOrderById(project);
     }
 
+    /**
+     * Get feedback template
+     * @param id template id
+     * @return feedback template
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public FeedbackTemplate findTemplateFromId(Long id) {
         return feedbackTemplateRepository.findById(id).orElse(null);
     }
 
+    /**
+     * Save feedback template to database
+     * @param template feedback template
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public void addTemplate(FeedbackTemplate template) {
         feedbackTemplateRepository.save(template);
     }
 
+    /**
+     * Save feedback log to database
+     * @param log feedback log
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public void addLog(FeedbackLog log) {
         feedbackLogRepository.save(log);
     }
 
+    /**
+     * Get feedback logs from a project
+     * @param project a project from database
+     * @return list of feedback logs
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public List<FeedbackLog> getLogs(Project project) {
         return feedbackLogRepository.findFeedbackLogsByLink_Id_Submission_ProjectOrderBySendAtDesc(project);
     }
 
+    /**
+     * Delete feedback template from database
+     * @param templateId feedback template id
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public void deleteTemplate(Long templateId) {
         FeedbackTemplate template = feedbackTemplateRepository.findFeedbackTemplateById(templateId).orElse(null);
@@ -63,6 +93,11 @@ public class FeedbackService {
         feedbackTemplateRepository.delete(template);
     }
 
+    /**
+     * Get feedback logs from assessment link
+     * @param link assessment link
+     * @return list of feedback logs
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public List<FeedbackLog> findLogFromLink(AssessmentLink link) {
         return feedbackLogRepository.findFeedbackLogsByLink(link);

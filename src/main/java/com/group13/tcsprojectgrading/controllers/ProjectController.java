@@ -10,9 +10,7 @@ import com.group13.tcsprojectgrading.canvas.api.CanvasApi;
 import com.group13.tcsprojectgrading.models.course.CourseParticipation;
 import com.group13.tcsprojectgrading.models.feedback.FeedbackLog;
 import com.group13.tcsprojectgrading.models.feedback.FeedbackTemplate;
-import com.group13.tcsprojectgrading.models.grading.Issue;
 import com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum;
-import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.models.submissions.Label;
 import com.group13.tcsprojectgrading.models.user.User;
 import com.group13.tcsprojectgrading.services.course.CourseService;
@@ -34,9 +32,12 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.group13.tcsprojectgrading.controllers.Utils.groupPages;
+import static com.group13.tcsprojectgrading.controllers.utils.Utils.groupPages;
 import static com.group13.tcsprojectgrading.models.permissions.PrivilegeEnum.*;
 
+/**
+ * Controller handles Project Endpoints
+ */
 @RestController
 @RequestMapping("/api/courses/{courseId}/projects")
 public class ProjectController {
@@ -59,8 +60,15 @@ public class ProjectController {
         this.feedbackService = feedbackService;
     }
 
-    /*
-    Returns the project's details.
+    /**
+     * Gets the project's details.
+     * this method require privilege PROJECT_READ
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param principal injected oauth2 client's information
+     * @return Project wit privileges
+     * @throws IOException not found exception
+     * @throws ParseException parsing exception
      */
     @RequestMapping(value = "/{projectId}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
@@ -83,19 +91,15 @@ public class ProjectController {
         }
     }
 
-//    @RequestMapping(value = "/{projectId}/students", method = RequestMethod.GET, produces = "application/json")
-//    @ResponseBody
-//    protected List<CourseParticipation> getProjectStudents(@PathVariable Long courseId, @PathVariable Long projectId, Principal principal) throws JsonProcessingException, ParseException {
-//
-//        List<PrivilegeEnum> privileges = this.gradingParticipationService
-//                .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
-//        if (!(privileges != null && privileges.contains(PROJECT_READ))) {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
-//        }
-//
-//        return this.projectService.getProjectParticipantsWithSubmissions(courseId, projectId);
-//    }
-
+    /**
+     * Get project student with choice (either student with their submissions or student list)
+     * this method require privilege PROJECT_READ
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param principal injected oauth2 client's information
+     * @param includeSubmissions either to include student's submissions
+     * @return list of Submission from database
+     */
     @RequestMapping(
             value = "/{projectId}/students",
             method = RequestMethod.GET,
@@ -127,6 +131,16 @@ public class ProjectController {
         }
     }
 
+    /**
+     * get list of final grades in project
+     * this method require privilege PROJECT_READ
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param principal injected oauth2 client's information
+     * @return List of final grades
+     * @throws JsonProcessingException json parsing exception
+     * @throws ParseException parse exception
+     */
     @RequestMapping(value = "/{projectId}/stats", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     protected List<Float> getProjectCurrentGradesDistribution(@PathVariable Long courseId,
@@ -142,6 +156,17 @@ public class ProjectController {
         return this.projectService.getFinalGrades(courseId, projectId);
     }
 
+    /**
+     * Get info on a student
+     * this method require privilege PROJECT_READ
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param studentId canvas student id
+     * @param principal injected oauth2 client's information
+     * @return a CourseParticipation from database
+     * @throws JsonProcessingException json parsing exception
+     * @throws ParseException parse exception
+     */
     @RequestMapping(value = "/{projectId}/students/{studentId}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     protected CourseParticipation getProjectParticipant(@PathVariable Long courseId,
@@ -158,11 +183,15 @@ public class ProjectController {
         return this.projectService.getProjectStudent(courseId, projectId, studentId);
     }
 
-    /*
-    Returns the list of people who are
-
-
-    ed to grade submissions in the project.
+    /**
+     * Returns the list of people who are assigned to grade submissions in the project.
+     * this method require privilege PROJECT_READ
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param principal injected oauth2 client's information
+     * @return List of graders from database
+     * @throws IOException not found exception
+     * @throws ParseException parsing exception
      */
     @RequestMapping(value = "/{projectId}/graders", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
@@ -180,8 +209,16 @@ public class ProjectController {
         return this.projectService.getProjectGraders(projectId);
     }
 
-    /*
-    Saves specified users as graders in the project.
+    /**
+     * Saves specified users as graders in the project.
+     * this method require privilege MANAGE_GRADERS_EDIT
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param graders list of graders that are active
+     * @param principal injected oauth2 client's information
+     * @return updated list of graders
+     * @throws IOException not found exception
+     * @throws ParseException parsing exception
      */
     @RequestMapping(value = "/{projectId}/graders", method = RequestMethod.PUT, produces = "application/json")
     @ResponseBody
@@ -200,8 +237,13 @@ public class ProjectController {
         return this.projectService.saveProjectGraders(projectId, graders, Long.valueOf(principal.getName()));
     }
 
-    /*
-    Synchronises the project's state with (new) data obtained from Canvas (updates the user list and the submission list).
+    /**
+     * Synchronises the project's state with (new) data obtained from Canvas (updates the user list and the submission list).
+     * this method require privilege SUBMISSIONS_SYNC
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param principal injected oauth2 client's information
+     * @throws JsonProcessingException json parsing exception
      */
     @GetMapping(value = "/{projectId}/sync")
     protected void syncWithCanvas(@PathVariable Long courseId,
@@ -225,8 +267,13 @@ public class ProjectController {
         this.projectService.syncProject(projectId, submissionsArray);
     }
 
-    /*
-    Returns all existing labels in the project.
+    /**
+     * Get all existing labels in the project.
+     * this method require privilege PROJECT_READ
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param principal injected oauth2 client's information
+     * @return list of labels from database
      */
     @GetMapping(value = "/{projectId}/labels")
     protected List<Label> getProjectLabels(@PathVariable Long courseId,
@@ -243,8 +290,14 @@ public class ProjectController {
         return this.projectService.getProjectLabels(projectId);
     }
 
-    /*
-    Creates a new label and associates it with the project.
+    /**
+     * Creates a new label and associates it with the project.
+     * this method require privilege FLAG_EDIT
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param label new label from project
+     * @param principal injected oauth2 client's information
+     * @return created label from database
      */
     @PostMapping(value = "/{projectId}/labels")
     protected Label createProjectLabel(@PathVariable Long courseId,
@@ -262,13 +315,23 @@ public class ProjectController {
         return this.projectService.saveProjectLabel(label, projectId);
     }
 
+    /**
+     * Export and download rubric in Pdf format
+     * this method require privilege RUBRIC_DOWNLOAD
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param principal injected oauth2 client's information
+     * @return bytes of rubric pdf
+     * @throws IOException not found exception
+     * @throws ParseException parsing exception
+     */
     @GetMapping(
             value = "/{projectId}/downloadRubric",
             produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
 
     )
     @ResponseBody
-    protected byte[] sendFeedbackPdf(@PathVariable Long courseId,
+    protected byte[] downloadRubric(@PathVariable Long courseId,
                                                      @PathVariable Long projectId,
                                                      Principal principal) throws IOException, ParseException {
 
@@ -281,6 +344,15 @@ public class ProjectController {
         return projectService.downloadRubric(courseId, projectId);
     }
 
+    /**
+     * get templates for feedback (use for sending feedback via Canvas)
+     * this method require privilege FEEDBACK_OPEN
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param principal injected oauth2 client's information
+     * @return list of feedback templates
+     * @throws JsonProcessingException json parsing exception
+     */
     @GetMapping(value = "/{projectId}/feedback/templates")
     @ResponseBody
     protected List<FeedbackTemplate> getFeedbackTemplates(@PathVariable Long courseId,
@@ -296,8 +368,18 @@ public class ProjectController {
         return projectService.getFeedbackTemplates(projectId);
     }
 
+    /**
+     * create feedback template
+     * this method require privilege FEEDBACK_EDIT
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param objectNode template json
+     * @param principal injected oauth2 client's information
+     * @return created feedback template
+     * @throws JsonProcessingException json parsing exception
+     */
     @PostMapping(value = "/{projectId}/feedback/templates")
-    protected List<FeedbackTemplate> getFeedbackParticipants(@PathVariable Long courseId,
+    protected List<FeedbackTemplate> createFeedbackTemplate(@PathVariable Long courseId,
                                                              @PathVariable Long projectId,
                                                              @RequestBody ObjectNode objectNode,
                                                              Principal principal) throws JsonProcessingException {
@@ -311,6 +393,17 @@ public class ProjectController {
         return projectService.createFeedbackTemplate(projectId, objectNode);
     }
 
+    /**
+     * update a feedback template
+     * this method require privilege FEEDBACK_EDIT
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param templateId template id
+     * @param objectNode soon to be updated template json
+     * @param principal injected oauth2 client's information
+     * @return updated feedback template from database
+     * @throws JsonProcessingException json parsing exception
+     */
     @PutMapping(value = "/{projectId}/feedback/templates/{templateId}")
     protected List<FeedbackTemplate> updateFeedbackTemplate(@PathVariable Long courseId,
                                                              @PathVariable Long projectId,
@@ -327,8 +420,18 @@ public class ProjectController {
         return projectService.updateFeedbackTemplate(projectId, templateId, objectNode);
     }
 
+    /**
+     * delete feedback template
+     * this method require privilege FEEDBACK_EDIT
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param templateId template id
+     * @param principal injected oauth2 client's information
+     * @return list of updated templates
+     * @throws JsonProcessingException json parsing exception
+     */
     @DeleteMapping(value = "/{projectId}/feedback/templates/{templateId}")
-    protected List<FeedbackTemplate> getFeedbackParticipants(@PathVariable Long courseId,
+    protected List<FeedbackTemplate> deleteTemplate(@PathVariable Long courseId,
                                                              @PathVariable Long projectId,
                                                              @PathVariable Long templateId,
                                                              Principal principal) throws JsonProcessingException {
@@ -342,6 +445,15 @@ public class ProjectController {
         return projectService.deleteUpdateTemplate(projectId, templateId);
     }
 
+    /**
+     * get all students that have a submission in a project
+     * this method require privilege PROJECT_READ
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param principal injected oauth2 client's information
+     * @return list of course participants from database
+     * @throws JsonProcessingException json parsing exception
+     */
     @GetMapping(value = "/{projectId}/feedback/participants/all")
     @ResponseBody
     protected List<CourseParticipation> getAllParticipant(@PathVariable Long courseId,
@@ -350,13 +462,22 @@ public class ProjectController {
 
         List<PrivilegeEnum> privileges = this.gradingParticipationService
                 .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
-        if (!(privileges != null && privileges.contains(FEEDBACK_OPEN))) {
+        if (!(privileges != null && privileges.contains(PROJECT_READ))) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
         }
 
         return projectService.allFinishedGradedUser(projectId);
     }
 
+    /**
+     * get all students that didn't receive a feedback
+     * this method require privilege FEEDBACK_OPEN
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param principal injected oauth2 client's information
+     * @return list of course participant from database
+     * @throws JsonProcessingException json parsing exception
+     */
     @GetMapping(value = "/{projectId}/feedback/participants/notSent")
     @ResponseBody
     protected List<CourseParticipation> getNotSentParticipant(@PathVariable Long courseId,
@@ -372,6 +493,18 @@ public class ProjectController {
         return projectService.allFinishedGradedUserNotSent(projectId);
     }
 
+    /**
+     * send feedback to student with a template
+     * this method require privilege FEEDBACK_OPEN
+     * @param courseId canvas course id
+     * @param projectId canvas project id
+     * @param templateId feedback template id
+     * @param isAll whether to send to all students
+     * @param type delivery type ("emailPdf" or "canvasString")
+     * @param principal injected oauth2 client's information
+     * @return list of feedback logs
+     * @throws JsonProcessingException json parsing exception
+     */
     @GetMapping(value = "/{projectId}/feedback/send/{templateId}")
     @ResponseBody
     protected List<FeedbackLog> sendFeedBack(@PathVariable Long courseId,
@@ -396,6 +529,14 @@ public class ProjectController {
         }
     }
 
+    /**
+     * retrieve rubric from database
+     * this method require privilege RUBRIC_READ
+     * @param projectId canvas project id
+     * @param principal injected oauth2 client's information
+     * @return rubric from database
+     * @throws JsonProcessingException json parsing exception
+     */
     @GetMapping("/{projectId}/rubric")
     public String getRubrics(
             @PathVariable Long projectId,
@@ -409,9 +550,17 @@ public class ProjectController {
         return projectService.getRubric(projectId);
     }
 
-    /*
-    Updates the rubric with update patches. Patches are applied in order they come and are stored in the database to
-    retrieve rubric history.
+    /**
+     *  Updates the rubric with update patches. Patches are applied in order they come and are stored in the database
+     *  to retrieve rubric history.
+     * this method require privilege RUBRIC_WRITE
+     * @param patch update patch from front-end
+     * @param projectId canvas project id
+     * @param version version before update from front-end
+     * @param principal injected oauth2 client's information
+     * @return updated rubric from database
+     * @throws JsonPatchApplicationException patch exception
+     * @throws JsonProcessingException json parsing exception
      */
     @PatchMapping("/{projectId}/rubric")
     public String updateRubric(
@@ -430,6 +579,14 @@ public class ProjectController {
         return projectService.getRubric(projectId);
     }
 
+    /**
+     * Download rubric as custom file for further use
+     * this method require privilege RUBRIC_READ
+     * @param projectId canvas project id
+     * @param principal injected oauth2 client's information
+     * @return bytes from custom file contains rubric
+     * @throws JsonProcessingException json parsing exception
+     */
     @GetMapping(
             value = "/{projectId}/rubric/downloadFile",
             produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
@@ -446,6 +603,15 @@ public class ProjectController {
         return projectService.getRubricFile(projectId);
     }
 
+    /**
+     * upload rubric by custom file
+     * this method require privilege RUBRIC_WRITE
+     * @param projectId canvas project id
+     * @param file soon to be update rubric
+     * @param principal injected oauth2 client's information
+     * @return updated rubric from database
+     * @throws IOException not found exception
+     */
     @PostMapping(
             value = "/{projectId}/rubric/uploadFile",
             consumes = {"multipart/form-data"}
@@ -466,6 +632,13 @@ public class ProjectController {
         return projectService.getRubric(projectId);
     }
 
+    /**
+     * Export project grades with comments to excel
+     * this method require privilege PROJECT_READ
+     * @param projectId canvas project id
+     * @param principal injected oauth2 client's information
+     * @return bytes from excel project grades
+     */
     @GetMapping(
             value =  "/{projectId}/excel",
             produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
@@ -475,7 +648,7 @@ public class ProjectController {
 
         List<PrivilegeEnum> privileges = this.gradingParticipationService
                 .getPrivilegesFromUserIdAndProject(Long.valueOf(principal.getName()), projectId);
-        if (!(privileges != null && privileges.contains(RUBRIC_READ))) {
+        if (!(privileges != null && privileges.contains(PROJECT_READ))) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
         }
 
@@ -488,6 +661,13 @@ public class ProjectController {
         }
     }
 
+    /**
+     * upload completed grades to canvas
+     * this method require privilege UPLOAD_GRADES
+     * @param projectId canvas project id
+     * @param principal injected oauth2 client's information
+     * @return response from canvas
+     */
     @GetMapping(
             value =  "/{projectId}/uploadGrades"
     )

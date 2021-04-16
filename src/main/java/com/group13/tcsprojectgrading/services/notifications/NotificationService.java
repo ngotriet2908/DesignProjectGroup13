@@ -3,6 +3,9 @@ package com.group13.tcsprojectgrading.services.notifications;
 import org.springframework.stereotype.Service;
 import org.springframework.mail.SimpleMailMessage;
 
+/**
+ * Service handlers operations relating to notifications
+ */
 @Service
 public class NotificationService {
     private final EmailSender emailSender;
@@ -20,6 +23,12 @@ public class NotificationService {
         emailSender.getMailSender().send(message);
     }
 
+    /**
+     * send email as notification when issue is created
+     * @param to receiver
+     * @param authorName author name
+     * @param projectName project name
+     */
     public void sendIssueNotification(String to, String authorName, String projectName) {
         this.sendNotification(to,
                 authorName + " has mentioned you in a new issue of the " + projectName + " project",
@@ -27,6 +36,11 @@ public class NotificationService {
                 );
     }
 
+    /**
+     * send email as notification when issue is created
+     * @param to receiver
+     * @param projectName project name
+     */
     public void sendIssueNotification(String to, String projectName) {
         this.sendNotification(to,
                 "New issue in " + projectName + " project",
@@ -34,6 +48,12 @@ public class NotificationService {
         );
     }
 
+    /**
+     * send email as notification when issue is resolved
+     * @param to receiver
+     * @param issueSubject issue subject
+     * @param projectName project name
+     */
     public void sendResolvedNotification(String to, String issueSubject, String projectName) {
         this.sendNotification(to,
                 "The issue " + issueSubject + " in project " + projectName + " has been resolved",

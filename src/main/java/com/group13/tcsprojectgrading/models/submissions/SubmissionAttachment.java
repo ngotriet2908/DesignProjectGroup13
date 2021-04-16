@@ -9,6 +9,9 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import javax.persistence.*;
 import java.io.IOException;
 
+/**
+ * Model that represent submission attachment from canvas
+ */
 @Entity
 public class SubmissionAttachment {
     @Id
@@ -22,6 +25,7 @@ public class SubmissionAttachment {
     @ManyToOne
     @JsonBackReference(value="submission-attachments")
     private Submission submission;
+
 
     public SubmissionAttachment() {
     }

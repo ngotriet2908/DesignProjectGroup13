@@ -9,6 +9,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 
+/**
+ * This class consists of methods that are used to retrieve data from canvas user apis
+ */
 @Component
 public class CanvasUsersApi {
     private final CanvasApi canvasApi;
@@ -18,6 +21,10 @@ public class CanvasUsersApi {
         this.canvasApi = canvasApi;
     }
 
+    /**
+     * get authorised client account from canvas
+     * @return canvas account json string
+     */
     public String getAccount() {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
@@ -34,6 +41,11 @@ public class CanvasUsersApi {
         }
     }
 
+    /**
+     * get authorised client account from canvas
+     * @param userId canvas user id
+     * @return canvas account json string
+     */
     public String getAccountWithId(Long userId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
@@ -50,6 +62,11 @@ public class CanvasUsersApi {
         }
     }
 
+    /**
+     * get user enrollment in Canvas
+     * @param userId canvas user id
+     * @return list of enrollments
+     */
     public List<String> getEnrolments(Long userId) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 
@@ -66,6 +83,13 @@ public class CanvasUsersApi {
         }
     }
 
+    /**
+     * send canvas message to user/group
+     * @param userId canvas user id
+     * @param groupId canvas group id
+     * @param subject subject of the message
+     * @param body body of the message
+     */
     public void sendMessageWithId(Long userId, Long groupId, String subject, String body) {
         OAuth2AuthorizedClient authorizedClient = this.canvasApi.getAuthorisedClient();
 

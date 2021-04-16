@@ -13,7 +13,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-
+/**
+ * Handler for successful login using oauth2 flow from canvas
+ */
 @Component
 public class CanvasOAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
@@ -23,14 +25,15 @@ public class CanvasOAuth2LoginSuccessHandler implements AuthenticationSuccessHan
         this.userService = userService;
     }
 
+    /**
+     * log the user to console, register a new user in database
+     * @param request request from user
+     * @param response response from canvas
+     * @param authentication injected authentication contain user details
+     * @throws IOException exception if no user exists
+     */
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
-        handle(request, response, authentication);
-//        clearAuthenticationAttributes(request);
-    }
-
-//    @Override
-    protected void handle(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         DefaultOAuth2User oauth2User = (DefaultOAuth2User) authentication.getPrincipal();
         System.out.println("User signed in:");
         System.out.println(oauth2User.getAttributes());

@@ -15,6 +15,9 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.transaction.Transactional;
 import java.util.*;
 
+/**
+ * Service handlers operations relating to user
+ */
 @Service
 public class UserService {
     private final SubmissionService submissionService;
@@ -32,6 +35,10 @@ public class UserService {
         this.issueRepository = issueRepository;
     }
 
+    /**
+     * save user in database
+     * @param user user entity
+     */
     @Transactional(rollbackOn = Exception.class)
     public void saveUser(User user) {
         //Obtain write lock on user
@@ -40,6 +47,11 @@ public class UserService {
         this.userRepository.save(user);
     }
 
+    /**
+     * find user by id
+     * @param userId canvas user id
+     * @return user entity
+     */
     @Transactional
     public User findById(Long userId) {
         return userRepository.findById(userId).orElse(null);
@@ -50,8 +62,11 @@ public class UserService {
         return userRepository.getOne(userId);
     }
 
-    /*
-    Returns a list of projects in which the user has submissions to grade.
+    /**
+     * Returns a list of projects in which the user has submissions to grade.
+     * @param userId canvas user id
+     * @return list of projects
+     * @throws ResponseStatusException response exception
      */
     @Transactional
     public Collection<Project> getTodoForUser(Long userId) throws ResponseStatusException{
@@ -114,8 +129,11 @@ public class UserService {
         return projectMap.values();
     }
 
-    /*
-    Returns a list of issues that have the user as the author or addressee.
+    /**
+     * Returns a list of issues that have the user as the author or addressee.
+     * @param userId canvas user id
+     * @return list of issue
+     * @throws ResponseStatusException response exception
      */
     @Transactional
     public Collection<Issue> getIssuesForUser(Long userId) throws ResponseStatusException{
@@ -127,8 +145,6 @@ public class UserService {
             );
         }
 
-        List<Issue> issues = this.issueRepository.findIssuesByCreatorOrAddressee(user, user);
-
-        return issues;
+        return this.issueRepository.findIssuesByCreatorOrAddressee(user, user);
     }
 }

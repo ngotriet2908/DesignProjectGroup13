@@ -30,20 +30,36 @@ public class CanvasApi {
     private final CanvasUsersApi canvasUsersApi;
     private final CanvasCoursesApi canvasCoursesApi;
 
+    /**
+     * default constructor
+     * @param webClient spring boot webclient
+     */
     public CanvasApi(WebClient webClient) {
         this.webClient = webClient;
         this.canvasUsersApi = new CanvasUsersApi(this);
         this.canvasCoursesApi = new CanvasCoursesApi(this);
     }
 
+    /**
+     * get canvas users api, which grants the ability to call canvas users' endpoints
+     * @return canvas users api
+     */
     public CanvasUsersApi getCanvasUsersApi() {
         return canvasUsersApi;
     }
 
+    /**
+     * get canvas courses api, which grants the ability to call canvas courses' endpoints
+     * @return canvas courses api
+     */
     public CanvasCoursesApi getCanvasCoursesApi() {
         return canvasCoursesApi;
     }
 
+    /**
+     * get user oauth2 authentication/authorised client from user request's parameters and database
+     * @return oauth2 authorised client
+     */
     public OAuth2AuthorizedClient getAuthorisedClient() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -61,6 +77,13 @@ public class CanvasApi {
         }
     }
 
+    /**
+     * a custom method to send CRUD methods request to canvas' endpoints
+     * @param uri canvas' endpoint
+     * @param httpMethod CRUD method
+     * @param authorizedClient oauth2 client contains canvas token
+     * @return response body from canvas
+     */
     public String sendRequest(URI uri, HttpMethod httpMethod, OAuth2AuthorizedClient authorizedClient) {
         WebClient.UriSpec<WebClient.RequestBodySpec> uriSpec = webClient.method(httpMethod);
         WebClient.RequestBodySpec bodySpec = uriSpec.uri(uri);
@@ -82,6 +105,14 @@ public class CanvasApi {
             return result;
     }
 
+    /**
+     * a custom method to send POST request to canvas' endpoints
+     * @param uri canvas' endpoint
+     * @param httpMethod CRUD method
+     * @param authorizedClient oauth2 client contains canvas token
+     * @param data payload for post request
+     * @return response body from canvas
+     */
     public String postRequest(URI uri, HttpMethod httpMethod, OAuth2AuthorizedClient authorizedClient, MultiValueMap<String, String> data) {
         WebClient.UriSpec<WebClient.RequestBodySpec> uriSpec = webClient.method(httpMethod);
         WebClient.RequestBodySpec bodySpec = uriSpec
@@ -107,7 +138,13 @@ public class CanvasApi {
         return result;
     }
 
-
+    /**
+     * a custom async method to send CRUD methods request to canvas' endpoints
+     * @param uri canvas' endpoint
+     * @param httpMethod CRUD method
+     * @param authorizedClient oauth2 client contains canvas token
+     * @return a Mono entity for async methods
+     */
     public Mono<ResponseEntity<String>> sendRequestAsync(URI uri, HttpMethod httpMethod, OAuth2AuthorizedClient authorizedClient) {
         WebClient.UriSpec<WebClient.RequestBodySpec> uriSpec = webClient.method(httpMethod);
         WebClient.RequestBodySpec bodySpec = uriSpec.uri(uri);
@@ -115,6 +152,13 @@ public class CanvasApi {
         return bodySpec.retrieve().toEntity(String.class);
     }
 
+    /**
+     * a custom method to send CRUD methods request to canvas' endpoints and retrieve all pages from canvas pagination
+     * @param url canvas' endpoint
+     * @param httpMethod CRUD method
+     * @param authorizedClient oauth2 client contains canvas token
+     * @return list of response bodies from canvas
+     */
     public List<String> sendRequestWithPagination(URI url, HttpMethod httpMethod, OAuth2AuthorizedClient authorizedClient) {
         Mono<List<String>> entityMono =
                 sendRequestAsync(url, httpMethod, authorizedClient)

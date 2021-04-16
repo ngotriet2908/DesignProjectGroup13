@@ -18,6 +18,9 @@ import javax.persistence.*;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Model represent a user from Canvas
+ */
 @Entity
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Table(name = "user", schema = "public")
@@ -98,6 +101,7 @@ public class User {
         this.name = name;
         this.toGrade = toGrade;
     }
+
 
     public User(Long id) {
         this.id = id;

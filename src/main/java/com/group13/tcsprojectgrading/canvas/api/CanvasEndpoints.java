@@ -1,5 +1,8 @@
 package com.group13.tcsprojectgrading.canvas.api;
 
+/**
+ * Canvas static api information
+ */
 public class CanvasEndpoints {
     public static final String HOST = "utwente-dev.instructure.com";
     public static final String SCHEME = "https";

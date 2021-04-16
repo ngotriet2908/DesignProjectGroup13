@@ -1,4 +1,4 @@
-package com.group13.tcsprojectgrading.controllers;
+package com.group13.tcsprojectgrading.controllers.utils;
 
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.Message;

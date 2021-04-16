@@ -31,15 +31,16 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
-import java.text.ParseException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.group13.tcsprojectgrading.controllers.Utils.groupPages;
-
+import static com.group13.tcsprojectgrading.controllers.utils.Utils.groupPages;
+/**
+ * Service handlers operations relating to courses
+ */
 @Service
 public class CourseService {
     private final ProjectService projectService;
@@ -78,8 +79,12 @@ public class CourseService {
         this.userService = userService;
     }
 
-    /*
-    Imports selected courses into the app
+    /**
+     * Imports selected courses into the app
+     * @param courses courses from canvas
+     * @param userId canvas user id
+     * @throws IOException not found exception
+     * @throws ResponseStatusException response exception
      */
     @Transactional(rollbackOn = Exception.class)
     public void importCourses(ArrayNode courses, Long userId) throws IOException, ResponseStatusException {
@@ -158,11 +163,23 @@ public class CourseService {
         }
     }
 
+    /**
+     * Obtain a lock on a course
+     * @param courseId canvas course id
+     * @return a course from database
+     * @throws ResponseStatusException response exception
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public Course getCourseWithLock(Long courseId) throws ResponseStatusException {
         return this.courseRepository.findCourseById(courseId).orElse(null);
     }
 
+    /**
+     * re-synchronise course from canvas
+     * @param courseId canvas course id
+     * @throws JsonProcessingException json parsing exception
+     * @throws ResponseStatusException response exception
+     */
     @Transactional(rollbackOn = Exception.class)
     public void syncCourse(Long courseId) throws JsonProcessingException, ResponseStatusException{
         // get course (can also be used to update it if required)
@@ -219,8 +236,12 @@ public class CourseService {
         }
     }
 
-    /*
-    Returns all imported courses that the user participates in.
+    /**
+     * Returns all imported courses that the user participates in.
+     * @param userId canvas user id
+     * @return list of courses from database
+     * @throws JsonProcessingException json parsing exception
+     * @throws ResponseStatusException response exception
      */
     @Transactional
     public List<Course> getCourses(Long userId) throws JsonProcessingException, ResponseStatusException{
@@ -240,6 +261,14 @@ public class CourseService {
         return courses;
     }
 
+    /**
+     * Get course with user role
+     * @param courseId canvas course id
+     * @param userId canvas user id
+     * @return a course with user role from database
+     * @throws IOException not found exception
+     * @throws ResponseStatusException response exception
+     */
     @Transactional
     public String getCourse(Long courseId, Long userId) throws IOException, ResponseStatusException{
         Course course = this.courseRepository.findById(courseId).orElse(null);
@@ -264,8 +293,13 @@ public class CourseService {
         return writer.writeValueAsString(course);
     }
 
-    /*
-    Imports selected projects into the app
+    /**
+     * Imports selected projects into the app
+     * @param projects projects from canvas
+     * @param courseId canvas course id
+     * @param userId canvas user id
+     * @throws JsonProcessingException json parsing exception
+     * @throws ResponseStatusException response exception
      */
     @Transactional(rollbackOn = Exception.class)
     public void importProjects(ArrayNode projects, Long courseId, Long userId) throws JsonProcessingException, ResponseStatusException {
@@ -338,6 +372,12 @@ public class CourseService {
         }
     }
 
+    /**
+     * get users from course
+     * @param courseId canvas course id
+     * @return list of users from database
+     * @throws ResponseStatusException response exception
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public List<User> getCourseUsers(Long courseId) throws ResponseStatusException {
         Optional<Course> courseOptional = this.courseRepository.findById(courseId);
@@ -359,6 +399,12 @@ public class CourseService {
         return users;
     }
 
+    /**
+     * get students from course
+     * @param courseId canvas course id
+     * @return list of course participant of students from database
+     * @throws ResponseStatusException response exception
+     */
     @Transactional
     public List<CourseParticipation> getCourseStudents(Long courseId) throws ResponseStatusException {
         Optional<Course> courseOptional = this.courseRepository.findById(courseId);
@@ -372,6 +418,12 @@ public class CourseService {
         return this.courseParticipationRepository.findById_Course_IdAndRole_Name(courseId, RoleEnum.STUDENT.toString());
     }
 
+    /**
+     * get teachers from course
+     * @param courseId canvas course id
+     * @return list of course participant of teachers from database
+     * @throws ResponseStatusException response exception
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public List<CourseParticipation> getCourseTeachers(Long courseId) throws ResponseStatusException {
         Optional<Course> courseOptional = this.courseRepository.findById(courseId);
@@ -385,6 +437,12 @@ public class CourseService {
         return this.courseParticipationRepository.findById_Course_IdAndRole_Name(courseId, RoleEnum.TEACHER.toString());
     }
 
+    /**
+     * get teachers and teaching assistants from course
+     * @param courseId canvas course id
+     * @return list of course participant of teachers and tas from database
+     * @throws ResponseStatusException response exception
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public List<CourseParticipation> getCourseTeachersAndTAs(Long courseId) throws ResponseStatusException {
         Optional<Course> courseOptional = this.courseRepository.findById(courseId);
@@ -402,6 +460,12 @@ public class CourseService {
         return this.courseParticipationRepository.findById_Course_IdAndRole_NameIsIn(courseId, roles);
     }
 
+    /**
+     * get teachers and tas from course as user
+     * @param courseId canvas course id
+     * @return list of users from database
+     * @throws ResponseStatusException response exception
+     */
     @Transactional
     public List<User> getCourseTeachersAsUsers(Long courseId) {
         Optional<Course> courseOptional = this.courseRepository.findById(courseId);
@@ -422,6 +486,12 @@ public class CourseService {
         return users;
     }
 
+    /**
+     * get tas from course as user
+     * @param courseId canvas course id
+     * @return list of users from database
+     * @throws ResponseStatusException response exception
+     */
     @Transactional
     public List<User> getCourseTAsAsUsers(Long courseId) {
         Course courseOptional = this.courseRepository.findById(courseId).orElse(null);
@@ -442,6 +512,12 @@ public class CourseService {
         return users;
     }
 
+    /**
+     * get teachers and tas from course as user
+     * @param courseId canvas course id
+     * @return list of users from database
+     * @throws ResponseStatusException response exception
+     */
     @Transactional
     public List<User> getCourseTeachersAndTAsAsUsers(Long courseId) {
         Course course = this.courseRepository.findById(courseId).orElse(null);
@@ -466,6 +542,13 @@ public class CourseService {
         return users;
     }
 
+    /**
+     * get info on a user in a course
+     * @param courseId canvas course id
+     * @param userId canvas user id
+     * @return get user from database
+     * @throws ResponseStatusException response exception
+     */
     @Transactional(value = Transactional.TxType.MANDATORY)
     public User getCourseUser(Long courseId, Long userId) throws ResponseStatusException {
         Optional<Course> courseOptional = this.courseRepository.findById(courseId);
@@ -490,6 +573,13 @@ public class CourseService {
         return courseParticipation.getId().getUser();
     }
 
+    /**
+     * get role of a user in a course
+     * @param courseId canvas course id
+     * @param userId canvas user id
+     * @return get role enum from database
+     * @throws ResponseStatusException response exception
+     */
     @Transactional
     public RoleEnum getCourseRole(Long courseId, Long userId) throws ResponseStatusException {
         if (!((this.userService.findById(userId) != null) && this.courseRepository.existsById(courseId))) {

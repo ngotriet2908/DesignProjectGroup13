@@ -12,6 +12,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Model that links User and Course together and therefore represent the participant of a User in a Course (with a role)
+ */
 @Entity
 public class CourseParticipation {
     @Embeddable
@@ -54,9 +57,11 @@ public class CourseParticipation {
     @ManyToOne
     private Role role;
 
+
     @Transient
 //    @JsonSerialize(contentUsing= Submission.SubmissionShortSerializer.class)
     private List<Submission> submissions;
+
 
     @Transient
 //    @JsonSerialize(contentUsing= Submission.SubmissionShortSerializer.class)
@@ -77,6 +82,7 @@ public class CourseParticipation {
         this.id = new Pk(user, course);
         this.role = role;
     }
+
 
     public Pk getId() {
         return id;

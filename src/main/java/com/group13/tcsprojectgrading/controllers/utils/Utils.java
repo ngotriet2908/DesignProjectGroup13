@@ -1,4 +1,4 @@
-package com.group13.tcsprojectgrading.controllers;
+package com.group13.tcsprojectgrading.controllers.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;

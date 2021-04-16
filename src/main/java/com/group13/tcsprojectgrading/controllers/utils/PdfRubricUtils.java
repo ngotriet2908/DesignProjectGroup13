@@ -1,9 +1,6 @@
-package com.group13.tcsprojectgrading.controllers;
+package com.group13.tcsprojectgrading.controllers.utils;
 
-
-import com.group13.tcsprojectgrading.models.course.CourseParticipation;
-import com.group13.tcsprojectgrading.models.grading.Assessment;
-import com.group13.tcsprojectgrading.models.grading.Grade;
+import com.group13.tcsprojectgrading.models.project.Project;
 import com.group13.tcsprojectgrading.models.rubric.Element;
 import com.group13.tcsprojectgrading.models.rubric.Rubric;
 import com.group13.tcsprojectgrading.models.rubric.RubricContent;
@@ -18,39 +15,26 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PdfUtils {
+import static com.group13.tcsprojectgrading.controllers.utils.PdfUtils.addEmptyLine;
+
+public class PdfRubricUtils {
     private final Document document;
     private final Rubric rubric;
-    private final Assessment assessment;
     private final Map<String, NodeInfo> nodeInfoMap;
-    private final CourseParticipation participation;
     private int maxLevel;
+    private final Project project;
 
-    public PdfUtils(Document document, Rubric rubric, Assessment assessment, CourseParticipation participation) {
+    public PdfRubricUtils(Document document, Rubric rubric, Project project) {
         this.document = document;
         this.rubric = rubric;
-        this.assessment = assessment;
-        this.participation = participation;
         this.maxLevel = 0;
+        this.project = project;
         nodeInfoMap = new HashMap<>();
     }
 
-    public void headerGenerator(String title, String body) {
-
-    }
-
-    private Grade findActiveGradeForCriterion(String criterion) {
-        for(Grade grade: this.assessment.getGrades()) {
-            if (grade.getActive() && grade.getCriterionId().equals(criterion)) {
-                return grade;
-            }
-        }
-        return null;
-    }
-
-    public Document generatePdfOfFeedback() throws IOException {
-        if (rubric.getChildren() == null) return null;
-        nodeInfoMap.put("-1", new NodeInfo(0, null, 0, "-1","P", 0, 0));
+    public void generateRubrics() throws IOException {
+        if (rubric.getChildren() == null) return;
+        nodeInfoMap.put("-1", new NodeInfo(0,"-1","P", 0, 0));
         NodeInfo nodeInfo = nodeInfoMap.get("-1");
 
         for(Element child: rubric.getChildren()) {
@@ -58,17 +42,10 @@ public class PdfUtils {
         }
 
         PdfFont font = PdfFontFactory.createFont(FontConstants.COURIER);
-        Paragraph header = new Paragraph("Feedback for " + participation.getId().getUser().getName())
+        Paragraph header = new Paragraph("Rubric of " + project.getName())
+                .setFont(font)
                 .setHorizontalAlignment(HorizontalAlignment.CENTER)
-                .setFont(font)
-                .setFontSize(20);
-        addEmptyLine(header, 1);
-        document.add(header);
-
-        font = PdfFontFactory.createFont(FontConstants.COURIER);
-        header = new Paragraph("Final grade: " + ((assessment.getManualGrade() != null)? assessment.getManualGrade() : assessment.getFinalGrade()))
-                .setFont(font)
-                .setFontSize(20);
+                .setFontSize(24);
         addEmptyLine(header, 3);
 
         document.add(header);
@@ -76,7 +53,7 @@ public class PdfUtils {
         for(Element child: rubric.getChildren()) {
             visitWriteNode(child);
         }
-        return document;
+        document.close();
     }
 
     public void visitWriteNode(Element currentNode) throws IOException {
@@ -85,13 +62,14 @@ public class PdfUtils {
         PdfFont font = PdfFontFactory.createFont(FontConstants.COURIER);
         float fixPadding = 10* (nodeInfo.getLevel() - 1);
         if (content.getType().equals(RubricContent.CRITERION_TYPE)) {
-            Paragraph header = new Paragraph(nodeInfo.label + " " + content.getTitle() + ": " + nodeInfo.getGrade().getGrade())
+            Paragraph header = new Paragraph(nodeInfo.label + " " + content.getTitle())
                     .setFont(font)
                     .setPaddingLeft(fixPadding)
                     .setFontSize(13);
             document.add(header);
             //TODO check for null comment
-            Paragraph body = new Paragraph("comment: " + nodeInfo.getGrade().getDescription())
+            RichTextParser richTextParser = new RichTextParser();
+            Paragraph body = richTextParser.parse(content.getText())
                     .setFont(font)
                     .setPaddingLeft(fixPadding + 10)
                     .setFontSize(12);
@@ -105,7 +83,7 @@ public class PdfUtils {
 //            addEmptyLine(blockBreak, 1);
             document.add(blockBreak);
 
-            Paragraph header = new Paragraph(nodeInfo.label + " " + content.getTitle() + ": ")
+            Paragraph header = new Paragraph(nodeInfo.label + " " + content.getTitle())
                     .setFont(font)
                     .setPaddingLeft(fixPadding)
                     .setFontSize(15 + 2*(maxLevel - nodeInfo.getLevel()));
@@ -124,23 +102,18 @@ public class PdfUtils {
     public void visitNode(Element currentNode, Element parentNode) {
         RubricContent content = currentNode.getContent();
         if (content.getType().equals(RubricContent.CRITERION_TYPE)) {
-            Grade grade = findActiveGradeForCriterion(content.getId());
-            if (grade != null) {
                 NodeInfo nodeInfo = null;
-
                 //level 0
                 if (currentNode.getContent().getId().equals(parentNode.getContent().getId())) {
                     nodeInfoMap.get("-1").setCriterionCount(nodeInfoMap.get("-1").getCriterionCount() + 1);
                     maxLevel = Math.max(maxLevel , 1);
                     nodeInfo = new NodeInfo(
                             1,
-                            grade,
-                            -1,
                             "-1",
                             "C" + nodeInfoMap.get("-1").getCriterionCount(),
                             0,
                             0
-                            );
+                    );
                 } else if (nodeInfoMap.containsKey(parentNode.getContent().getId())) {
                     maxLevel = Math.max(maxLevel , nodeInfoMap.get(parentNode.getContent().getId()).getLevel() + 1);
 
@@ -148,9 +121,6 @@ public class PdfUtils {
                     parentInfo.setCriterionCount(parentInfo.getCriterionCount() + 1);
                     nodeInfo = new NodeInfo(
                             nodeInfoMap.get(parentNode.getContent().getId()).getLevel() + 1,
-                            grade
-                            ,
-                            -1,
                             parentNode.getContent().getId(),
                             "C" + parentInfo.getLabel().substring(1) + "." + parentInfo.getCriterionCount(),
                             0,
@@ -161,18 +131,7 @@ public class PdfUtils {
                 if (nodeInfo == null) return;
 
                 nodeInfoMap.put(currentNode.getContent().getId(), nodeInfo);
-
-                if (nodeInfoMap.containsKey(parentNode.getContent().getId()) &&
-                        !currentNode.getContent().getId().equals(parentNode.getContent().getId())) {
-                    nodeInfoMap.get(parentNode.getContent().getId()).setSumGrade(
-                            nodeInfoMap.get(parentNode.getContent().getId()).getSumGrade() +
-                                    grade.getGrade()
-                    );
-                } else if (currentNode.getContent().getId().equals(parentNode.getContent().getId())) {
-                    nodeInfoMap.get("-1").setSumGrade(nodeInfoMap.get("-1").getSumGrade() + nodeInfo.getGrade().getGrade());
-                }
                 return;
-            }
         }
 
         //Block type
@@ -186,8 +145,6 @@ public class PdfUtils {
 
             nodeInfo = new NodeInfo(
                     1,
-                    null,
-                    0,
                     "-1",
                     "B" + nodeInfoMap.get("-1").getBlockCount(),
                     0,
@@ -199,8 +156,6 @@ public class PdfUtils {
             maxLevel = Math.max(maxLevel , nodeInfoMap.get(parentNode.getContent().getId()).getLevel() + 1);
             nodeInfo = new NodeInfo(
                     nodeInfoMap.get(parentNode.getContent().getId()).getLevel() + 1,
-                    null,
-                    0,
                     parentNode.getContent().getId(),
                     "B" + parentInfo.getLabel().substring(1) + "." + parentInfo.getBlockCount(),
                     0,
@@ -215,45 +170,24 @@ public class PdfUtils {
         if (currentNode.getChildren() != null) {
             for(Element element1: currentNode.getChildren()) {
                 visitNode(element1, currentNode);
-                if (nodeInfoMap.containsKey(parentNode.getContent().getId()) &&
-                        !currentNode.getContent().getId().equals(parentNode.getContent().getId())) {
-                    nodeInfoMap.get(parentNode.getContent().getId()).setSumGrade(
-                            nodeInfoMap.get(parentNode.getContent().getId()).getSumGrade() +
-                                    nodeInfoMap.get(currentNode.getContent().getId()).getSumGrade()
-                    );
-                }
-            }
-            if (currentNode.getContent().getId().equals(parentNode.getContent().getId())) {
-                nodeInfoMap.get("-1").setSumGrade(nodeInfoMap.get("-1").getSumGrade() + nodeInfo.getSumGrade());
             }
         }
     }
 
     public class NodeInfo {
         private int level;
-        private Grade grade;
-        private float sumGrade;
         private String parentId;
         private String label;
         private int blockCount;
         private int criterionCount;
 
-        public NodeInfo(int level, Grade grade, float sumGrade, String parentId, String label, int blockCount, int criterionCount) {
+        public NodeInfo(int level, String parentId, String label, int blockCount, int criterionCount) {
             this.level = level;
-            this.grade = grade;
-            this.sumGrade = sumGrade;
+
             this.parentId = parentId;
             this.label = label;
             this.blockCount = blockCount;
             this.criterionCount = criterionCount;
-        }
-
-        public float getSumGrade() {
-            return sumGrade;
-        }
-
-        public void setSumGrade(float sumGrade) {
-            this.sumGrade = sumGrade;
         }
 
         public int getLevel() {
@@ -262,14 +196,6 @@ public class PdfUtils {
 
         public void setLevel(int level) {
             this.level = level;
-        }
-
-        public Grade getGrade() {
-            return grade;
-        }
-
-        public void setGrade(Grade grade) {
-            this.grade = grade;
         }
 
         public String getParentId() {
@@ -304,11 +230,4 @@ public class PdfUtils {
             this.criterionCount = criterionCount;
         }
     }
-
-    public static void addEmptyLine(Paragraph paragraph, int number) {
-        for (int i = 0; i < number; i++) {
-            paragraph.add(new Paragraph(" "));
-        }
-    }
-
 }
