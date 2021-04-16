@@ -402,7 +402,7 @@ public class AssessmentService {
 
         Submission submission = submissionRepository.findById(submissionId).orElse(null);
         if (submission == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "submission not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Submission not found");
         }
 
         if (privileges.contains(GRADING_WRITE_SINGLE)) {

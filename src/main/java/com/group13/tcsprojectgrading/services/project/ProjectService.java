@@ -446,7 +446,7 @@ public class ProjectService {
             );
         }
 
-        if  (!graders.contains(new User(userId))) {
+        if (!graders.contains(new User(userId))) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, "Self must be explicitly included as a grader"
             );
