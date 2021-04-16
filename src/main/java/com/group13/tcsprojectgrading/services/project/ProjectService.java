@@ -169,14 +169,18 @@ public class ProjectService {
                                     .sorted(Comparator.comparingLong(Submission::getId))
                                     .collect(Collectors.toList())
                     );
-                    Assessment assessment = assessmentService.findCurrentAssessmentUser(
+                    AssessmentLink link = assessmentService.findCurrentAssessmentUser(
                             project,
                             participation.getId().getUser()
-                    )
-                            .getId().getAssessment();
+                    );
+                    if (link == null) {
+                        return;
+                    }
+                    Assessment assessment = link.getId().getAssessment();
 
                     participation.setCurrentAssessment(assessmentService.getAssessmentDetails(assessment.getId(), project));
                 })
+//                .filter(Objects::nonNull)
                 .sorted(Comparator.comparingLong(a -> a.getId().getUser().getId()))
                 .collect(Collectors.toList());
     }
@@ -232,11 +236,12 @@ public class ProjectService {
                 .getCourseStudents(courseId)
                 .stream()
                 .map(participation -> {
-                    Assessment assessment = assessmentService.findCurrentAssessmentUser(
+                    AssessmentLink link = assessmentService.findCurrentAssessmentUser(
                             project,
                             participation.getId().getUser()
-                    )
-                            .getId().getAssessment();
+                    );
+                    if (link == null) return null;
+                    Assessment assessment = link.getId().getAssessment();
                     assessment = assessmentService.getAssessmentDetails(assessment.getId(), project);
                     if (assessment.getProgress() < 100) return null;
                     return (assessment.getManualGrade() != null)? assessment.getManualGrade() : assessment.getFinalGrade();
@@ -498,7 +503,7 @@ public class ProjectService {
             );
         }
 
-        if  (!graders.contains(new User(userId))) {
+        if (!graders.contains(new User(userId))) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, "Self must be explicitly included as a grader"
             );

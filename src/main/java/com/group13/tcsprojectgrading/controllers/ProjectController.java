@@ -574,7 +574,7 @@ public class ProjectController {
         if (!(privileges != null && privileges.contains(RUBRIC_WRITE))) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
         }
-        System.out.println("Rubric version the server: " + version);
+//        System.out.println("Rubric version the server: " + version);
         projectService.updateRubric(projectId, patch, version);
         return projectService.getRubric(projectId);
     }

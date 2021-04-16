@@ -25,6 +25,7 @@ import com.group13.tcsprojectgrading.services.project.ProjectService;
 import com.group13.tcsprojectgrading.services.rubric.RubricService;
 import com.group13.tcsprojectgrading.services.settings.SettingsService;
 import com.group13.tcsprojectgrading.services.user.UserService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -72,10 +73,18 @@ public class CourseServiceTest {
     @InjectMocks
     private CourseService courseService;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    private final Long courseId = 72L;
-    private final Long userId = 51L;
-    private final Course testCourse = new Course(courseId, "Test Course", Date.from(Instant.now()));
+    private ObjectMapper objectMapper;
+    private Long courseId;
+    private Long userId;
+    private Course testCourse;
+
+    @BeforeEach
+    public void init() {
+        objectMapper = new ObjectMapper();
+        courseId = 72L;
+        userId = 51L;
+        testCourse = new Course(courseId, "Test Course", Date.from(Instant.now()));
+    }
 
     @Test
     public void importCoursesCourseAlreadyExists() {
@@ -103,6 +112,7 @@ public class CourseServiceTest {
         ArrayNode enrollments = objectMapper.createArrayNode();
         ObjectNode enrollment = objectMapper.createObjectNode();
         enrollment.put("role", "TaEnrollment");
+        enrollment.put("user_id", userId);
         enrollments.add(enrollment);
         testCourseCanvas.put("id",courseId);
         testCourseCanvas.put("name", "Test Course");
@@ -130,6 +140,7 @@ public class CourseServiceTest {
         ObjectNode teacherEnrollment = objectMapper.createObjectNode();
         teacherEnrollment.put("role", "TeacherEnrollment");
         teacherEnrollment.put("course_id", courseId);
+        teacherEnrollment.put("user_id", userId);
         enrollments.add(teacherEnrollment);
 
         testCourseCanvas.put("id",courseId);
@@ -145,10 +156,12 @@ public class CourseServiceTest {
         ObjectNode taEnrollment = objectMapper.createObjectNode();
         taEnrollment.put("role", "TaEnrollment");
         taEnrollment.put("course_id", courseId);
+        taEnrollment.put("user_id", userId + 3);
 
         ObjectNode studentEnrollment = objectMapper.createObjectNode();
         studentEnrollment.put("role", "StudentEnrollment");
         studentEnrollment.put("course_id", courseId);
+        studentEnrollment.put("user_id", userId + 2);
 
         ObjectNode user1 = objectMapper.createObjectNode();
         user1.put("id", userId + 1);

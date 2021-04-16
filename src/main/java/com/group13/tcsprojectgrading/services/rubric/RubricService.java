@@ -68,7 +68,7 @@ public class RubricService {
             // TODO, get rid of object mapper
             ObjectMapper objectMapper = new ObjectMapper();
             if (linker != null) {
-                System.out.println("Rubric version: " + linker.getVersion());
+//                System.out.println("Rubric version: " + linker.getVersion());
                 Rubric rubric = objectMapper.readValue(linker.getRubric(), Rubric.class);
                 rubric.setVersion(linker.getVersion());
                 return rubric;
@@ -113,7 +113,7 @@ public class RubricService {
 
         // TODO, get rid of object mapper
 //        linker.setRubric(Json.getObjectWriter().writeValueAsString(rubric));
-        System.out.println("Rubric version: " + linker.getVersion());
+//        System.out.println("Rubric version: " + linker.getVersion());
         ObjectMapper mapper = new ObjectMapper();
         linker.setRubric(mapper.writeValueAsString(rubric));
 
@@ -269,6 +269,7 @@ public class RubricService {
     public Rubric applyUpdate(JsonNode patches, Rubric rubric) throws JsonProcessingException, ResponseStatusException {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode rubricJson = objectMapper.convertValue(rubric, JsonNode.class);
+        System.out.println(rubricJson);
 
         if (patches.isArray()) {
             ArrayNode arrayNode = (ArrayNode) patches;
@@ -330,11 +331,13 @@ public class RubricService {
                         // for each criterion
                         try {
                             for (JsonNode criterion: criteria) {
+                                System.out.println(criterion);
                                 // for each assessment in the project check if the criterion is in it
                                 System.out.println("removing grades of criterion: " + criterion.get("content").get("id").asText());
                                 gradeRepository.deleteAllByCriterionId(criterion.get("content").get("id").asText());
                             }
                         } catch (Exception e) {
+                            e.printStackTrace();
                             throw new ResponseStatusException(HttpStatus.CONFLICT, "deletion failed");
                         }
                     } else {
@@ -371,6 +374,7 @@ public class RubricService {
         JsonNode currentElement = rubric;
 
         for (int i = 1; i < path.length; i++) {
+            System.out.println(path[i]);
             if (path[i].equals("children")) {
                 // children
                 currentArray = currentElement.get("children");
@@ -395,7 +399,6 @@ public class RubricService {
 
         while (!fringe.isEmpty()) {
             JsonNode currentElement = fringe.pop();
-
             if (currentElement.get("content").get("type").asText().equals(Type.SECTION.toString())) {
                 for (JsonNode e: currentElement.get("children")) {
                     fringe.push(e);
@@ -408,7 +411,7 @@ public class RubricService {
         return criteria;
     }
 
-    private enum Operation {
+    public enum Operation {
         REPLACE("replace"),
         ADD("add"),
         REMOVE("remove");
@@ -425,7 +428,7 @@ public class RubricService {
         }
     }
 
-    private enum Type {
+    public enum Type {
         CRITERION("1"),
         SECTION("0");
 
