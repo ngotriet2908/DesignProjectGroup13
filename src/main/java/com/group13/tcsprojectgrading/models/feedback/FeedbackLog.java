@@ -1,13 +1,9 @@
 package com.group13.tcsprojectgrading.models.feedback;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.group13.tcsprojectgrading.models.course.CourseParticipation;
 import com.group13.tcsprojectgrading.models.grading.AssessmentLink;
-import com.group13.tcsprojectgrading.models.project.Project;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.List;
 
 @Entity
 public class FeedbackLog {
@@ -18,7 +14,7 @@ public class FeedbackLog {
 
     @Column(name = "send_at")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date sendAt;
+    private Date sentAt;
 
     @ManyToOne
     private AssessmentLink link;
@@ -26,8 +22,8 @@ public class FeedbackLog {
     @ManyToOne
     private FeedbackTemplate template;
 
-    public FeedbackLog(Date sendAt, AssessmentLink link, FeedbackTemplate template) {
-        this.sendAt = sendAt;
+    public FeedbackLog(Date sentAt, AssessmentLink link, FeedbackTemplate template) {
+        this.sentAt = sentAt;
         this.link = link;
         this.template = template;
     }
@@ -44,12 +40,12 @@ public class FeedbackLog {
         this.id = id;
     }
 
-    public Date getSendAt() {
-        return sendAt;
+    public Date getSentAt() {
+        return sentAt;
     }
 
-    public void setSendAt(Date sendAt) {
-        this.sendAt = sendAt;
+    public void setSentAt(Date sendAt) {
+        this.sentAt = sendAt;
     }
 
     public AssessmentLink getLink() {

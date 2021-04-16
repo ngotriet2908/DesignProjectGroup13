@@ -462,8 +462,6 @@ public class ProjectController {
         }
 
         String s = new String(file.getBytes(), StandardCharsets.UTF_8);
-        System.out.println(s);
-//        TODO can only upload before grading starts, also would criterion id matters ?
         projectService.importRubric(projectId, s);
         return projectService.getRubric(projectId);
     }

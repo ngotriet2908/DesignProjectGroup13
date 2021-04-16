@@ -37,7 +37,7 @@
 }
 
 .projectsList:hover {
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .overviewContainer {

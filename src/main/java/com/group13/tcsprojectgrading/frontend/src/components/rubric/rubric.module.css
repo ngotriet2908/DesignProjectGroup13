@@ -154,7 +154,7 @@
 
     white-space: nowrap;
 
-    overflow-x: scroll;
+    overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
