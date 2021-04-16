@@ -281,16 +281,6 @@ class Project extends Component {
                           </Button>
                         </Can>
 
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={() => store.dispatch(push(this.props.match.url + "/feedback"))}
-                          startIcon={<FeedbackIcon/>}
-                          disableElevation
-                        >
-                          Feedback
-                        </Button>
-
                         <Can I="read" a="Rubric">
                           <Button
                             variant="contained"
